@@ -1,0 +1,15 @@
+package com.cpa.yusin.quiz;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@SpringBootApplication
+public class YusinQuizApplication
+{
+
+    public static void main(String[] args)
+    {
+        SpringApplication.run(YusinQuizApplication.class, args);
+    }
+
+}
