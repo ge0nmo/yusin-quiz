@@ -1,13 +1,11 @@
 package com.cpa.yusin.quiz.global.utils;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.gson.Gson;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 
-import java.io.IOException;
 import java.util.Base64;
 import java.util.Optional;
 
@@ -57,14 +55,6 @@ public class CookieUtils
 
     public static String serialize(Object object)
     {
-/*        log.info("object: {}", object);
-        try {
-            String jsonString = objectMapper.writeValueAsString(object);
-            return Base64.getEncoder().encodeToString(jsonString.getBytes());
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }*/
-
         String json = gson.toJson(object);
         return Base64.getEncoder().encodeToString(json.getBytes());
     }
@@ -78,16 +68,5 @@ public class CookieUtils
         byte[] decodedBytes = Base64.getDecoder().decode(cookie.getValue());
         String json = new String(decodedBytes);
         return gson.fromJson(json, cls);
-
-/*        try{
-
-            String jsonString = new String(decodedBytes);
-            log.info("jsonString = {}", jsonString);
-            T result = objectMapper.readValue(jsonString, cls);
-            log.info("result = {}", result);
-            return result;
-        } catch (IOException e){
-            throw new RuntimeException(e);
-        }*/
     }
 }

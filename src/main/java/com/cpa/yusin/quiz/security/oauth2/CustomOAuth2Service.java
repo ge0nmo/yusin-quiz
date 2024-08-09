@@ -30,11 +30,7 @@ public class CustomOAuth2Service extends DefaultOAuth2UserService
         log.info("loadUser");
         OAuth2User oAuth2User = super.loadUser(userRequest);
 
-        try{
-            return processOAuth2User(userRequest, oAuth2User);
-        } catch (Exception e) {
-            throw new RuntimeException("OAuth2 error");
-        }
+        return processOAuth2User(userRequest, oAuth2User);
     }
 
     private OAuth2User processOAuth2User(OAuth2UserRequest request, OAuth2User oAuth2User)
@@ -49,10 +45,12 @@ public class CustomOAuth2Service extends DefaultOAuth2UserService
         log.info("email = {}", oAuthUserInfo.getEmail());
         Member member;
         Optional<Member> optionalMember = memberRepository.findByEmail(oAuthUserInfo.getEmail());
+        String registrationId = request.getClientRegistration().getRegistrationId();
+        log.info("registrationId = {}", registrationId);
 
         if(optionalMember.isPresent()){
             member = optionalMember.get();
-            if(!member.getPlatform().name().equals(request.getClientRegistration().getRegistrationId())) {
+            if(!member.getPlatform().name().equalsIgnoreCase(request.getClientRegistration().getRegistrationId())) {
                 throw new RuntimeException("looks like you log in with another platform");
             }
 
