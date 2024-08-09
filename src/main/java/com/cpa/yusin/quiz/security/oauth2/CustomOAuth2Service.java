@@ -38,9 +38,8 @@ public class CustomOAuth2Service extends DefaultOAuth2UserService
         OAuth2UserInfo oAuthUserInfo = OAuth2UserInfoFactory.getOAuthUserInfo(request.getClientRegistration().getRegistrationId(), oAuth2User.getAttributes());
         log.info("attributes = {}", oAuth2User.getAttributes());
 
-        if(!StringUtils.hasLength(oAuthUserInfo.getEmail())) {
+        if(!StringUtils.hasLength(oAuthUserInfo.getEmail()))
             throw new RuntimeException("Email not found");
-        }
 
         log.info("email = {}", oAuthUserInfo.getEmail());
         Member member;
@@ -50,9 +49,8 @@ public class CustomOAuth2Service extends DefaultOAuth2UserService
 
         if(optionalMember.isPresent()){
             member = optionalMember.get();
-            if(!member.getPlatform().name().equalsIgnoreCase(request.getClientRegistration().getRegistrationId())) {
+            if(!member.getPlatform().name().equalsIgnoreCase(request.getClientRegistration().getRegistrationId()))
                 throw new RuntimeException("looks like you log in with another platform");
-            }
 
             member = updateMember(member, oAuthUserInfo);
         } else{

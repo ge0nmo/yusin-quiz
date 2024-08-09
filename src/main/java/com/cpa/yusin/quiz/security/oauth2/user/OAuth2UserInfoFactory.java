@@ -8,10 +8,9 @@ public class OAuth2UserInfoFactory
 {
     public static OAuth2UserInfo getOAuthUserInfo(String registrationId, Map<String, Object> attributes)
     {
-        if(registrationId.equalsIgnoreCase(Platform.GOOGLE.name())){
+        if(registrationId.equalsIgnoreCase(Platform.GOOGLE.name()))
             return new GoogleOAuth2UserInfo(attributes);
-        } else{
-            throw new RuntimeException("sorry. log in with " + registrationId + "does not work");
-        }
+
+        throw new RuntimeException("sorry. log in with " + registrationId + "does not work");
     }
 }
