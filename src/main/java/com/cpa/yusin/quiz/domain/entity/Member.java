@@ -43,4 +43,8 @@ public class Member extends BaseEntity
         this.role = Role.USER;
         this.subscribeStatus = SubscribeStatus.DEFAULT;
     }
+
+    public void updateMember(String username){
+        this.username = username;
+    }
 }

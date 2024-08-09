@@ -30,6 +30,12 @@ public class JwtServiceImpl implements JwtService
         this.key = Keys.hmacShaKeyFor(secretKey.getBytes());
     }
 
+    @Override
+    public String createAccessToken(Map<String, Object> claims, String email)
+    {
+        return createToken(claims, email, accessTokenExpiration);
+    }
+
 
     private String createToken(Map<String, Object> claims, String email, long expiration)
     {
@@ -42,6 +48,7 @@ public class JwtServiceImpl implements JwtService
                 .compact();
     }
 
+    @Override
     public boolean validateToken(String token, MemberDetails memberDetails)
     {
         Date expirationDate = extractClaim(token, Claims::getExpiration);
@@ -51,12 +58,14 @@ public class JwtServiceImpl implements JwtService
     }
 
 
+    @Override
     public <T> T extractClaim(String token, Function<Claims, T> claimsResolver)
     {
         Claims claims = extractAllClaims(token);
         return claimsResolver.apply(claims);
     }
 
+    @Override
     public String extractSubject(String token)
     {
         return extractClaim(token, Claims::getSubject);

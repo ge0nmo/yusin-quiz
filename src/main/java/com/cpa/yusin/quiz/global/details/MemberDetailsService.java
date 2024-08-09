@@ -6,6 +6,8 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
+
 @Service
 public class MemberDetailsService implements UserDetailsService
 {
@@ -23,6 +25,6 @@ public class MemberDetailsService implements UserDetailsService
         Member member = memberRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException(email));
 
-        return new MemberDetails(member);
+        return new MemberDetails(member, new HashMap<>());
     }
 }
