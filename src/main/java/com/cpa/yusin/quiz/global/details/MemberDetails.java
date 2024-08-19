@@ -1,6 +1,6 @@
 package com.cpa.yusin.quiz.global.details;
 
-import com.cpa.yusin.quiz.domain.entity.Member;
+import com.cpa.yusin.quiz.member.infrastructure.Member;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;

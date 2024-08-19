@@ -1,10 +1,8 @@
 package com.cpa.yusin.quiz.config;
 
-import com.cpa.yusin.quiz.global.details.MemberDetailsService;
-import com.cpa.yusin.quiz.security.oauth2.CustomOAuth2Service;
-import com.cpa.yusin.quiz.security.oauth2.HttpCookieOAuth2AuthorizationRequestRepository;
-import com.cpa.yusin.quiz.security.oauth2.OAuth2AuthenticationSuccessHandler;
-import lombok.RequiredArgsConstructor;
+import com.cpa.yusin.quiz.global.security.oauth2.CustomOAuth2Service;
+import com.cpa.yusin.quiz.global.security.oauth2.HttpCookieOAuth2AuthorizationRequestRepository;
+import com.cpa.yusin.quiz.global.security.oauth2.OAuth2AuthenticationSuccessHandler;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
