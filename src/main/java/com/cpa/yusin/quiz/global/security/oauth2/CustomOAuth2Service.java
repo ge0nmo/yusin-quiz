@@ -60,7 +60,7 @@ public class CustomOAuth2Service extends DefaultOAuth2UserService
             memberDomain = registerMember(oAuthUserInfo);
         }
 
-        return new MemberDetails(Member.fromDomain(memberDomain), oAuth2User.getAttributes());
+        return new MemberDetails(memberDomain, oAuth2User.getAttributes());
     }
 
     private MemberDomain registerMember(OAuth2UserInfo oAuth2UserInfo)

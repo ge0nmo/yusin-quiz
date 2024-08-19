@@ -29,7 +29,7 @@ public class Member extends BaseEntity
     @Column(nullable = false)
     private String username;
 
-    @Column(nullable = false)
+    @Column(nullable = false, updatable = false)
     @Enumerated(EnumType.STRING)
     private Platform platform;
 

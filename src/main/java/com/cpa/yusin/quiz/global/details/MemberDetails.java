@@ -1,6 +1,8 @@
 package com.cpa.yusin.quiz.global.details;
 
+import com.cpa.yusin.quiz.member.domain.MemberDomain;
 import com.cpa.yusin.quiz.member.infrastructure.Member;
+import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -10,33 +12,34 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 
+@Getter
 public class MemberDetails implements UserDetails, OAuth2User
 {
-    private final Member member;
+    private final MemberDomain memberDomain;
     private final Map<String, Object> attributes;
 
-    public MemberDetails(Member member, Map<String, Object> attributes)
+    public MemberDetails(MemberDomain memberDomain, Map<String, Object> attributes)
     {
-        this.member = member;
+        this.memberDomain = memberDomain;
         this.attributes = attributes;
     }
 
     @Override
     public String getPassword()
     {
-        return member.getPassword();
+        return memberDomain.getPassword();
     }
 
     @Override
     public String getUsername()
     {
-        return member.getEmail();
+        return memberDomain.getEmail();
     }
 
     @Override
     public String getName()
     {
-        return member.getEmail();
+        return memberDomain.getEmail();
     }
 
     @Override
@@ -48,7 +51,7 @@ public class MemberDetails implements UserDetails, OAuth2User
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities()
     {
-        return Collections.singletonList(new SimpleGrantedAuthority(member.getRole().name()));
+        return Collections.singletonList(new SimpleGrantedAuthority(memberDomain.getRole().name()));
     }
 
 }

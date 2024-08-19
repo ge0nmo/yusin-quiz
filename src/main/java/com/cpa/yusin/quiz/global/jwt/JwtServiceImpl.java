@@ -2,17 +2,19 @@ package com.cpa.yusin.quiz.global.jwt;
 
 import com.cpa.yusin.quiz.global.details.MemberDetails;
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
+@Slf4j
 @Service
 public class JwtServiceImpl implements JwtService
 {
@@ -31,8 +33,9 @@ public class JwtServiceImpl implements JwtService
     }
 
     @Override
-    public String createAccessToken(Map<String, Object> claims, String email)
+    public String createAccessToken(String email)
     {
+        Map<String, Object> claims = new HashMap<>();
         return createToken(claims, email, accessTokenExpiration);
     }
 
@@ -49,10 +52,11 @@ public class JwtServiceImpl implements JwtService
     }
 
     @Override
-    public boolean validateToken(String token, MemberDetails memberDetails)
+    public boolean isValidToken(String token, MemberDetails memberDetails)
     {
         Date expirationDate = extractClaim(token, Claims::getExpiration);
         String email = extractSubject(token);
+        log.info("validation processing...");
 
         return !expirationDate.before(new Date()) && memberDetails.getUsername().equals(email);
     }

@@ -26,6 +26,6 @@ public class MemberDetailsService implements UserDetailsService
         MemberDomain memberDomain = memberRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException(email));
 
-        return new MemberDetails(Member.fromDomain(memberDomain), new HashMap<>());
+        return new MemberDetails(memberDomain, new HashMap<>());
     }
 }

@@ -34,7 +34,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
     public String determineTargetUri(Authentication authentication)
     {
         MemberDetails memberDetails = (MemberDetails) authentication.getPrincipal();
-        String accessToken = jwtService.createAccessToken(new HashMap<>(), memberDetails.getName());
+        String accessToken = jwtService.createAccessToken(memberDetails.getName());
         String redirectUri = env.getProperty("app.oauth2.authorizedRedirectUris");
 
         return UriComponentsBuilder.fromUriString(redirectUri)

@@ -9,7 +9,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import org.apache.catalina.util.StringUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -20,6 +20,7 @@ import java.io.IOException;
 
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 
+@Slf4j
 @RequiredArgsConstructor
 public class SecurityFilter extends OncePerRequestFilter
 {
@@ -47,7 +48,7 @@ public class SecurityFilter extends OncePerRequestFilter
 
         MemberDetails memberDetails = memberDetailsService.loadUserByUsername(email);
 
-        if(!jwtService.validateToken(token, memberDetails)){
+        if(!jwtService.isValidToken(token, memberDetails)){
             filterChain.doFilter(request, response);
         }
 
@@ -57,6 +58,8 @@ public class SecurityFilter extends OncePerRequestFilter
 
         context.setAuthentication(authenticationToken);
         SecurityContextHolder.setContext(context);
+
+        filterChain.doFilter(request, response);
     }
 
     private boolean isValidHeader(String header) {

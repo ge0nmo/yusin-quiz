@@ -1,14 +1,18 @@
 package com.cpa.yusin.quiz.member.domain;
 
+import com.cpa.yusin.quiz.member.controller.dto.request.MemberCreateRequest;
 import com.cpa.yusin.quiz.member.domain.type.Platform;
 import com.cpa.yusin.quiz.member.domain.type.Role;
 import com.cpa.yusin.quiz.member.domain.type.SubscribeStatus;
 import com.cpa.yusin.quiz.global.security.oauth2.user.OAuth2UserInfo;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.ToString;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.UUID;
 
+@ToString
 @Builder
 @Getter
 public class MemberDomain
@@ -21,13 +25,13 @@ public class MemberDomain
     private Role role;
     private SubscribeStatus subscribeStatus;
 
-    public static MemberDomain fromHome(String email, String password, String username, Platform platform)
+    public static MemberDomain fromHome(MemberCreateRequest request, PasswordEncoder passwordEncoder)
     {
         return MemberDomain.builder()
-                .email(email)
-                .password(password)
-                .username(username)
-                .platform(platform)
+                .email(request.getEmail())
+                .password(passwordEncoder.encode(request.getPassword()))
+                .username(request.getUsername())
+                .platform(Platform.HOME)
                 .subscribeStatus(SubscribeStatus.DEFAULT)
                 .role(Role.USER)
                 .build();
