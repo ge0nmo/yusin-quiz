@@ -1,5 +1,6 @@
 package com.cpa.yusin.quiz.global.security.oauth2;
 
+import com.cpa.yusin.quiz.common.service.UuidHolder;
 import com.cpa.yusin.quiz.global.exception.ExceptionMessage;
 import com.cpa.yusin.quiz.global.exception.GlobalException;
 import com.cpa.yusin.quiz.member.domain.MemberDomain;
@@ -26,6 +27,7 @@ import java.util.UUID;
 public class CustomOAuth2Service extends DefaultOAuth2UserService
 {
     private final MemberRepository memberRepository;
+    private final UuidHolder uuidHolder;
 
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException
@@ -65,7 +67,7 @@ public class CustomOAuth2Service extends DefaultOAuth2UserService
 
     private MemberDomain registerMember(OAuth2UserInfo oAuth2UserInfo)
     {
-        MemberDomain member = MemberDomain.fromOAuth2(oAuth2UserInfo, UUID.randomUUID());
+        MemberDomain member = MemberDomain.fromOAuth2(oAuth2UserInfo, uuidHolder);
         return memberRepository.save(member);
     }
 }

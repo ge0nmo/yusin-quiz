@@ -4,10 +4,8 @@ import com.cpa.yusin.quiz.common.infrastructure.BaseEntity;
 import com.cpa.yusin.quiz.member.domain.MemberDomain;
 import com.cpa.yusin.quiz.member.domain.type.Platform;
 import com.cpa.yusin.quiz.member.domain.type.Role;
-import com.cpa.yusin.quiz.member.domain.type.SubscribeStatus;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -37,10 +35,6 @@ public class Member extends BaseEntity
     @Enumerated(EnumType.STRING)
     private Role role;
 
-    @Column(nullable = false)
-    @Enumerated(EnumType.STRING)
-    private SubscribeStatus subscribeStatus;
-
     public static Member fromDomain(MemberDomain memberDomain)
     {
         Member member = new Member();
@@ -50,7 +44,6 @@ public class Member extends BaseEntity
         member.username = memberDomain.getUsername();
         member.platform = memberDomain.getPlatform();
         member.role = memberDomain.getRole();
-        member.subscribeStatus = memberDomain.getSubscribeStatus();
 
         return member;
     }
@@ -64,7 +57,6 @@ public class Member extends BaseEntity
                 .username(username)
                 .platform(platform)
                 .role(role)
-                .subscribeStatus(subscribeStatus)
                 .build();
     }
 }
