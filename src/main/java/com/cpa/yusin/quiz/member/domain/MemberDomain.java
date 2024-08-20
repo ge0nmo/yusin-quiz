@@ -10,6 +10,7 @@ import lombok.Getter;
 import lombok.ToString;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @ToString
@@ -23,6 +24,8 @@ public class MemberDomain
     private String username;
     private Platform platform;
     private Role role;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 
     public static MemberDomain fromHome(MemberCreateRequest request, PasswordEncoder passwordEncoder)
     {
@@ -46,15 +49,17 @@ public class MemberDomain
                 .build();
     }
 
-    public MemberDomain updateFromOauth2(MemberDomain memberDomain, String username)
+    public MemberDomain updateFromOauth2(String username)
     {
         return MemberDomain.builder()
-                .id(memberDomain.getId())
-                .email(memberDomain.getEmail())
-                .password(memberDomain.getPassword())
+                .id(id)
+                .email(email)
+                .password(password)
                 .username(username)
-                .platform(memberDomain.getPlatform())
-                .role(memberDomain.getRole())
+                .platform(platform)
+                .createdAt(createdAt)
+                .updatedAt(LocalDateTime.now())
+                .role(role)
                 .build();
     }
 }

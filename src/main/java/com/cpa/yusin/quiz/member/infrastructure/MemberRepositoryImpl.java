@@ -34,7 +34,7 @@ public class MemberRepositoryImpl implements MemberRepository
     }
 
     @Override
-    public Optional<MemberDomain> findById(Long id)
+    public Optional<MemberDomain> findById(long id)
     {
         return memberJpaRepository.findById(id)
                 .map(Member::toDomain);

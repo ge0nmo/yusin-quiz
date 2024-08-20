@@ -9,6 +9,8 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
@@ -35,6 +37,8 @@ public class Member extends BaseEntity
     @Enumerated(EnumType.STRING)
     private Role role;
 
+    private LocalDateTime subscriberExpiredAt;
+
     public static Member fromDomain(MemberDomain memberDomain)
     {
         Member member = new Member();
@@ -57,6 +61,8 @@ public class Member extends BaseEntity
                 .username(username)
                 .platform(platform)
                 .role(role)
+                .createdAt(this.getCreatedAt())
+                .updatedAt(this.getUpdatedAt())
                 .build();
     }
 }

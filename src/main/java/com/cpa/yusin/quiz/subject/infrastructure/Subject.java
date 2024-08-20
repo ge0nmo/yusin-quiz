@@ -1,6 +1,7 @@
 package com.cpa.yusin.quiz.subject.infrastructure;
 
 import com.cpa.yusin.quiz.common.infrastructure.BaseEntity;
+import com.cpa.yusin.quiz.subject.domain.SubjectDomain;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -20,9 +21,21 @@ public class Subject extends BaseEntity
     @Column(nullable = false, unique = true)
     private String name;
 
-    @Builder
-    public Subject(String name) {
-        this.name = name;
+
+    public static Subject from(SubjectDomain domain)
+    {
+        Subject subject = new Subject();
+        subject.id = domain.getId();
+        subject.name = domain.getName();
+        return subject;
+    }
+
+    public SubjectDomain toModel()
+    {
+        return SubjectDomain.builder()
+                .id(id)
+                .name(name)
+                .build();
     }
 
 }

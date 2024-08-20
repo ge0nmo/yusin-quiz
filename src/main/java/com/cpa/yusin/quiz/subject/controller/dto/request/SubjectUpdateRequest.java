@@ -1,10 +1,9 @@
 package com.cpa.yusin.quiz.subject.controller.dto.request;
 
-import lombok.*;
+import lombok.Getter;
 
-@Builder
 @Getter
-public class SubjectCreateRequest
+public class SubjectUpdateRequest
 {
     private String name;
 }

@@ -11,6 +11,7 @@ public enum ExceptionMessage
 
     INVALID_EMAIL("이메일 정보가 유효하지 않습니다"),
 
+    SUBJECT_NOT_FOUND("해당 과목을 찾을 수 없습니다.")
 ;
 
     private final String message;

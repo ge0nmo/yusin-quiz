@@ -16,5 +16,5 @@ public interface MemberRepository
 
     MemberDomain save(MemberDomain member);
 
-    Optional<MemberDomain> findById(Long id);
+    Optional<MemberDomain> findById(long id);
 }

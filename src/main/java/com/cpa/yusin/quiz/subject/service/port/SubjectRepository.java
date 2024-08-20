@@ -1,7 +1,17 @@
 package com.cpa.yusin.quiz.subject.service.port;
 
+import com.cpa.yusin.quiz.subject.domain.SubjectDomain;
 import com.cpa.yusin.quiz.subject.infrastructure.Subject;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface SubjectRepository extends JpaRepository<Subject, Long> {
+import java.util.Optional;
+
+public interface SubjectRepository
+{
+    SubjectDomain save(SubjectDomain subjectDomain);
+
+
+    Optional<SubjectDomain> findById(long id);
+
+
 }

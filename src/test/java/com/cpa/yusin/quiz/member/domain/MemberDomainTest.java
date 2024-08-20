@@ -89,7 +89,7 @@ class MemberDomainTest
                 .build();
 
         // when
-        MemberDomain result = memberDomain.updateFromOauth2(memberDomain, "James");
+        MemberDomain result = memberDomain.updateFromOauth2("James");
 
         // then
         assertThat(result.getUsername()).isEqualTo("James");
