@@ -6,6 +6,8 @@ import com.cpa.yusin.quiz.member.domain.type.Role;
 import lombok.Builder;
 import lombok.Getter;
 
+import java.time.LocalDateTime;
+
 @Builder
 @Getter
 public class MemberDTO
@@ -15,6 +17,8 @@ public class MemberDTO
     private final String username;
     private final Platform platform;
     private final Role role;
+    private final LocalDateTime createdAt;
+    private final LocalDateTime updatedAt;
 
     public static MemberDTO from(MemberDomain memberDomain)
     {
@@ -24,6 +28,8 @@ public class MemberDTO
                 .username(memberDomain.getUsername())
                 .platform(memberDomain.getPlatform())
                 .role(memberDomain.getRole())
+                .createdAt(memberDomain.getCreatedAt())
+                .updatedAt(memberDomain.getUpdatedAt())
                 .build();
     }
 }
