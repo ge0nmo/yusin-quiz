@@ -20,4 +20,6 @@ public interface SubjectRepository
     void deleteById(long id);
 
     boolean existsByName(String name);
+
+    boolean existsByNameAndIdNot(long id, String name);
 }

@@ -19,4 +19,11 @@ public class SubjectValidatorImpl implements SubjectValidator
         if(subjectRepository.existsByName(name))
             throw new GlobalException(ExceptionMessage.SUBJECT_NAME_EXISTS);
     }
+
+    @Override
+    public void validateName(long id, String name)
+    {
+        if(subjectRepository.existsByNameAndIdNot(id, name))
+            throw new GlobalException(ExceptionMessage.SUBJECT_NAME_EXISTS);
+    }
 }

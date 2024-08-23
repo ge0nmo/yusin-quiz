@@ -53,4 +53,10 @@ public class SubjectRepositoryImpl implements SubjectRepository
     {
         return subjectJpaRepository.existsByName(name);
     }
+
+    @Override
+    public boolean existsByNameAndIdNot(long id, String name)
+    {
+        return subjectJpaRepository.existsByNameAndIdNot(id, name);
+    }
 }

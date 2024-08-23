@@ -3,6 +3,7 @@ package com.cpa.yusin.quiz.subject.service;
 import com.cpa.yusin.quiz.global.exception.GlobalException;
 import com.cpa.yusin.quiz.mock.TestContainer;
 import com.cpa.yusin.quiz.subject.controller.dto.request.SubjectCreateRequest;
+import com.cpa.yusin.quiz.subject.controller.dto.request.SubjectUpdateRequest;
 import com.cpa.yusin.quiz.subject.controller.dto.response.SubjectCreateResponse;
 import com.cpa.yusin.quiz.subject.controller.dto.response.SubjectDTO;
 import com.cpa.yusin.quiz.subject.domain.SubjectDomain;
@@ -40,7 +41,7 @@ class SubjectServiceTest
     }
 
     @Test
-    void saveWithUniqueName()
+    void save_WithUniqueName()
     {
         // given
         SubjectCreateRequest request = SubjectCreateRequest.builder()
@@ -55,7 +56,7 @@ class SubjectServiceTest
     }
 
     @Test
-    void throwErrorIfNameIsNotUnique()
+    void save_ThrowErrorIfNameIsNotUnique()
     {
         // given
         SubjectCreateRequest request = SubjectCreateRequest.builder()
@@ -117,12 +118,45 @@ class SubjectServiceTest
         // given
 
         // when
-        List<SubjectDTO> result = testContainer.subjectService.findAll();
+        List<SubjectDTO> result = testContainer.subjectService.getAll();
 
         // then
         assertThat(result).isNotEmpty();
         assertThat(result.get(0).getName()).isEqualTo("Chemistry");
         assertThat(result.get(1).getName()).isEqualTo("Economics");
         assertThat(result.get(2).getName()).isEqualTo("English");
+    }
+
+    @Test
+    void update_WhenIdIsTheSameAndNameDoesNotExist()
+    {
+        // given
+        long id = 1L;
+        SubjectUpdateRequest request = SubjectUpdateRequest.builder()
+                .name("Microeconomics")
+                .build();
+
+        // when
+        testContainer.subjectService.update(id, request);
+
+        // then
+        SubjectDTO result = testContainer.subjectService.getById(id);
+        assertThat(result.getName()).isEqualTo("Microeconomics");
+    }
+
+    @Test
+    void update_ThrowErrorWhenIdIsDifferentAndNameExists()
+    {
+        // given
+        long id = 2L;
+        SubjectUpdateRequest request = SubjectUpdateRequest.builder()
+                .name("Economics")
+                .build();
+
+        // when
+
+        // then
+        assertThatThrownBy(() -> testContainer.subjectService.update(id, request))
+                .isInstanceOf(GlobalException.class);
     }
 }

@@ -3,6 +3,7 @@ package com.cpa.yusin.quiz.subject.service;
 import com.cpa.yusin.quiz.global.exception.ExceptionMessage;
 import com.cpa.yusin.quiz.global.exception.GlobalException;
 import com.cpa.yusin.quiz.subject.controller.dto.request.SubjectCreateRequest;
+import com.cpa.yusin.quiz.subject.controller.dto.request.SubjectUpdateRequest;
 import com.cpa.yusin.quiz.subject.controller.dto.response.SubjectCreateResponse;
 import com.cpa.yusin.quiz.subject.controller.dto.response.SubjectDTO;
 import com.cpa.yusin.quiz.subject.controller.mapper.SubjectMapper;
@@ -37,6 +38,16 @@ public class SubjectServiceImpl implements SubjectService
     }
 
     @Override
+    public void update(long id, SubjectUpdateRequest request)
+    {
+        SubjectDomain domain = findById(id);
+        subjectValidator.validateName(domain.getId(), request.getName());
+
+        domain = domain.update(request);
+        subjectRepository.save(domain);
+    }
+
+    @Override
     public SubjectDomain findById(long id)
     {
         return subjectRepository.findById(id)
@@ -51,7 +62,7 @@ public class SubjectServiceImpl implements SubjectService
     }
 
     @Override
-    public List<SubjectDTO> findAll()
+    public List<SubjectDTO> getAll()
     {
         List<SubjectDTO> response = subjectMapper.toSubjectDTOs(subjectRepository.findAll());
 

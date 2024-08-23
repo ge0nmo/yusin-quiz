@@ -48,4 +48,31 @@ class SubjectValidatorTest
                 .isInstanceOf(GlobalException.class);
     }
 
+    @Test
+    void shouldNotThrowErrorIfNameExistsAndIdIsSame()
+    {
+        // given
+        long id = 1L;
+        String name = "Economics";
+
+        // when
+
+        // then
+        testContainer.subjectValidator.validateName(id, name);
+    }
+
+    @Test
+    void shouldNotThrowErrorIfNameExistsAndIdIsDifferent()
+    {
+        // given
+        long id = 2L;
+        String name = "Economics";
+
+        // when
+
+        // then
+        assertThatThrownBy(() -> testContainer.subjectValidator.validateName(name))
+                .isInstanceOf(GlobalException.class);
+    }
+
 }

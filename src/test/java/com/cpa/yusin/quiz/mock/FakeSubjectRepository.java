@@ -63,4 +63,11 @@ public class FakeSubjectRepository implements SubjectRepository
         return data.stream()
                 .anyMatch(item -> item.getName().equals(name));
     }
+
+    @Override
+    public boolean existsByNameAndIdNot(long id, String name)
+    {
+        return data.stream()
+                .anyMatch(item -> !item.getId().equals(id) && item.getName().equals(name));
+    }
 }
