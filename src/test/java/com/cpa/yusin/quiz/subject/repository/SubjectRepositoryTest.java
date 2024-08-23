@@ -1,12 +1,10 @@
 package com.cpa.yusin.quiz.subject.repository;
 
-import com.cpa.yusin.quiz.mock.TestContainer;
-import com.cpa.yusin.quiz.subject.controller.dto.request.SubjectCreateRequest;
+import com.cpa.yusin.quiz.config.TestContainer;
 import com.cpa.yusin.quiz.subject.domain.SubjectDomain;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 

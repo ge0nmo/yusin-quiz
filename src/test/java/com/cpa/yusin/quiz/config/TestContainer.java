@@ -1,5 +1,10 @@
-package com.cpa.yusin.quiz.mock;
+package com.cpa.yusin.quiz.config;
 
+import com.cpa.yusin.quiz.exam.controller.mapper.ExamMapper;
+import com.cpa.yusin.quiz.exam.controller.mapper.ExamMapperImpl;
+import com.cpa.yusin.quiz.exam.controller.port.ExamService;
+import com.cpa.yusin.quiz.exam.service.ExamServiceImpl;
+import com.cpa.yusin.quiz.exam.service.port.ExamRepository;
 import com.cpa.yusin.quiz.global.details.MemberDetailsService;
 import com.cpa.yusin.quiz.global.jwt.JwtService;
 import com.cpa.yusin.quiz.global.jwt.JwtServiceImpl;
@@ -11,6 +16,9 @@ import com.cpa.yusin.quiz.member.controller.port.MemberService;
 import com.cpa.yusin.quiz.member.service.AuthenticationServiceImpl;
 import com.cpa.yusin.quiz.member.service.MemberServiceImpl;
 import com.cpa.yusin.quiz.member.service.port.MemberRepository;
+import com.cpa.yusin.quiz.mock.FakeExamRepository;
+import com.cpa.yusin.quiz.mock.FakeMemberRepository;
+import com.cpa.yusin.quiz.mock.FakeSubjectRepository;
 import com.cpa.yusin.quiz.subject.controller.mapper.SubjectMapper;
 import com.cpa.yusin.quiz.subject.controller.mapper.SubjectMapperImpl;
 import com.cpa.yusin.quiz.subject.controller.port.SubjectService;
@@ -34,11 +42,14 @@ public class TestContainer
     public final AuthenticationService authenticationService;
     public final MemberMapper memberMapper;
 
-
     public final SubjectRepository subjectRepository;
     public final SubjectValidator subjectValidator;
     public final SubjectService subjectService;
     public final SubjectMapper subjectMapper;
+
+    public final ExamRepository examRepository;
+    public final ExamMapper examMapper;
+    public final ExamService examService;
 
 
     public TestContainer()
@@ -58,6 +69,9 @@ public class TestContainer
         this.subjectMapper = new SubjectMapperImpl();
         this.subjectService = new SubjectServiceImpl(this.subjectRepository, this.subjectMapper, this.subjectValidator);
 
+        this.examRepository = new FakeExamRepository();
+        this.examMapper = new ExamMapperImpl();
+        this.examService = new ExamServiceImpl(this.examRepository, this.examMapper, this.subjectService, this.subjectMapper);
     }
 
 }

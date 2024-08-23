@@ -37,6 +37,7 @@ public class SubjectServiceImpl implements SubjectService
         return subjectMapper.toSubjectCreateResponse(domain);
     }
 
+    @Transactional
     @Override
     public void update(long id, SubjectUpdateRequest request)
     {

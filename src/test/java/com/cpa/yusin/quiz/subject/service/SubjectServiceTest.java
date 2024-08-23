@@ -1,7 +1,7 @@
 package com.cpa.yusin.quiz.subject.service;
 
 import com.cpa.yusin.quiz.global.exception.GlobalException;
-import com.cpa.yusin.quiz.mock.TestContainer;
+import com.cpa.yusin.quiz.config.TestContainer;
 import com.cpa.yusin.quiz.subject.controller.dto.request.SubjectCreateRequest;
 import com.cpa.yusin.quiz.subject.controller.dto.request.SubjectUpdateRequest;
 import com.cpa.yusin.quiz.subject.controller.dto.response.SubjectCreateResponse;

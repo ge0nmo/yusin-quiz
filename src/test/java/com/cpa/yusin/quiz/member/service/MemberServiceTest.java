@@ -5,7 +5,7 @@ import com.cpa.yusin.quiz.member.controller.dto.response.MemberDTO;
 import com.cpa.yusin.quiz.member.domain.MemberDomain;
 import com.cpa.yusin.quiz.member.domain.type.Platform;
 import com.cpa.yusin.quiz.member.domain.type.Role;
-import com.cpa.yusin.quiz.mock.TestContainer;
+import com.cpa.yusin.quiz.config.TestContainer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
