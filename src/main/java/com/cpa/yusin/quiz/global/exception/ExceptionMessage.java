@@ -13,7 +13,11 @@ public enum ExceptionMessage
 
     SUBJECT_NOT_FOUND("해당 과목을 찾을 수 없습니다."),
 
-    SUBJECT_NAME_EXISTS("해당 과목 이름이 존재합니다.")
+    SUBJECT_NAME_EXIST("해당 과목 이름이 존재합니다."),
+
+    EXAM_NOT_FOUND("해당 시험 정보를 찾을 수 없습니다."),
+
+
 ;
 
     private final String message;

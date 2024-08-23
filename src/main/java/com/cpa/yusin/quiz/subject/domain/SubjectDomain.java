@@ -5,12 +5,16 @@ import com.cpa.yusin.quiz.subject.controller.dto.request.SubjectUpdateRequest;
 import lombok.Builder;
 import lombok.Getter;
 
+import java.time.LocalDateTime;
+
 @Builder
 @Getter
 public class SubjectDomain
 {
     private Long id;
     private String name;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 
     public static SubjectDomain from(SubjectCreateRequest request)
     {
