@@ -5,6 +5,7 @@ import com.cpa.yusin.quiz.subject.service.port.SubjectRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @RequiredArgsConstructor
@@ -25,5 +26,31 @@ public class SubjectRepositoryImpl implements SubjectRepository
     {
         return subjectJpaRepository.findById(id)
                 .map(Subject::toModel);
+    }
+
+    @Override
+    public List<SubjectDomain> findAll()
+    {
+        return subjectJpaRepository.findAll().stream()
+                .map(Subject::toModel)
+                .toList();
+    }
+
+    @Override
+    public boolean existsById(long id)
+    {
+        return subjectJpaRepository.existsById(id);
+    }
+
+    @Override
+    public void deleteById(long id)
+    {
+        subjectJpaRepository.deleteById(id);
+    }
+
+    @Override
+    public boolean existsByName(String name)
+    {
+        return subjectJpaRepository.existsByName(name);
     }
 }

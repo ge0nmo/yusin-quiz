@@ -39,4 +39,10 @@ public class MemberRepositoryImpl implements MemberRepository
         return memberJpaRepository.findById(id)
                 .map(Member::toDomain);
     }
+
+    @Override
+    public void deleteById(long id)
+    {
+        memberJpaRepository.deleteById(id);
+    }
 }

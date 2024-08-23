@@ -20,16 +20,4 @@ public class MemberDTO
     private final LocalDateTime createdAt;
     private final LocalDateTime updatedAt;
 
-    public static MemberDTO from(MemberDomain memberDomain)
-    {
-        return MemberDTO.builder()
-                .id(memberDomain.getId())
-                .email(memberDomain.getEmail())
-                .username(memberDomain.getUsername())
-                .platform(memberDomain.getPlatform())
-                .role(memberDomain.getRole())
-                .createdAt(memberDomain.getCreatedAt())
-                .updatedAt(memberDomain.getUpdatedAt())
-                .build();
-    }
 }

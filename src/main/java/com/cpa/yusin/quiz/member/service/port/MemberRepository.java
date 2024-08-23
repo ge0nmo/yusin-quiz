@@ -17,4 +17,6 @@ public interface MemberRepository
     MemberDomain save(MemberDomain member);
 
     Optional<MemberDomain> findById(long id);
+
+    void deleteById(long id);
 }
