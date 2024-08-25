@@ -1,18 +1,13 @@
-package com.cpa.yusin.quiz.choice.controller.port;
+package com.cpa.yusin.quiz.choice.service;
 
 import com.cpa.yusin.quiz.choice.controller.dto.request.ChoiceCreateRequest;
 import com.cpa.yusin.quiz.choice.controller.dto.response.ChoiceCreateResponse;
-import com.cpa.yusin.quiz.choice.domain.ChoiceDomain;
 import com.cpa.yusin.quiz.config.MockSetup;
-import com.cpa.yusin.quiz.config.TestContainer;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 
 class ChoiceServiceTest extends MockSetup
 {

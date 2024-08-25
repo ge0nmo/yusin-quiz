@@ -16,7 +16,7 @@ public class ChoiceMapperImpl implements ChoiceMapper
     @Override
     public ChoiceDomain fromCreateRequestToDomain(ChoiceCreateRequest request, ProblemDomain problemDomain)
     {
-        if(request == null)
+        if(request == null || problemDomain == null)
             return null;
 
         return ChoiceDomain.builder()
@@ -50,7 +50,6 @@ public class ChoiceMapperImpl implements ChoiceMapper
                 .number(domain.getNumber())
                 .content(domain.getContent())
                 .isAnswer(domain.isAnswer())
-
                 .build();
     }
 
