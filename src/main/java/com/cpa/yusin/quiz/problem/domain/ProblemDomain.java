@@ -11,13 +11,6 @@ public class ProblemDomain
     private Long id;
     private String content;
     private int number;
-    private String explanation;
     private ExamDomain exam;
 
-    public static ProblemDomain from()
-    {
-       return ProblemDomain.builder()
-
-               .build();
-    }
 }

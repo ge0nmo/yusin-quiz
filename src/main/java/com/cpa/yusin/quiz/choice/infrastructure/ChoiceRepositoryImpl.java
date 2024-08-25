@@ -22,6 +22,18 @@ public class ChoiceRepositoryImpl implements ChoiceRepository
     }
 
     @Override
+    public List<ChoiceDomain> saveAll(List<ChoiceDomain> domains)
+    {
+        List<Choice> choices = domains.stream()
+                .map(Choice::from)
+                .toList();
+
+        return choiceJpaRepository.saveAll(choices).stream()
+                .map(Choice::toModel)
+                .toList();
+    }
+
+    @Override
     public List<ChoiceDomain> findAllByProblemId(long problemId)
     {
         return choiceJpaRepository.findAllByProblemId(problemId).stream()

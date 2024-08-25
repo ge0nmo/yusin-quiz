@@ -10,6 +10,4 @@ public class ChoiceCreateRequest
     private int number;
     private String content;
     private boolean isAnswer;
-
-
 }

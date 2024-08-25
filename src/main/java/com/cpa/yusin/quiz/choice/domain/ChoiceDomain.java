@@ -5,6 +5,8 @@ import com.cpa.yusin.quiz.problem.domain.ProblemDomain;
 import lombok.Builder;
 import lombok.Getter;
 
+import java.util.List;
+
 @Getter
 @Builder
 public class ChoiceDomain
@@ -15,13 +17,4 @@ public class ChoiceDomain
     private boolean isAnswer;
     private ProblemDomain problem;
 
-    public static ChoiceDomain from(ChoiceCreateRequest request, ProblemDomain problemDomain)
-    {
-        return ChoiceDomain.builder()
-                .number(request.getNumber())
-                .content(request.getContent())
-                .isAnswer(request.isAnswer())
-                .problem(problemDomain)
-                .build();
-    }
 }

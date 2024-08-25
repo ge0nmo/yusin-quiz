@@ -10,6 +10,8 @@ public interface ChoiceRepository
 {
     ChoiceDomain save(ChoiceDomain domain);
 
+    List<ChoiceDomain> saveAll(List<ChoiceDomain> domains);
+
     List<ChoiceDomain> findAllByProblemId(long problemId);
 
     List<ChoiceDomain> findAllByExamId(long examId);
