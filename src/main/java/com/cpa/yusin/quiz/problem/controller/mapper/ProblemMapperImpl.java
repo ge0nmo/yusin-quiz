@@ -15,6 +15,9 @@ public class ProblemMapperImpl implements ProblemMapper
     @Override
     public ProblemDomain toProblemDomain(ProblemCreateRequest request, ExamDomain exam)
     {
+        if(request == null || exam == null)
+            return null;
+
         return ProblemDomain.builder()
                 .content(request.getContent())
                 .number(request.getNumber())
@@ -25,6 +28,9 @@ public class ProblemMapperImpl implements ProblemMapper
     @Override
     public ProblemCreateResponse toCreateResponse(ProblemDomain domain, List<ChoiceCreateResponse> choiceCreateResponses)
     {
+        if(domain == null)
+            return null;
+
         return ProblemCreateResponse.builder()
                 .id(domain.getId())
                 .content(domain.getContent())
