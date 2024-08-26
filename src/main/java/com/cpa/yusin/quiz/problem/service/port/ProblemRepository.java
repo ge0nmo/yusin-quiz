@@ -17,5 +17,7 @@ public interface ProblemRepository
 
     void deleteById(long id);
 
+    void deleteAllByIdInBatch(List<Long> ids);
+
     boolean existsById(long id);
 }

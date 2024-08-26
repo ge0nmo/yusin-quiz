@@ -1,6 +1,7 @@
 package com.cpa.yusin.quiz.exam.service;
 
 import com.cpa.yusin.quiz.exam.controller.dto.request.ExamCreateRequest;
+import com.cpa.yusin.quiz.exam.controller.dto.request.ExamUpdateRequest;
 import com.cpa.yusin.quiz.exam.controller.dto.response.ExamCreateResponse;
 import com.cpa.yusin.quiz.exam.controller.dto.response.ExamDTO;
 import com.cpa.yusin.quiz.exam.controller.mapper.ExamMapper;
@@ -42,6 +43,15 @@ public class ExamServiceImpl implements ExamService
         exam = examRepository.save(exam);
 
         return examMapper.toCreateResponse(exam, subjectMapper.toSubjectDTO(subject));
+    }
+
+    @Override
+    public void update(long examId, ExamUpdateRequest request)
+    {
+        ExamDomain domain = findById(examId);
+        domain = domain.update(request);
+
+        examRepository.save(domain);
     }
 
     @Override

@@ -42,6 +42,14 @@ public class ChoiceRepositoryImpl implements ChoiceRepository
     }
 
     @Override
+    public List<ChoiceDomain> findAllByProblemIds(List<Long> problemIds)
+    {
+        return choiceJpaRepository.findAllByProblemIds(problemIds).stream()
+                .map(Choice::toModel)
+                .toList();
+    }
+
+    @Override
     public List<ChoiceDomain> findAllByExamId(long examId)
     {
         return choiceJpaRepository.findAllByExamId(examId).stream()
@@ -60,5 +68,11 @@ public class ChoiceRepositoryImpl implements ChoiceRepository
     public void deleteById(long id)
     {
         choiceJpaRepository.deleteById(id);
+    }
+
+    @Override
+    public void deleteAllByIdInBatch(List<Long> ids)
+    {
+        choiceJpaRepository.deleteAllByIdInBatch(ids);
     }
 }

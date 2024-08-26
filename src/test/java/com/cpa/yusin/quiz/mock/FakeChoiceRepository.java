@@ -5,7 +5,6 @@ import com.cpa.yusin.quiz.choice.service.port.ChoiceRepository;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 
@@ -64,5 +63,11 @@ public class FakeChoiceRepository implements ChoiceRepository
     @Override
     public void deleteById(long id) {
         data.removeIf(item -> item.getId() == id);
+    }
+
+    @Override
+    public void deleteAllByIdInBatch(List<Long> ids)
+    {
+        data.removeIf(item -> ids.contains(item.getId()));
     }
 }

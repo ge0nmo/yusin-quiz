@@ -1,6 +1,7 @@
 package com.cpa.yusin.quiz.exam.domain;
 
 import com.cpa.yusin.quiz.exam.controller.dto.request.ExamCreateRequest;
+import com.cpa.yusin.quiz.exam.controller.dto.request.ExamUpdateRequest;
 import com.cpa.yusin.quiz.subject.domain.SubjectDomain;
 import lombok.Builder;
 import lombok.Getter;
@@ -23,4 +24,13 @@ public class ExamDomain
                 .build();
     }
 
+    public ExamDomain update(ExamUpdateRequest request)
+    {
+        return ExamDomain.builder()
+                .id(this.id)
+                .name(request.getName())
+                .year(request.getYear())
+                .subjectDomain(this.subjectDomain)
+                .build();
+    }
 }

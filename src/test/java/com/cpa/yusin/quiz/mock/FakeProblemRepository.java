@@ -1,6 +1,5 @@
 package com.cpa.yusin.quiz.mock;
 
-import com.cpa.yusin.quiz.member.domain.MemberDomain;
 import com.cpa.yusin.quiz.problem.domain.ProblemDomain;
 import com.cpa.yusin.quiz.problem.service.port.ProblemRepository;
 
@@ -62,6 +61,12 @@ public class FakeProblemRepository implements ProblemRepository
     public void deleteById(long id)
     {
         data.removeIf(item -> item.getId().equals(id));
+    }
+
+    @Override
+    public void deleteAllByIdInBatch(List<Long> ids)
+    {
+        data.removeIf(item -> ids.contains(item.getId()));
     }
 
     @Override
