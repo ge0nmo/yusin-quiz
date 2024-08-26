@@ -47,6 +47,14 @@ public class FakeChoiceRepository implements ChoiceRepository
     }
 
     @Override
+    public List<ChoiceDomain> findAllByProblemIds(List<Long> problemIds)
+    {
+        return data.stream()
+                .filter(choice -> problemIds.contains(choice.getId()))
+                .collect(toList());
+    }
+
+    @Override
     public List<ChoiceDomain> findAllByExamId(long examId) {
         return data.stream()
                 .filter(choice -> choice.getProblem().getExam().getId() == examId)
