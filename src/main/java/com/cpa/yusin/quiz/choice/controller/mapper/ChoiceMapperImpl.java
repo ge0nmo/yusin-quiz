@@ -61,7 +61,6 @@ public class ChoiceMapperImpl implements ChoiceMapper
 
         return domains.stream()
                 .map(this::toCreateResponse)
-                .sorted(Comparator.comparing(ChoiceCreateResponse::getNumber))
                 .toList();
     }
 

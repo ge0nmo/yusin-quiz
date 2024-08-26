@@ -117,9 +117,63 @@ class ChoiceMapperTest extends MockSetup
     void toCreateResponses()
     {
         // given
+        ChoiceDomain choice1 = ChoiceDomain.builder()
+                .id(1L)
+                .content("choice 1")
+                .number(1)
+                .isAnswer(true)
+                .problem(physicsProblem1)
+                .build();
+
+        ChoiceDomain choice2 = ChoiceDomain.builder()
+                .id(2L)
+                .content("choice 2")
+                .number(2)
+                .isAnswer(false)
+                .problem(physicsProblem1)
+                .build();
+
+        ChoiceDomain choice3 = ChoiceDomain.builder()
+                .id(3L)
+                .content("choice 3")
+                .number(3)
+                .isAnswer(false)
+                .problem(physicsProblem1)
+                .build();
+
+
+        List<ChoiceDomain> request = List.of(choice1, choice2, choice3);
+
+        // when
+        List<ChoiceCreateResponse> result = testContainer.choiceMapper.toCreateResponses(request);
+
+        // then
+        assertThat(result).hasSize(3);
+
+        assertThat(result.getFirst().getNumber()).isEqualTo(1);
+        assertThat(result.getFirst().getContent()).isEqualTo("choice 1");
+        assertThat(result.getFirst().isAnswer()).isTrue();
+
+        assertThat(result.get(1).getNumber()).isEqualTo(2);
+        assertThat(result.get(1).getContent()).isEqualTo("choice 2");
+        assertThat(result.get(1).isAnswer()).isFalse();
+
+        assertThat(result.get(2).getNumber()).isEqualTo(3);
+        assertThat(result.get(2).getContent()).isEqualTo("choice 3");
+        assertThat(result.get(2).isAnswer()).isFalse();
+    }
+
+    @Test
+    void toCreateResponses_returnEmptyList()
+    {
+        // given
+        List<ChoiceDomain> request = null;
 
         // when
 
+        List<ChoiceCreateResponse> result = testContainer.choiceMapper.toCreateResponses(request);
+
         // then
+        assertThat(result).isEmpty();
     }
 }
