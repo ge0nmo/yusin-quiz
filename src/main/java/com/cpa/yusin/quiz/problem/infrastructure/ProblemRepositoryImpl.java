@@ -56,8 +56,26 @@ public class ProblemRepositoryImpl implements ProblemRepository
     }
 
     @Override
+    public void deleteAllByIdInBatch(List<Long> ids)
+    {
+        problemJpaRepository.deleteAllByIdInBatch(ids);
+    }
+
+    @Override
     public boolean existsById(long id)
     {
         return problemJpaRepository.existsById(id);
+    }
+
+    @Override
+    public void deleteAllByExamId(long examId)
+    {
+        problemJpaRepository.deleteAllByExamId(examId);
+    }
+
+    @Override
+    public void deleteAllBySubjectId(long subjectId)
+    {
+        problemJpaRepository.deleteAllByExamSubjectId(subjectId);
     }
 }

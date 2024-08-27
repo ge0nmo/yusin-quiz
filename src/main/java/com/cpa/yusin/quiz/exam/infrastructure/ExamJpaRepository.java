@@ -1,7 +1,7 @@
 package com.cpa.yusin.quiz.exam.infrastructure;
 
-import com.cpa.yusin.quiz.exam.domain.ExamDomain;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -13,4 +13,8 @@ public interface ExamJpaRepository extends JpaRepository<Exam, Long>
             "FROM Exam e " +
             "WHERE e.subject.id = :subjectId")
     List<Exam> findAllBySubjectId(@Param("subjectId") long subjectId);
+
+    @Modifying
+    @Query("DELETE FROM Exam e WHERE e.subject.id = :subjectId")
+    void deleteAllBySubjectId(@Param("subjectId") long subjectId);
 }

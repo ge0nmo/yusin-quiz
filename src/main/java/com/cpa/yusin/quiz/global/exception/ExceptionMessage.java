@@ -17,7 +17,9 @@ public enum ExceptionMessage
 
     EXAM_NOT_FOUND("해당 시험 정보를 찾을 수 없습니다."),
 
+    PROBLEM_NOT_FOUND("해당 문제 정보를 찾을 수 없습니다."),
 
+    CHOICE_NOT_FOUND("해당 보기 정보를 찾을 수 없습니다."),
 ;
 
     private final String message;

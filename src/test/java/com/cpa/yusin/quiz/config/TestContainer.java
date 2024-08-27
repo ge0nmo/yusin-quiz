@@ -1,5 +1,12 @@
 package com.cpa.yusin.quiz.config;
 
+import com.cpa.yusin.quiz.choice.controller.mapper.ChoiceMapper;
+import com.cpa.yusin.quiz.choice.controller.mapper.ChoiceMapperImpl;
+import com.cpa.yusin.quiz.choice.controller.port.ChoiceService;
+import com.cpa.yusin.quiz.choice.service.ChoiceServiceImpl;
+import com.cpa.yusin.quiz.choice.service.port.ChoiceRepository;
+import com.cpa.yusin.quiz.common.infrastructure.CascadeDeleteServiceImpl;
+import com.cpa.yusin.quiz.common.service.CascadeDeleteService;
 import com.cpa.yusin.quiz.exam.controller.mapper.ExamMapper;
 import com.cpa.yusin.quiz.exam.controller.mapper.ExamMapperImpl;
 import com.cpa.yusin.quiz.exam.controller.port.ExamService;
@@ -16,9 +23,12 @@ import com.cpa.yusin.quiz.member.controller.port.MemberService;
 import com.cpa.yusin.quiz.member.service.AuthenticationServiceImpl;
 import com.cpa.yusin.quiz.member.service.MemberServiceImpl;
 import com.cpa.yusin.quiz.member.service.port.MemberRepository;
-import com.cpa.yusin.quiz.mock.FakeExamRepository;
-import com.cpa.yusin.quiz.mock.FakeMemberRepository;
-import com.cpa.yusin.quiz.mock.FakeSubjectRepository;
+import com.cpa.yusin.quiz.mock.*;
+import com.cpa.yusin.quiz.problem.controller.mapper.ProblemMapper;
+import com.cpa.yusin.quiz.problem.controller.mapper.ProblemMapperImpl;
+import com.cpa.yusin.quiz.problem.controller.port.ProblemService;
+import com.cpa.yusin.quiz.problem.service.ProblemServiceImpl;
+import com.cpa.yusin.quiz.problem.service.port.ProblemRepository;
 import com.cpa.yusin.quiz.subject.controller.mapper.SubjectMapper;
 import com.cpa.yusin.quiz.subject.controller.mapper.SubjectMapperImpl;
 import com.cpa.yusin.quiz.subject.controller.port.SubjectService;
@@ -42,19 +52,47 @@ public class TestContainer
     public final AuthenticationService authenticationService;
     public final MemberMapper memberMapper;
 
+    /**
+     *  subject
+     */
     public final SubjectRepository subjectRepository;
     public final SubjectValidator subjectValidator;
     public final SubjectService subjectService;
     public final SubjectMapper subjectMapper;
 
+    /**
+     *  exam
+     */
     public final ExamRepository examRepository;
     public final ExamMapper examMapper;
     public final ExamService examService;
 
+    /**
+     *  choice
+     */
+    public final ChoiceMapper choiceMapper;
+    public final ChoiceRepository choiceRepository;
+    public final ChoiceService choiceService;
+
+    /**
+     *  problem
+     */
+    public final ProblemMapper problemMapper;
+    public final ProblemRepository problemRepository;
+    public final ProblemService problemService;
+
+    public final CascadeDeleteService cascadeDeleteService;
 
     public TestContainer()
     {
         this.memberRepository = new FakeMemberRepository();
+        this.subjectRepository = new FakeSubjectRepository();
+        this.examRepository = new FakeExamRepository();
+        this.problemRepository = new FakeProblemRepository();
+        this.choiceRepository = new FakeChoiceRepository();
+
+        cascadeDeleteService = new CascadeDeleteServiceImpl(this.subjectRepository, this.examRepository, this.problemRepository, this.choiceRepository);
+
         this.memberMapper = new MemberMapperImpl();
         this.memberService = new MemberServiceImpl(this.memberRepository, this.memberMapper);
         this.memberDetailsService = new MemberDetailsService(this.memberRepository);
@@ -64,14 +102,25 @@ public class TestContainer
         this.authenticationService = new AuthenticationServiceImpl(this.passwordEncoder, this.jwtService,
                 this.memberRepository, this.authenticationProvider, this.memberDetailsService, this.memberMapper);
 
-        this.subjectRepository = new FakeSubjectRepository();
+
+
+
         this.subjectValidator = new SubjectValidatorImpl(this.subjectRepository);
         this.subjectMapper = new SubjectMapperImpl();
-        this.subjectService = new SubjectServiceImpl(this.subjectRepository, this.subjectMapper, this.subjectValidator);
+        this.subjectService = new SubjectServiceImpl(this.subjectRepository, this.subjectMapper, this.subjectValidator, this.cascadeDeleteService);
 
-        this.examRepository = new FakeExamRepository();
+
         this.examMapper = new ExamMapperImpl();
-        this.examService = new ExamServiceImpl(this.examRepository, this.examMapper, this.subjectService, this.subjectMapper);
+        this.examService = new ExamServiceImpl(this.examRepository, this.examMapper, this.subjectService, this.subjectMapper, this.cascadeDeleteService);
+
+
+        this.choiceMapper = new ChoiceMapperImpl();
+        this.choiceService = new ChoiceServiceImpl(this.choiceRepository, this.choiceMapper);
+
+        this.problemMapper = new ProblemMapperImpl();
+
+        this.problemService = new ProblemServiceImpl(this.problemRepository, this.problemMapper,
+                this.examService, this.choiceService);
     }
 
 }

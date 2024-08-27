@@ -1,0 +1,91 @@
+package com.cpa.yusin.quiz.choice.infrastructure;
+
+import com.cpa.yusin.quiz.choice.domain.ChoiceDomain;
+import com.cpa.yusin.quiz.choice.service.port.ChoiceRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+import java.util.Optional;
+
+@RequiredArgsConstructor
+@Repository
+public class ChoiceRepositoryImpl implements ChoiceRepository
+{
+    private final ChoiceJpaRepository choiceJpaRepository;
+
+    @Override
+    public ChoiceDomain save(ChoiceDomain domain)
+    {
+        return choiceJpaRepository.save(Choice.from(domain))
+                .toModel();
+    }
+
+    @Override
+    public List<ChoiceDomain> saveAll(List<ChoiceDomain> domains)
+    {
+        List<Choice> choices = domains.stream()
+                .map(Choice::from)
+                .toList();
+
+        return choiceJpaRepository.saveAll(choices).stream()
+                .map(Choice::toModel)
+                .toList();
+    }
+
+    @Override
+    public List<ChoiceDomain> findAllByProblemId(long problemId)
+    {
+        return choiceJpaRepository.findAllByProblemId(problemId).stream()
+                .map(Choice::toModel)
+                .toList();
+    }
+
+    @Override
+    public List<ChoiceDomain> findAllByProblemIds(List<Long> problemIds)
+    {
+        return choiceJpaRepository.findAllByProblemIds(problemIds).stream()
+                .map(Choice::toModel)
+                .toList();
+    }
+
+    @Override
+    public List<ChoiceDomain> findAllByExamId(long examId)
+    {
+        return choiceJpaRepository.findAllByExamId(examId).stream()
+                .map(Choice::toModel)
+                .toList();
+    }
+
+    @Override
+    public Optional<ChoiceDomain> findById(long id)
+    {
+        return choiceJpaRepository.findById(id)
+                .map(Choice::toModel);
+    }
+
+    @Override
+    public void deleteById(long id)
+    {
+        choiceJpaRepository.deleteById(id);
+    }
+
+    @Override
+    public void deleteAllByIdInBatch(List<Long> ids)
+    {
+        choiceJpaRepository.deleteAllByIdInBatch(ids);
+    }
+
+    @Override
+    public void deleteAllBySubjectId(long subjectId)
+    {
+        choiceJpaRepository.deleteAllByProblemExamSubjectId(subjectId);
+    }
+
+    @Override
+    public void deleteAllByExamId(long examId)
+    {
+        choiceJpaRepository.deleteAllByProblemExamId(examId);
+    }
+
+}

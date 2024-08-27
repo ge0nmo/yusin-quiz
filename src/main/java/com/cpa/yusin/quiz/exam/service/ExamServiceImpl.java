@@ -1,6 +1,8 @@
 package com.cpa.yusin.quiz.exam.service;
 
+import com.cpa.yusin.quiz.common.service.CascadeDeleteService;
 import com.cpa.yusin.quiz.exam.controller.dto.request.ExamCreateRequest;
+import com.cpa.yusin.quiz.exam.controller.dto.request.ExamUpdateRequest;
 import com.cpa.yusin.quiz.exam.controller.dto.response.ExamCreateResponse;
 import com.cpa.yusin.quiz.exam.controller.dto.response.ExamDTO;
 import com.cpa.yusin.quiz.exam.controller.mapper.ExamMapper;
@@ -20,7 +22,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -32,6 +33,7 @@ public class ExamServiceImpl implements ExamService
     private final ExamMapper examMapper;
     private final SubjectService subjectService;
     private final SubjectMapper subjectMapper;
+    private final CascadeDeleteService cascadeDeleteService;
 
     @Transactional
     @Override
@@ -42,6 +44,15 @@ public class ExamServiceImpl implements ExamService
         exam = examRepository.save(exam);
 
         return examMapper.toCreateResponse(exam, subjectMapper.toSubjectDTO(subject));
+    }
+
+    @Override
+    public void update(long examId, ExamUpdateRequest request)
+    {
+        ExamDomain domain = findById(examId);
+        domain = domain.update(request);
+
+        examRepository.save(domain);
     }
 
     @Override
@@ -74,6 +85,15 @@ public class ExamServiceImpl implements ExamService
                         .thenComparing(ExamDomain::getName))
                 .map(this.examMapper::toExamDTO)
                 .toList();
+    }
+
+    @Override
+    public boolean deleteById(long id)
+    {
+        findById(id);
+        cascadeDeleteService.deleteExamByExamId(id);
+
+        return !examRepository.existsById(id);
     }
 
 
