@@ -75,4 +75,16 @@ public class FakeProblemRepository implements ProblemRepository
         return data.stream()
                 .anyMatch(item -> item.getId().equals(id));
     }
+
+    @Override
+    public void deleteAllByExamId(long examId)
+    {
+        data.removeIf(item -> item.getExam().getId().equals(examId));
+    }
+
+    @Override
+    public void deleteAllBySubjectId(long subjectId)
+    {
+        data.removeIf(item -> item.getExam().getSubjectDomain().getId().equals(subjectId));
+    }
 }

@@ -3,6 +3,7 @@ package com.cpa.yusin.quiz.choice.service;
 import com.cpa.yusin.quiz.choice.controller.dto.request.ChoiceCreateRequest;
 import com.cpa.yusin.quiz.choice.controller.dto.request.ChoiceUpdateRequest;
 import com.cpa.yusin.quiz.choice.controller.dto.response.ChoiceCreateResponse;
+import com.cpa.yusin.quiz.choice.controller.dto.response.ChoiceResponse;
 import com.cpa.yusin.quiz.choice.controller.mapper.ChoiceMapper;
 import com.cpa.yusin.quiz.choice.controller.port.ChoiceService;
 import com.cpa.yusin.quiz.choice.domain.ChoiceDomain;
@@ -17,6 +18,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
+import static java.util.stream.Collectors.*;
 
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
@@ -81,6 +84,23 @@ public class ChoiceServiceImpl implements ChoiceService
     {
         return choiceRepository.findById(id)
                 .orElseThrow(() -> new GlobalException(ExceptionMessage.CHOICE_NOT_FOUND));
+    }
+
+    @Override
+    public List<ChoiceDomain> findAllByProblemId(long problemId)
+    {
+        return choiceRepository.findAllByProblemId(problemId);
+    }
+
+    @Override
+    public Map<Long, List<ChoiceResponse>> findAllByExamId(long examId)
+    {
+        List<ChoiceDomain> choices = choiceRepository.findAllByExamId(examId);
+
+        return choices.stream()
+                .collect(groupingBy(
+                        choice -> choice.getProblem().getId(),
+                        mapping(choiceMapper::toResponse, toList())));
     }
 
     @Override

@@ -20,4 +20,8 @@ public interface ProblemRepository
     void deleteAllByIdInBatch(List<Long> ids);
 
     boolean existsById(long id);
+
+    void deleteAllByExamId(long examId);
+
+    void deleteAllBySubjectId(long subjectId);
 }

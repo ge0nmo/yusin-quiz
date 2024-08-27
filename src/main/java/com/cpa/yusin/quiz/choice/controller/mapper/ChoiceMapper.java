@@ -2,6 +2,7 @@ package com.cpa.yusin.quiz.choice.controller.mapper;
 
 import com.cpa.yusin.quiz.choice.controller.dto.request.ChoiceCreateRequest;
 import com.cpa.yusin.quiz.choice.controller.dto.response.ChoiceCreateResponse;
+import com.cpa.yusin.quiz.choice.controller.dto.response.ChoiceResponse;
 import com.cpa.yusin.quiz.choice.domain.ChoiceDomain;
 import com.cpa.yusin.quiz.problem.domain.ProblemDomain;
 
@@ -16,4 +17,8 @@ public interface ChoiceMapper
     ChoiceCreateResponse toCreateResponse(ChoiceDomain domain);
 
     List<ChoiceCreateResponse> toCreateResponses(List<ChoiceDomain> domains);
+
+    ChoiceResponse toResponse(ChoiceDomain domain);
+
+    List<ChoiceResponse> toResponses(List<ChoiceDomain> domains);
 }

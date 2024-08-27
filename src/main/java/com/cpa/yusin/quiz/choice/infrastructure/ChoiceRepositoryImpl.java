@@ -75,4 +75,17 @@ public class ChoiceRepositoryImpl implements ChoiceRepository
     {
         choiceJpaRepository.deleteAllByIdInBatch(ids);
     }
+
+    @Override
+    public void deleteAllBySubjectId(long subjectId)
+    {
+        choiceJpaRepository.deleteAllByProblemExamSubjectId(subjectId);
+    }
+
+    @Override
+    public void deleteAllByExamId(long examId)
+    {
+        choiceJpaRepository.deleteAllByProblemExamId(examId);
+    }
+
 }

@@ -22,4 +22,8 @@ public interface ChoiceRepository
     void deleteById(long id);
 
     void deleteAllByIdInBatch(List<Long> ids);
+
+    void deleteAllBySubjectId(long subjectId);
+
+    void deleteAllByExamId(long examId);
 }

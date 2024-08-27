@@ -36,4 +36,22 @@ public class ExamRepositoryImpl implements ExamRepository
                 .toList();
     }
 
+    @Override
+    public void deleteById(long id)
+    {
+        examJpaRepository.deleteById(id);
+    }
+
+    @Override
+    public void deleteAllBySubjectId(long subjectId)
+    {
+        examJpaRepository.deleteAllBySubjectId(subjectId);
+    }
+
+    @Override
+    public boolean existsById(long id)
+    {
+        return examJpaRepository.existsById(id);
+    }
+
 }

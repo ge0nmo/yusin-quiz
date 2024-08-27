@@ -1,5 +1,6 @@
 package com.cpa.yusin.quiz.subject.service;
 
+import com.cpa.yusin.quiz.common.service.CascadeDeleteService;
 import com.cpa.yusin.quiz.global.exception.ExceptionMessage;
 import com.cpa.yusin.quiz.global.exception.GlobalException;
 import com.cpa.yusin.quiz.subject.controller.dto.request.SubjectCreateRequest;
@@ -26,6 +27,7 @@ public class SubjectServiceImpl implements SubjectService
     private final SubjectRepository subjectRepository;
     private final SubjectMapper subjectMapper;
     private final SubjectValidator subjectValidator;
+    private final CascadeDeleteService cascadeDeleteService;
 
     @Transactional
     @Override
@@ -76,8 +78,8 @@ public class SubjectServiceImpl implements SubjectService
     public boolean deleteById(long id)
     {
         findById(id);
-        subjectRepository.deleteById(id);
+        cascadeDeleteService.deleteExamByExamId(id);
 
-        return subjectRepository.existsById(id);
+        return !subjectRepository.existsById(id);
     }
 }

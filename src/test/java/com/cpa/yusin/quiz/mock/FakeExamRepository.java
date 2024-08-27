@@ -47,4 +47,23 @@ public class FakeExamRepository implements ExamRepository
                 .filter(item -> item.getSubjectDomain().getId().equals(subjectId))
                 .toList();
     }
+
+    @Override
+    public void deleteById(long id)
+    {
+        data.removeIf(item -> item.getId().equals(id));
+    }
+
+    @Override
+    public void deleteAllBySubjectId(long subjectId)
+    {
+        data.removeIf(item -> item.getSubjectDomain().getId().equals(subjectId));
+    }
+
+    @Override
+    public boolean existsById(long id)
+    {
+        return data.stream()
+                .anyMatch(item -> item.getId().equals(id));
+    }
 }

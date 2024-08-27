@@ -12,4 +12,10 @@ public interface ExamRepository
     Optional<ExamDomain> findById(long id);
 
     List<ExamDomain> findAllBySubjectId(long subjectId);
+
+    void deleteById(long id);
+
+    void deleteAllBySubjectId(long subjectId);
+
+    boolean existsById(long id);
 }

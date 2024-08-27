@@ -1,6 +1,7 @@
 package com.cpa.yusin.quiz.choice.infrastructure;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -19,4 +20,17 @@ public interface ChoiceJpaRepository extends JpaRepository<Choice, Long>
             "JOIN Exam e ON e.id = p.exam.id " +
             "WHERE e.id = :examId ")
     List<Choice> findAllByExamId(@Param("examId") long examId);
+
+    @Modifying
+    @Query("DELETE FROM Choice c " +
+            "WHERE c.problem.id IN " +
+            "(SELECT p.id FROM Problem p WHERE p.exam.id IN " +
+            "(SELECT e.id FROM Exam e WHERE e.subject.id = :subjectId))")
+    void deleteAllByProblemExamSubjectId(long subjectId);
+
+    @Modifying
+    @Query("DELETE FROM Choice c " +
+            "WHERE c.problem.id IN " +
+            "(SELECT p.id FROM Problem p WHERE p.exam.id = :examId)")
+    void deleteAllByProblemExamId(long examId);
 }

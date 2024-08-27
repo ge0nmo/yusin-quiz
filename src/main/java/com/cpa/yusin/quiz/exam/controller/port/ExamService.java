@@ -20,4 +20,6 @@ public interface ExamService
     ExamDTO getById(long id);
 
     List<ExamDTO> getAllBySubjectId(long subjectId);
+
+    boolean deleteById(long id);
 }

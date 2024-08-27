@@ -66,4 +66,16 @@ public class ProblemRepositoryImpl implements ProblemRepository
     {
         return problemJpaRepository.existsById(id);
     }
+
+    @Override
+    public void deleteAllByExamId(long examId)
+    {
+        problemJpaRepository.deleteAllByExamId(examId);
+    }
+
+    @Override
+    public void deleteAllBySubjectId(long subjectId)
+    {
+        problemJpaRepository.deleteAllByExamSubjectId(subjectId);
+    }
 }

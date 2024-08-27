@@ -2,7 +2,10 @@ package com.cpa.yusin.quiz.problem.service;
 
 import com.cpa.yusin.quiz.choice.controller.dto.request.ChoiceUpdateRequest;
 import com.cpa.yusin.quiz.choice.controller.dto.response.ChoiceCreateResponse;
+import com.cpa.yusin.quiz.choice.controller.dto.response.ChoiceResponse;
+import com.cpa.yusin.quiz.choice.controller.mapper.ChoiceMapper;
 import com.cpa.yusin.quiz.choice.controller.port.ChoiceService;
+import com.cpa.yusin.quiz.choice.domain.ChoiceDomain;
 import com.cpa.yusin.quiz.exam.controller.port.ExamService;
 import com.cpa.yusin.quiz.exam.domain.ExamDomain;
 import com.cpa.yusin.quiz.global.exception.ExceptionMessage;
@@ -10,11 +13,15 @@ import com.cpa.yusin.quiz.global.exception.GlobalException;
 import com.cpa.yusin.quiz.problem.controller.dto.request.ProblemCreateRequest;
 import com.cpa.yusin.quiz.problem.controller.dto.request.ProblemUpdateRequest;
 import com.cpa.yusin.quiz.problem.controller.dto.response.ProblemCreateResponse;
+import com.cpa.yusin.quiz.problem.controller.dto.response.ProblemDTO;
+import com.cpa.yusin.quiz.problem.controller.dto.response.ProblemResponse;
 import com.cpa.yusin.quiz.problem.controller.mapper.ProblemMapper;
 import com.cpa.yusin.quiz.problem.controller.port.ProblemService;
 import com.cpa.yusin.quiz.problem.domain.ProblemDomain;
 import com.cpa.yusin.quiz.problem.service.port.ProblemRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,6 +29,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.*;
 
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
@@ -78,7 +88,17 @@ public class ProblemServiceImpl implements ProblemService
         deleteProcess(problemIdsToDelete);
         updateProcess(problemsToUpdate);
         choiceService.update(choiceUpdateMap);
+    }
 
+    @Override
+    public List<ProblemResponse> getAllByExamId(long examId)
+    {
+        List<ProblemDomain> problems = problemRepository.findAllByExamId(examId);
+        Map<Long, List<ChoiceResponse>> choiceMap = choiceService.findAllByExamId(examId);
+
+        return problems.stream()
+                .map(problem -> problemMapper.toResponse(problem, choiceMap.get(problem.getId())))
+                .toList();
     }
 
     private void updateProcess(List<ProblemDomain> domains)
@@ -97,9 +117,9 @@ public class ProblemServiceImpl implements ProblemService
     }
 
     @Override
-    public ProblemDomain getById(long id)
+    public ProblemDTO getById(long id)
     {
-        return null;
+        return problemMapper.toProblemDTO(findById(id));
     }
 
     @Override
