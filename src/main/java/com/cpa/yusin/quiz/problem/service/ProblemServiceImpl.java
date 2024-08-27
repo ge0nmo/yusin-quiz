@@ -75,24 +75,25 @@ public class ProblemServiceImpl implements ProblemService
             }
         }
 
-        if(!problemIdsToDelete.isEmpty()){
-            deleteAll(problemIdsToDelete);
-        }
-
-        if(!problemsToUpdate.isEmpty()){
-            problemRepository.saveAll(problemsToUpdate);
-        }
-
-        for(Map.Entry<Long, List<ChoiceUpdateRequest>> entry : choiceUpdateMap.entrySet()){
-            choiceService.update(entry.getKey(), entry.getValue());
-        }
+        deleteProcess(problemIdsToDelete);
+        updateProcess(problemsToUpdate);
+        choiceService.update(choiceUpdateMap);
 
     }
 
-    private void deleteAll(List<Long> problemIds)
+    private void updateProcess(List<ProblemDomain> domains)
     {
-        choiceService.deleteAllByProblemIds(problemIds);
-        problemRepository.deleteAllByIdInBatch(problemIds);
+        if(!domains.isEmpty()){
+            problemRepository.saveAll(domains);
+        }
+    }
+
+    private void deleteProcess(List<Long> problemIds)
+    {
+        if(!problemIds.isEmpty()){
+            choiceService.deleteAllByProblemIds(problemIds);
+            problemRepository.deleteAllByIdInBatch(problemIds);
+        }
     }
 
     @Override

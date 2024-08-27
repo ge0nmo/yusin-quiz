@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
@@ -37,21 +38,42 @@ public class ChoiceServiceImpl implements ChoiceService
     }
 
     @Override
-    public void update(long problemId, List<ChoiceUpdateRequest> requests)
+    public void update(Map<Long, List<ChoiceUpdateRequest>> choiceUpdateMaps)
     {
-        List<ChoiceDomain> domains = new ArrayList<>();
-        for(ChoiceUpdateRequest request : requests)
-        {
-            if(request.isDeleted()){
-                choiceRepository.deleteById(request.getId());
-                continue;
+        List<ChoiceDomain> domainsToUpdate = new ArrayList<>();
+        List<Long> choiceIdsToDelete = new ArrayList<>();
+
+        for (Map.Entry<Long, List<ChoiceUpdateRequest>> entry : choiceUpdateMaps.entrySet()) {
+            long problemId = entry.getKey();
+            List<ChoiceUpdateRequest> requests = entry.getValue();
+
+            for(ChoiceUpdateRequest request : requests) {
+                if(request.isDeleted()){
+                    choiceIdsToDelete.add(request.getId());
+                } else{
+                    ChoiceDomain choiceDomain = findById(request.getId());
+                    choiceDomain = choiceDomain.update(problemId, request);
+                    domainsToUpdate.add(choiceDomain);
+                }
             }
-            ChoiceDomain choiceDomain = findById(request.getId());
-            choiceDomain = choiceDomain.update(problemId, request);
-            domains.add(choiceDomain);
         }
 
-        choiceRepository.saveAll(domains);
+        deleteProcess(choiceIdsToDelete);
+        updateProcess(domainsToUpdate);
+    }
+
+    private void updateProcess(List<ChoiceDomain> domainsToUpdate)
+    {
+        if(!domainsToUpdate.isEmpty()){
+            choiceRepository.saveAll(domainsToUpdate);
+        }
+    }
+
+    private void deleteProcess(List<Long> choiceIdsToDelete)
+    {
+        if(!choiceIdsToDelete.isEmpty()){
+            choiceRepository.deleteAllByIdInBatch(choiceIdsToDelete);
+        }
     }
 
     @Override

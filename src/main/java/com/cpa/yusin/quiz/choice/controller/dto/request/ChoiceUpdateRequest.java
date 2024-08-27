@@ -3,8 +3,10 @@ package com.cpa.yusin.quiz.choice.controller.dto.request;
 import lombok.Builder;
 import lombok.Getter;
 
-@Builder
+import java.util.List;
+
 @Getter
+@Builder
 public class ChoiceUpdateRequest
 {
     private long id;

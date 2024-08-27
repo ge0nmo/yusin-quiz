@@ -1,14 +1,11 @@
 package com.cpa.yusin.quiz.choice.domain;
 
-import com.cpa.yusin.quiz.choice.controller.dto.request.ChoiceCreateRequest;
 import com.cpa.yusin.quiz.choice.controller.dto.request.ChoiceUpdateRequest;
 import com.cpa.yusin.quiz.global.exception.ExceptionMessage;
 import com.cpa.yusin.quiz.global.exception.GlobalException;
 import com.cpa.yusin.quiz.problem.domain.ProblemDomain;
 import lombok.Builder;
 import lombok.Getter;
-
-import java.util.List;
 
 @Getter
 @Builder
