@@ -16,7 +16,7 @@ public interface ProblemService
 {
     List<ProblemCreateResponse> save(long examId, List<ProblemCreateRequest> requests);
 
-    void update(List<ProblemUpdateRequest> requests);
+    void update(long examId, List<ProblemUpdateRequest> requests);
 
     List<ProblemResponse> getAllByExamId(long examId);
 

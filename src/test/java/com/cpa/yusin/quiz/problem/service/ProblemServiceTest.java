@@ -142,7 +142,7 @@ class ProblemServiceTest extends MockSetup
         List<ProblemUpdateRequest> request = List.of(problemRequest1, problemRequest2, problemRequest3);
 
         // when
-        testContainer.problemService.update(request);
+        testContainer.problemService.update(examId, request);
 
         // then
         List<ProblemDomain> result = testContainer.problemRepository.findAllByExamId(examId).stream()
@@ -198,7 +198,7 @@ class ProblemServiceTest extends MockSetup
         assertThat(choiceDomains).hasSize(3);
 
         // when
-        testContainer.problemService.update(request);
+        testContainer.problemService.update(examId, request);
 
         // then
         List<ProblemDomain> result = testContainer.problemRepository.findAllByExamId(examId);

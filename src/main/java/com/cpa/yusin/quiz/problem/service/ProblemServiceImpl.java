@@ -66,7 +66,7 @@ public class ProblemServiceImpl implements ProblemService
 
     @Transactional
     @Override
-    public void update(List<ProblemUpdateRequest> requests)
+    public void update(long examId, List<ProblemUpdateRequest> requests)
     {
         List<Long> problemIdsToDelete = new ArrayList<>();
         List<ProblemDomain> problemsToUpdate = new ArrayList<>();
@@ -78,7 +78,7 @@ public class ProblemServiceImpl implements ProblemService
                 problemIdsToDelete.add(request.getId());
             } else{
                 ProblemDomain problemDomain = findById(request.getId());
-                problemDomain = problemDomain.update(request);
+                problemDomain = problemDomain.update(examId, request);
                 problemsToUpdate.add(problemDomain);
 
                 choiceUpdateMap.put(problemDomain.getId(), request.getChoices());
