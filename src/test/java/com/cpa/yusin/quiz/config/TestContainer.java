@@ -7,6 +7,7 @@ import com.cpa.yusin.quiz.choice.service.ChoiceServiceImpl;
 import com.cpa.yusin.quiz.choice.service.port.ChoiceRepository;
 import com.cpa.yusin.quiz.common.infrastructure.CascadeDeleteServiceImpl;
 import com.cpa.yusin.quiz.common.service.CascadeDeleteService;
+import com.cpa.yusin.quiz.exam.controller.ExamControllerAdmin;
 import com.cpa.yusin.quiz.exam.controller.mapper.ExamMapper;
 import com.cpa.yusin.quiz.exam.controller.mapper.ExamMapperImpl;
 import com.cpa.yusin.quiz.exam.controller.port.ExamService;
@@ -66,6 +67,7 @@ public class TestContainer
     public final ExamRepository examRepository;
     public final ExamMapper examMapper;
     public final ExamService examService;
+    public final ExamControllerAdmin adminExamController;
 
     /**
      *  choice
@@ -112,7 +114,7 @@ public class TestContainer
 
         this.examMapper = new ExamMapperImpl();
         this.examService = new ExamServiceImpl(this.examRepository, this.examMapper, this.subjectService, this.subjectMapper, this.cascadeDeleteService);
-
+        this.adminExamController = new ExamControllerAdmin(this.examService);
 
         this.choiceMapper = new ChoiceMapperImpl();
         this.choiceService = new ChoiceServiceImpl(this.choiceRepository, this.choiceMapper);
@@ -121,6 +123,8 @@ public class TestContainer
 
         this.problemService = new ProblemServiceImpl(this.problemRepository, this.problemMapper,
                 this.examService, this.choiceService);
+
+
     }
 
 }

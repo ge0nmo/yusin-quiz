@@ -78,7 +78,7 @@ public class SubjectServiceImpl implements SubjectService
     public boolean deleteById(long id)
     {
         findById(id);
-        cascadeDeleteService.deleteExamByExamId(id);
+        cascadeDeleteService.deleteSubjectBySubjectId(id);
 
         return !subjectRepository.existsById(id);
     }

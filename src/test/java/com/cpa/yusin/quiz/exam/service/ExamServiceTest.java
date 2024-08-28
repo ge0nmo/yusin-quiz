@@ -54,6 +54,8 @@ class ExamServiceTest
     void update()
     {
         // given
+        testContainer.examService.save(1L, ExamCreateRequest.builder().name("1차").year(2024).build());
+
         ExamUpdateRequest request = ExamUpdateRequest.builder()
                 .name("update exam")
                 .year(2020)
