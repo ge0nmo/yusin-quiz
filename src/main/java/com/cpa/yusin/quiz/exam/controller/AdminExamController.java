@@ -9,7 +9,6 @@ import com.cpa.yusin.quiz.exam.controller.port.ExamService;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -19,7 +18,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/admin/exam")
 @RestController
-public class ExamControllerAdmin
+public class AdminExamController
 {
     private final ExamService examService;
 
@@ -64,8 +63,10 @@ public class ExamControllerAdmin
         boolean result = examService.deleteById(id);
 
         if(result)
-            return ResponseEntity.ok(new GlobalResponse<>("삭제가 완료 되었습니다."));
+            return ResponseEntity.status(HttpStatus.NO_CONTENT)
+                    .build();
 
-        return new ResponseEntity<>(new GlobalResponse<>("잠시 후 다시 시도해주세요."), HttpStatus.BAD_REQUEST);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(new GlobalResponse<>("잠시 후 다시 시도해주세요."));
     }
 }

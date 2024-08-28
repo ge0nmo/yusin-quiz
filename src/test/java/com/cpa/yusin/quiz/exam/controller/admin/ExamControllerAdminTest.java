@@ -154,11 +154,6 @@ class ExamControllerAdminTest
         ResponseEntity<GlobalResponse<String>> result = testContainer.adminExamController.deleteById(1L);
 
         // then
-        assertThat(result.getStatusCode()).isEqualTo(HttpStatusCode.valueOf(200));
-        assertThat(result.getBody()).isNotNull();
-
-        String response = result.getBody().getData();
-
-        assertThat(response).isEqualTo("삭제가 완료 되었습니다.");
+        assertThat(result.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
     }
 }

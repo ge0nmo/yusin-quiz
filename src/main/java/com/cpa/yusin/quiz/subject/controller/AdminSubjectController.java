@@ -8,15 +8,18 @@ import com.cpa.yusin.quiz.subject.controller.dto.response.SubjectDTO;
 import com.cpa.yusin.quiz.subject.controller.port.SubjectService;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Objects;
 
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/subject")
+@RequestMapping("/api/v1/admin/subject")
 @RestController
-public class SubjectController
+public class AdminSubjectController
 {
     private final SubjectService subjectService;
 
@@ -26,7 +29,8 @@ public class SubjectController
         SubjectCreateResponse response = subjectService.save(request);
 
         return ResponseEntity
-                .ok(new GlobalResponse<>(response));
+                .status(HttpStatus.CREATED)
+                .body(new GlobalResponse<>(response));
     }
 
     @PatchMapping("/{id}")
@@ -57,17 +61,16 @@ public class SubjectController
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<GlobalResponse<String>> deleteById(@Positive @PathVariable("id") long id)
+    public ResponseEntity<Object> deleteById(@Positive @PathVariable("id") long id)
     {
         boolean result = subjectService.deleteById(id);
-        String response;
-        if(result)
-            response = "삭제가 완료 되었습니다.";
-        else
-            response = "삭제에 실패했습니다.";
 
-        return ResponseEntity
-                .ok(new GlobalResponse<>(response));
+        if(result)
+           return ResponseEntity.status(HttpStatus.NO_CONTENT)
+                   .build();
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(new GlobalResponse<>("잠시 후 다시 시도해주세요."));
     }
 
 }
