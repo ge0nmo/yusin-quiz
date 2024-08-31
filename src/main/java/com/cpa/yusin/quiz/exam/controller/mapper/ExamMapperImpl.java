@@ -22,6 +22,7 @@ public class ExamMapperImpl implements ExamMapper
                 .id(domain.getId())
                 .name(domain.getName())
                 .year(domain.getYear())
+                .maxProblemCount(domain.getMaxProblemCount())
                 .subject(subjectDTO)
                 .build();
     }
@@ -36,6 +37,7 @@ public class ExamMapperImpl implements ExamMapper
                 .id(domain.getId())
                 .name(domain.getName())
                 .year(domain.getYear())
+                .maxProblemCount(domain.getMaxProblemCount())
                 .build();
     }
 

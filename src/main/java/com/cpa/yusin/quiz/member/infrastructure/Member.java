@@ -37,7 +37,7 @@ public class Member extends BaseEntity
     @Enumerated(EnumType.STRING)
     private Role role;
 
-    private LocalDateTime subscriberExpiredAt;
+    private LocalDateTime subscriptionExpiredAt;
 
     public static Member fromDomain(MemberDomain memberDomain)
     {
@@ -48,6 +48,8 @@ public class Member extends BaseEntity
         member.username = memberDomain.getUsername();
         member.platform = memberDomain.getPlatform();
         member.role = memberDomain.getRole();
+        member.subscriptionExpiredAt = memberDomain.getSubscriptionExpiredAt() != null
+                ? memberDomain.getSubscriptionExpiredAt() : LocalDateTime.now();
 
         return member;
     }
@@ -61,6 +63,7 @@ public class Member extends BaseEntity
                 .username(username)
                 .platform(platform)
                 .role(role)
+                .subscriptionExpiredAt(subscriptionExpiredAt)
                 .createdAt(this.getCreatedAt())
                 .updatedAt(this.getUpdatedAt())
                 .build();

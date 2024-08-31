@@ -13,6 +13,7 @@ public class ExamDomain
     private Long id;
     private String name;
     private int year;
+    private int maxProblemCount;
     private SubjectDomain subjectDomain;
 
     public static ExamDomain from(ExamCreateRequest request, SubjectDomain subjectDomain)
@@ -20,6 +21,7 @@ public class ExamDomain
         return ExamDomain.builder()
                 .name(request.getName())
                 .year(request.getYear())
+                .maxProblemCount(request.getMaxProblemCount())
                 .subjectDomain(subjectDomain)
                 .build();
     }
@@ -30,6 +32,7 @@ public class ExamDomain
                 .id(this.id)
                 .name(request.getName())
                 .year(request.getYear())
+                .maxProblemCount(request.getMaxProblemCount())
                 .subjectDomain(this.subjectDomain)
                 .build();
     }

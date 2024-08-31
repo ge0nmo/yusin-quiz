@@ -14,4 +14,7 @@ public class ExamCreateRequest
 
     @NotNull
     private int year;
+
+    @NotNull
+    private int maxProblemCount;
 }

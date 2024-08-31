@@ -12,6 +12,7 @@ import com.cpa.yusin.quiz.subject.domain.SubjectDomain;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -118,17 +119,15 @@ class ExamServiceTest
                 .isAnswer(true)
                 .problem(shouldNotBeRemovedProblem)
                 .build());
-
-        long examId = 1L;
+        List<Long> ids = List.of(1L);
 
         // when
-        boolean result = testContainer.examService.deleteById(examId);
-        Optional<ExamDomain> removedExam = testContainer.examRepository.findById(examId);
+        testContainer.examService.deleteById(ids);
+        Optional<ExamDomain> removedExam = testContainer.examRepository.findById(1L);
         Optional<ProblemDomain> existingProblem = testContainer.problemRepository.findById(shouldNotBeRemovedProblem.getId());
         Optional<ChoiceDomain> existingChoice = testContainer.choiceRepository.findById(shouldNotBeRemovedChoice.getId());
 
         // then
-        assertThat(result).isTrue();
         assertThat(removedExam).isEmpty();
         assertThat(existingProblem).isNotEmpty();
         assertThat(existingChoice).isNotEmpty();

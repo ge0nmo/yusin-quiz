@@ -1,6 +1,7 @@
 package com.cpa.yusin.quiz.member.domain;
 
 import com.cpa.yusin.quiz.member.controller.dto.request.MemberCreateRequest;
+import com.cpa.yusin.quiz.member.controller.dto.request.MemberUpdateRequest;
 import com.cpa.yusin.quiz.member.domain.type.Platform;
 import com.cpa.yusin.quiz.member.domain.type.Role;
 import com.cpa.yusin.quiz.mock.FakeOAuth2UserInfo;
@@ -11,9 +12,11 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.refEq;
 import static org.mockito.Mockito.when;
 
 class MemberDomainTest
@@ -98,6 +101,34 @@ class MemberDomainTest
         assertThat(result.getPlatform()).isEqualTo(Platform.GOOGLE);
         assertThat(result.getPassword()).isEqualTo("123123");
 
+    }
+
+    @Test
+    void update()
+    {
+        // given
+        MemberDomain memberDomain = MemberDomain.builder()
+                .id(1L)
+                .role(Role.USER)
+                .platform(Platform.GOOGLE)
+                .password("123123")
+                .email("test@naver.com")
+                .username("John Doe")
+                .subscriptionExpiredAt(null)
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .build();
+
+        MemberUpdateRequest request = MemberUpdateRequest.builder()
+                .username("Mike")
+                .build();
+
+        // when
+
+        MemberDomain updatedMember = memberDomain.update(request);
+
+        // then
+        assertThat(updatedMember.getUsername()).isEqualTo("Mike");
     }
 
 }

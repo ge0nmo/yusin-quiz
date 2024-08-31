@@ -21,5 +21,5 @@ public interface ExamService
 
     List<ExamDTO> getAllBySubjectId(long subjectId);
 
-    boolean deleteById(long id);
+    void deleteById(List<Long> ids);
 }

@@ -3,6 +3,7 @@ package com.cpa.yusin.quiz.exam.controller.admin;
 import com.cpa.yusin.quiz.common.controller.dto.response.GlobalResponse;
 import com.cpa.yusin.quiz.config.TestContainer;
 import com.cpa.yusin.quiz.exam.controller.dto.request.ExamCreateRequest;
+import com.cpa.yusin.quiz.exam.controller.dto.request.ExamDeleteRequest;
 import com.cpa.yusin.quiz.exam.controller.dto.request.ExamUpdateRequest;
 import com.cpa.yusin.quiz.exam.controller.dto.response.ExamCreateResponse;
 import com.cpa.yusin.quiz.exam.controller.dto.response.ExamDTO;
@@ -149,9 +150,14 @@ class ExamControllerAdminTest
     {
         // given
         testContainer.examService.save(1L, ExamCreateRequest.builder().name("1차").year(2024).build());
-
+        testContainer.examService.save(1L, ExamCreateRequest.builder().name("2차").year(2024).build());
+        testContainer.examService.save(1L, ExamCreateRequest.builder().name("3차").year(2024).build());
+        List<Long> examIds = List.of(1L, 2L, 3L);
+        ExamDeleteRequest request = ExamDeleteRequest.builder()
+                .examIds(examIds)
+                .build();
         // when
-        ResponseEntity<GlobalResponse<String>> result = testContainer.adminExamController.deleteById(1L);
+        ResponseEntity<GlobalResponse<String>> result = testContainer.adminExamController.deleteById(request);
 
         // then
         assertThat(result.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);

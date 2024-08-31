@@ -17,7 +17,8 @@ public class MemberDTO
     private final String username;
     private final Platform platform;
     private final Role role;
+    private LocalDateTime subscriberExpiredAt;
+
     private final LocalDateTime createdAt;
     private final LocalDateTime updatedAt;
-
 }

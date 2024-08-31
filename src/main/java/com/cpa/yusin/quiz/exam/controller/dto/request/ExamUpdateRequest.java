@@ -9,4 +9,5 @@ public class ExamUpdateRequest
 {
     private String name;
     private int year;
+    private int maxProblemCount;
 }

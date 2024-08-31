@@ -2,6 +2,7 @@ package com.cpa.yusin.quiz.exam.controller;
 
 import com.cpa.yusin.quiz.common.controller.dto.response.GlobalResponse;
 import com.cpa.yusin.quiz.exam.controller.dto.request.ExamCreateRequest;
+import com.cpa.yusin.quiz.exam.controller.dto.request.ExamDeleteRequest;
 import com.cpa.yusin.quiz.exam.controller.dto.request.ExamUpdateRequest;
 import com.cpa.yusin.quiz.exam.controller.dto.response.ExamCreateResponse;
 import com.cpa.yusin.quiz.exam.controller.dto.response.ExamDTO;
@@ -57,16 +58,12 @@ public class AdminExamController
         return ResponseEntity.ok(new GlobalResponse<>(response));
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<GlobalResponse<String>> deleteById(@PathVariable("id") long id)
+    @DeleteMapping
+    public ResponseEntity<GlobalResponse<String>> deleteById(@RequestBody ExamDeleteRequest request)
     {
-        boolean result = examService.deleteById(id);
+        examService.deleteById(request.getExamIds());
 
-        if(result)
-            return ResponseEntity.status(HttpStatus.NO_CONTENT)
-                    .build();
-
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(new GlobalResponse<>("잠시 후 다시 시도해주세요."));
+        return ResponseEntity.status(HttpStatus.NO_CONTENT)
+                .body(new GlobalResponse<>("삭제가 완료 되었습니다."));
     }
 }

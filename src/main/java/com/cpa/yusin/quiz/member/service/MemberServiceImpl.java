@@ -2,6 +2,7 @@ package com.cpa.yusin.quiz.member.service;
 
 import com.cpa.yusin.quiz.global.exception.ExceptionMessage;
 import com.cpa.yusin.quiz.global.exception.GlobalException;
+import com.cpa.yusin.quiz.member.controller.dto.request.MemberUpdateRequest;
 import com.cpa.yusin.quiz.member.controller.dto.response.MemberDTO;
 import com.cpa.yusin.quiz.member.controller.mapper.MemberMapper;
 import com.cpa.yusin.quiz.member.controller.port.MemberService;
@@ -9,8 +10,11 @@ import com.cpa.yusin.quiz.member.domain.MemberDomain;
 import com.cpa.yusin.quiz.member.service.port.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -21,6 +25,16 @@ public class MemberServiceImpl implements MemberService
     private final MemberRepository memberRepository;
     private final MemberMapper memberMapper;
 
+
+    @Override
+    public void update(long memberId, MemberUpdateRequest request, MemberDomain memberDomain)
+    {
+        memberDomain.validateMember(memberId, memberDomain);
+        memberDomain = memberDomain.update(request);
+
+        memberRepository.save(memberDomain);
+    }
+
     @Override
     public MemberDTO getById(long id)
     {
@@ -30,11 +44,19 @@ public class MemberServiceImpl implements MemberService
     }
 
     @Override
+    public Page<MemberDTO> getAll(String keyword, Pageable pageable)
+    {
+        if(StringUtils.hasLength(keyword))
+            keyword = keyword.toLowerCase();
+
+        return memberRepository.findAllByKeyword(keyword, pageable)
+                .map(memberMapper::toMemberDTO);
+    }
+
+    @Override
     public MemberDomain findById(long id)
     {
         return memberRepository.findById(id)
                 .orElseThrow(() -> new GlobalException(ExceptionMessage.USER_NOT_FOUND));
     }
-
-
 }

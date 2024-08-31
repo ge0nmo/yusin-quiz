@@ -88,12 +88,12 @@ public class ExamServiceImpl implements ExamService
     }
 
     @Override
-    public boolean deleteById(long id)
+    public void deleteById(List<Long> ids)
     {
-        findById(id);
-        cascadeDeleteService.deleteExamByExamId(id);
-
-        return !examRepository.existsById(id);
+        ids.forEach(id -> {
+            findById(id);
+            cascadeDeleteService.deleteExamByExamId(id);
+        });
     }
 
 

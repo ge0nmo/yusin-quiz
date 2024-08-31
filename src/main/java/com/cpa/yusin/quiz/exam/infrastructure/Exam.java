@@ -21,6 +21,9 @@ public class Exam
     @Column(nullable = false)
     private int year;
 
+    @Column(nullable = false)
+    private int maxProblemCount;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "subject_id", nullable = false, updatable = false)
     private Subject subject;

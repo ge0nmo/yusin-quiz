@@ -2,7 +2,12 @@ package com.cpa.yusin.quiz.mock;
 
 import com.cpa.yusin.quiz.member.domain.MemberDomain;
 import com.cpa.yusin.quiz.member.service.port.MemberRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+import org.springframework.util.StringUtils;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -17,6 +22,21 @@ public class FakeMemberRepository implements MemberRepository
         return data.stream()
                 .filter(item -> item.getEmail().equals(email))
                 .findAny();
+    }
+
+    @Override
+    public Page<MemberDomain> findAllByKeyword(String keyword, Pageable pageable)
+    {
+        List<MemberDomain> result = data.stream()
+                .filter(member -> !StringUtils.hasLength(keyword) ||
+                        member.getEmail().toLowerCase().contains(keyword) ||
+                        member.getUsername().toLowerCase().contains(keyword))
+                .sorted(Comparator.comparing(MemberDomain::getCreatedAt, Comparator.nullsLast(Comparator.naturalOrder())))
+                .limit(pageable.getPageSize())
+                .skip(pageable.getOffset())
+                .toList();
+
+        return new PageImpl<>(result, pageable, result.size());
     }
 
     @Override
@@ -36,6 +56,8 @@ public class FakeMemberRepository implements MemberRepository
                     .username(member.getUsername())
                     .platform(member.getPlatform())
                     .role(member.getRole())
+                    .createdAt(LocalDateTime.now())
+                    .updatedAt(LocalDateTime.now())
                     .build();
             data.add(newMember);
             return newMember;
