@@ -3,7 +3,7 @@ package com.cpa.yusin.quiz.problem.domain;
 import com.cpa.yusin.quiz.exam.domain.ExamDomain;
 import com.cpa.yusin.quiz.global.exception.ExceptionMessage;
 import com.cpa.yusin.quiz.global.exception.GlobalException;
-import com.cpa.yusin.quiz.problem.controller.dto.request.ProblemUpdateRequest;
+import com.cpa.yusin.quiz.problem.controller.dto.request.ProblemRequest;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -16,7 +16,7 @@ public class ProblemDomain
     private int number;
     private ExamDomain exam;
 
-    public void update(long examId, ProblemUpdateRequest request)
+    public void update(long examId, ProblemRequest request)
     {
         validateExamId(examId);
 

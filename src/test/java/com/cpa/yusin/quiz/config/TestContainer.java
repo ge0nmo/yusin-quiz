@@ -26,6 +26,7 @@ import com.cpa.yusin.quiz.member.service.AuthenticationServiceImpl;
 import com.cpa.yusin.quiz.member.service.MemberServiceImpl;
 import com.cpa.yusin.quiz.member.service.port.MemberRepository;
 import com.cpa.yusin.quiz.mock.*;
+import com.cpa.yusin.quiz.problem.controller.AdminProblemController;
 import com.cpa.yusin.quiz.problem.controller.mapper.ProblemMapper;
 import com.cpa.yusin.quiz.problem.controller.mapper.ProblemMapperImpl;
 import com.cpa.yusin.quiz.problem.controller.port.ProblemService;
@@ -86,6 +87,7 @@ public class TestContainer
     public final ProblemMapper problemMapper;
     public final ProblemRepository problemRepository;
     public final ProblemService problemService;
+    public final AdminProblemController adminProblemController;
 
     public final CascadeDeleteService cascadeDeleteService;
 
@@ -124,9 +126,9 @@ public class TestContainer
         this.choiceService = new ChoiceServiceImpl(this.choiceRepository, this.choiceMapper);
 
         this.problemMapper = new ProblemMapperImpl();
-
         this.problemService = new ProblemServiceImpl(this.problemRepository, this.problemMapper,
                 this.examService, this.choiceService);
+        this.adminProblemController = new AdminProblemController(this.problemService);
 
 
     }

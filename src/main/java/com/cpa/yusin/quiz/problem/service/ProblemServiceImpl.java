@@ -1,16 +1,13 @@
 package com.cpa.yusin.quiz.problem.service;
 
-import com.cpa.yusin.quiz.choice.controller.dto.request.ChoiceUpdateRequest;
-import com.cpa.yusin.quiz.choice.controller.dto.response.ChoiceCreateResponse;
+import com.cpa.yusin.quiz.choice.controller.dto.request.ChoiceRequest;
 import com.cpa.yusin.quiz.choice.controller.dto.response.ChoiceResponse;
 import com.cpa.yusin.quiz.choice.controller.port.ChoiceService;
 import com.cpa.yusin.quiz.exam.controller.port.ExamService;
 import com.cpa.yusin.quiz.exam.domain.ExamDomain;
 import com.cpa.yusin.quiz.global.exception.ExceptionMessage;
 import com.cpa.yusin.quiz.global.exception.GlobalException;
-import com.cpa.yusin.quiz.problem.controller.dto.request.ProblemCreateRequest;
-import com.cpa.yusin.quiz.problem.controller.dto.request.ProblemUpdateRequest;
-import com.cpa.yusin.quiz.problem.controller.dto.response.ProblemCreateResponse;
+import com.cpa.yusin.quiz.problem.controller.dto.request.ProblemRequest;
 import com.cpa.yusin.quiz.problem.controller.dto.response.ProblemDTO;
 import com.cpa.yusin.quiz.problem.controller.dto.response.ProblemResponse;
 import com.cpa.yusin.quiz.problem.controller.mapper.ProblemMapper;
@@ -38,50 +35,41 @@ public class ProblemServiceImpl implements ProblemService
 
     @Transactional
     @Override
-    public List<ProblemCreateResponse> save(long examId, List<ProblemCreateRequest> requests)
+    public void saveOrUpdateProblem(long examId, List<ProblemRequest> requests)
     {
         ExamDomain exam = examService.findById(examId);
-        List<ProblemCreateResponse> responses = new ArrayList<>();
-
-        for(ProblemCreateRequest request : requests)
-        {
-            ProblemDomain problemDomain = problemMapper.toProblemDomain(request, exam);
-            problemDomain = problemRepository.save(problemDomain);
-
-            List<ChoiceCreateResponse> choiceCreateResponses = choiceService.save(request.getChoiceCreateRequests(), problemDomain);
-
-            ProblemCreateResponse createResponse = problemMapper.toCreateResponse(problemDomain, choiceCreateResponses);
-            responses.add(createResponse);
-        }
-
-        return responses;
-    }
-
-    @Transactional
-    @Override
-    public void update(long examId, List<ProblemUpdateRequest> requests)
-    {
         List<Long> problemIdsToDelete = new ArrayList<>();
-        List<ProblemDomain> problemsToUpdate = new ArrayList<>();
-        Map<Long, List<ChoiceUpdateRequest>> choiceUpdateMap = new HashMap<>();
+        Map<ProblemDomain, List<ChoiceRequest>> choiceUpdateMap = new HashMap<>();
 
-        for(ProblemUpdateRequest request : requests)
+        for(ProblemRequest request : requests)
         {
-            if(request.isDeleted()){
+            if(request.isDeleted() && !request.isNew()){
                 problemIdsToDelete.add(request.getId());
             } else{
-                ProblemDomain problemDomain = findById(request.getId());
-                problemDomain.update(examId, request);
-                problemsToUpdate.add(problemDomain);
-
-                choiceUpdateMap.put(problemDomain.getId(), request.getChoices());
+                ProblemDomain problemDomain;
+                if(request.isNew()){
+                    problemDomain = problemMapper.toProblemDomain(request, exam);
+                } else{
+                    problemDomain = findById(request.getId());
+                    problemDomain.update(examId, request);
+                }
+                problemDomain = problemRepository.save(problemDomain);
+                choiceUpdateMap.put(problemDomain, request.getChoices());
             }
         }
 
         deleteProcess(problemIdsToDelete);
-        updateProcess(problemsToUpdate);
-        choiceService.update(choiceUpdateMap);
+        choiceService.saveOrUpdate(choiceUpdateMap);
     }
+
+    private void deleteProcess(List<Long> problemIds)
+    {
+        if(!problemIds.isEmpty()){
+            choiceService.deleteAllByProblemIds(problemIds);
+            problemRepository.deleteAllByIdInBatch(problemIds);
+        }
+    }
+
 
     @Override
     public List<ProblemResponse> getAllByExamId(long examId)
@@ -94,20 +82,6 @@ public class ProblemServiceImpl implements ProblemService
                 .toList();
     }
 
-    private void updateProcess(List<ProblemDomain> domains)
-    {
-        if(!domains.isEmpty()){
-            problemRepository.saveAll(domains);
-        }
-    }
-
-    private void deleteProcess(List<Long> problemIds)
-    {
-        if(!problemIds.isEmpty()){
-            choiceService.deleteAllByProblemIds(problemIds);
-            problemRepository.deleteAllByIdInBatch(problemIds);
-        }
-    }
 
     @Override
     public ProblemDTO getById(long id)

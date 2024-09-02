@@ -1,6 +1,6 @@
 package com.cpa.yusin.quiz.choice.controller.mapper;
 
-import com.cpa.yusin.quiz.choice.controller.dto.request.ChoiceCreateRequest;
+import com.cpa.yusin.quiz.choice.controller.dto.request.ChoiceRequest;
 import com.cpa.yusin.quiz.choice.controller.dto.response.ChoiceCreateResponse;
 import com.cpa.yusin.quiz.choice.controller.dto.response.ChoiceResponse;
 import com.cpa.yusin.quiz.choice.domain.ChoiceDomain;
@@ -8,14 +8,13 @@ import com.cpa.yusin.quiz.problem.domain.ProblemDomain;
 import org.springframework.stereotype.Component;
 
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 @Component
 public class ChoiceMapperImpl implements ChoiceMapper
 {
     @Override
-    public ChoiceDomain fromCreateRequestToDomain(ChoiceCreateRequest request, ProblemDomain problemDomain)
+    public ChoiceDomain fromCreateRequestToDomain(ChoiceRequest request, ProblemDomain problemDomain)
     {
         if(request == null || problemDomain == null)
             return null;
@@ -28,17 +27,6 @@ public class ChoiceMapperImpl implements ChoiceMapper
                 .build();
     }
 
-    @Override
-    public List<ChoiceDomain> fromCreateRequestToDomain(List<ChoiceCreateRequest> requests, ProblemDomain problemDomain)
-    {
-        if(requests == null || requests.isEmpty())
-            return Collections.emptyList();
-
-        return requests.stream()
-                .map(item -> this.fromCreateRequestToDomain(item, problemDomain))
-                .toList();
-
-    }
 
     @Override
     public ChoiceCreateResponse toCreateResponse(ChoiceDomain domain)

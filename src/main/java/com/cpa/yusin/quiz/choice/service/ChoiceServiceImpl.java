@@ -1,8 +1,6 @@
 package com.cpa.yusin.quiz.choice.service;
 
-import com.cpa.yusin.quiz.choice.controller.dto.request.ChoiceCreateRequest;
-import com.cpa.yusin.quiz.choice.controller.dto.request.ChoiceUpdateRequest;
-import com.cpa.yusin.quiz.choice.controller.dto.response.ChoiceCreateResponse;
+import com.cpa.yusin.quiz.choice.controller.dto.request.ChoiceRequest;
 import com.cpa.yusin.quiz.choice.controller.dto.response.ChoiceResponse;
 import com.cpa.yusin.quiz.choice.controller.mapper.ChoiceMapper;
 import com.cpa.yusin.quiz.choice.controller.port.ChoiceService;
@@ -29,53 +27,49 @@ public class ChoiceServiceImpl implements ChoiceService
     private final ChoiceRepository choiceRepository;
     private final ChoiceMapper choiceMapper;
 
-    @Override
-    public List<ChoiceCreateResponse> save(List<ChoiceCreateRequest> choiceCreateRequests, ProblemDomain problem)
-    {
-        List<ChoiceDomain> choiceDomains = choiceMapper.fromCreateRequestToDomain(choiceCreateRequests, problem);
-
-        choiceDomains = choiceRepository.saveAll(choiceDomains);
-
-        return choiceMapper.toCreateResponses(choiceDomains);
-
-    }
 
     @Override
-    public void update(Map<Long, List<ChoiceUpdateRequest>> choiceUpdateMaps)
+    public void saveOrUpdate(Map<ProblemDomain, List<ChoiceRequest>> choiceMaps)
     {
-        List<ChoiceDomain> domainsToUpdate = new ArrayList<>();
-        List<Long> choiceIdsToDelete = new ArrayList<>();
+        List<ChoiceDomain> saveOrUpdate = new ArrayList<>();
+        List<Long> deleteList = new ArrayList<>();
 
-        for (Map.Entry<Long, List<ChoiceUpdateRequest>> entry : choiceUpdateMaps.entrySet()) {
-            long problemId = entry.getKey();
-            List<ChoiceUpdateRequest> requests = entry.getValue();
+        for(Map.Entry<ProblemDomain, List<ChoiceRequest>> entry : choiceMaps.entrySet()) {
+            ProblemDomain problem = entry.getKey();
+            List<ChoiceRequest> requests = entry.getValue();
 
-            for(ChoiceUpdateRequest request : requests) {
-                if(request.isDeleted()){
-                    choiceIdsToDelete.add(request.getId());
+            for(ChoiceRequest request : requests) {
+                if(request.isDeleted() && !request.isNew()){
+                    deleteList.add(request.getId());
                 } else{
-                    ChoiceDomain choiceDomain = findById(request.getId());
-                    choiceDomain.update(problemId, request);
-                    domainsToUpdate.add(choiceDomain);
+                    ChoiceDomain choiceDomain;
+                    if(request.isNew()) {
+                        choiceDomain = choiceMapper.fromCreateRequestToDomain(request, problem);
+                    } else{
+                        choiceDomain = findById(request.getId());
+                        choiceDomain.update(problem.getId(), request);
+                    }
+                    saveOrUpdate.add(choiceDomain);
                 }
             }
         }
 
-        deleteProcess(choiceIdsToDelete);
-        updateProcess(domainsToUpdate);
-    }
+        deleteProcess(deleteList);
+        saveProcess(saveOrUpdate);
 
-    private void updateProcess(List<ChoiceDomain> domainsToUpdate)
-    {
-        if(!domainsToUpdate.isEmpty()){
-            choiceRepository.saveAll(domainsToUpdate);
-        }
     }
 
     private void deleteProcess(List<Long> choiceIdsToDelete)
     {
         if(!choiceIdsToDelete.isEmpty()){
             choiceRepository.deleteAllByIdInBatch(choiceIdsToDelete);
+        }
+    }
+
+    private void saveProcess(List<ChoiceDomain> domains)
+    {
+        if(!domains.isEmpty()){
+            choiceRepository.saveAll(domains);
         }
     }
 

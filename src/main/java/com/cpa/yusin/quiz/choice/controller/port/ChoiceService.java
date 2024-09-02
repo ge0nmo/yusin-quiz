@@ -1,8 +1,6 @@
 package com.cpa.yusin.quiz.choice.controller.port;
 
-import com.cpa.yusin.quiz.choice.controller.dto.request.ChoiceCreateRequest;
-import com.cpa.yusin.quiz.choice.controller.dto.request.ChoiceUpdateRequest;
-import com.cpa.yusin.quiz.choice.controller.dto.response.ChoiceCreateResponse;
+import com.cpa.yusin.quiz.choice.controller.dto.request.ChoiceRequest;
 import com.cpa.yusin.quiz.choice.controller.dto.response.ChoiceResponse;
 import com.cpa.yusin.quiz.choice.domain.ChoiceDomain;
 import com.cpa.yusin.quiz.problem.domain.ProblemDomain;
@@ -12,9 +10,11 @@ import java.util.Map;
 
 public interface ChoiceService
 {
-    List<ChoiceCreateResponse> save(List<ChoiceCreateRequest> choiceCreateRequests, ProblemDomain problem);
+    /*List<ChoiceCreateResponse> save(List<ChoiceCreateRequest> choiceCreateRequests, ProblemDomain problem);
 
-    void update(Map<Long, List<ChoiceUpdateRequest>> choiceUpdateMaps);
+    void update(Map<Long, List<ChoiceUpdateRequest>> choiceUpdateMaps);*/
+
+    void saveOrUpdate(Map<ProblemDomain, List<ChoiceRequest>> choiceMaps);
 
     ChoiceDomain findById(long id);
 

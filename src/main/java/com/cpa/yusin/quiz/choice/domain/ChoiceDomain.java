@@ -1,6 +1,6 @@
 package com.cpa.yusin.quiz.choice.domain;
 
-import com.cpa.yusin.quiz.choice.controller.dto.request.ChoiceUpdateRequest;
+import com.cpa.yusin.quiz.choice.controller.dto.request.ChoiceRequest;
 import com.cpa.yusin.quiz.global.exception.ExceptionMessage;
 import com.cpa.yusin.quiz.global.exception.GlobalException;
 import com.cpa.yusin.quiz.problem.domain.ProblemDomain;
@@ -17,7 +17,7 @@ public class ChoiceDomain
     private boolean isAnswer;
     private ProblemDomain problem;
 
-    public void update(long problemId, ChoiceUpdateRequest request)
+    public void update(long problemId, ChoiceRequest request)
     {
         validateProblemId(problemId);
 

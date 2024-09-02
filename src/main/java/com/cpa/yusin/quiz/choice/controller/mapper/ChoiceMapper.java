@@ -1,6 +1,6 @@
 package com.cpa.yusin.quiz.choice.controller.mapper;
 
-import com.cpa.yusin.quiz.choice.controller.dto.request.ChoiceCreateRequest;
+import com.cpa.yusin.quiz.choice.controller.dto.request.ChoiceRequest;
 import com.cpa.yusin.quiz.choice.controller.dto.response.ChoiceCreateResponse;
 import com.cpa.yusin.quiz.choice.controller.dto.response.ChoiceResponse;
 import com.cpa.yusin.quiz.choice.domain.ChoiceDomain;
@@ -10,9 +10,7 @@ import java.util.List;
 
 public interface ChoiceMapper
 {
-    ChoiceDomain fromCreateRequestToDomain(ChoiceCreateRequest request, ProblemDomain problemDomain);
-
-    List<ChoiceDomain> fromCreateRequestToDomain(List<ChoiceCreateRequest> requests, ProblemDomain problemDomain);
+    ChoiceDomain fromCreateRequestToDomain(ChoiceRequest request, ProblemDomain problemDomain);
 
     ChoiceCreateResponse toCreateResponse(ChoiceDomain domain);
 

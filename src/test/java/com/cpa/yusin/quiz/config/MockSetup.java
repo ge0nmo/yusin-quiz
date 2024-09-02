@@ -107,6 +107,5 @@ public class MockSetup
                 .isAnswer(false)
                 .problem(physicsProblem1)
                 .build());
-
     }
 }
