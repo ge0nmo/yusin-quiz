@@ -1,5 +1,6 @@
 package com.cpa.yusin.quiz.member.domain;
 
+import com.cpa.yusin.quiz.global.exception.GlobalException;
 import com.cpa.yusin.quiz.member.controller.dto.request.MemberCreateRequest;
 import com.cpa.yusin.quiz.member.controller.dto.request.MemberUpdateRequest;
 import com.cpa.yusin.quiz.member.domain.type.Platform;
@@ -7,6 +8,7 @@ import com.cpa.yusin.quiz.member.domain.type.Role;
 import com.cpa.yusin.quiz.mock.FakeOAuth2UserInfo;
 import com.cpa.yusin.quiz.mock.FakeUuidHolder;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -16,7 +18,8 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.refEq;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.Mockito.when;
 
 class MemberDomainTest
@@ -129,6 +132,43 @@ class MemberDomainTest
 
         // then
         assertThat(updatedMember.getUsername()).isEqualTo("Mike");
+    }
+
+    @DisplayName("validateMember - ADMIN can pass validation")
+    @Test
+    void validateMember1()
+    {
+        // given
+        MemberDomain memberDomain = MemberDomain.builder()
+                .id(1L)
+                .role(Role.ADMIN)
+                .platform(Platform.GOOGLE)
+                .password("123123")
+                .email("test@naver.com")
+                .username("John Doe")
+                .build();
+
+        // when and then
+        assertDoesNotThrow(() -> memberDomain.validateMember(2L, memberDomain));
+    }
+
+    @DisplayName("validateMember - memberId should be the same if it's USER")
+    @Test
+    void validateMember2()
+    {
+        // given
+        MemberDomain memberDomain = MemberDomain.builder()
+                .id(1L)
+                .role(Role.USER)
+                .platform(Platform.GOOGLE)
+                .password("123123")
+                .email("test@naver.com")
+                .username("John Doe")
+                .build();
+
+        // when and then
+        assertThatThrownBy(() -> memberDomain.validateMember(2L, memberDomain))
+                .isInstanceOf(GlobalException.class);
     }
 
 }

@@ -27,12 +27,14 @@ public class MemberServiceImpl implements MemberService
 
 
     @Override
-    public void update(long memberId, MemberUpdateRequest request, MemberDomain memberDomain)
+    public void update(long memberId, MemberUpdateRequest request, MemberDomain loggedInMember)
     {
-        memberDomain.validateMember(memberId, memberDomain);
-        memberDomain = memberDomain.update(request);
+        loggedInMember.validateMember(memberId, loggedInMember);
 
-        memberRepository.save(memberDomain);
+        MemberDomain targetMember = findById(memberId);
+        targetMember = targetMember.update(request);
+
+        memberRepository.save(targetMember);
     }
 
     @Override
@@ -59,4 +61,12 @@ public class MemberServiceImpl implements MemberService
         return memberRepository.findById(id)
                 .orElseThrow(() -> new GlobalException(ExceptionMessage.USER_NOT_FOUND));
     }
+
+    @Override
+    public void deleteById(long id, MemberDomain loggedInMember)
+    {
+        loggedInMember.validateMember(id, loggedInMember);
+        memberRepository.deleteById(id);
+    }
+
 }

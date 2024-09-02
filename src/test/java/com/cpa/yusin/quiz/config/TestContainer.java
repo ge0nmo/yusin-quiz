@@ -17,6 +17,7 @@ import com.cpa.yusin.quiz.global.details.MemberDetailsService;
 import com.cpa.yusin.quiz.global.jwt.JwtService;
 import com.cpa.yusin.quiz.global.jwt.JwtServiceImpl;
 import com.cpa.yusin.quiz.global.security.CustomAuthenticationProvider;
+import com.cpa.yusin.quiz.member.controller.AdminMemberController;
 import com.cpa.yusin.quiz.member.controller.mapper.MemberMapper;
 import com.cpa.yusin.quiz.member.controller.mapper.MemberMapperImpl;
 import com.cpa.yusin.quiz.member.controller.port.AuthenticationService;
@@ -53,6 +54,7 @@ public class TestContainer
     public final JwtService jwtService;
     public final AuthenticationService authenticationService;
     public final MemberMapper memberMapper;
+    public final AdminMemberController adminMemberController;
 
     /**
      *  subject
@@ -105,7 +107,7 @@ public class TestContainer
         this.jwtService = new JwtServiceImpl(FAKE_SECRET_KEY);
         this.authenticationService = new AuthenticationServiceImpl(this.passwordEncoder, this.jwtService,
                 this.memberRepository, this.authenticationProvider, this.memberDetailsService, this.memberMapper);
-
+        this.adminMemberController = new AdminMemberController(this.memberService);
 
 
 

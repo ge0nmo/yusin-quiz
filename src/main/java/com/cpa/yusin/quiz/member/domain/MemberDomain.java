@@ -87,8 +87,10 @@ public class MemberDomain
 
     public void validateMember(long memberId, MemberDomain member)
     {
-        if(!member.getId().equals(memberId)){
-            throw new GlobalException(ExceptionMessage.NO_AUTHORIZATION);
+        if(member.getId().equals(memberId) || Role.ADMIN.equals(member.getRole())){
+            return;
         }
+
+        throw new GlobalException(ExceptionMessage.NO_AUTHORIZATION);
     }
 }
