@@ -55,34 +55,15 @@ public class MemberDomain
                 .build();
     }
 
-    public MemberDomain updateFromOauth2(String newUsername)
-    {
-        return MemberDomain.builder()
-                .id(id)
-                .email(email)
-                .password(password)
-                .username(newUsername)
-                .platform(platform)
-                .createdAt(createdAt)
-                .updatedAt(LocalDateTime.now())
-                .role(role)
-                .subscriptionExpiredAt(subscriptionExpiredAt)
-                .build();
+    public void updateFromOauth2(String newUsername) {
+        this.username = newUsername;
+        this.updatedAt = LocalDateTime.now();
     }
 
-    public MemberDomain update(MemberUpdateRequest request)
+    public void update(MemberUpdateRequest request)
     {
-        return MemberDomain.builder()
-                .id(id)
-                .email(email)
-                .password(password)
-                .username(request.getUsername())
-                .platform(platform)
-                .createdAt(createdAt)
-                .updatedAt(LocalDateTime.now())
-                .subscriptionExpiredAt(subscriptionExpiredAt)
-                .role(role)
-                .build();
+        this.username = request.getUsername();
+        this.updatedAt = LocalDateTime.now();
     }
 
     public void validateMember(long memberId, MemberDomain member)

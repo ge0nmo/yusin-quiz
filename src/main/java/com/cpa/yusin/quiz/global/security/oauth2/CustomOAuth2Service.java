@@ -57,7 +57,7 @@ public class CustomOAuth2Service extends DefaultOAuth2UserService
             if(!memberDomain.getPlatform().name().equalsIgnoreCase(request.getClientRegistration().getRegistrationId()))
                 throw new GlobalException(ExceptionMessage.USER_NOT_FOUND);
 
-            memberDomain = memberDomain.updateFromOauth2(oAuth2User.getName());
+            memberDomain.updateFromOauth2(oAuth2User.getName());
         } else{
             memberDomain = registerMember(oAuthUserInfo);
         }

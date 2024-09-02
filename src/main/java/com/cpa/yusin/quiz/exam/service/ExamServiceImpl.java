@@ -50,7 +50,7 @@ public class ExamServiceImpl implements ExamService
     public void update(long examId, ExamUpdateRequest request)
     {
         ExamDomain domain = findById(examId);
-        domain = domain.update(request);
+        domain.update(request);
 
         examRepository.save(domain);
     }

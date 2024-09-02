@@ -46,7 +46,7 @@ public class SubjectServiceImpl implements SubjectService
         SubjectDomain domain = findById(id);
         subjectValidator.validateName(domain.getId(), request.getName());
 
-        domain = domain.update(request);
+        domain.update(request);
         subjectRepository.save(domain);
     }
 

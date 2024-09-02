@@ -16,16 +16,12 @@ public class ProblemDomain
     private int number;
     private ExamDomain exam;
 
-    public ProblemDomain update(long examId, ProblemUpdateRequest request)
+    public void update(long examId, ProblemUpdateRequest request)
     {
         validateExamId(examId);
 
-        return ProblemDomain.builder()
-                .id(this.id)
-                .content(request.getContent())
-                .number(request.getNumber())
-                .exam(this.exam)
-                .build();
+        this.content = request.getContent();
+        this.number = request.getNumber();
     }
 
     private void validateExamId(long examId)

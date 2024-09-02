@@ -71,7 +71,7 @@ public class ProblemServiceImpl implements ProblemService
                 problemIdsToDelete.add(request.getId());
             } else{
                 ProblemDomain problemDomain = findById(request.getId());
-                problemDomain = problemDomain.update(examId, request);
+                problemDomain.update(examId, request);
                 problemsToUpdate.add(problemDomain);
 
                 choiceUpdateMap.put(problemDomain.getId(), request.getChoices());

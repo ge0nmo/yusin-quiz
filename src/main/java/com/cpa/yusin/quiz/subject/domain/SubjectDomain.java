@@ -23,11 +23,8 @@ public class SubjectDomain
                 .build();
     }
 
-    public SubjectDomain update(SubjectUpdateRequest request)
+    public void update(SubjectUpdateRequest request)
     {
-        return SubjectDomain.builder()
-                .id(id)
-                .name(request.getName())
-                .build();
+        this.name = request.getName();
     }
 }

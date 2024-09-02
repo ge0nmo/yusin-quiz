@@ -11,7 +11,6 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class AdminProblemControllerTest extends MockSetup
 {
-
     @Test
     void save()
     {

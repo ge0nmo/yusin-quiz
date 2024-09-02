@@ -17,17 +17,13 @@ public class ChoiceDomain
     private boolean isAnswer;
     private ProblemDomain problem;
 
-    public ChoiceDomain update(long problemId, ChoiceUpdateRequest request)
+    public void update(long problemId, ChoiceUpdateRequest request)
     {
         validateProblemId(problemId);
 
-        return ChoiceDomain.builder()
-                .id(this.id)
-                .number(request.getNumber())
-                .content(request.getContent())
-                .isAnswer(request.isAnswer())
-                .problem(this.problem)
-                .build();
+        this.number = request.getNumber();
+        this.content = request.getContent();
+        this.isAnswer = request.isAnswer();
     }
 
     public void validateProblemId(long problemId)

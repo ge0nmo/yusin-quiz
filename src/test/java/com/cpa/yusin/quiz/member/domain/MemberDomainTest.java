@@ -95,14 +95,14 @@ class MemberDomainTest
                 .build();
 
         // when
-        MemberDomain result = memberDomain.updateFromOauth2("James");
+        memberDomain.updateFromOauth2("James");
 
         // then
-        assertThat(result.getUsername()).isEqualTo("James");
-        assertThat(result.getEmail()).isEqualTo("test@naver.com");
-        assertThat(result.getRole()).isEqualTo(Role.USER);
-        assertThat(result.getPlatform()).isEqualTo(Platform.GOOGLE);
-        assertThat(result.getPassword()).isEqualTo("123123");
+        assertThat(memberDomain.getUsername()).isEqualTo("James");
+        assertThat(memberDomain.getEmail()).isEqualTo("test@naver.com");
+        assertThat(memberDomain.getRole()).isEqualTo(Role.USER);
+        assertThat(memberDomain.getPlatform()).isEqualTo(Platform.GOOGLE);
+        assertThat(memberDomain.getPassword()).isEqualTo("123123");
 
     }
 
@@ -127,11 +127,10 @@ class MemberDomainTest
                 .build();
 
         // when
-
-        MemberDomain updatedMember = memberDomain.update(request);
+        memberDomain.update(request);
 
         // then
-        assertThat(updatedMember.getUsername()).isEqualTo("Mike");
+        assertThat(memberDomain.getUsername()).isEqualTo("Mike");
     }
 
     @DisplayName("validateMember - ADMIN can pass validation")

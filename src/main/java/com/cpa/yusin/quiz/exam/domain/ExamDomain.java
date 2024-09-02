@@ -26,14 +26,10 @@ public class ExamDomain
                 .build();
     }
 
-    public ExamDomain update(ExamUpdateRequest request)
+    public void update(ExamUpdateRequest request)
     {
-        return ExamDomain.builder()
-                .id(this.id)
-                .name(request.getName())
-                .year(request.getYear())
-                .maxProblemCount(request.getMaxProblemCount())
-                .subjectDomain(this.subjectDomain)
-                .build();
+        this.name = request.getName();
+        this.year = request.getYear();
+        this.maxProblemCount = request.getMaxProblemCount();
     }
 }

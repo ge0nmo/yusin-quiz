@@ -26,13 +26,14 @@ public class MemberServiceImpl implements MemberService
     private final MemberMapper memberMapper;
 
 
+    @Transactional
     @Override
     public void update(long memberId, MemberUpdateRequest request, MemberDomain loggedInMember)
     {
         loggedInMember.validateMember(memberId, loggedInMember);
 
         MemberDomain targetMember = findById(memberId);
-        targetMember = targetMember.update(request);
+        targetMember.update(request);
 
         memberRepository.save(targetMember);
     }
@@ -62,6 +63,7 @@ public class MemberServiceImpl implements MemberService
                 .orElseThrow(() -> new GlobalException(ExceptionMessage.USER_NOT_FOUND));
     }
 
+    @Transactional
     @Override
     public void deleteById(long id, MemberDomain loggedInMember)
     {

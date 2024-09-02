@@ -55,7 +55,7 @@ public class ChoiceServiceImpl implements ChoiceService
                     choiceIdsToDelete.add(request.getId());
                 } else{
                     ChoiceDomain choiceDomain = findById(request.getId());
-                    choiceDomain = choiceDomain.update(problemId, request);
+                    choiceDomain.update(problemId, request);
                     domainsToUpdate.add(choiceDomain);
                 }
             }
