@@ -56,7 +56,6 @@ public class ChoiceServiceImpl implements ChoiceService
 
         deleteProcess(deleteList);
         saveProcess(saveOrUpdate);
-
     }
 
     private void deleteProcess(List<Long> choiceIdsToDelete)

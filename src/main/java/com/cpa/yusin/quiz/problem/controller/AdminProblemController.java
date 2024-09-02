@@ -1,6 +1,7 @@
 package com.cpa.yusin.quiz.problem.controller;
 
 import com.cpa.yusin.quiz.common.controller.dto.response.GlobalResponse;
+import com.cpa.yusin.quiz.problem.controller.dto.request.ProblemRequest;
 import com.cpa.yusin.quiz.problem.controller.dto.response.ProblemDTO;
 import com.cpa.yusin.quiz.problem.controller.dto.response.ProblemResponse;
 import com.cpa.yusin.quiz.problem.controller.port.ProblemService;
@@ -16,6 +17,17 @@ import java.util.List;
 public class AdminProblemController
 {
     private final ProblemService problemService;
+
+    @PostMapping
+    public ResponseEntity<GlobalResponse<List<ProblemResponse>>> saveOrUpdate(@RequestParam(value = "examId") long examId,
+                                                                              @RequestBody List<ProblemRequest> requests)
+    {
+        problemService.saveOrUpdateProblem(examId, requests);
+        List<ProblemResponse> response = problemService.getAllByExamId(examId);
+
+        return ResponseEntity
+                .ok(new GlobalResponse<>(response));
+    }
 
 
     @GetMapping("/{id}")

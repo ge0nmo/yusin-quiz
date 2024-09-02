@@ -10,10 +10,6 @@ import java.util.Map;
 
 public interface ChoiceService
 {
-    /*List<ChoiceCreateResponse> save(List<ChoiceCreateRequest> choiceCreateRequests, ProblemDomain problem);
-
-    void update(Map<Long, List<ChoiceUpdateRequest>> choiceUpdateMaps);*/
-
     void saveOrUpdate(Map<ProblemDomain, List<ChoiceRequest>> choiceMaps);
 
     ChoiceDomain findById(long id);
