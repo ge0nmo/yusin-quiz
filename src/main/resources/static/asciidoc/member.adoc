@@ -23,7 +23,7 @@ include::{snippets}/회원가입/http-response.adoc[]
 include::{snippets}/회원가입/response-fields.adoc[]
 
 
-=== 회원 가입 실패
+=== 회원 가입 실패 - 필드 누락
 ==== HTTP Request
 include::{snippets}/회원가입 - 이메일 형식 오류/http-request.adoc[]
 
@@ -35,3 +35,17 @@ include::{snippets}/회원가입 - 이메일 형식 오류/http-response.adoc[]
 
 ==== Response Fields
 include::{snippets}/회원가입 - 이메일 형식 오류/response-fields.adoc[]
+
+
+=== 회원 가입 실패 - 이메일 중복
+==== HTTP Request
+include::{snippets}/회원가입 - 이메일 중복/http-request.adoc[]
+
+==== Request Fields
+include::{snippets}/회원가입 - 이메일 중복/request-fields.adoc[]
+
+==== HTTP Response
+include::{snippets}/회원가입 - 이메일 중복/http-response.adoc[]
+
+==== Response Fields
+include::{snippets}/회원가입 - 이메일 중복/response-fields.adoc[]

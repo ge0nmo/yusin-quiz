@@ -136,8 +136,8 @@ class MemberTest
                                 fieldWithPath("username").description("회원 이름")
                         ),
                         responseFields(
-                                fieldWithPath("status").type(JsonFieldType.NUMBER).description("회원 고유 식별자"),
-                                fieldWithPath("message").type(JsonFieldType.STRING).description("회원 고유 식별자"),
+                                fieldWithPath("status").type(JsonFieldType.NUMBER).description("상태"),
+                                fieldWithPath("message").type(JsonFieldType.STRING).description("메세지"),
                                 fieldWithPath("valueErrors[].descriptor").type(JsonFieldType.STRING).description("오류 항목"),
                                 fieldWithPath("valueErrors[].rejectedValue").type(JsonFieldType.STRING).description("오류 내용"),
                                 fieldWithPath("valueErrors[].reason").type(JsonFieldType.STRING).description("오류 원인")
@@ -145,5 +145,51 @@ class MemberTest
                 );
     }
 
+    @Test
+    void signUpWhenEmailAlreadyExists() throws Exception
+    {
+        // given
+        MemberCreateRequest request = MemberCreateRequest.builder()
+                .username("Lee")
+                .email("Mike@gmail.com")
+                .password("123123")
+                .build();
 
+        String requestBody = om.writeValueAsString(request);
+
+        // when
+        ResultActions resultActions = mvc
+                .perform(post("/api/v1/sign-up")
+                        .content(requestBody)
+                        .contentType(MediaType.APPLICATION_JSON));
+
+        // then
+        resultActions
+                .andExpect(status().isInternalServerError())
+                .andDo(document("회원가입 - 이메일 중복",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+                        requestFields(
+                                fieldWithPath("email").description("이메일"),
+                                fieldWithPath("password").description("비밀번호"),
+                                fieldWithPath("username").description("회원 이름")
+                        ),
+                        responseFields(
+                                fieldWithPath("status").type(JsonFieldType.NUMBER).description("상태"),
+                                fieldWithPath("message").type(JsonFieldType.STRING).description("메세지")
+                        ))
+                );
+    }
+
+
+    @Test
+    void login()
+    {
+        // given
+
+
+        // when
+
+        // then
+    }
 }
