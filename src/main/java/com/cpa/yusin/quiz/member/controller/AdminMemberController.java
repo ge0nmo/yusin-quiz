@@ -20,7 +20,7 @@ public class AdminMemberController
 {
     private final MemberService memberService;
 
-    @DeleteMapping("/{id}")
+    @PostMapping("/{id}")
     public ResponseEntity<GlobalResponse<MemberDTO>> update(@Positive @PathVariable("id") long id,
                                                             @RequestBody @Valid MemberUpdateRequest request,
                                                             @AuthenticationPrincipal MemberDetails memberDetails)

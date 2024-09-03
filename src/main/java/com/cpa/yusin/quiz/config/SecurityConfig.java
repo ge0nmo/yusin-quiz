@@ -50,7 +50,7 @@ public class SecurityConfig
                         .requestMatchers(
                                 "/api/v1/home/login",
                                 "/api/v1/oauth2/**",
-                                "/api/v1/members/sign-up",
+                                "/api/v1/sign-up",
                                 "/api/v1/login").permitAll()
                         .anyRequest().authenticated());
 

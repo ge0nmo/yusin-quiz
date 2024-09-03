@@ -7,6 +7,8 @@ public enum ExceptionMessage
 {
     INVALID_LOGIN_INFORMATION("로그인 정보가 일치하지 않습니다."),
 
+    EMAIL_EXISTS("사용중인 이메일입니다."),
+
     NO_AUTHORIZATION("권한이 없습니다"),
 
     USER_NOT_FOUND("회원 정보를 찾을 수 없습니다"),

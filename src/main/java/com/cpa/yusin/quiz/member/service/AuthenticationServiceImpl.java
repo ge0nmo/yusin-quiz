@@ -12,13 +12,12 @@ import com.cpa.yusin.quiz.member.controller.mapper.MemberMapper;
 import com.cpa.yusin.quiz.member.controller.port.AuthenticationService;
 import com.cpa.yusin.quiz.member.domain.MemberDomain;
 import com.cpa.yusin.quiz.member.service.port.MemberRepository;
+import com.cpa.yusin.quiz.member.service.port.MemberValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
-import java.util.Map;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -31,6 +30,7 @@ public class AuthenticationServiceImpl implements AuthenticationService
     private final CustomAuthenticationProvider authenticationProvider;
     private final MemberDetailsService memberDetailsService;
     private final MemberMapper memberMapper;
+    private final MemberValidator memberValidator;
 
 
     @Override
@@ -48,6 +48,8 @@ public class AuthenticationServiceImpl implements AuthenticationService
     @Override
     public MemberCreateResponse signUp(MemberCreateRequest request)
     {
+        memberValidator.validateEmail(request.getEmail());
+
         MemberDomain memberDomain = MemberDomain.fromHome(request, passwordEncoder);
         memberDomain = memberRepository.save(memberDomain);
 

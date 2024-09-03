@@ -1,0 +1,37 @@
+= API Documentation
+:doctype: book
+:icons: font
+:toc: left
+:toc-title: 순서
+:sectnums:
+:sectnumlevels: 5
+:source-highlighter: highlightjs
+
+== 회원 API
+
+=== 회원가입 성공
+==== HTTP Request
+include::{snippets}/회원가입/http-request.adoc[]
+
+==== Request Fields
+include::{snippets}/회원가입/request-fields.adoc[]
+
+==== HTTP Response
+include::{snippets}/회원가입/http-response.adoc[]
+
+==== Response Fields
+include::{snippets}/회원가입/response-fields.adoc[]
+
+
+=== 회원 가입 실패
+==== HTTP Request
+include::{snippets}/회원가입 - 이메일 형식 오류/http-request.adoc[]
+
+==== Request Fields
+include::{snippets}/회원가입 - 이메일 형식 오류/request-fields.adoc[]
+
+==== HTTP Response
+include::{snippets}/회원가입 - 이메일 형식 오류/http-response.adoc[]
+
+==== Response Fields
+include::{snippets}/회원가입 - 이메일 형식 오류/response-fields.adoc[]

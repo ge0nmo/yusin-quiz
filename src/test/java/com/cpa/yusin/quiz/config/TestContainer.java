@@ -22,9 +22,11 @@ import com.cpa.yusin.quiz.member.controller.mapper.MemberMapper;
 import com.cpa.yusin.quiz.member.controller.mapper.MemberMapperImpl;
 import com.cpa.yusin.quiz.member.controller.port.AuthenticationService;
 import com.cpa.yusin.quiz.member.controller.port.MemberService;
+import com.cpa.yusin.quiz.member.infrastructure.MemberValidatorImpl;
 import com.cpa.yusin.quiz.member.service.AuthenticationServiceImpl;
 import com.cpa.yusin.quiz.member.service.MemberServiceImpl;
 import com.cpa.yusin.quiz.member.service.port.MemberRepository;
+import com.cpa.yusin.quiz.member.service.port.MemberValidator;
 import com.cpa.yusin.quiz.mock.*;
 import com.cpa.yusin.quiz.problem.controller.AdminProblemController;
 import com.cpa.yusin.quiz.problem.controller.mapper.ProblemMapper;
@@ -56,6 +58,7 @@ public class TestContainer
     public final AuthenticationService authenticationService;
     public final MemberMapper memberMapper;
     public final AdminMemberController adminMemberController;
+    public final MemberValidator memberValidator;
 
     /**
      *  subject
@@ -107,8 +110,9 @@ public class TestContainer
         this.passwordEncoder = new BCryptPasswordEncoder();
         this.authenticationProvider = new CustomAuthenticationProvider(this.memberDetailsService, this.passwordEncoder);
         this.jwtService = new JwtServiceImpl(FAKE_SECRET_KEY);
+        this.memberValidator = new MemberValidatorImpl(this.memberRepository);
         this.authenticationService = new AuthenticationServiceImpl(this.passwordEncoder, this.jwtService,
-                this.memberRepository, this.authenticationProvider, this.memberDetailsService, this.memberMapper);
+                this.memberRepository, this.authenticationProvider, this.memberDetailsService, this.memberMapper, this.memberValidator);
         this.adminMemberController = new AdminMemberController(this.memberService);
 
 
