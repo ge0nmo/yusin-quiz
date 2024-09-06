@@ -22,7 +22,7 @@ public class AuthenticationController
 {
     private final AuthenticationService authenticationService;
 
-    @PostMapping("/home/login")
+    @PostMapping("/login")
     public ResponseEntity<GlobalResponse<LoginResponse>> login(@Validated @RequestBody LoginRequest loginRequest)
     {
         LoginResponse response = authenticationService.login(loginRequest);

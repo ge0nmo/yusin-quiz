@@ -1,7 +1,8 @@
 package com.cpa.yusin.quiz.global.details;
 
+import com.cpa.yusin.quiz.global.exception.ExceptionMessage;
+import com.cpa.yusin.quiz.global.exception.GlobalException;
 import com.cpa.yusin.quiz.member.domain.MemberDomain;
-import com.cpa.yusin.quiz.member.infrastructure.Member;
 import com.cpa.yusin.quiz.member.service.port.MemberRepository;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -24,7 +25,7 @@ public class MemberDetailsService implements UserDetailsService
     public MemberDetails loadUserByUsername(String email) throws UsernameNotFoundException
     {
         MemberDomain memberDomain = memberRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException(email));
+                .orElseThrow(() -> new GlobalException(ExceptionMessage.USER_NOT_FOUND));
 
         return new MemberDetails(memberDomain, new HashMap<>());
     }

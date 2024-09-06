@@ -40,9 +40,11 @@ public class AuthenticationServiceImpl implements AuthenticationService
 
         MemberDetails memberDetails = memberDetailsService.loadUserByUsername(request.getEmail());
 
-        String accessToken = jwtService.createAccessToken(memberDetails.getUsername());
+        MemberDomain member = memberDetails.getMemberDomain();
 
-        return LoginResponse.from(accessToken);
+        String accessToken = jwtService.createAccessToken(member.getEmail());
+
+        return LoginResponse.from(member.getId(), member.getEmail(), accessToken);
     }
 
     @Override
