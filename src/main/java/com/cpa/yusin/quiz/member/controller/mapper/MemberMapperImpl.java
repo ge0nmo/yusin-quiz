@@ -35,6 +35,8 @@ public class MemberMapperImpl implements MemberMapper
                 .username(memberDomain.getUsername())
                 .platform(memberDomain.getPlatform())
                 .role(memberDomain.getRole())
+                .subscriberExpiredAt(memberDomain.getSubscriptionExpiredAt() == null
+                        ? null : memberDomain.getSubscriptionExpiredAt())
                 .createdAt(memberDomain.getCreatedAt())
                 .updatedAt(memberDomain.getUpdatedAt())
                 .build();

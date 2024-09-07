@@ -5,12 +5,12 @@ import com.cpa.yusin.quiz.member.domain.MemberDomain;
 import com.cpa.yusin.quiz.member.domain.type.Platform;
 import com.cpa.yusin.quiz.member.domain.type.Role;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
+@Builder
+@AllArgsConstructor
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
@@ -49,7 +49,7 @@ public class Member extends BaseEntity
         member.platform = memberDomain.getPlatform();
         member.role = memberDomain.getRole();
         member.subscriptionExpiredAt = memberDomain.getSubscriptionExpiredAt() != null
-                ? memberDomain.getSubscriptionExpiredAt() : LocalDateTime.now();
+                ? memberDomain.getSubscriptionExpiredAt() : null;
 
         return member;
     }
@@ -64,8 +64,8 @@ public class Member extends BaseEntity
                 .platform(platform)
                 .role(role)
                 .subscriptionExpiredAt(subscriptionExpiredAt)
-                .createdAt(this.getCreatedAt())
-                .updatedAt(this.getUpdatedAt())
+                .createdAt(super.getCreatedAt())
+                .updatedAt(super.getUpdatedAt())
                 .build();
     }
 }

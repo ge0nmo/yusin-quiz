@@ -18,7 +18,7 @@ import org.springframework.util.StringUtils;
 
 @Slf4j
 @RequiredArgsConstructor
-@Transactional
+@Transactional(readOnly = true)
 @Service
 public class MemberServiceImpl implements MemberService
 {
@@ -35,6 +35,8 @@ public class MemberServiceImpl implements MemberService
         MemberDomain targetMember = findById(memberId);
         targetMember.update(request);
 
+        log.info("targetMember {}", targetMember );
+
         memberRepository.save(targetMember);
     }
 
@@ -42,8 +44,11 @@ public class MemberServiceImpl implements MemberService
     public MemberDTO getById(long id)
     {
         log.info("member id = {}", id);
+        MemberDomain member = findById(id);
 
-        return memberMapper.toMemberDTO(findById(id));
+        log.info("member = {}", member);
+
+        return memberMapper.toMemberDTO(member);
     }
 
     @Override

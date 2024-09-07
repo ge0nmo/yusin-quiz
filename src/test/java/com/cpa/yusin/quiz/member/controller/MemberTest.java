@@ -2,6 +2,7 @@ package com.cpa.yusin.quiz.member.controller;
 
 
 import com.cpa.yusin.quiz.config.TeardownExtension;
+import com.cpa.yusin.quiz.global.details.MemberDetails;
 import com.cpa.yusin.quiz.member.controller.dto.request.LoginRequest;
 import com.cpa.yusin.quiz.member.controller.dto.request.MemberCreateRequest;
 import com.cpa.yusin.quiz.member.controller.dto.request.MemberUpdateRequest;
@@ -32,6 +33,7 @@ import org.springframework.web.context.WebApplicationContext;
 import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.documentationConfiguration;
@@ -39,6 +41,7 @@ import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuild
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.*;
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @ExtendWith(TeardownExtension.class)
@@ -51,11 +54,17 @@ class MemberTest
     private MockMvc mvc;
 
     @Autowired
+    private MemberRepository memberRepository;
+
+    @Autowired
     private AuthenticationService authenticationService;
+
 
     ObjectMapper om = new ObjectMapper();
 
-    long id;
+    long memberId;
+
+    MemberDomain member;
 
     @BeforeEach
     void setUp()
@@ -63,14 +72,22 @@ class MemberTest
         MemberCreateResponse response = authenticationService.signUp(MemberCreateRequest.builder()
                 .email("David@naver.com").password("12341234").username("David").build());
 
-        id = response.getId();
+        memberId = response.getId();
 
         authenticationService.signUp(MemberCreateRequest.builder()
                 .email("Mike@gmail.com").password("12341234").username("Mike").build());
 
-
         authenticationService.signUp(MemberCreateRequest.builder()
                 .email("Gale@github.com").password("12341234").username("Gale").build());
+
+
+        member = memberRepository.save(MemberDomain.builder()
+                .email("John@gmail.com")
+                .password("12341234")
+                .username("John")
+                .platform(Platform.HOME)
+                .role(Role.ADMIN)
+                .build());
     }
 
 
@@ -314,6 +331,59 @@ class MemberTest
 
     }
 
+    @WithUserDetails(value = "John@gmail.com", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+    @Test
+    void update() throws Exception
+    {
+        // given
+        MemberUpdateRequest request = MemberUpdateRequest.builder()
+                .username("GeonMo")
+                .build();
 
+
+        String requestBody = om.writeValueAsString(request);
+
+        MemberDetails memberDetails = new MemberDetails(member, new HashMap<>());
+
+        // when
+        ResultActions resultActions = mvc
+                .perform(patch("/api/v1/admin/members/" + member.getId())
+                        .content(requestBody)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .with(user(memberDetails))
+                );
+
+        // then
+        resultActions
+                .andExpect(status().isOk())
+                .andDo(document("회원 수정 - 성공",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+
+                        requestFields(
+                                fieldWithPath("username").description("유저 이름")
+                        ),
+
+                        responseFields(
+                                fieldWithPath("data.id").type(JsonFieldType.NUMBER).description("회원 고유 식별자"),
+                                fieldWithPath("data.email").type(JsonFieldType.STRING).description("이메일"),
+                                fieldWithPath("data.username").type(JsonFieldType.STRING).description("유저 이름"),
+                                fieldWithPath("data.platform").type(JsonFieldType.STRING).description("회원가입 경로"),
+                                fieldWithPath("data.role").type(JsonFieldType.STRING).description("유저 권한"),
+                                fieldWithPath("data.subscriberExpiredAt").type(JsonFieldType.STRING).description("구독 만료일").optional(),
+                                fieldWithPath("data.createdAt").type(JsonFieldType.STRING).description("생성 날짜"),
+                                fieldWithPath("data.updatedAt").type(JsonFieldType.STRING).description("수정 날짜"),
+
+
+                                fieldWithPath("pageInfo").type(JsonFieldType.NUMBER).description("페이지 정보").optional()
+                        )
+
+                ))
+
+        ;
+
+
+
+    }
 
 }
