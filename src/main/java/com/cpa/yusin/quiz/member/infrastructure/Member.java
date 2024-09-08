@@ -51,6 +51,9 @@ public class Member extends BaseEntity
         member.subscriptionExpiredAt = memberDomain.getSubscriptionExpiredAt() != null
                 ? memberDomain.getSubscriptionExpiredAt() : null;
 
+        member.setCreatedAt(memberDomain.getCreatedAt());
+        member.setUpdatedAt(memberDomain.getUpdatedAt());
+
         return member;
     }
 
@@ -64,8 +67,8 @@ public class Member extends BaseEntity
                 .platform(platform)
                 .role(role)
                 .subscriptionExpiredAt(subscriptionExpiredAt)
-                .createdAt(super.getCreatedAt())
-                .updatedAt(super.getUpdatedAt())
+                .createdAt(this.getCreatedAt())
+                .updatedAt(this.getUpdatedAt())
                 .build();
     }
 }

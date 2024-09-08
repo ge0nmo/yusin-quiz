@@ -57,13 +57,11 @@ public class MemberDomain
 
     public void updateFromOauth2(String newUsername) {
         this.username = newUsername;
-        this.updatedAt = LocalDateTime.now();
     }
 
     public void update(MemberUpdateRequest request)
     {
         this.username = request.getUsername();
-        this.updatedAt = LocalDateTime.now();
     }
 
     public void validateMember(long memberId, MemberDomain member)

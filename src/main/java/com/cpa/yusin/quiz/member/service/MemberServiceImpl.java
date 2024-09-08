@@ -44,11 +44,8 @@ public class MemberServiceImpl implements MemberService
     public MemberDTO getById(long id)
     {
         log.info("member id = {}", id);
-        MemberDomain member = findById(id);
 
-        log.info("member = {}", member);
-
-        return memberMapper.toMemberDTO(member);
+        return memberMapper.toMemberDTO(findById(id));
     }
 
     @Override
@@ -72,7 +69,9 @@ public class MemberServiceImpl implements MemberService
     @Override
     public void deleteById(long id, MemberDomain loggedInMember)
     {
-        loggedInMember.validateMember(id, loggedInMember);
+        MemberDomain targetMember = findById(id);
+
+        targetMember.validateMember(id, loggedInMember);
         memberRepository.deleteById(id);
     }
 

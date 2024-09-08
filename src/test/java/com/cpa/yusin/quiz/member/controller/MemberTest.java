@@ -13,6 +13,7 @@ import com.cpa.yusin.quiz.member.domain.MemberDomain;
 import com.cpa.yusin.quiz.member.domain.type.Platform;
 import com.cpa.yusin.quiz.member.domain.type.Role;
 import com.cpa.yusin.quiz.member.service.port.MemberRepository;
+import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -21,6 +22,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
 import org.springframework.http.MediaType;
 import org.springframework.restdocs.RestDocumentationContextProvider;
 import org.springframework.restdocs.payload.JsonFieldType;
@@ -37,8 +40,7 @@ import java.util.HashMap;
 
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.documentationConfiguration;
-import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.patch;
-import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
+import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.*;
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.*;
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
@@ -87,7 +89,10 @@ class MemberTest
                 .username("John")
                 .platform(Platform.HOME)
                 .role(Role.ADMIN)
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
                 .build());
+
     }
 
 
@@ -333,7 +338,7 @@ class MemberTest
 
     @WithUserDetails(value = "John@gmail.com", setupBefore = TestExecutionEvent.TEST_EXECUTION)
     @Test
-    void update() throws Exception
+    void update_success() throws Exception
     {
         // given
         MemberUpdateRequest request = MemberUpdateRequest.builder()
@@ -374,15 +379,190 @@ class MemberTest
                                 fieldWithPath("data.createdAt").type(JsonFieldType.STRING).description("생성 날짜"),
                                 fieldWithPath("data.updatedAt").type(JsonFieldType.STRING).description("수정 날짜"),
 
-
-                                fieldWithPath("pageInfo").type(JsonFieldType.NUMBER).description("페이지 정보").optional()
+                                fieldWithPath("pageInfo").type(JsonFieldType.OBJECT).description("페이지 정보").optional()
                         )
+                ))
+        ;
 
+    }
+
+
+    @WithUserDetails(value = "John@gmail.com", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+    @Test
+    void getMemberById() throws Exception
+    {
+        // given
+        MemberDetails memberDetails = new MemberDetails(member, new HashMap<>());
+
+        // when
+        ResultActions resultActions = mvc
+                .perform(get("/api/v1/admin/members/" + 1)
+                        .with(user(memberDetails))
+                );
+
+        // then
+        resultActions
+                .andExpect(status().isOk())
+                .andDo(document("회원 1명 조회",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+
+
+                        responseFields(
+                                fieldWithPath("data.id").type(JsonFieldType.NUMBER).description("회원 고유 식별자"),
+                                fieldWithPath("data.email").type(JsonFieldType.STRING).description("이메일"),
+                                fieldWithPath("data.username").type(JsonFieldType.STRING).description("유저 이름"),
+                                fieldWithPath("data.platform").type(JsonFieldType.STRING).description("회원가입 경로"),
+                                fieldWithPath("data.role").type(JsonFieldType.STRING).description("유저 권한"),
+                                fieldWithPath("data.subscriberExpiredAt").type(JsonFieldType.STRING).description("구독 만료일").optional(),
+                                fieldWithPath("data.createdAt").type(JsonFieldType.STRING).description("생성 날짜"),
+                                fieldWithPath("data.updatedAt").type(JsonFieldType.STRING).description("수정 날짜"),
+
+
+                                fieldWithPath("pageInfo").type(JsonFieldType.OBJECT).description("페이지 정보").optional()
+                        )
                 ))
 
         ;
 
+    }
 
+    @WithUserDetails(value = "John@gmail.com", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+    @Test
+    void getMembers_noKeyword() throws Exception
+    {
+        // given
+        MemberDetails memberDetails = new MemberDetails(member, new HashMap<>());
+
+        // when
+        ResultActions resultActions = mvc
+                .perform(get("/api/v1/admin/members")
+                        .with(user(memberDetails))
+                );
+
+        // then
+        resultActions
+                .andExpect(status().isOk())
+                .andDo(document("회원 전체 조회",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+
+
+                        responseFields(
+                                fieldWithPath("data[].id").type(JsonFieldType.NUMBER).description("회원 고유 식별자"),
+                                fieldWithPath("data[].email").type(JsonFieldType.STRING).description("이메일"),
+                                fieldWithPath("data[].username").type(JsonFieldType.STRING).description("유저 이름"),
+                                fieldWithPath("data[].platform").type(JsonFieldType.STRING).description("회원가입 경로"),
+                                fieldWithPath("data[].role").type(JsonFieldType.STRING).description("유저 권한"),
+                                fieldWithPath("data[].subscriberExpiredAt").type(JsonFieldType.STRING).description("구독 만료일").optional(),
+                                fieldWithPath("data[].createdAt").type(JsonFieldType.STRING).description("생성 날짜"),
+                                fieldWithPath("data[].updatedAt").type(JsonFieldType.STRING).description("수정 날짜"),
+
+
+                                fieldWithPath("pageInfo").type(JsonFieldType.OBJECT).description("페이지 정보").optional(),
+                                fieldWithPath("pageInfo.totalElements").type(JsonFieldType.NUMBER).description("총 데이터 수").optional(),
+                                fieldWithPath("pageInfo.totalPages").type(JsonFieldType.NUMBER).description("총 페이지 수").optional(),
+                                fieldWithPath("pageInfo.currentPage").type(JsonFieldType.NUMBER).description("현재 페이지").optional(),
+                                fieldWithPath("pageInfo.pageSize").type(JsonFieldType.NUMBER).description("페이지 크기").optional()
+                        )
+                ));
+    }
+
+    @WithUserDetails(value = "John@gmail.com", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+    @Test
+    void getMembers_keyword() throws Exception
+    {
+        // given
+        MemberDetails memberDetails = new MemberDetails(member, new HashMap<>());
+        String keyword = "mike";
+
+        // when
+        ResultActions resultActions = mvc
+                .perform(get("/api/v1/admin/members")
+                        .param("keyword", keyword)
+                        .with(user(memberDetails))
+                );
+
+        // then
+        resultActions
+                .andExpect(status().isOk())
+                .andDo(document("회원 전체 조회 - keyword",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+
+
+                        responseFields(
+                                fieldWithPath("data[].id").type(JsonFieldType.NUMBER).description("회원 고유 식별자"),
+                                fieldWithPath("data[].email").type(JsonFieldType.STRING).description("이메일"),
+                                fieldWithPath("data[].username").type(JsonFieldType.STRING).description("유저 이름"),
+                                fieldWithPath("data[].platform").type(JsonFieldType.STRING).description("회원가입 경로"),
+                                fieldWithPath("data[].role").type(JsonFieldType.STRING).description("유저 권한"),
+                                fieldWithPath("data[].subscriberExpiredAt").type(JsonFieldType.STRING).description("구독 만료일").optional(),
+                                fieldWithPath("data[].createdAt").type(JsonFieldType.STRING).description("생성 날짜"),
+                                fieldWithPath("data[].updatedAt").type(JsonFieldType.STRING).description("수정 날짜"),
+
+
+                                fieldWithPath("pageInfo").type(JsonFieldType.OBJECT).description("페이지 정보").optional(),
+                                fieldWithPath("pageInfo.totalElements").type(JsonFieldType.NUMBER).description("총 데이터 수").optional(),
+                                fieldWithPath("pageInfo.totalPages").type(JsonFieldType.NUMBER).description("총 페이지 수").optional(),
+                                fieldWithPath("pageInfo.currentPage").type(JsonFieldType.NUMBER).description("현재 페이지").optional(),
+                                fieldWithPath("pageInfo.pageSize").type(JsonFieldType.NUMBER).description("페이지 크기").optional()
+                        )
+                ));
+    }
+
+
+    @WithUserDetails(value = "John@gmail.com", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+    @Test
+    void deleteById_success() throws Exception
+    {
+        // given
+        MemberDetails memberDetails = new MemberDetails(member, new HashMap<>());
+
+        // when
+        ResultActions resultActions = mvc
+                .perform(delete("/api/v1/admin/members/" + 2)
+                        .with(user(memberDetails))
+                );
+
+        // then
+        resultActions
+                .andExpect(status().isNoContent())
+                .andDo(document("회원 삭제",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint())
+
+                ))
+        ;
+
+    }
+
+    @WithUserDetails(value = "John@gmail.com", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+    @Test
+    void deleteById_notExistingMember() throws Exception
+    {
+        // given
+        MemberDetails memberDetails = new MemberDetails(member, new HashMap<>());
+
+        // when
+        ResultActions resultActions = mvc
+                .perform(delete("/api/v1/admin/members/" + 20)
+                        .with(user(memberDetails))
+                );
+
+        // then
+        resultActions
+                .andExpect(status().isInternalServerError())
+                .andDo(document("회원 삭제 - 실패",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+
+                        responseFields(
+                                fieldWithPath("status").type(JsonFieldType.NUMBER).description("상태"),
+                                fieldWithPath("message").type(JsonFieldType.STRING).description("메세지")
+                        )
+                ))
+        ;
 
     }
 
