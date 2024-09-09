@@ -75,6 +75,7 @@ public class SubjectServiceImpl implements SubjectService
     }
 
     @Override
+    @Transactional
     public boolean deleteById(long id)
     {
         findById(id);
