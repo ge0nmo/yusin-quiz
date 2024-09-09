@@ -37,3 +37,15 @@ include::{snippets}/과목 등록 - 중복된 이름/http-response.adoc[]
 include::{snippets}/과목 등록 - 중복된 이름/response-fields.adoc[]
 
 
+== 과목 수정 성공
+==== HTTP Request
+include::{snippets}/과목 수정 - 성공/http-request.adoc[]
+
+==== Request Fields
+include::{snippets}/과목 수정 - 성공/request-fields.adoc[]
+
+==== HTTP Response
+include::{snippets}/과목 수정 - 성공/http-response.adoc[]
+
+==== Response Fields
+include::{snippets}/과목 수정 - 성공/response-fields.adoc[]
