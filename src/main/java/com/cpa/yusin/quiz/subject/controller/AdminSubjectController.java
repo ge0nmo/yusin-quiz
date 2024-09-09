@@ -6,6 +6,7 @@ import com.cpa.yusin.quiz.subject.controller.dto.request.SubjectUpdateRequest;
 import com.cpa.yusin.quiz.subject.controller.dto.response.SubjectCreateResponse;
 import com.cpa.yusin.quiz.subject.controller.dto.response.SubjectDTO;
 import com.cpa.yusin.quiz.subject.controller.port.SubjectService;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -24,7 +25,7 @@ public class AdminSubjectController
     private final SubjectService subjectService;
 
     @PostMapping
-    public ResponseEntity<GlobalResponse<SubjectCreateResponse>> save(@RequestBody SubjectCreateRequest request)
+    public ResponseEntity<GlobalResponse<SubjectCreateResponse>> save(@Valid @RequestBody SubjectCreateRequest request)
     {
         SubjectCreateResponse response = subjectService.save(request);
 

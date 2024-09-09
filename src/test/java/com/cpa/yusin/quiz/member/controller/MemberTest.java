@@ -8,43 +8,34 @@ import com.cpa.yusin.quiz.member.controller.dto.request.MemberCreateRequest;
 import com.cpa.yusin.quiz.member.controller.dto.request.MemberUpdateRequest;
 import com.cpa.yusin.quiz.member.controller.dto.response.MemberCreateResponse;
 import com.cpa.yusin.quiz.member.controller.port.AuthenticationService;
-import com.cpa.yusin.quiz.member.controller.port.MemberService;
 import com.cpa.yusin.quiz.member.domain.MemberDomain;
 import com.cpa.yusin.quiz.member.domain.type.Platform;
 import com.cpa.yusin.quiz.member.domain.type.Role;
 import com.cpa.yusin.quiz.member.service.port.MemberRepository;
-import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
 import org.springframework.http.MediaType;
-import org.springframework.restdocs.RestDocumentationContextProvider;
 import org.springframework.restdocs.payload.JsonFieldType;
 import org.springframework.security.test.context.support.TestExecutionEvent;
 import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.context.WebApplicationContext;
 import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
 
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
-import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.documentationConfiguration;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.*;
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.*;
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(TeardownExtension.class)
 @AutoConfigureMockMvc
@@ -132,7 +123,7 @@ class MemberTest
                                 fieldWithPath("data.platform").type(JsonFieldType.STRING).description("가입 경로"),
                                 fieldWithPath("data.role").type(JsonFieldType.STRING).description("권한"),
 
-                                fieldWithPath("pageInfo").type(JsonFieldType.NUMBER).description("페이지 정보").optional()
+                                fieldWithPath("pageInfo").type(JsonFieldType.OBJECT).description("페이지 정보").optional()
                         ))
                 );
     }
@@ -250,7 +241,7 @@ class MemberTest
                                 fieldWithPath("data.email").type(JsonFieldType.STRING).description("이메일"),
                                 fieldWithPath("data.accessToken").type(JsonFieldType.STRING).description("액세스 토큰"),
 
-                                fieldWithPath("pageInfo").type(JsonFieldType.NUMBER).description("페이지 정보").optional()
+                                fieldWithPath("pageInfo").type(JsonFieldType.OBJECT).description("페이지 정보").optional()
                         )
                 ));
 
