@@ -37,6 +37,9 @@ public class Problem extends BaseEntity
         problem.content = domain.getContent();
         problem.number = domain.getNumber();
         problem.exam = Exam.from(domain.getExam());
+
+        problem.setCreatedAt(domain.getCreatedAt());
+        problem.setUpdatedAt(domain.getUpdatedAt());
         return problem;
     }
 
@@ -45,6 +48,9 @@ public class Problem extends BaseEntity
         return ProblemDomain.builder()
                 .id(this.id)
                 .content(this.content)
+                .number(this.number)
+                .createdAt(this.getCreatedAt())
+                .updatedAt(this.getUpdatedAt())
                 .exam(this.exam.toModel())
                 .build();
     }

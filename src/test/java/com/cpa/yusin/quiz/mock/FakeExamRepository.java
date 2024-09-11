@@ -41,10 +41,10 @@ public class FakeExamRepository implements ExamRepository
     }
 
     @Override
-    public List<ExamDomain> findAllBySubjectId(long subjectId)
+    public List<ExamDomain> findAllBySubjectId(long subjectId, int year)
     {
         return data.stream()
-                .filter(item -> item.getSubjectDomain().getId().equals(subjectId))
+                .filter(item -> item.getSubjectDomain().getId().equals(subjectId) && item.getYear() == year)
                 .toList();
     }
 

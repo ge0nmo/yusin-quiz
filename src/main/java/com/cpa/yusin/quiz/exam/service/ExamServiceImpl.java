@@ -32,7 +32,6 @@ public class ExamServiceImpl implements ExamService
     private final ExamRepository examRepository;
     private final ExamMapper examMapper;
     private final SubjectService subjectService;
-    private final SubjectMapper subjectMapper;
     private final CascadeDeleteService cascadeDeleteService;
 
     @Transactional
@@ -43,9 +42,10 @@ public class ExamServiceImpl implements ExamService
         ExamDomain exam = ExamDomain.from(request, subject);
         exam = examRepository.save(exam);
 
-        return examMapper.toCreateResponse(exam, subjectMapper.toSubjectDTO(subject));
+        return examMapper.toCreateResponse(exam);
     }
 
+    @Transactional
     @Override
     public void update(long examId, ExamUpdateRequest request)
     {
@@ -71,11 +71,11 @@ public class ExamServiceImpl implements ExamService
     }
 
     @Override
-    public List<ExamDTO> getAllBySubjectId(long subjectId)
+    public List<ExamDTO> getAllBySubjectId(long subjectId, int year)
     {
         subjectService.findById(subjectId);
 
-        List<ExamDomain> examDomains = examRepository.findAllBySubjectId(subjectId);
+        List<ExamDomain> examDomains = examRepository.findAllBySubjectId(subjectId, year);
 
         if(examDomains.isEmpty())
             return Collections.emptyList();
@@ -87,6 +87,7 @@ public class ExamServiceImpl implements ExamService
                 .toList();
     }
 
+    @Transactional
     @Override
     public void deleteById(List<Long> ids)
     {

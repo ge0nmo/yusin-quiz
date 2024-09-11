@@ -6,6 +6,8 @@ import com.cpa.yusin.quiz.subject.domain.SubjectDomain;
 import lombok.Builder;
 import lombok.Getter;
 
+import java.time.LocalDateTime;
+
 @Getter
 @Builder
 public class ExamDomain
@@ -15,6 +17,9 @@ public class ExamDomain
     private int year;
     private int maxProblemCount;
     private SubjectDomain subjectDomain;
+
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 
     public static ExamDomain from(ExamCreateRequest request, SubjectDomain subjectDomain)
     {

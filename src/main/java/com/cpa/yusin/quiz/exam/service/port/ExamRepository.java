@@ -11,7 +11,7 @@ public interface ExamRepository
 
     Optional<ExamDomain> findById(long id);
 
-    List<ExamDomain> findAllBySubjectId(long subjectId);
+    List<ExamDomain> findAllBySubjectId(long subjectId, int year);
 
     void deleteById(long id);
 

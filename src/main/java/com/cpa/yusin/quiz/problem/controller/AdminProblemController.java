@@ -5,8 +5,10 @@ import com.cpa.yusin.quiz.problem.controller.dto.request.ProblemRequest;
 import com.cpa.yusin.quiz.problem.controller.dto.response.ProblemDTO;
 import com.cpa.yusin.quiz.problem.controller.dto.response.ProblemResponse;
 import com.cpa.yusin.quiz.problem.controller.port.ProblemService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,7 +22,7 @@ public class AdminProblemController
 
     @PostMapping
     public ResponseEntity<GlobalResponse<List<ProblemResponse>>> saveOrUpdate(@RequestParam(value = "examId") long examId,
-                                                                              @RequestBody List<ProblemRequest> requests)
+                                                                              @Valid @RequestBody List<ProblemRequest> requests)
     {
         problemService.saveOrUpdateProblem(examId, requests);
         List<ProblemResponse> response = problemService.getAllByExamId(examId);
@@ -31,7 +33,7 @@ public class AdminProblemController
 
 
     @GetMapping("/{id}")
-    public ResponseEntity<GlobalResponse<ProblemDTO>> getById(@PathVariable long id)
+    public ResponseEntity<GlobalResponse<ProblemDTO>> getById(@PathVariable("id") long id)
     {
         ProblemDTO response = problemService.getById(id);
 
@@ -39,7 +41,7 @@ public class AdminProblemController
     }
 
     @GetMapping
-    public ResponseEntity<GlobalResponse<List<ProblemResponse>>> getAllByExamId(@RequestParam long examId)
+    public ResponseEntity<GlobalResponse<List<ProblemResponse>>> getAllByExamId(@RequestParam("examId") long examId)
     {
         List<ProblemResponse> response = problemService.getAllByExamId(examId);
 

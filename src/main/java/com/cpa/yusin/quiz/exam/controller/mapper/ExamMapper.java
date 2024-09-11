@@ -9,7 +9,7 @@ import java.util.List;
 
 public interface ExamMapper
 {
-    ExamCreateResponse toCreateResponse(ExamDomain domain, SubjectDTO subjectDTO);
+    ExamCreateResponse toCreateResponse(ExamDomain domain);
 
     ExamDTO toExamDTO(ExamDomain domain);
 

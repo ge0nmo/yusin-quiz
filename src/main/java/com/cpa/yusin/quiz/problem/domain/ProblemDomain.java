@@ -7,6 +7,8 @@ import com.cpa.yusin.quiz.problem.controller.dto.request.ProblemRequest;
 import lombok.Builder;
 import lombok.Getter;
 
+import java.time.LocalDateTime;
+
 @Getter
 @Builder
 public class ProblemDomain
@@ -15,6 +17,8 @@ public class ProblemDomain
     private String content;
     private int number;
     private ExamDomain exam;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 
     public void update(long examId, ProblemRequest request)
     {

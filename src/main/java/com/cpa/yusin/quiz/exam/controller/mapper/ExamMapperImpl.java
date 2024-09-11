@@ -13,7 +13,7 @@ import java.util.List;
 public class ExamMapperImpl implements ExamMapper
 {
     @Override
-    public ExamCreateResponse toCreateResponse(ExamDomain domain, SubjectDTO subjectDTO)
+    public ExamCreateResponse toCreateResponse(ExamDomain domain)
     {
         if(domain == null)
             return null;
@@ -23,7 +23,6 @@ public class ExamMapperImpl implements ExamMapper
                 .name(domain.getName())
                 .year(domain.getYear())
                 .maxProblemCount(domain.getMaxProblemCount())
-                .subject(subjectDTO)
                 .build();
     }
 

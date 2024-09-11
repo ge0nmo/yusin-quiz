@@ -16,6 +16,8 @@ public interface ChoiceService
 
     List<ChoiceDomain> findAllByProblemId(long problemId);
 
+    List<ChoiceResponse> getAllByProblemId(long problemId);
+
     Map<Long, List<ChoiceResponse>> findAllByExamId(long examId);
 
     void deleteAllByIds(List<Long> ids);

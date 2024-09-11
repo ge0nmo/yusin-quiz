@@ -29,9 +29,9 @@ public class ExamRepositoryImpl implements ExamRepository
     }
 
     @Override
-    public List<ExamDomain> findAllBySubjectId(long subjectId)
+    public List<ExamDomain> findAllBySubjectId(long subjectId, int year)
     {
-        return examJpaRepository.findAllBySubjectId(subjectId).stream()
+        return examJpaRepository.findAllBySubjectId(subjectId, year).stream()
                 .map(Exam::toModel)
                 .toList();
     }

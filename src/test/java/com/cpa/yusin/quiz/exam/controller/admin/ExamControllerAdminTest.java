@@ -119,7 +119,7 @@ class ExamControllerAdminTest
         testContainer.examService.save(1L, ExamCreateRequest.builder().name("2차").year(2025).build());
 
         // when
-        ResponseEntity<GlobalResponse<List<ExamDTO>>> result = testContainer.adminExamController.getAllExamBySubjectId(1L);
+        ResponseEntity<GlobalResponse<List<ExamDTO>>> result = testContainer.adminExamController.getAllExamBySubjectId(1L, 2024);
 
         // then
         assertThat(result.getStatusCode()).isEqualTo(HttpStatusCode.valueOf(200));
@@ -127,21 +127,16 @@ class ExamControllerAdminTest
 
         List<ExamDTO> response = result.getBody().getData();
 
-        assertThat(response).hasSize(5);
-        assertThat(response.getFirst().getYear()).isEqualTo(2025);
-        assertThat(response.getFirst().getName()).isEqualTo("1차");
+        assertThat(response).hasSize(3);
 
-        assertThat(response.get(1).getYear()).isEqualTo(2025);
+        assertThat(response.get(0).getYear()).isEqualTo(2024);
+        assertThat(response.get(0).getName()).isEqualTo("1차");
+
+        assertThat(response.get(1).getYear()).isEqualTo(2024);
         assertThat(response.get(1).getName()).isEqualTo("2차");
 
         assertThat(response.get(2).getYear()).isEqualTo(2024);
-        assertThat(response.get(2).getName()).isEqualTo("1차");
-
-        assertThat(response.get(3).getYear()).isEqualTo(2024);
-        assertThat(response.get(3).getName()).isEqualTo("2차");
-
-        assertThat(response.get(4).getYear()).isEqualTo(2024);
-        assertThat(response.get(4).getName()).isEqualTo("3차");
+        assertThat(response.get(2).getName()).isEqualTo("3차");
 
     }
 

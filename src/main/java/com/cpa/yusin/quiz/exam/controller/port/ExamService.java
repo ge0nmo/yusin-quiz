@@ -19,7 +19,7 @@ public interface ExamService
 
     ExamDTO getById(long id);
 
-    List<ExamDTO> getAllBySubjectId(long subjectId);
+    List<ExamDTO> getAllBySubjectId(long subjectId, int year);
 
     void deleteById(List<Long> ids);
 }

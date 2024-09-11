@@ -10,6 +10,7 @@ import com.cpa.yusin.quiz.global.exception.ExceptionMessage;
 import com.cpa.yusin.quiz.global.exception.GlobalException;
 import com.cpa.yusin.quiz.problem.domain.ProblemDomain;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,6 +20,7 @@ import java.util.Map;
 
 import static java.util.stream.Collectors.*;
 
+@Slf4j
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 @Service
@@ -47,6 +49,7 @@ public class ChoiceServiceImpl implements ChoiceService
                         choiceDomain = choiceMapper.fromCreateRequestToDomain(request, problem);
                     } else{
                         choiceDomain = findById(request.getId());
+                        log.info("request = {}", request.toString());
                         choiceDomain.update(problem.getId(), request);
                     }
                     saveOrUpdate.add(choiceDomain);
@@ -83,6 +86,14 @@ public class ChoiceServiceImpl implements ChoiceService
     public List<ChoiceDomain> findAllByProblemId(long problemId)
     {
         return choiceRepository.findAllByProblemId(problemId);
+    }
+
+    @Override
+    public List<ChoiceResponse> getAllByProblemId(long problemId)
+    {
+        List<ChoiceDomain> choices = findAllByProblemId(problemId);
+
+        return choiceMapper.toResponses(choices);
     }
 
     @Override

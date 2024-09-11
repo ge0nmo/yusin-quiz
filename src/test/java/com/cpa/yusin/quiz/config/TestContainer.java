@@ -123,7 +123,7 @@ public class TestContainer
         this.adminSubjectController = new AdminSubjectController(this.subjectService);
 
         this.examMapper = new ExamMapperImpl();
-        this.examService = new ExamServiceImpl(this.examRepository, this.examMapper, this.subjectService, this.subjectMapper, this.cascadeDeleteService);
+        this.examService = new ExamServiceImpl(this.examRepository, this.examMapper, this.subjectService, this.cascadeDeleteService);
         this.adminExamController = new AdminExamController(this.examService);
 
         this.choiceMapper = new ChoiceMapperImpl();

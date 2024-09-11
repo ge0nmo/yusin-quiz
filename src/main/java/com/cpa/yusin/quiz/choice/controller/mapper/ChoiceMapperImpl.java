@@ -22,7 +22,7 @@ public class ChoiceMapperImpl implements ChoiceMapper
         return ChoiceDomain.builder()
                 .number(request.getNumber())
                 .content(request.getContent())
-                .isAnswer(request.isAnswer())
+                .answer(request.isAnswer())
                 .problem(problemDomain)
                 .build();
     }

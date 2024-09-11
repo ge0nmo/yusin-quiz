@@ -1,5 +1,6 @@
 package com.cpa.yusin.quiz.exam.infrastructure;
 
+import com.cpa.yusin.quiz.common.infrastructure.BaseEntity;
 import com.cpa.yusin.quiz.exam.domain.ExamDomain;
 import com.cpa.yusin.quiz.subject.infrastructure.Subject;
 import jakarta.persistence.*;
@@ -10,7 +11,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 @Entity
-public class Exam
+public class Exam extends BaseEntity
 {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -34,6 +35,10 @@ public class Exam
         exam.id = domain.getId();
         exam.name = domain.getName();
         exam.year = domain.getYear();
+        exam.maxProblemCount = domain.getMaxProblemCount();
+        exam.setCreatedAt(domain.getCreatedAt());
+        exam.setUpdatedAt(domain.getUpdatedAt());
+
         exam.subject = Subject.from(domain.getSubjectDomain());
 
         return exam;
@@ -45,6 +50,9 @@ public class Exam
                 .id(this.id)
                 .name(this.name)
                 .year(this.year)
+                .maxProblemCount(this.maxProblemCount)
+                .createdAt(this.getCreatedAt())
+                .updatedAt(this.getUpdatedAt())
                 .subjectDomain(this.subject.toModel())
                 .build();
     }

@@ -17,7 +17,7 @@ public interface ProblemMapper
 
     ProblemCreateResponse toCreateResponse(ProblemDomain domain, List<ChoiceCreateResponse> choiceCreateResponses);
 
-    ProblemDTO toProblemDTO(ProblemDomain domain);
+    ProblemDTO toProblemDTO(ProblemDomain domain, List<ChoiceResponse> choices);
 
     ProblemResponse toResponse(ProblemDomain domain, List<ChoiceResponse> choices);
 }

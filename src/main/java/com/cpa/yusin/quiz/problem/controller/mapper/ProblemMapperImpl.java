@@ -44,7 +44,7 @@ public class ProblemMapperImpl implements ProblemMapper
     }
 
     @Override
-    public ProblemDTO toProblemDTO(ProblemDomain domain)
+    public ProblemDTO toProblemDTO(ProblemDomain domain, List<ChoiceResponse> choices)
     {
         if(domain == null)
             return null;
@@ -53,6 +53,7 @@ public class ProblemMapperImpl implements ProblemMapper
                 .id(domain.getId())
                 .content(domain.getContent())
                 .number(domain.getNumber())
+                .choices(choices)
                 .build();
     }
 

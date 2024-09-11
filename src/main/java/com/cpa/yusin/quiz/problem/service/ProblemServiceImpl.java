@@ -3,6 +3,7 @@ package com.cpa.yusin.quiz.problem.service;
 import com.cpa.yusin.quiz.choice.controller.dto.request.ChoiceRequest;
 import com.cpa.yusin.quiz.choice.controller.dto.response.ChoiceResponse;
 import com.cpa.yusin.quiz.choice.controller.port.ChoiceService;
+import com.cpa.yusin.quiz.choice.domain.ChoiceDomain;
 import com.cpa.yusin.quiz.exam.controller.port.ExamService;
 import com.cpa.yusin.quiz.exam.domain.ExamDomain;
 import com.cpa.yusin.quiz.global.exception.ExceptionMessage;
@@ -15,6 +16,7 @@ import com.cpa.yusin.quiz.problem.controller.port.ProblemService;
 import com.cpa.yusin.quiz.problem.domain.ProblemDomain;
 import com.cpa.yusin.quiz.problem.service.port.ProblemRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,6 +25,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 @Service
@@ -86,7 +89,11 @@ public class ProblemServiceImpl implements ProblemService
     @Override
     public ProblemDTO getById(long id)
     {
-        return problemMapper.toProblemDTO(findById(id));
+        ProblemDomain problem = findById(id);
+
+        List<ChoiceResponse> choices = choiceService.getAllByProblemId(problem.getId());
+
+        return problemMapper.toProblemDTO(problem, choices);
     }
 
     @Override

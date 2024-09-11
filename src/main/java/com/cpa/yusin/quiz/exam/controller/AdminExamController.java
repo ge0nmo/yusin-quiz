@@ -24,7 +24,7 @@ public class AdminExamController
     private final ExamService examService;
 
     @PostMapping
-    public ResponseEntity<GlobalResponse<ExamCreateResponse>> save(@Positive @RequestParam long subjectId,
+    public ResponseEntity<GlobalResponse<ExamCreateResponse>> save(@Positive @RequestParam(value = "subjectId") long subjectId,
                                                                    @Validated @RequestBody ExamCreateRequest request)
     {
         ExamCreateResponse response = examService.save(subjectId, request);
@@ -51,9 +51,10 @@ public class AdminExamController
     }
 
     @GetMapping
-    public ResponseEntity<GlobalResponse<List<ExamDTO>>> getAllExamBySubjectId(@RequestParam long subjectId)
+    public ResponseEntity<GlobalResponse<List<ExamDTO>>> getAllExamBySubjectId(@RequestParam(value = "subjectId") long subjectId,
+                                                                               @RequestParam(value = "year") int year)
     {
-        List<ExamDTO> response = examService.getAllBySubjectId(subjectId);
+        List<ExamDTO> response = examService.getAllBySubjectId(subjectId, year);
 
         return ResponseEntity.ok(new GlobalResponse<>(response));
     }
