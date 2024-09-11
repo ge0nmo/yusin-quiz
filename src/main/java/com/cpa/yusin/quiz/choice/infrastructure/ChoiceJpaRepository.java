@@ -26,11 +26,11 @@ public interface ChoiceJpaRepository extends JpaRepository<Choice, Long>
             "WHERE c.problem.id IN " +
             "(SELECT p.id FROM Problem p WHERE p.exam.id IN " +
             "(SELECT e.id FROM Exam e WHERE e.subject.id = :subjectId))")
-    void deleteAllByProblemExamSubjectId(long subjectId);
+    void deleteAllByProblemExamSubjectId(@Param("subjectId") long subjectId);
 
     @Modifying
     @Query("DELETE FROM Choice c " +
             "WHERE c.problem.id IN " +
             "(SELECT p.id FROM Problem p WHERE p.exam.id = :examId)")
-    void deleteAllByProblemExamId(long examId);
+    void deleteAllByProblemExamId(@Param("examId") long examId);
 }

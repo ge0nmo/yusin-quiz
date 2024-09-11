@@ -41,7 +41,7 @@ public class AdminMemberController
 
 
     @GetMapping("/{id}")
-    public ResponseEntity<GlobalResponse<MemberDTO>> getById(@PathVariable("id") Long id)
+    public ResponseEntity<GlobalResponse<MemberDTO>> getById(@PathVariable("id") long id)
     {
         MemberDTO response = memberService.getById(id);
 
@@ -49,7 +49,7 @@ public class AdminMemberController
     }
 
     @GetMapping
-    public ResponseEntity<GlobalResponse<List<MemberDTO>>> getMembers(@RequestParam(required = false) String keyword,
+    public ResponseEntity<GlobalResponse<List<MemberDTO>>> getMembers(@RequestParam(value = "keyword", required = false) String keyword,
                                                                       @PageableDefault Pageable pageable)
     {
         Page<MemberDTO> response = memberService.getAll(keyword, pageable.previousOrFirst());
