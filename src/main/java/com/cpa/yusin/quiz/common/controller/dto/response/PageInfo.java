@@ -18,7 +18,7 @@ public class PageInfo {
         return PageInfo.builder()
                 .totalElements(page.getTotalElements())
                 .totalPages(page.getTotalPages())
-                .currentPage(page.getPageable().getPageNumber())
+                .currentPage(page.getPageable().getPageNumber() + 1)
                 .pageSize(page.getPageable().getPageSize())
                 .build();
     }
