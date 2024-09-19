@@ -1,7 +1,9 @@
 package com.cpa.yusin.quiz.file.infrastructure;
 
 import com.cpa.yusin.quiz.common.infrastructure.BaseEntity;
+import com.cpa.yusin.quiz.file.domain.FileDomain;
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Getter;
 
 @Getter
@@ -26,4 +28,32 @@ public class File extends BaseEntity
 
     @Column(nullable = false)
     private Long size;
+
+    public static File from(FileDomain fileDomain)
+    {
+        File file = new File();
+        file.id = fileDomain.getId();
+        file.originalName = fileDomain.getOriginalName();
+        file.url = fileDomain.getUrl();
+        file.storedName = fileDomain.getStoredName();
+        file.contentType = fileDomain.getContentType();
+        file.size = fileDomain.getSize();
+        file.setCreatedAt(fileDomain.getCreatedAt());
+        file.setUpdatedAt(fileDomain.getUpdatedAt());
+        return file;
+    }
+
+    public FileDomain toModel()
+    {
+        return FileDomain.builder()
+                .id(this.id)
+                .originalName(this.originalName)
+                .url(this.url)
+                .storedName(this.storedName)
+                .contentType(this.contentType)
+                .size(this.size)
+                .createdAt(this.getCreatedAt())
+                .updatedAt(this.getUpdatedAt())
+                .build();
+    }
 }

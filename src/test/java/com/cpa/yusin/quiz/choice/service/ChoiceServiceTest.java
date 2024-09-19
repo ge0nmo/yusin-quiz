@@ -23,11 +23,11 @@ class ChoiceServiceTest extends MockSetup
         Map<ProblemDomain, List<ChoiceRequest>> choiceMap = new HashMap<>();
 
         List<ChoiceRequest> choices = List.of(
-                ChoiceRequest.builder().content("problem1 - choice1").number(1).isAnswer(true).build(),
-                ChoiceRequest.builder().content("problem1 - choice2").number(2).isAnswer(false).build(),
-                ChoiceRequest.builder().content("problem1 - choice3").number(3).isAnswer(false).build(),
-                ChoiceRequest.builder().content("problem1 - choice4").number(4).isAnswer(false).build(),
-                ChoiceRequest.builder().content("problem1 - choice5").number(5).isAnswer(false).build()
+                ChoiceRequest.builder().content("problem1 - choice1").number(1).answer(true).build(),
+                ChoiceRequest.builder().content("problem1 - choice2").number(2).answer(false).build(),
+                ChoiceRequest.builder().content("problem1 - choice3").number(3).answer(false).build(),
+                ChoiceRequest.builder().content("problem1 - choice4").number(4).answer(false).build(),
+                ChoiceRequest.builder().content("problem1 - choice5").number(5).answer(false).build()
 
         );
 

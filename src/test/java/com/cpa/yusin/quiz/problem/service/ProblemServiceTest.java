@@ -21,11 +21,11 @@ class ProblemServiceTest extends MockSetup
     {
         // given
         List<ChoiceRequest> choices1 = List.of(
-                ChoiceRequest.builder().content("problem1 - choice1").number(1).isAnswer(true).build(),
-                ChoiceRequest.builder().content("problem1 - choice2").number(2).isAnswer(false).build(),
-                ChoiceRequest.builder().content("problem1 - choice3").number(3).isAnswer(false).build(),
-                ChoiceRequest.builder().content("problem1 - choice4").number(4).isAnswer(false).build(),
-                ChoiceRequest.builder().content("problem1 - choice5").number(5).isAnswer(false).build()
+                ChoiceRequest.builder().content("problem1 - choice1").number(1).answer(true).build(),
+                ChoiceRequest.builder().content("problem1 - choice2").number(2).answer(false).build(),
+                ChoiceRequest.builder().content("problem1 - choice3").number(3).answer(false).build(),
+                ChoiceRequest.builder().content("problem1 - choice4").number(4).answer(false).build(),
+                ChoiceRequest.builder().content("problem1 - choice5").number(5).answer(false).build()
 
         );
 
@@ -72,9 +72,9 @@ class ProblemServiceTest extends MockSetup
     {
         // given
         List<ChoiceRequest> choices1 = List.of(
-                ChoiceRequest.builder().id(1L).content("problem1 - choice1").number(1).isAnswer(false).build(),
-                ChoiceRequest.builder().id(2L).content("problem1 - choice2").number(2).isAnswer(true).build(),
-                ChoiceRequest.builder().id(3L).content("problem1 - choice3").number(3).isDeleted(true).isAnswer(false).build()
+                ChoiceRequest.builder().id(1L).content("problem1 - choice1").number(1).answer(false).build(),
+                ChoiceRequest.builder().id(2L).content("problem1 - choice2").number(2).answer(true).build(),
+                ChoiceRequest.builder().id(3L).content("problem1 - choice3").number(3).deleted(true).answer(false).build()
         );
 
         List<ProblemRequest> request = List.of(
@@ -130,7 +130,7 @@ class ProblemServiceTest extends MockSetup
                 .id(10L)
                 .number(1)
                 .content("biology content")
-                .isAnswer(true)
+                .answer(true)
                 .problem(biologyProblem)
                 .build());
 

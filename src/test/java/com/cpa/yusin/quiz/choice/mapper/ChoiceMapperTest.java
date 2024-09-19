@@ -23,7 +23,7 @@ class ChoiceMapperTest extends MockSetup
                 .id(1L)
                 .content("choice1")
                 .number(1)
-                .isAnswer(true)
+                .answer(true)
                 .problem(physicsProblem1)
                 .build();
         // when
@@ -43,7 +43,7 @@ class ChoiceMapperTest extends MockSetup
                 .id(1L)
                 .content("choice 1")
                 .number(1)
-                .isAnswer(true)
+                .answer(true)
                 .problem(physicsProblem1)
                 .build();
 
@@ -51,7 +51,7 @@ class ChoiceMapperTest extends MockSetup
                 .id(2L)
                 .content("choice 2")
                 .number(2)
-                .isAnswer(false)
+                .answer(false)
                 .problem(physicsProblem1)
                 .build();
 
@@ -59,7 +59,7 @@ class ChoiceMapperTest extends MockSetup
                 .id(3L)
                 .content("choice 3")
                 .number(3)
-                .isAnswer(false)
+                .answer(false)
                 .problem(physicsProblem1)
                 .build();
 

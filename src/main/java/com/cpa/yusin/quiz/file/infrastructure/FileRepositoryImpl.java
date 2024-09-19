@@ -14,6 +14,7 @@ public class FileRepositoryImpl implements FileRepository
     @Override
     public FileDomain save(FileDomain fileDomain)
     {
-        return null;
+        return fileJpaRepository.save(File.from(fileDomain))
+                .toModel();
     }
 }

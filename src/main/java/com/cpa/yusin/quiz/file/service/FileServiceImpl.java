@@ -13,12 +13,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.UUID;
 
+@Transactional(readOnly = true)
 @Slf4j
 @RequiredArgsConstructor
 @Service
@@ -34,11 +36,14 @@ public class FileServiceImpl implements FileService
     @Value("${cloud.aws.s3.bucket.prefix}")
     private String prefix;
 
+    @Transactional
+    @Override
     public FileResponse save(MultipartFile file)
     {
         String uniqueFilename = getUniqueFilename();
 
         String url = updateFileToS3(uniqueFilename, file);
+        log.info("url = {}", url);
 
         FileDomain fileDomain = fileMapper.toFileDomain(url, uniqueFilename, file);
 
@@ -49,7 +54,7 @@ public class FileServiceImpl implements FileService
 
     private String updateFileToS3(String uniqueFilename, MultipartFile file)
     {
-        try{
+        try {
             ObjectMetadata metadata = new ObjectMetadata();
             String objectFilename = getObjectFileName(uniqueFilename + file.getContentType());
 
@@ -59,14 +64,14 @@ public class FileServiceImpl implements FileService
 
             return String.valueOf(amazonS3.getUrl(bucket, objectFilename));
 
-        } catch (IOException e){
+        } catch (IOException e) {
             throw new GlobalException(ExceptionMessage.INVALID_DATA);
         }
     }
 
     private String extractType(String filename)
     {
-        if(!StringUtils.hasLength(filename)){
+        if (!StringUtils.hasLength(filename)) {
             throw new GlobalException(ExceptionMessage.INVALID_DATA);
         }
 

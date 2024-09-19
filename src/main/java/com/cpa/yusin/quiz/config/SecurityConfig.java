@@ -51,6 +51,7 @@ public class SecurityConfig
                                 "/api/v1/home/login",
                                 "/api/v1/oauth2/**",
                                 "/api/v1/sign-up",
+                                "/api/v1/file/**",
                                 "/api/v1/login").permitAll()
                         .anyRequest().authenticated());
 
