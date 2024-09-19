@@ -1,0 +1,24 @@
+= API Documentation
+:doctype: book
+:icons: font
+:toc: left
+:toc-title: 순서
+:sectnums:
+:sectnumlevels: 5
+:source-highlighter: highlightjs
+
+
+== 파일 API
+
+=== 파일 등록 성공
+==== HTTP Request
+include::{snippets}/파일 업로드/http-request.adoc[]
+
+==== Request Fields
+include::{snippets}/파일 업로드/request-parts.adoc[]
+
+==== HTTP Response
+include::{snippets}/파일 업로드/http-response.adoc[]
+
+==== Response Fields
+include::{snippets}/파일 업로드/response-fields.adoc[]
