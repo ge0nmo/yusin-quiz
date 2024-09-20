@@ -85,6 +85,6 @@ public class FakeProblemRepository implements ProblemRepository
     @Override
     public void deleteAllBySubjectId(long subjectId)
     {
-        data.removeIf(item -> item.getExam().getSubjectDomain().getId().equals(subjectId));
+        data.removeIf(item -> item.getExam().getSubjectId().equals(subjectId));
     }
 }

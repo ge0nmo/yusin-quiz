@@ -16,7 +16,7 @@ public class ExamDomain
     private String name;
     private int year;
     private int maxProblemCount;
-    private SubjectDomain subjectDomain;
+    private Long subjectId;
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -27,7 +27,7 @@ public class ExamDomain
                 .name(request.getName())
                 .year(request.getYear())
                 .maxProblemCount(request.getMaxProblemCount())
-                .subjectDomain(subjectDomain)
+                .subjectId(subjectDomain.getId())
                 .build();
     }
 

@@ -11,8 +11,10 @@ import com.cpa.yusin.quiz.exam.controller.AdminExamController;
 import com.cpa.yusin.quiz.exam.controller.mapper.ExamMapper;
 import com.cpa.yusin.quiz.exam.controller.mapper.ExamMapperImpl;
 import com.cpa.yusin.quiz.exam.controller.port.ExamService;
+import com.cpa.yusin.quiz.exam.infrastructure.ExamValidatorImpl;
 import com.cpa.yusin.quiz.exam.service.ExamServiceImpl;
 import com.cpa.yusin.quiz.exam.service.port.ExamRepository;
+import com.cpa.yusin.quiz.exam.service.port.ExamValidator;
 import com.cpa.yusin.quiz.global.details.MemberDetailsService;
 import com.cpa.yusin.quiz.global.jwt.JwtService;
 import com.cpa.yusin.quiz.global.jwt.JwtServiceImpl;
@@ -76,6 +78,7 @@ public class TestContainer
     public final ExamMapper examMapper;
     public final ExamService examService;
     public final AdminExamController adminExamController;
+    public final ExamValidator examValidator;
 
     /**
      *  choice
@@ -123,7 +126,8 @@ public class TestContainer
         this.adminSubjectController = new AdminSubjectController(this.subjectService);
 
         this.examMapper = new ExamMapperImpl();
-        this.examService = new ExamServiceImpl(this.examRepository, this.examMapper, this.subjectService, this.cascadeDeleteService);
+        this.examValidator = new ExamValidatorImpl(this.examRepository);
+        this.examService = new ExamServiceImpl(this.examRepository, this.examMapper, this.subjectService, this.cascadeDeleteService, this.examValidator);
         this.adminExamController = new AdminExamController(this.examService);
 
         this.choiceMapper = new ChoiceMapperImpl();

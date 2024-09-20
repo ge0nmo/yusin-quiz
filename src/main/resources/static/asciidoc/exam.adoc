@@ -1,0 +1,131 @@
+= API Documentation
+:doctype: book
+:icons: font
+:toc: left
+:toc-title: 순서
+:sectnums:
+:sectnumlevels: 5
+:source-highlighter: highlightjs
+
+== 시험 API
+
+== 시험 등록 성공
+==== HTTP Request
+include::{snippets}/exam-create-success/http-request.adoc[]
+
+==== Query Parameters
+include::{snippets}/exam-create-success/query-parameters.adoc[]
+
+==== Request Fields
+include::{snippets}/exam-create-success/request-fields.adoc[]
+
+==== HTTP Response
+include::{snippets}/exam-create-success/http-response.adoc[]
+
+==== Response Fields
+include::{snippets}/exam-create-success/response-fields.adoc[]
+
+== 시험 등록 실패 - 필드 누락
+==== HTTP Request
+include::{snippets}/exam-create-fail-empty-name/http-request.adoc[]
+
+==== Query Parameters
+include::{snippets}/exam-create-fail-empty-name/query-parameters.adoc[]
+
+==== Request Fields
+include::{snippets}/exam-create-fail-empty-name/request-fields.adoc[]
+
+==== HTTP Response
+include::{snippets}/exam-create-fail-empty-name/http-response.adoc[]
+
+==== Response Fields
+include::{snippets}/exam-create-fail-empty-name/response-fields.adoc[]
+
+== 시험 등록 실패 - 중복
+==== HTTP Request
+include::{snippets}/exam-create-fail-duplicated/http-request.adoc[]
+
+==== Query Parameters
+include::{snippets}/exam-create-fail-duplicated/query-parameters.adoc[]
+
+==== Request Fields
+include::{snippets}/exam-create-fail-duplicated/request-fields.adoc[]
+
+==== HTTP Response
+include::{snippets}/exam-create-fail-duplicated/http-response.adoc[]
+
+==== Response Fields
+include::{snippets}/exam-create-fail-duplicated/response-fields.adoc[]
+
+== 시험 정보 수정 - 성공
+==== HTTP Request
+include::{snippets}/exam-update-success/http-request.adoc[]
+
+==== Request Fields
+include::{snippets}/exam-update-success/request-fields.adoc[]
+
+==== HTTP Response
+include::{snippets}/exam-update-success/http-response.adoc[]
+
+==== Response Fields
+include::{snippets}/exam-update-success/response-fields.adoc[]
+
+== 시험 정보 수정 실패 - 필드 누락
+==== HTTP Request
+include::{snippets}/exam-update-fail-no-fields/http-request.adoc[]
+
+==== Request Fields
+include::{snippets}/exam-update-fail-no-fields/request-fields.adoc[]
+
+==== HTTP Response
+include::{snippets}/exam-update-fail-no-fields/http-response.adoc[]
+
+==== Response Fields
+include::{snippets}/exam-update-fail-no-fields/response-fields.adoc[]
+
+== 시험 정보 수정 실패 - 중복
+==== HTTP Request
+include::{snippets}/exam-update-fail-duplicated/http-request.adoc[]
+
+==== Request Fields
+include::{snippets}/exam-update-fail-duplicated/request-fields.adoc[]
+
+==== HTTP Response
+include::{snippets}/exam-update-fail-duplicated/http-response.adoc[]
+
+==== Response Fields
+include::{snippets}/exam-update-fail-duplicated/response-fields.adoc[]
+
+== 시험 1개 조회
+==== HTTP Request
+include::{snippets}/getExamById/http-request.adoc[]
+
+==== HTTP Response
+include::{snippets}/getExamById/http-response.adoc[]
+
+==== Response Fields
+include::{snippets}/getExamById/response-fields.adoc[]
+
+
+== 과목 & 연도별 시험 조회
+==== HTTP Request
+include::{snippets}/getExamsBySubjectIdAndYear/http-request.adoc[]
+
+==== Query Parameters
+include::{snippets}/getExamsBySubjectIdAndYear/query-parameters.adoc[]
+
+==== HTTP Response
+include::{snippets}/getExamsBySubjectIdAndYear/http-response.adoc[]
+
+==== Response Fields
+include::{snippets}/getExamsBySubjectIdAndYear/response-fields.adoc[]
+
+== 시험 삭제 성공
+==== HTTP Request
+include::{snippets}/deleteExamById/http-request.adoc[]
+
+==== Request Fields
+include::{snippets}/deleteExamById/request-fields.adoc[]
+
+==== HTTP Response
+include::{snippets}/deleteExamById/http-response.adoc[]

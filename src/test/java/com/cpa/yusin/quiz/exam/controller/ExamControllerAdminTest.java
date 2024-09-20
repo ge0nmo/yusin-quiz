@@ -1,4 +1,4 @@
-package com.cpa.yusin.quiz.exam.controller.admin;
+package com.cpa.yusin.quiz.exam.controller;
 
 import com.cpa.yusin.quiz.common.controller.dto.response.GlobalResponse;
 import com.cpa.yusin.quiz.config.TestContainer;
@@ -7,7 +7,6 @@ import com.cpa.yusin.quiz.exam.controller.dto.request.ExamDeleteRequest;
 import com.cpa.yusin.quiz.exam.controller.dto.request.ExamUpdateRequest;
 import com.cpa.yusin.quiz.exam.controller.dto.response.ExamCreateResponse;
 import com.cpa.yusin.quiz.exam.controller.dto.response.ExamDTO;
-import com.cpa.yusin.quiz.exam.domain.ExamDomain;
 import com.cpa.yusin.quiz.subject.domain.SubjectDomain;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -119,7 +118,7 @@ class ExamControllerAdminTest
         testContainer.examService.save(1L, ExamCreateRequest.builder().name("2차").year(2025).build());
 
         // when
-        ResponseEntity<GlobalResponse<List<ExamDTO>>> result = testContainer.adminExamController.getAllExamBySubjectId(1L, 2024);
+        ResponseEntity<GlobalResponse<List<ExamDTO>>> result = testContainer.adminExamController.getAllExamBySubjectIdAndYear(1L, 2024);
 
         // then
         assertThat(result.getStatusCode()).isEqualTo(HttpStatusCode.valueOf(200));

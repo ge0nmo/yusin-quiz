@@ -9,6 +9,7 @@ import com.cpa.yusin.quiz.exam.controller.mapper.ExamMapper;
 import com.cpa.yusin.quiz.exam.controller.port.ExamService;
 import com.cpa.yusin.quiz.exam.domain.ExamDomain;
 import com.cpa.yusin.quiz.exam.service.port.ExamRepository;
+import com.cpa.yusin.quiz.exam.service.port.ExamValidator;
 import com.cpa.yusin.quiz.global.exception.ExceptionMessage;
 import com.cpa.yusin.quiz.global.exception.GlobalException;
 import com.cpa.yusin.quiz.subject.controller.mapper.SubjectMapper;
@@ -33,12 +34,15 @@ public class ExamServiceImpl implements ExamService
     private final ExamMapper examMapper;
     private final SubjectService subjectService;
     private final CascadeDeleteService cascadeDeleteService;
+    private final ExamValidator examValidator;
 
     @Transactional
     @Override
     public ExamCreateResponse save(long subjectId, ExamCreateRequest request)
     {
         SubjectDomain subject = subjectService.findById(subjectId);
+        examValidator.validate(subjectId, request.getName(), request.getYear());
+
         ExamDomain exam = ExamDomain.from(request, subject);
         exam = examRepository.save(exam);
 
@@ -50,6 +54,8 @@ public class ExamServiceImpl implements ExamService
     public void update(long examId, ExamUpdateRequest request)
     {
         ExamDomain domain = findById(examId);
+
+        examValidator.validate(examId, domain.getId(), request.getName(), request.getYear());
         domain.update(request);
 
         examRepository.save(domain);

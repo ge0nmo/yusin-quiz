@@ -44,28 +44,28 @@ public class MockSetup
                 .id(1L)
                 .name("2024 1차")
                 .year(2024)
-                .subjectDomain(physics)
+                .subjectId(physics.getId())
                 .build());
 
         physicsExam2 = testContainer.examRepository.save(ExamDomain.builder()
                 .id(2L)
                 .name("2024 2차")
                 .year(2024)
-                .subjectDomain(physics)
+                .subjectId(physics.getId())
                 .build());
 
         biologyExam1 = testContainer.examRepository.save(ExamDomain.builder()
                 .id(3L)
                 .name("2024 1차")
                 .year(2024)
-                .subjectDomain(biology)
+                .subjectId(biology.getId())
                 .build());
 
         biologyExam2 = testContainer.examRepository.save(ExamDomain.builder()
                 .id(4L)
                 .name("2024 2차")
                 .year(2024)
-                .subjectDomain(biology)
+                .subjectId(biology.getId())
                 .build());
 
 

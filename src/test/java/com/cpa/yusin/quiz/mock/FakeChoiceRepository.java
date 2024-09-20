@@ -82,7 +82,7 @@ public class FakeChoiceRepository implements ChoiceRepository
     @Override
     public void deleteAllBySubjectId(long subjectId)
     {
-        data.removeIf(item -> item.getProblem().getExam().getSubjectDomain().getId().equals(subjectId));
+        data.removeIf(item -> item.getProblem().getExam().getSubjectId().equals(subjectId));
     }
 
     @Override

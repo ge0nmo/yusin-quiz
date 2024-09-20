@@ -177,7 +177,7 @@ class SubjectServiceTest
                 .id(1L)
                 .name("2024 1차")
                 .year(2024)
-                .subjectDomain(physics)
+                .subjectId(physics.getId())
                 .build());
 
         ProblemDomain physicsProblem1 = testContainer.problemRepository.save(ProblemDomain.builder()

@@ -54,4 +54,16 @@ public class ExamRepositoryImpl implements ExamRepository
         return examJpaRepository.existsById(id);
     }
 
+    @Override
+    public boolean existsBySubjectIdAndNameAndYear(long subjectId, String name, int year)
+    {
+        return examJpaRepository.existsBySubjectIdAndNameAndYear(subjectId, name, year);
+    }
+
+    @Override
+    public boolean existsByIdNotAndSubjectIdAndNameAndYear(long examId, long subjectId, String name, int year)
+    {
+        return examJpaRepository.existsByIdNotSubjectIdAndNameAndYear(examId, subjectId, name, year);
+    }
+
 }

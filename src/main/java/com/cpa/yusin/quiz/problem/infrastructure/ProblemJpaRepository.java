@@ -14,7 +14,7 @@ public interface ProblemJpaRepository extends JpaRepository<Problem, Long>
 
     @Modifying
     @Query("DELETE FROM Problem p " +
-            "WHERE p.exam.id IN (SELECT e.id FROM Exam e WHERE e.subject.id = :subjectId)")
+            "WHERE p.exam.id IN (SELECT e.id FROM Exam e WHERE e.subjectId = :subjectId)")
     void deleteAllByExamSubjectId(@Param("subjectId") long subjectId);
 
     @Modifying

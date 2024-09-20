@@ -18,4 +18,8 @@ public interface ExamRepository
     void deleteAllBySubjectId(long subjectId);
 
     boolean existsById(long id);
+
+    boolean existsBySubjectIdAndNameAndYear(long subjectId, String name, int year);
+
+    boolean existsByIdNotAndSubjectIdAndNameAndYear(long examId, long subjectId, String name, int year);
 }

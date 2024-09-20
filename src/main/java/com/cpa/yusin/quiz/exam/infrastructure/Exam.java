@@ -9,6 +9,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Table(uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"name", "year", "subjectId"})
+})
 @Getter
 @Entity
 public class Exam extends BaseEntity
@@ -25,9 +28,8 @@ public class Exam extends BaseEntity
     @Column(nullable = false)
     private int maxProblemCount;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "subject_id", nullable = false, updatable = false)
-    private Subject subject;
+    @Column(nullable = false, updatable = false)
+    private Long subjectId;
 
     public static Exam from(ExamDomain domain)
     {
@@ -39,7 +41,7 @@ public class Exam extends BaseEntity
         exam.setCreatedAt(domain.getCreatedAt());
         exam.setUpdatedAt(domain.getUpdatedAt());
 
-        exam.subject = Subject.from(domain.getSubjectDomain());
+        exam.subjectId = domain.getSubjectId();
 
         return exam;
     }
@@ -53,7 +55,7 @@ public class Exam extends BaseEntity
                 .maxProblemCount(this.maxProblemCount)
                 .createdAt(this.getCreatedAt())
                 .updatedAt(this.getUpdatedAt())
-                .subjectDomain(this.subject.toModel())
+                .subjectId(this.subjectId)
                 .build();
     }
 }

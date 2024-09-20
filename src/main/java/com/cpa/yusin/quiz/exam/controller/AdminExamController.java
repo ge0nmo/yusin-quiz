@@ -11,6 +11,7 @@ import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,15 +24,18 @@ public class AdminExamController
 {
     private final ExamService examService;
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     public ResponseEntity<GlobalResponse<ExamCreateResponse>> save(@Positive @RequestParam(value = "subjectId") long subjectId,
                                                                    @Validated @RequestBody ExamCreateRequest request)
     {
         ExamCreateResponse response = examService.save(subjectId, request);
 
-        return ResponseEntity.ok(new GlobalResponse<>(response));
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(new GlobalResponse<>(response));
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("/{id}")
     public ResponseEntity<GlobalResponse<ExamDTO>> update(@Positive @PathVariable("id") long id,
                                                           @Validated @RequestBody ExamUpdateRequest request)
@@ -42,6 +46,7 @@ public class AdminExamController
         return ResponseEntity.ok(new GlobalResponse<>(response));
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/{id}")
     public ResponseEntity<GlobalResponse<ExamDTO>> getById(@PathVariable("id") long id)
     {
@@ -50,15 +55,17 @@ public class AdminExamController
         return ResponseEntity.ok(new GlobalResponse<>(response));
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
-    public ResponseEntity<GlobalResponse<List<ExamDTO>>> getAllExamBySubjectId(@RequestParam(value = "subjectId") long subjectId,
-                                                                               @RequestParam(value = "year") int year)
+    public ResponseEntity<GlobalResponse<List<ExamDTO>>> getAllExamBySubjectIdAndYear(@RequestParam(value = "subjectId") long subjectId,
+                                                                                      @RequestParam(value = "year") int year)
     {
         List<ExamDTO> response = examService.getAllBySubjectId(subjectId, year);
 
         return ResponseEntity.ok(new GlobalResponse<>(response));
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping
     public ResponseEntity<GlobalResponse<String>> deleteById(@RequestBody ExamDeleteRequest request)
     {

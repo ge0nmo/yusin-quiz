@@ -11,11 +11,31 @@ public interface ExamJpaRepository extends JpaRepository<Exam, Long>
 {
     @Query("SELECT e " +
             "FROM Exam e " +
-            "WHERE e.subject.id = :subjectId " +
+            "WHERE e.subjectId = :subjectId " +
             "AND e.year = :year")
     List<Exam> findAllBySubjectId(@Param("subjectId") long subjectId, @Param("year") int year);
 
     @Modifying
-    @Query("DELETE FROM Exam e WHERE e.subject.id = :subjectId")
+    @Query("DELETE FROM Exam e WHERE e.subjectId = :subjectId")
     void deleteAllBySubjectId(@Param("subjectId") long subjectId);
+
+    @Query("SELECT CASE WHEN COUNT(e) > 0 THEN TRUE ELSE FALSE END " +
+            "FROM Exam e " +
+            "WHERE e.subjectId = :subjectId " +
+            "AND e.name = :name " +
+            "AND e.year = :year")
+    boolean existsBySubjectIdAndNameAndYear(@Param("subjectId") long subjectId,
+                                            @Param("name") String name,
+                                            @Param("year") int year);
+
+    @Query("SELECT CASE WHEN COUNT(e) > 0 THEN TRUE ELSE FALSE END " +
+            "FROM Exam e " +
+            "WHERE e.id != :examId " +
+            "AND e.subjectId = :subjectId " +
+            "AND e.name = :name " +
+            "AND e.year = :year")
+    boolean existsByIdNotSubjectIdAndNameAndYear(@Param("examId") long examId,
+                                                 @Param("subjectId") long subjectId,
+                                                 @Param("name") String name,
+                                                 @Param("year") int year);
 }

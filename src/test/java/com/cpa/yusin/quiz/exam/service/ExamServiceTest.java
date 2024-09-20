@@ -80,14 +80,14 @@ class ExamServiceTest
                 .id(1L)
                 .name("2024 1차")
                 .year(2024)
-                .subjectDomain(physics)
+                .subjectId(physics.getId())
                 .build());
 
         ExamDomain shouldNotBeRemovedExam = testContainer.examRepository.save(ExamDomain.builder()
                 .id(2L)
                 .name("2024 2차")
                 .year(2024)
-                .subjectDomain(physics)
+                .subjectId(physics.getId())
                 .build());
 
         ProblemDomain shouldBeRemovedProblem = testContainer.problemRepository.save(ProblemDomain.builder()
