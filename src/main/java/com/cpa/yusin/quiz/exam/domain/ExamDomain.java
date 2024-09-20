@@ -21,13 +21,13 @@ public class ExamDomain
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    public static ExamDomain from(ExamCreateRequest request, SubjectDomain subjectDomain)
+    public static ExamDomain from(ExamCreateRequest request, long subjectId)
     {
         return ExamDomain.builder()
                 .name(request.getName())
                 .year(request.getYear())
                 .maxProblemCount(request.getMaxProblemCount())
-                .subjectId(subjectDomain.getId())
+                .subjectId(subjectId)
                 .build();
     }
 

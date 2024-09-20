@@ -43,7 +43,7 @@ public class ExamServiceImpl implements ExamService
         SubjectDomain subject = subjectService.findById(subjectId);
         examValidator.validate(subjectId, request.getName(), request.getYear());
 
-        ExamDomain exam = ExamDomain.from(request, subject);
+        ExamDomain exam = ExamDomain.from(request, subject.getId());
         exam = examRepository.save(exam);
 
         return examMapper.toCreateResponse(exam);

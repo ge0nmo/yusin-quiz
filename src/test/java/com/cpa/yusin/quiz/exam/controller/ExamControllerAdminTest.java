@@ -42,13 +42,14 @@ class ExamControllerAdminTest
         ExamCreateRequest request = ExamCreateRequest.builder()
                 .name("1차")
                 .year(2024)
+                .maxProblemCount(40)
                 .build();
 
         // when
         ResponseEntity<GlobalResponse<ExamCreateResponse>> result = testContainer.adminExamController.save(subjectId, request);
 
         // then
-        assertThat(result.getStatusCode()).isEqualTo(HttpStatusCode.valueOf(200));
+        assertThat(result.getStatusCode()).isEqualTo(HttpStatusCode.valueOf(201));
 
         assertThat(result.getBody()).isNotNull();
 
@@ -65,11 +66,13 @@ class ExamControllerAdminTest
         ExamCreateResponse savedExam = testContainer.examService.save(1L, ExamCreateRequest.builder()
                 .name("1차")
                 .year(2024)
+                .maxProblemCount(40)
                 .build());
 
         ExamUpdateRequest request = ExamUpdateRequest.builder()
                 .name("2차")
                 .year(2023)
+                .maxProblemCount(40)
                 .build();
 
         // when
@@ -93,6 +96,7 @@ class ExamControllerAdminTest
         ExamCreateResponse savedExam = testContainer.examService.save(1L, ExamCreateRequest.builder()
                 .name("1차")
                 .year(2024)
+                .maxProblemCount(40)
                 .build());
 
         // when
@@ -111,11 +115,11 @@ class ExamControllerAdminTest
     void getAllExamBySubjectId()
     {
         // given
-        testContainer.examService.save(1L, ExamCreateRequest.builder().name("1차").year(2024).build());
-        testContainer.examService.save(1L, ExamCreateRequest.builder().name("2차").year(2024).build());
-        testContainer.examService.save(1L, ExamCreateRequest.builder().name("3차").year(2024).build());
-        testContainer.examService.save(1L, ExamCreateRequest.builder().name("1차").year(2025).build());
-        testContainer.examService.save(1L, ExamCreateRequest.builder().name("2차").year(2025).build());
+        testContainer.examService.save(1L, ExamCreateRequest.builder().name("1차").year(2024).maxProblemCount(40).build());
+        testContainer.examService.save(1L, ExamCreateRequest.builder().name("2차").year(2024).maxProblemCount(40).build());
+        testContainer.examService.save(1L, ExamCreateRequest.builder().name("3차").year(2024).maxProblemCount(40).build());
+        testContainer.examService.save(1L, ExamCreateRequest.builder().name("1차").year(2025).maxProblemCount(40).build());
+        testContainer.examService.save(1L, ExamCreateRequest.builder().name("2차").year(2025).maxProblemCount(40).build());
 
         // when
         ResponseEntity<GlobalResponse<List<ExamDTO>>> result = testContainer.adminExamController.getAllExamBySubjectIdAndYear(1L, 2024);
@@ -143,9 +147,9 @@ class ExamControllerAdminTest
     void deleteById()
     {
         // given
-        testContainer.examService.save(1L, ExamCreateRequest.builder().name("1차").year(2024).build());
-        testContainer.examService.save(1L, ExamCreateRequest.builder().name("2차").year(2024).build());
-        testContainer.examService.save(1L, ExamCreateRequest.builder().name("3차").year(2024).build());
+        testContainer.examService.save(1L, ExamCreateRequest.builder().name("1차").year(2024).maxProblemCount(40).build());
+        testContainer.examService.save(1L, ExamCreateRequest.builder().name("2차").year(2024).maxProblemCount(40).build());
+        testContainer.examService.save(1L, ExamCreateRequest.builder().name("3차").year(2024).maxProblemCount(40).build());
         List<Long> examIds = List.of(1L, 2L, 3L);
         ExamDeleteRequest request = ExamDeleteRequest.builder()
                 .examIds(examIds)
