@@ -41,7 +41,7 @@ public class ChoiceServiceImpl implements ChoiceService
             List<ChoiceRequest> requests = entry.getValue();
 
             for(ChoiceRequest request : requests) {
-                if(request.isDeleted() && !request.isNew()){
+                if(Boolean.TRUE.equals(request.getIsDeleted()) && !request.isNew()){
                     deleteList.add(request.getId());
                 } else{
                     ChoiceDomain choiceDomain;

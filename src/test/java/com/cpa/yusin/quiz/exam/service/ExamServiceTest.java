@@ -110,7 +110,7 @@ class ExamServiceTest
                 .id(1L)
                 .content("choice 1")
                 .number(1)
-                .answer(true)
+                .isAnswer(true)
                 .problem(shouldBeRemovedProblem)
                 .build());
 
@@ -118,7 +118,7 @@ class ExamServiceTest
                 .id(2L)
                 .content("choice 1")
                 .number(1)
-                .answer(true)
+                .isAnswer(true)
                 .problem(shouldNotBeRemovedProblem)
                 .build());
         List<Long> ids = List.of(1L);

@@ -24,10 +24,10 @@ public class Choice extends BaseEntity
     private String content;
 
     @Column(nullable = false)
-    private int number;
+    private Integer number;
 
     @Column(nullable = false)
-    private boolean answer;
+    private Boolean isAnswer;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(nullable = false, name = "problem_id")
@@ -40,7 +40,7 @@ public class Choice extends BaseEntity
         choice.content = domain.getContent();
         choice.number = domain.getNumber();
         choice.problem = Problem.from(domain.getProblem());
-        choice.answer = domain.isAnswer();
+        choice.isAnswer = domain.getIsAnswer();
 
         choice.setCreatedAt(domain.getCreatedAt());
         choice.setUpdatedAt(domain.getUpdatedAt());
@@ -53,7 +53,7 @@ public class Choice extends BaseEntity
                 .id(this.id)
                 .content(this.content)
                 .number(this.number)
-                .answer(this.answer)
+                .isAnswer(this.getIsAnswer())
                 .problem(this.problem.toModel())
                 .createdAt(this.getCreatedAt())
                 .updatedAt(this.getUpdatedAt())

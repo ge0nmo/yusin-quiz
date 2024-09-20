@@ -198,7 +198,7 @@ class SubjectServiceTest
                 .id(1L)
                 .content("choice 1")
                 .number(1)
-                .answer(true)
+                .isAnswer(true)
                 .problem(physicsProblem1)
                 .build());
 

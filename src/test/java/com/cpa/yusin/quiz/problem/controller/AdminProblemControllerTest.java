@@ -21,11 +21,11 @@ class AdminProblemControllerTest extends MockSetup
     {
         // given
         List<ChoiceRequest> choices1 = List.of(
-                ChoiceRequest.builder().content("problem1 - choice1").number(1).answer(true).build(),
-                ChoiceRequest.builder().content("problem1 - choice2").number(2).answer(false).build(),
-                ChoiceRequest.builder().content("problem1 - choice3").number(3).answer(false).build(),
-                ChoiceRequest.builder().content("problem1 - choice4").number(4).answer(false).build(),
-                ChoiceRequest.builder().content("problem1 - choice5").number(5).answer(false).build()
+                ChoiceRequest.builder().content("problem1 - choice1").number(1).isAnswer(true).build(),
+                ChoiceRequest.builder().content("problem1 - choice2").number(2).isAnswer(false).build(),
+                ChoiceRequest.builder().content("problem1 - choice3").number(3).isAnswer(false).build(),
+                ChoiceRequest.builder().content("problem1 - choice4").number(4).isAnswer(false).build(),
+                ChoiceRequest.builder().content("problem1 - choice5").number(5).isAnswer(false).build()
 
         );
 
@@ -50,11 +50,11 @@ class AdminProblemControllerTest extends MockSetup
         List<ChoiceResponse> choices = response.getFirst().getChoices();
         assertThat(choices.getFirst().getContent()).isEqualTo("problem1 - choice1");
         assertThat(choices.getFirst().getNumber()).isEqualTo(1);
-        assertThat(choices.getFirst().isAnswer()).isTrue();
+        assertThat(choices.getFirst().getIsAnswer()).isTrue();
 
         assertThat(choices.get(1).getContent()).isEqualTo("problem1 - choice2");
         assertThat(choices.get(1).getNumber()).isEqualTo(2);
-        assertThat(choices.get(1).isAnswer()).isFalse();
+        assertThat(choices.get(1).getIsAnswer()).isFalse();
 
     }
 

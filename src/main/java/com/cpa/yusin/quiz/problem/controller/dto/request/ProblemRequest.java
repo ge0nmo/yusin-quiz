@@ -1,6 +1,7 @@
 package com.cpa.yusin.quiz.problem.controller.dto.request;
 
 import com.cpa.yusin.quiz.choice.controller.dto.request.ChoiceRequest;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 
 import java.util.List;
@@ -18,6 +19,7 @@ public class ProblemRequest
     private boolean deleted;
     private List<ChoiceRequest> choices;
 
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     public boolean isNew()
     {
         return id == null;

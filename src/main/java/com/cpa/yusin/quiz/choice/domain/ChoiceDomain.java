@@ -14,9 +14,9 @@ import java.time.LocalDateTime;
 public class ChoiceDomain
 {
     private Long id;
-    private int number;
+    private Integer number;
     private String content;
-    private boolean answer;
+    private Boolean isAnswer;
     private ProblemDomain problem;
 
     private LocalDateTime createdAt;
@@ -28,7 +28,7 @@ public class ChoiceDomain
 
         this.number = request.getNumber();
         this.content = request.getContent();
-        this.answer = request.isAnswer();
+        this.isAnswer = request.getIsAnswer();
     }
 
     public void validateProblemId(long problemId)

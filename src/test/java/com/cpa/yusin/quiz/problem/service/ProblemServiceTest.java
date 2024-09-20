@@ -21,11 +21,11 @@ class ProblemServiceTest extends MockSetup
     {
         // given
         List<ChoiceRequest> choices1 = List.of(
-                ChoiceRequest.builder().content("problem1 - choice1").number(1).answer(true).build(),
-                ChoiceRequest.builder().content("problem1 - choice2").number(2).answer(false).build(),
-                ChoiceRequest.builder().content("problem1 - choice3").number(3).answer(false).build(),
-                ChoiceRequest.builder().content("problem1 - choice4").number(4).answer(false).build(),
-                ChoiceRequest.builder().content("problem1 - choice5").number(5).answer(false).build()
+                ChoiceRequest.builder().content("problem1 - choice1").number(1).isAnswer(true).build(),
+                ChoiceRequest.builder().content("problem1 - choice2").number(2).isAnswer(false).build(),
+                ChoiceRequest.builder().content("problem1 - choice3").number(3).isAnswer(false).build(),
+                ChoiceRequest.builder().content("problem1 - choice4").number(4).isAnswer(false).build(),
+                ChoiceRequest.builder().content("problem1 - choice5").number(5).isAnswer(false).build()
 
         );
 
@@ -41,23 +41,23 @@ class ProblemServiceTest extends MockSetup
         assertThat(choiceDomains).hasSize(5);
         assertThat(choiceDomains.getFirst().getContent()).isEqualTo("problem1 - choice1");
         assertThat(choiceDomains.getFirst().getNumber()).isEqualTo(1);
-        assertThat(choiceDomains.getFirst().isAnswer()).isTrue();
+        assertThat(choiceDomains.getFirst().getIsAnswer()).isTrue();
 
         assertThat(choiceDomains.get(1).getContent()).isEqualTo("problem1 - choice2");
         assertThat(choiceDomains.get(1).getNumber()).isEqualTo(2);
-        assertThat(choiceDomains.get(1).isAnswer()).isFalse();
+        assertThat(choiceDomains.get(1).getIsAnswer()).isFalse();
 
         assertThat(choiceDomains.get(2).getContent()).isEqualTo("problem1 - choice3");
         assertThat(choiceDomains.get(2).getNumber()).isEqualTo(3);
-        assertThat(choiceDomains.get(2).isAnswer()).isFalse();
+        assertThat(choiceDomains.get(2).getIsAnswer()).isFalse();
 
         assertThat(choiceDomains.get(3).getContent()).isEqualTo("problem1 - choice4");
         assertThat(choiceDomains.get(3).getNumber()).isEqualTo(4);
-        assertThat(choiceDomains.get(3).isAnswer()).isFalse();
+        assertThat(choiceDomains.get(3).getIsAnswer()).isFalse();
 
         assertThat(choiceDomains.get(4).getContent()).isEqualTo("problem1 - choice5");
         assertThat(choiceDomains.get(4).getNumber()).isEqualTo(5);
-        assertThat(choiceDomains.get(4).isAnswer()).isFalse();
+        assertThat(choiceDomains.get(4).getIsAnswer()).isFalse();
 
         List<ProblemDomain> problems = testContainer.problemRepository.findAllByExamId(biologyExam2.getId());
         assertThat(problems).hasSize(1);
@@ -72,9 +72,9 @@ class ProblemServiceTest extends MockSetup
     {
         // given
         List<ChoiceRequest> choices1 = List.of(
-                ChoiceRequest.builder().id(1L).content("problem1 - choice1").number(1).answer(false).build(),
-                ChoiceRequest.builder().id(2L).content("problem1 - choice2").number(2).answer(true).build(),
-                ChoiceRequest.builder().id(3L).content("problem1 - choice3").number(3).deleted(true).answer(false).build()
+                ChoiceRequest.builder().id(1L).content("problem1 - choice1").number(1).isAnswer(false).build(),
+                ChoiceRequest.builder().id(2L).content("problem1 - choice2").number(2).isAnswer(true).build(),
+                ChoiceRequest.builder().id(3L).content("problem1 - choice3").number(3).isDeleted(true).isAnswer(false).build()
         );
 
         List<ProblemRequest> request = List.of(
@@ -90,7 +90,7 @@ class ProblemServiceTest extends MockSetup
         assertThat(choiceDomains).hasSize(2);
         assertThat(choiceDomains.getFirst().getContent()).isEqualTo("problem1 - choice1");
         assertThat(choiceDomains.getFirst().getNumber()).isEqualTo(1);
-        assertThat(choiceDomains.getFirst().isAnswer()).isFalse();
+        assertThat(choiceDomains.getFirst().getIsAnswer()).isFalse();
     }
 
     @Test
@@ -130,7 +130,7 @@ class ProblemServiceTest extends MockSetup
                 .id(10L)
                 .number(1)
                 .content("biology content")
-                .answer(true)
+                .isAnswer(true)
                 .problem(biologyProblem)
                 .build());
 

@@ -10,5 +10,5 @@ public class ChoiceResponse
     private final long id;
     private final int number;
     private final String content;
-    private final boolean isAnswer;
+    private final Boolean isAnswer;
 }

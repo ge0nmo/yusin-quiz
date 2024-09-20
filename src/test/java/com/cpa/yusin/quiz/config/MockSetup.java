@@ -88,7 +88,7 @@ public class MockSetup
                 .id(1L)
                 .content("choice 1")
                 .number(1)
-                .answer(true)
+                .isAnswer(true)
                 .problem(physicsProblem1)
                 .build());
 
@@ -96,7 +96,7 @@ public class MockSetup
                 .id(2L)
                 .content("choice 2")
                 .number(2)
-                .answer(false)
+                .isAnswer(false)
                 .problem(physicsProblem1)
                 .build());
 
@@ -104,7 +104,7 @@ public class MockSetup
                 .id(3L)
                 .content("choice 3")
                 .number(3)
-                .answer(false)
+                .isAnswer(false)
                 .problem(physicsProblem1)
                 .build());
     }

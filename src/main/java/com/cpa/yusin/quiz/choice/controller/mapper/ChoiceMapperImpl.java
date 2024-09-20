@@ -22,7 +22,7 @@ public class ChoiceMapperImpl implements ChoiceMapper
         return ChoiceDomain.builder()
                 .number(request.getNumber())
                 .content(request.getContent())
-                .answer(request.isAnswer())
+                .isAnswer(request.getIsAnswer())
                 .problem(problemDomain)
                 .build();
     }
@@ -38,7 +38,7 @@ public class ChoiceMapperImpl implements ChoiceMapper
                 .id(domain.getId())
                 .number(domain.getNumber())
                 .content(domain.getContent())
-                .isAnswer(domain.isAnswer())
+                .isAnswer(domain.getIsAnswer())
                 .build();
     }
 
@@ -63,7 +63,7 @@ public class ChoiceMapperImpl implements ChoiceMapper
                 .id(domain.getId())
                 .number(domain.getNumber())
                 .content(domain.getContent())
-                .isAnswer(domain.isAnswer())
+                .isAnswer(domain.getIsAnswer())
                 .build();
     }
 
