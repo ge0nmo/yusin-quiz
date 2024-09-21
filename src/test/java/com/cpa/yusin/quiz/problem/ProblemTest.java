@@ -1,6 +1,8 @@
 package com.cpa.yusin.quiz.problem;
 
 import com.cpa.yusin.quiz.choice.controller.dto.request.ChoiceRequest;
+import com.cpa.yusin.quiz.choice.domain.ChoiceDomain;
+import com.cpa.yusin.quiz.choice.service.port.ChoiceRepository;
 import com.cpa.yusin.quiz.config.TeardownExtension;
 import com.cpa.yusin.quiz.exam.domain.ExamDomain;
 import com.cpa.yusin.quiz.exam.service.port.ExamRepository;
@@ -9,6 +11,7 @@ import com.cpa.yusin.quiz.member.domain.type.Platform;
 import com.cpa.yusin.quiz.member.domain.type.Role;
 import com.cpa.yusin.quiz.member.service.port.MemberRepository;
 import com.cpa.yusin.quiz.problem.controller.dto.request.ProblemRequest;
+import com.cpa.yusin.quiz.problem.domain.ProblemDomain;
 import com.cpa.yusin.quiz.problem.service.port.ProblemRepository;
 import com.cpa.yusin.quiz.subject.domain.SubjectDomain;
 import com.cpa.yusin.quiz.subject.service.port.SubjectRepository;
@@ -28,6 +31,7 @@ import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -41,8 +45,7 @@ import static org.springframework.restdocs.operation.preprocess.Preprocessors.*;
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.prettyPrint;
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
-import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
-import static org.springframework.restdocs.request.RequestDocumentation.queryParameters;
+import static org.springframework.restdocs.request.RequestDocumentation.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith({RestDocumentationExtension.class, TeardownExtension.class})
@@ -66,10 +69,13 @@ public class ProblemTest
     @Autowired
     private ProblemRepository problemRepository;
 
+    @Autowired
+    private ChoiceRepository choiceRepository;
+
     private final ObjectMapper mapper = new ObjectMapper();
 
     MemberDomain admin;
-    SubjectDomain economics;
+    SubjectDomain english;
     ExamDomain exam;
 
     @BeforeEach
@@ -89,7 +95,7 @@ public class ProblemTest
                 .build());
 
 
-        economics = subjectRepository.save(SubjectDomain.builder()
+        english = subjectRepository.save(SubjectDomain.builder()
                 .id(1L)
                 .name("영어")
                 .createdAt(LocalDateTime.now())
@@ -101,7 +107,7 @@ public class ProblemTest
                 .year(2024)
                 .name("1차")
                 .maxProblemCount(40)
-                .subjectId(economics.getId())
+                .subjectId(english.getId())
                 .build());
     }
 
@@ -180,4 +186,136 @@ public class ProblemTest
         ;
 
     }
+
+    @Transactional
+    @WithUserDetails(value = "John@gmail.com", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+    @Test
+    void getById() throws Exception
+    {
+        // given
+        String content = "The walking tour was a big ___ to some people";
+        ProblemDomain problem = problemRepository.save(ProblemDomain.builder()
+                .id(1L)
+                .content(content)
+                .number(1)
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .exam(exam)
+                .build());
+
+        List<ChoiceDomain> choices = List.of(
+                ChoiceDomain.builder().id(1L).content("disappointing").number(1).isAnswer(true).createdAt(LocalDateTime.now()).updatedAt(LocalDateTime.now()).problem(problem).build(),
+                ChoiceDomain.builder().id(2L).content("disappointment").number(2).isAnswer(false).createdAt(LocalDateTime.now()).updatedAt(LocalDateTime.now()).problem(problem).build(),
+                ChoiceDomain.builder().id(3L).content("disappoint").number(3).isAnswer(false).createdAt(LocalDateTime.now()).updatedAt(LocalDateTime.now()).problem(problem).build(),
+                ChoiceDomain.builder().id(4L).content("disappointedly").number(4).isAnswer(false).createdAt(LocalDateTime.now()).updatedAt(LocalDateTime.now()).problem(problem).build()
+        );
+        choiceRepository.saveAll(choices);
+
+        // when
+        ResultActions resultActions = mvc
+                .perform(get("/api/v1/admin/problem/" + problem.getId()));
+
+        // then
+        resultActions
+                .andExpect(status().isOk())
+                .andDo(document("getProblemById",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+
+                        responseFields(
+                                fieldWithPath("data.id").description("문제 고유 식별자").type(JsonFieldType.NUMBER).optional(),
+                                fieldWithPath("data.content").description("문제 내용").type(JsonFieldType.STRING),
+                                fieldWithPath("data.number").description("문제 번호").type(JsonFieldType.NUMBER),
+                                fieldWithPath("data.choices").description("선택지 목록").type(JsonFieldType.ARRAY),
+                                fieldWithPath("data.choices[].id").description("선택지 식별자").type(JsonFieldType.NUMBER),
+                                fieldWithPath("data.choices[].number").description("선택지 번호").type(JsonFieldType.NUMBER),
+                                fieldWithPath("data.choices[].content").description("선택지 내용").type(JsonFieldType.STRING),
+                                fieldWithPath("data.choices[].isAnswer").description("정답 여부").type(JsonFieldType.BOOLEAN)
+                        )
+                ));
+
+
+    }
+
+    @Transactional
+    @WithUserDetails(value = "John@gmail.com", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+    @Test
+    void getAllProblemsByExamId() throws Exception
+    {
+        // given
+        String content = "The walking tour was a big ___ to some people";
+        ProblemDomain problem = problemRepository.save(ProblemDomain.builder()
+                .id(1L)
+                .content(content)
+                .number(1)
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .exam(exam)
+                .build());
+
+        List<ChoiceDomain> choices = List.of(
+                ChoiceDomain.builder().id(1L).content("disappointing").number(1).isAnswer(true)
+                        .createdAt(LocalDateTime.now()).updatedAt(LocalDateTime.now()).problem(problem).build(),
+                ChoiceDomain.builder().id(2L).content("disappointment").number(2).isAnswer(false)
+                        .createdAt(LocalDateTime.now()).updatedAt(LocalDateTime.now()).problem(problem).build(),
+                ChoiceDomain.builder().id(3L).content("disappoint").number(3).isAnswer(false)
+                        .createdAt(LocalDateTime.now()).updatedAt(LocalDateTime.now()).problem(problem).build(),
+                ChoiceDomain.builder().id(4L).content("disappointedly").number(4).isAnswer(false)
+                        .createdAt(LocalDateTime.now()).updatedAt(LocalDateTime.now()).problem(problem).build()
+        );
+
+        choiceRepository.saveAll(choices);
+
+        content = "He recently ___ a tour of the company's main facility";
+        ProblemDomain problem2 = problemRepository.save(ProblemDomain.builder()
+                .id(2L)
+                .content(content)
+                .number(2)
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .exam(exam)
+                .build());
+
+        List<ChoiceDomain> choices2 = List.of(
+                ChoiceDomain.builder().id(5L).content("conducted").number(1).isAnswer(true)
+                        .createdAt(LocalDateTime.now()).updatedAt(LocalDateTime.now()).problem(problem2).build(),
+                ChoiceDomain.builder().id(6L).content("conduct").number(2).isAnswer(false)
+                        .createdAt(LocalDateTime.now()).updatedAt(LocalDateTime.now()).problem(problem2).build(),
+                ChoiceDomain.builder().id(7L).content("to conduct").number(3).isAnswer(false)
+                        .createdAt(LocalDateTime.now()).updatedAt(LocalDateTime.now()).problem(problem2).build(),
+                ChoiceDomain.builder().id(8L).content("conductor").number(4).isAnswer(false)
+                        .createdAt(LocalDateTime.now()).updatedAt(LocalDateTime.now()).problem(problem2).build()
+        );
+
+        choiceRepository.saveAll(choices2);
+
+
+        // when
+        ResultActions resultActions = mvc
+                .perform(get("/api/v1/admin/problem")
+                        .queryParam("examId", exam.getId().toString())
+                );
+
+        // then
+        resultActions
+                .andExpect(status().isOk())
+                .andDo(document("getAllProblemsByExamId",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+
+                        responseFields(
+                                fieldWithPath("data[].id").description("문제 고유 식별자").type(JsonFieldType.NUMBER).optional(),
+                                fieldWithPath("data[].content").description("문제 내용").type(JsonFieldType.STRING),
+                                fieldWithPath("data[].number").description("문제 번호").type(JsonFieldType.NUMBER),
+                                fieldWithPath("data[].choices").description("선택지 목록").type(JsonFieldType.ARRAY),
+                                fieldWithPath("data[].choices[].id").description("선택지 식별자").type(JsonFieldType.NUMBER),
+                                fieldWithPath("data[].choices[].number").description("선택지 번호").type(JsonFieldType.NUMBER),
+                                fieldWithPath("data[].choices[].content").description("선택지 내용").type(JsonFieldType.STRING),
+                                fieldWithPath("data[].choices[].isAnswer").description("정답 여부").type(JsonFieldType.BOOLEAN)
+                        )
+                ));
+
+
+    }
+
 }

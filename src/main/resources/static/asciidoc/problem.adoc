@@ -9,7 +9,7 @@
 
 == 문제 & 선택지 API
 
-== 문제 등록 성공
+== 문제 등록
 ==== HTTP Request
 include::{snippets}/problemSaveUpdateSuccess/http-request.adoc[]
 
@@ -24,3 +24,25 @@ include::{snippets}/problemSaveUpdateSuccess/http-response.adoc[]
 
 ==== Response Fields
 include::{snippets}/problemSaveUpdateSuccess/response-fields.adoc[]
+
+
+== 문제 1개 조회
+==== HTTP Request
+include::{snippets}/getProblemById/http-request.adoc[]
+
+==== HTTP Response
+include::{snippets}/getProblemById/http-response.adoc[]
+
+==== Response Fields
+include::{snippets}/getProblemById/response-fields.adoc[]
+
+
+== 시험의 모든 문제 조회
+==== HTTP Request
+include::{snippets}/getAllProblemsByExamId/http-request.adoc[]
+
+==== HTTP Response
+include::{snippets}/getAllProblemsByExamId/http-response.adoc[]
+
+==== Response Fields
+include::{snippets}/getAllProblemsByExamId/response-fields.adoc[]
