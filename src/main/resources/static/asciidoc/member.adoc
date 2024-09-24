@@ -150,3 +150,15 @@ include::{snippets}/회원 삭제 - 실패/http-request.adoc[]
 
 ==== HTTP Response
 include::{snippets}/회원 삭제 - 실패/http-response.adoc[]
+
+
+=== 권한 없는 유저
+
+==== HTTP Request
+include::{snippets}/oauth2Login/http-request.adoc[]
+
+==== HTTP Response
+include::{snippets}/oauth2Login/http-response.adoc[]
+
+==== Response Header
+include::{snippets}/oauth2Login/response-headers.adoc[]
