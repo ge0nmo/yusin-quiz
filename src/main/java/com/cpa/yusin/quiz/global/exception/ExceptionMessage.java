@@ -27,7 +27,11 @@ public enum ExceptionMessage
 
     CHOICE_NOT_FOUND("해당 보기 정보를 찾을 수 없습니다."),
 
-    INVALID_DATA("유효하지 않은 데이터입니다.")
+    INVALID_DATA("유효하지 않은 데이터입니다."),
+
+    PRODUCT_NOT_FOUND("해당 상품을 찾을 수 없습니다"),
+
+    PRODUCT_DUPLICATED("동일한 상품 정보가 존재합니다.")
 ;
 
     private final String message;
