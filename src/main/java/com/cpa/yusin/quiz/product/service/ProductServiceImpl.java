@@ -3,6 +3,7 @@ package com.cpa.yusin.quiz.product.service;
 import com.cpa.yusin.quiz.global.exception.ExceptionMessage;
 import com.cpa.yusin.quiz.global.exception.GlobalException;
 import com.cpa.yusin.quiz.product.controller.dto.request.ProductRegisterRequest;
+import com.cpa.yusin.quiz.product.controller.dto.request.ProductUpdateRequest;
 import com.cpa.yusin.quiz.product.controller.dto.response.ProductDTO;
 import com.cpa.yusin.quiz.product.controller.dto.response.ProductRegisterResponse;
 import com.cpa.yusin.quiz.product.controller.port.ProductService;
@@ -32,6 +33,15 @@ public class ProductServiceImpl implements ProductService
 
         product = productRepository.save(product);
         return productMapper.toProductRegisterResponse(product);
+    }
+
+    @Override
+    public void update(long productId, ProductUpdateRequest request)
+    {
+        ProductDomain product = findById(productId);
+
+        product.update(request);
+        productRepository.save(product);
     }
 
     @Override
