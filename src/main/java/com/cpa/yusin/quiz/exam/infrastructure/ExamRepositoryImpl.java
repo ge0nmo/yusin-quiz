@@ -1,6 +1,6 @@
 package com.cpa.yusin.quiz.exam.infrastructure;
 
-import com.cpa.yusin.quiz.exam.domain.ExamDomain;
+import com.cpa.yusin.quiz.exam.domain.Exam;
 import com.cpa.yusin.quiz.exam.service.port.ExamRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -15,25 +15,21 @@ public class ExamRepositoryImpl implements ExamRepository
     private final ExamJpaRepository examJpaRepository;
 
     @Override
-    public ExamDomain save(ExamDomain exam)
+    public Exam save(Exam exam)
     {
-        return examJpaRepository.save(Exam.from(exam))
-                .toModel();
+        return examJpaRepository.save(exam);
     }
 
     @Override
-    public Optional<ExamDomain> findById(long id)
+    public Optional<Exam> findById(long id)
     {
-        return examJpaRepository.findById(id)
-                .map(Exam::toModel);
+        return examJpaRepository.findById(id);
     }
 
     @Override
-    public List<ExamDomain> findAllBySubjectId(long subjectId, int year)
+    public List<Exam> findAllBySubjectId(long subjectId, int year)
     {
-        return examJpaRepository.findAllBySubjectId(subjectId, year).stream()
-                .map(Exam::toModel)
-                .toList();
+        return examJpaRepository.findAllBySubjectId(subjectId, year);
     }
 
     @Override

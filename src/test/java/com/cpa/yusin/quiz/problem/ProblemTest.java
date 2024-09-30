@@ -1,19 +1,19 @@
 package com.cpa.yusin.quiz.problem;
 
 import com.cpa.yusin.quiz.choice.controller.dto.request.ChoiceRequest;
-import com.cpa.yusin.quiz.choice.domain.ChoiceDomain;
+import com.cpa.yusin.quiz.choice.domain.Choice;
 import com.cpa.yusin.quiz.choice.service.port.ChoiceRepository;
 import com.cpa.yusin.quiz.config.TeardownExtension;
-import com.cpa.yusin.quiz.exam.domain.ExamDomain;
+import com.cpa.yusin.quiz.exam.domain.Exam;
 import com.cpa.yusin.quiz.exam.service.port.ExamRepository;
-import com.cpa.yusin.quiz.member.domain.MemberDomain;
+import com.cpa.yusin.quiz.member.domain.Member;
 import com.cpa.yusin.quiz.member.domain.type.Platform;
 import com.cpa.yusin.quiz.member.domain.type.Role;
 import com.cpa.yusin.quiz.member.service.port.MemberRepository;
 import com.cpa.yusin.quiz.problem.controller.dto.request.ProblemRequest;
-import com.cpa.yusin.quiz.problem.domain.ProblemDomain;
+import com.cpa.yusin.quiz.problem.domain.Problem;
 import com.cpa.yusin.quiz.problem.service.port.ProblemRepository;
-import com.cpa.yusin.quiz.subject.domain.SubjectDomain;
+import com.cpa.yusin.quiz.subject.domain.Subject;
 import com.cpa.yusin.quiz.subject.service.port.SubjectRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -74,9 +74,9 @@ public class ProblemTest
 
     private final ObjectMapper mapper = new ObjectMapper();
 
-    MemberDomain admin;
-    SubjectDomain english;
-    ExamDomain exam;
+    Member admin;
+    Subject english;
+    Exam exam;
 
     @BeforeEach
     void setUp(WebApplicationContext webApplicationContext, RestDocumentationContextProvider restDocumentation) {
@@ -84,25 +84,21 @@ public class ProblemTest
                 .apply(documentationConfiguration(restDocumentation))
                 .build();
 
-        admin = memberRepository.save(MemberDomain.builder()
+        admin = memberRepository.save(Member.builder()
                 .email("John@gmail.com")
                 .password("12341234")
                 .username("John")
                 .platform(Platform.HOME)
                 .role(Role.ADMIN)
-                .createdAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now())
                 .build());
 
 
-        english = subjectRepository.save(SubjectDomain.builder()
+        english = subjectRepository.save(Subject.builder()
                 .id(1L)
                 .name("영어")
-                .createdAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now())
                 .build());
 
-        exam = examRepository.save(ExamDomain.builder()
+        exam = examRepository.save(Exam.builder()
                 .id(1L)
                 .year(2024)
                 .name("1차")
@@ -194,20 +190,18 @@ public class ProblemTest
     {
         // given
         String content = "The walking tour was a big ___ to some people";
-        ProblemDomain problem = problemRepository.save(ProblemDomain.builder()
+        Problem problem = problemRepository.save(Problem.builder()
                 .id(1L)
                 .content(content)
                 .number(1)
-                .createdAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now())
                 .exam(exam)
                 .build());
 
-        List<ChoiceDomain> choices = List.of(
-                ChoiceDomain.builder().id(1L).content("disappointing").number(1).isAnswer(true).createdAt(LocalDateTime.now()).updatedAt(LocalDateTime.now()).problem(problem).build(),
-                ChoiceDomain.builder().id(2L).content("disappointment").number(2).isAnswer(false).createdAt(LocalDateTime.now()).updatedAt(LocalDateTime.now()).problem(problem).build(),
-                ChoiceDomain.builder().id(3L).content("disappoint").number(3).isAnswer(false).createdAt(LocalDateTime.now()).updatedAt(LocalDateTime.now()).problem(problem).build(),
-                ChoiceDomain.builder().id(4L).content("disappointedly").number(4).isAnswer(false).createdAt(LocalDateTime.now()).updatedAt(LocalDateTime.now()).problem(problem).build()
+        List<Choice> choices = List.of(
+                Choice.builder().id(1L).content("disappointing").number(1).isAnswer(true).problem(problem).build(),
+                Choice.builder().id(2L).content("disappointment").number(2).isAnswer(false).problem(problem).build(),
+                Choice.builder().id(3L).content("disappoint").number(3).isAnswer(false).problem(problem).build(),
+                Choice.builder().id(4L).content("disappointedly").number(4).isAnswer(false).problem(problem).build()
         );
         choiceRepository.saveAll(choices);
 
@@ -244,47 +238,43 @@ public class ProblemTest
     {
         // given
         String content = "The walking tour was a big ___ to some people";
-        ProblemDomain problem = problemRepository.save(ProblemDomain.builder()
+        Problem problem = problemRepository.save(Problem.builder()
                 .id(1L)
                 .content(content)
                 .number(1)
-                .createdAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now())
                 .exam(exam)
                 .build());
 
-        List<ChoiceDomain> choices = List.of(
-                ChoiceDomain.builder().id(1L).content("disappointing").number(1).isAnswer(true)
-                        .createdAt(LocalDateTime.now()).updatedAt(LocalDateTime.now()).problem(problem).build(),
-                ChoiceDomain.builder().id(2L).content("disappointment").number(2).isAnswer(false)
-                        .createdAt(LocalDateTime.now()).updatedAt(LocalDateTime.now()).problem(problem).build(),
-                ChoiceDomain.builder().id(3L).content("disappoint").number(3).isAnswer(false)
-                        .createdAt(LocalDateTime.now()).updatedAt(LocalDateTime.now()).problem(problem).build(),
-                ChoiceDomain.builder().id(4L).content("disappointedly").number(4).isAnswer(false)
-                        .createdAt(LocalDateTime.now()).updatedAt(LocalDateTime.now()).problem(problem).build()
+        List<Choice> choices = List.of(
+                Choice.builder().id(1L).content("disappointing").number(1).isAnswer(true)
+                       .problem(problem).build(),
+                Choice.builder().id(2L).content("disappointment").number(2).isAnswer(false)
+                       .problem(problem).build(),
+                Choice.builder().id(3L).content("disappoint").number(3).isAnswer(false)
+                       .problem(problem).build(),
+                Choice.builder().id(4L).content("disappointedly").number(4).isAnswer(false)
+                        .problem(problem).build()
         );
 
         choiceRepository.saveAll(choices);
 
         content = "He recently ___ a tour of the company's main facility";
-        ProblemDomain problem2 = problemRepository.save(ProblemDomain.builder()
+        Problem problem2 = problemRepository.save(Problem.builder()
                 .id(2L)
                 .content(content)
                 .number(2)
-                .createdAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now())
                 .exam(exam)
                 .build());
 
-        List<ChoiceDomain> choices2 = List.of(
-                ChoiceDomain.builder().id(5L).content("conducted").number(1).isAnswer(true)
-                        .createdAt(LocalDateTime.now()).updatedAt(LocalDateTime.now()).problem(problem2).build(),
-                ChoiceDomain.builder().id(6L).content("conduct").number(2).isAnswer(false)
-                        .createdAt(LocalDateTime.now()).updatedAt(LocalDateTime.now()).problem(problem2).build(),
-                ChoiceDomain.builder().id(7L).content("to conduct").number(3).isAnswer(false)
-                        .createdAt(LocalDateTime.now()).updatedAt(LocalDateTime.now()).problem(problem2).build(),
-                ChoiceDomain.builder().id(8L).content("conductor").number(4).isAnswer(false)
-                        .createdAt(LocalDateTime.now()).updatedAt(LocalDateTime.now()).problem(problem2).build()
+        List<Choice> choices2 = List.of(
+                Choice.builder().id(5L).content("conducted").number(1).isAnswer(true)
+                        .problem(problem2).build(),
+                Choice.builder().id(6L).content("conduct").number(2).isAnswer(false)
+                        .problem(problem2).build(),
+                Choice.builder().id(7L).content("to conduct").number(3).isAnswer(false)
+                        .problem(problem2).build(),
+                Choice.builder().id(8L).content("conductor").number(4).isAnswer(false)
+                        .problem(problem2).build()
         );
 
         choiceRepository.saveAll(choices2);

@@ -1,14 +1,13 @@
 package com.cpa.yusin.quiz.exam.service;
 
-import com.cpa.yusin.quiz.choice.domain.ChoiceDomain;
-import com.cpa.yusin.quiz.config.MockSetup;
+import com.cpa.yusin.quiz.choice.domain.Choice;
 import com.cpa.yusin.quiz.config.TestContainer;
 import com.cpa.yusin.quiz.exam.controller.dto.request.ExamCreateRequest;
 import com.cpa.yusin.quiz.exam.controller.dto.request.ExamUpdateRequest;
 import com.cpa.yusin.quiz.exam.controller.dto.response.ExamCreateResponse;
-import com.cpa.yusin.quiz.exam.domain.ExamDomain;
-import com.cpa.yusin.quiz.problem.domain.ProblemDomain;
-import com.cpa.yusin.quiz.subject.domain.SubjectDomain;
+import com.cpa.yusin.quiz.exam.domain.Exam;
+import com.cpa.yusin.quiz.problem.domain.Problem;
+import com.cpa.yusin.quiz.subject.domain.Subject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -21,14 +20,14 @@ class ExamServiceTest
 {
     TestContainer testContainer;
 
-    SubjectDomain physics;
+    Subject physics;
 
     @BeforeEach
     void setUp()
     {
         testContainer = new TestContainer();
 
-        physics = testContainer.subjectRepository.save(SubjectDomain.builder()
+        physics = testContainer.subjectRepository.save(Subject.builder()
                 .id(1L)
                 .name("Physics")
                 .build());
@@ -68,45 +67,45 @@ class ExamServiceTest
         testContainer.examService.update(1L, request);
 
         // then
-        ExamDomain examDomain = testContainer.examRepository.findById(1L).orElseThrow();
+        Exam exam = testContainer.examRepository.findById(1L).orElseThrow();
 
-        assertThat(examDomain.getName()).isEqualTo("update exam");
-        assertThat(examDomain.getYear()).isEqualTo(2020);
+        assertThat(exam.getName()).isEqualTo("update exam");
+        assertThat(exam.getYear()).isEqualTo(2020);
     }
 
     @Test
     void deleteById()
     {
         // given
-        ExamDomain shouldBeRemovedExam = testContainer.examRepository.save(ExamDomain.builder()
+        Exam shouldBeRemovedExam = testContainer.examRepository.save(Exam.builder()
                 .id(1L)
                 .name("2024 1차")
                 .year(2024)
                 .subjectId(physics.getId())
                 .build());
 
-        ExamDomain shouldNotBeRemovedExam = testContainer.examRepository.save(ExamDomain.builder()
+        Exam shouldNotBeRemovedExam = testContainer.examRepository.save(Exam.builder()
                 .id(2L)
                 .name("2024 2차")
                 .year(2024)
                 .subjectId(physics.getId())
                 .build());
 
-        ProblemDomain shouldBeRemovedProblem = testContainer.problemRepository.save(ProblemDomain.builder()
+        Problem shouldBeRemovedProblem = testContainer.problemRepository.save(Problem.builder()
                 .id(1L)
                 .content("content abc")
                 .number(1)
                 .exam(shouldBeRemovedExam)
                 .build());
 
-        ProblemDomain shouldNotBeRemovedProblem = testContainer.problemRepository.save(ProblemDomain.builder()
+        Problem shouldNotBeRemovedProblem = testContainer.problemRepository.save(Problem.builder()
                 .id(2L)
                 .content("content abcdce")
                 .number(1)
                 .exam(shouldNotBeRemovedExam)
                 .build());
 
-        testContainer.choiceRepository.save(ChoiceDomain.builder()
+        testContainer.choiceRepository.save(Choice.builder()
                 .id(1L)
                 .content("choice 1")
                 .number(1)
@@ -114,7 +113,7 @@ class ExamServiceTest
                 .problem(shouldBeRemovedProblem)
                 .build());
 
-        ChoiceDomain shouldNotBeRemovedChoice = testContainer.choiceRepository.save(ChoiceDomain.builder()
+        Choice shouldNotBeRemovedChoice = testContainer.choiceRepository.save(Choice.builder()
                 .id(2L)
                 .content("choice 1")
                 .number(1)
@@ -125,9 +124,9 @@ class ExamServiceTest
 
         // when
         testContainer.examService.deleteById(ids);
-        Optional<ExamDomain> removedExam = testContainer.examRepository.findById(1L);
-        Optional<ProblemDomain> existingProblem = testContainer.problemRepository.findById(shouldNotBeRemovedProblem.getId());
-        Optional<ChoiceDomain> existingChoice = testContainer.choiceRepository.findById(shouldNotBeRemovedChoice.getId());
+        Optional<Exam> removedExam = testContainer.examRepository.findById(1L);
+        Optional<Problem> existingProblem = testContainer.problemRepository.findById(shouldNotBeRemovedProblem.getId());
+        Optional<Choice> existingChoice = testContainer.choiceRepository.findById(shouldNotBeRemovedChoice.getId());
 
         // then
         assertThat(removedExam).isEmpty();

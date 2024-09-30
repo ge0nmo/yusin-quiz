@@ -9,7 +9,6 @@ import com.cpa.yusin.quiz.common.infrastructure.CascadeDeleteServiceImpl;
 import com.cpa.yusin.quiz.common.service.CascadeDeleteService;
 import com.cpa.yusin.quiz.exam.controller.AdminExamController;
 import com.cpa.yusin.quiz.exam.controller.mapper.ExamMapper;
-import com.cpa.yusin.quiz.exam.controller.mapper.ExamMapperImpl;
 import com.cpa.yusin.quiz.exam.controller.port.ExamService;
 import com.cpa.yusin.quiz.exam.infrastructure.ExamValidatorImpl;
 import com.cpa.yusin.quiz.exam.service.ExamServiceImpl;
@@ -21,7 +20,6 @@ import com.cpa.yusin.quiz.global.jwt.JwtServiceImpl;
 import com.cpa.yusin.quiz.global.security.CustomAuthenticationProvider;
 import com.cpa.yusin.quiz.member.controller.AdminMemberController;
 import com.cpa.yusin.quiz.member.controller.mapper.MemberMapper;
-import com.cpa.yusin.quiz.member.controller.mapper.MemberMapperImpl;
 import com.cpa.yusin.quiz.member.controller.port.AuthenticationService;
 import com.cpa.yusin.quiz.member.controller.port.MemberService;
 import com.cpa.yusin.quiz.member.infrastructure.MemberValidatorImpl;
@@ -32,13 +30,11 @@ import com.cpa.yusin.quiz.member.service.port.MemberValidator;
 import com.cpa.yusin.quiz.mock.*;
 import com.cpa.yusin.quiz.problem.controller.AdminProblemController;
 import com.cpa.yusin.quiz.problem.controller.mapper.ProblemMapper;
-import com.cpa.yusin.quiz.problem.controller.mapper.ProblemMapperImpl;
 import com.cpa.yusin.quiz.problem.controller.port.ProblemService;
 import com.cpa.yusin.quiz.problem.service.ProblemServiceImpl;
 import com.cpa.yusin.quiz.problem.service.port.ProblemRepository;
 import com.cpa.yusin.quiz.subject.controller.AdminSubjectController;
 import com.cpa.yusin.quiz.subject.controller.mapper.SubjectMapper;
-import com.cpa.yusin.quiz.subject.controller.mapper.SubjectMapperImpl;
 import com.cpa.yusin.quiz.subject.controller.port.SubjectService;
 import com.cpa.yusin.quiz.subject.infrastructure.SubjectValidatorImpl;
 import com.cpa.yusin.quiz.subject.service.SubjectServiceImpl;
@@ -107,7 +103,7 @@ public class TestContainer
 
         cascadeDeleteService = new CascadeDeleteServiceImpl(this.subjectRepository, this.examRepository, this.problemRepository, this.choiceRepository);
 
-        this.memberMapper = new MemberMapperImpl();
+        this.memberMapper = new MemberMapper();
         this.memberService = new MemberServiceImpl(this.memberRepository, this.memberMapper);
         this.memberDetailsService = new MemberDetailsService(this.memberRepository);
         this.passwordEncoder = new BCryptPasswordEncoder();
@@ -121,11 +117,11 @@ public class TestContainer
 
 
         this.subjectValidator = new SubjectValidatorImpl(this.subjectRepository);
-        this.subjectMapper = new SubjectMapperImpl();
+        this.subjectMapper = new SubjectMapper();
         this.subjectService = new SubjectServiceImpl(this.subjectRepository, this.subjectMapper, this.subjectValidator, this.cascadeDeleteService);
         this.adminSubjectController = new AdminSubjectController(this.subjectService);
 
-        this.examMapper = new ExamMapperImpl();
+        this.examMapper = new ExamMapper();
         this.examValidator = new ExamValidatorImpl(this.examRepository);
         this.examService = new ExamServiceImpl(this.examRepository, this.examMapper, this.subjectService, this.cascadeDeleteService, this.examValidator);
         this.adminExamController = new AdminExamController(this.examService);
@@ -133,7 +129,7 @@ public class TestContainer
         this.choiceMapper = new ChoiceMapperImpl();
         this.choiceService = new ChoiceServiceImpl(this.choiceRepository, this.choiceMapper);
 
-        this.problemMapper = new ProblemMapperImpl();
+        this.problemMapper = new ProblemMapper();
         this.problemService = new ProblemServiceImpl(this.problemRepository, this.problemMapper,
                 this.examService, this.choiceService);
         this.adminProblemController = new AdminProblemController(this.problemService);

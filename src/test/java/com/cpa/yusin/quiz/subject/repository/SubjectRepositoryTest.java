@@ -1,7 +1,7 @@
 package com.cpa.yusin.quiz.subject.repository;
 
 import com.cpa.yusin.quiz.config.TestContainer;
-import com.cpa.yusin.quiz.subject.domain.SubjectDomain;
+import com.cpa.yusin.quiz.subject.domain.Subject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -19,17 +19,17 @@ class SubjectRepositoryTest
     {
         testContainer = new TestContainer();
 
-        testContainer.subjectRepository.save(SubjectDomain.builder()
+        testContainer.subjectRepository.save(Subject.builder()
                 .id(1L)
                 .name("Economy")
                 .build());
 
-        testContainer.subjectRepository.save(SubjectDomain.builder()
+        testContainer.subjectRepository.save(Subject.builder()
                 .id(2L)
                 .name("Chemistry")
                 .build());
 
-        testContainer.subjectRepository.save(SubjectDomain.builder()
+        testContainer.subjectRepository.save(Subject.builder()
                 .id(3L)
                 .name("English")
                 .build());
@@ -39,13 +39,13 @@ class SubjectRepositoryTest
     void save()
     {
         // given
-        SubjectDomain domain = SubjectDomain.builder()
+        Subject domain = Subject.builder()
                 .id(10L)
                 .name("Physics")
                 .build();
 
         // when
-        SubjectDomain result = testContainer.subjectRepository.save(domain);
+        Subject result = testContainer.subjectRepository.save(domain);
 
         // then
         assertThat(result.getName()).isEqualTo("Physics");
@@ -58,12 +58,12 @@ class SubjectRepositoryTest
         long id = 1L;
 
         // when
-        Optional<SubjectDomain> result = testContainer.subjectRepository.findById(id);
+        Optional<Subject> result = testContainer.subjectRepository.findById(id);
 
         // then
         assertThat(result.isPresent()).isTrue();
 
-        SubjectDomain domain = result.get();
+        Subject domain = result.get();
 
         assertThat(domain.getId()).isEqualTo(1L);
         assertThat(domain.getName()).isEqualTo("Economy");
@@ -75,7 +75,7 @@ class SubjectRepositoryTest
         // given
 
         // when
-        List<SubjectDomain> result = testContainer.subjectRepository.findAll();
+        List<Subject> result = testContainer.subjectRepository.findAll();
 
         // then
         assertThat(result)

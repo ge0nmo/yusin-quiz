@@ -3,8 +3,8 @@ package com.cpa.yusin.quiz.choice.controller.mapper;
 import com.cpa.yusin.quiz.choice.controller.dto.request.ChoiceRequest;
 import com.cpa.yusin.quiz.choice.controller.dto.response.ChoiceCreateResponse;
 import com.cpa.yusin.quiz.choice.controller.dto.response.ChoiceResponse;
-import com.cpa.yusin.quiz.choice.domain.ChoiceDomain;
-import com.cpa.yusin.quiz.problem.domain.ProblemDomain;
+import com.cpa.yusin.quiz.choice.domain.Choice;
+import com.cpa.yusin.quiz.problem.domain.Problem;
 import org.springframework.stereotype.Component;
 
 import java.util.Collections;
@@ -14,22 +14,22 @@ import java.util.List;
 public class ChoiceMapperImpl implements ChoiceMapper
 {
     @Override
-    public ChoiceDomain fromCreateRequestToDomain(ChoiceRequest request, ProblemDomain problemDomain)
+    public Choice fromCreateRequestToDomain(ChoiceRequest request, Problem problem)
     {
-        if(request == null || problemDomain == null)
+        if(request == null || problem == null)
             return null;
 
-        return ChoiceDomain.builder()
+        return Choice.builder()
                 .number(request.getNumber())
                 .content(request.getContent())
                 .isAnswer(request.getIsAnswer())
-                .problem(problemDomain)
+                .problem(problem)
                 .build();
     }
 
 
     @Override
-    public ChoiceCreateResponse toCreateResponse(ChoiceDomain domain)
+    public ChoiceCreateResponse toCreateResponse(Choice domain)
     {
         if(domain == null)
             return null;
@@ -43,7 +43,7 @@ public class ChoiceMapperImpl implements ChoiceMapper
     }
 
     @Override
-    public List<ChoiceCreateResponse> toCreateResponses(List<ChoiceDomain> domains)
+    public List<ChoiceCreateResponse> toCreateResponses(List<Choice> domains)
     {
         if(domains == null || domains.isEmpty())
             return Collections.emptyList();
@@ -54,7 +54,7 @@ public class ChoiceMapperImpl implements ChoiceMapper
     }
 
     @Override
-    public ChoiceResponse toResponse(ChoiceDomain domain)
+    public ChoiceResponse toResponse(Choice domain)
     {
         if(domain == null)
             return null;
@@ -68,7 +68,7 @@ public class ChoiceMapperImpl implements ChoiceMapper
     }
 
     @Override
-    public List<ChoiceResponse> toResponses(List<ChoiceDomain> domains)
+    public List<ChoiceResponse> toResponses(List<Choice> domains)
     {
         if(domains == null || domains.isEmpty())
             return Collections.emptyList();

@@ -1,19 +1,17 @@
 package com.cpa.yusin.quiz.subject.service.port;
 
-import com.cpa.yusin.quiz.subject.domain.SubjectDomain;
-import com.cpa.yusin.quiz.subject.infrastructure.Subject;
-import org.springframework.data.jpa.repository.JpaRepository;
+import com.cpa.yusin.quiz.subject.domain.Subject;
 
 import java.util.List;
 import java.util.Optional;
 
 public interface SubjectRepository
 {
-    SubjectDomain save(SubjectDomain subjectDomain);
+    Subject save(Subject subject);
 
-    Optional<SubjectDomain> findById(long id);
+    Optional<Subject> findById(long id);
 
-    List<SubjectDomain> findAll();
+    List<Subject> findAll();
 
     boolean existsById(long id);
 

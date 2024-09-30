@@ -31,7 +31,7 @@ public class AdminMemberController
                                                             @RequestBody @Valid MemberUpdateRequest request,
                                                             @AuthenticationPrincipal MemberDetails memberDetails)
     {
-        memberService.update(id, request, memberDetails.getMemberDomain());
+        memberService.update(id, request, memberDetails.getMember());
         MemberDTO response = memberService.getById(id);
 
         return ResponseEntity
@@ -62,7 +62,7 @@ public class AdminMemberController
     public ResponseEntity<GlobalResponse<Void>> deleteById(@Positive @PathVariable("id") long id,
                                                            @AuthenticationPrincipal MemberDetails memberDetails)
     {
-        memberService.deleteById(id, memberDetails.getMemberDomain());
+        memberService.deleteById(id, memberDetails.getMember());
 
         return ResponseEntity
                 .status(HttpStatus.NO_CONTENT)

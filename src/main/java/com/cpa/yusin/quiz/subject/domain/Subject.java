@@ -1,27 +1,27 @@
 package com.cpa.yusin.quiz.subject.domain;
 
+import com.cpa.yusin.quiz.common.infrastructure.BaseEntity;
 import com.cpa.yusin.quiz.subject.controller.dto.request.SubjectCreateRequest;
 import com.cpa.yusin.quiz.subject.controller.dto.request.SubjectUpdateRequest;
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
-
+@Entity
+@AllArgsConstructor
+@NoArgsConstructor
 @Builder
 @Getter
-public class SubjectDomain
+public class Subject extends BaseEntity
 {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String name;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
 
-    public static SubjectDomain from(SubjectCreateRequest request)
-    {
-        return SubjectDomain.builder()
-                .name(request.getName())
-                .build();
-    }
+    @Column(nullable = false, unique = true)
+    private String name;
 
     public void update(SubjectUpdateRequest request)
     {

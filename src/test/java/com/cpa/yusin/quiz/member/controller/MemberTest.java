@@ -8,7 +8,7 @@ import com.cpa.yusin.quiz.member.controller.dto.request.MemberCreateRequest;
 import com.cpa.yusin.quiz.member.controller.dto.request.MemberUpdateRequest;
 import com.cpa.yusin.quiz.member.controller.dto.response.MemberCreateResponse;
 import com.cpa.yusin.quiz.member.controller.port.AuthenticationService;
-import com.cpa.yusin.quiz.member.domain.MemberDomain;
+import com.cpa.yusin.quiz.member.domain.Member;
 import com.cpa.yusin.quiz.member.domain.type.Platform;
 import com.cpa.yusin.quiz.member.domain.type.Role;
 import com.cpa.yusin.quiz.member.service.port.MemberRepository;
@@ -57,7 +57,7 @@ class MemberTest
 
     long memberId;
 
-    MemberDomain member;
+    Member member;
 
     @BeforeEach
     void setUp()
@@ -74,14 +74,12 @@ class MemberTest
                 .email("Gale@github.com").password("12341234").username("Gale").build());
 
 
-        member = memberRepository.save(MemberDomain.builder()
+        member = memberRepository.save(Member.builder()
                 .email("John@gmail.com")
                 .password("12341234")
                 .username("John")
                 .platform(Platform.HOME)
                 .role(Role.ADMIN)
-                .createdAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now())
                 .build());
 
     }

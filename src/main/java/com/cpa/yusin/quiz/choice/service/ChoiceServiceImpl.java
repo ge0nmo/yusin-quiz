@@ -4,11 +4,11 @@ import com.cpa.yusin.quiz.choice.controller.dto.request.ChoiceRequest;
 import com.cpa.yusin.quiz.choice.controller.dto.response.ChoiceResponse;
 import com.cpa.yusin.quiz.choice.controller.mapper.ChoiceMapper;
 import com.cpa.yusin.quiz.choice.controller.port.ChoiceService;
-import com.cpa.yusin.quiz.choice.domain.ChoiceDomain;
+import com.cpa.yusin.quiz.choice.domain.Choice;
 import com.cpa.yusin.quiz.choice.service.port.ChoiceRepository;
 import com.cpa.yusin.quiz.global.exception.ExceptionMessage;
 import com.cpa.yusin.quiz.global.exception.GlobalException;
-import com.cpa.yusin.quiz.problem.domain.ProblemDomain;
+import com.cpa.yusin.quiz.problem.domain.Problem;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -31,28 +31,28 @@ public class ChoiceServiceImpl implements ChoiceService
 
 
     @Override
-    public void saveOrUpdate(Map<ProblemDomain, List<ChoiceRequest>> choiceMaps)
+    public void saveOrUpdate(Map<Problem, List<ChoiceRequest>> choiceMaps)
     {
-        List<ChoiceDomain> saveOrUpdate = new ArrayList<>();
+        List<Choice> saveOrUpdate = new ArrayList<>();
         List<Long> deleteList = new ArrayList<>();
 
-        for(Map.Entry<ProblemDomain, List<ChoiceRequest>> entry : choiceMaps.entrySet()) {
-            ProblemDomain problem = entry.getKey();
+        for(Map.Entry<Problem, List<ChoiceRequest>> entry : choiceMaps.entrySet()) {
+            Problem problem = entry.getKey();
             List<ChoiceRequest> requests = entry.getValue();
 
             for(ChoiceRequest request : requests) {
                 if(Boolean.TRUE.equals(request.getIsDeleted()) && !request.isNew()){
                     deleteList.add(request.getId());
                 } else{
-                    ChoiceDomain choiceDomain;
+                    Choice choice;
                     if(request.isNew()) {
-                        choiceDomain = choiceMapper.fromCreateRequestToDomain(request, problem);
+                        choice = choiceMapper.fromCreateRequestToDomain(request, problem);
                     } else{
-                        choiceDomain = findById(request.getId());
+                        choice = findById(request.getId());
                         log.info("request = {}", request.toString());
-                        choiceDomain.update(problem.getId(), request);
+                        choice.update(problem.getId(), request);
                     }
-                    saveOrUpdate.add(choiceDomain);
+                    saveOrUpdate.add(choice);
                 }
             }
         }
@@ -68,7 +68,7 @@ public class ChoiceServiceImpl implements ChoiceService
         }
     }
 
-    private void saveProcess(List<ChoiceDomain> domains)
+    private void saveProcess(List<Choice> domains)
     {
         if(!domains.isEmpty()){
             choiceRepository.saveAll(domains);
@@ -76,14 +76,14 @@ public class ChoiceServiceImpl implements ChoiceService
     }
 
     @Override
-    public ChoiceDomain findById(long id)
+    public Choice findById(long id)
     {
         return choiceRepository.findById(id)
                 .orElseThrow(() -> new GlobalException(ExceptionMessage.CHOICE_NOT_FOUND));
     }
 
     @Override
-    public List<ChoiceDomain> findAllByProblemId(long problemId)
+    public List<Choice> findAllByProblemId(long problemId)
     {
         return choiceRepository.findAllByProblemId(problemId);
     }
@@ -91,7 +91,7 @@ public class ChoiceServiceImpl implements ChoiceService
     @Override
     public List<ChoiceResponse> getAllByProblemId(long problemId)
     {
-        List<ChoiceDomain> choices = findAllByProblemId(problemId);
+        List<Choice> choices = findAllByProblemId(problemId);
 
         return choiceMapper.toResponses(choices);
     }
@@ -99,7 +99,7 @@ public class ChoiceServiceImpl implements ChoiceService
     @Override
     public Map<Long, List<ChoiceResponse>> findAllByExamId(long examId)
     {
-        List<ChoiceDomain> choices = choiceRepository.findAllByExamId(examId);
+        List<Choice> choices = choiceRepository.findAllByExamId(examId);
 
         return choices.stream()
                 .collect(groupingBy(
@@ -117,7 +117,7 @@ public class ChoiceServiceImpl implements ChoiceService
     public void deleteAllByProblemId(long problemId)
     {
         List<Long> choiceList = choiceRepository.findAllByProblemId(problemId).stream()
-                .map(ChoiceDomain::getId)
+                .map(Choice::getId)
                 .toList();
 
         choiceRepository.deleteAllByIdInBatch(choiceList);
@@ -127,7 +127,7 @@ public class ChoiceServiceImpl implements ChoiceService
     public void deleteAllByProblemIds(List<Long> problemIds)
     {
         List<Long> choiceList = choiceRepository.findAllByProblemIds(problemIds).stream()
-                .map(ChoiceDomain::getId)
+                .map(Choice::getId)
                 .toList();
 
         choiceRepository.deleteAllByIdInBatch(choiceList);

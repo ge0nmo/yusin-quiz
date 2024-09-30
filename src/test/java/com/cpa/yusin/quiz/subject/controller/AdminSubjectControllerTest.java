@@ -6,7 +6,7 @@ import com.cpa.yusin.quiz.subject.controller.dto.request.SubjectCreateRequest;
 import com.cpa.yusin.quiz.subject.controller.dto.request.SubjectUpdateRequest;
 import com.cpa.yusin.quiz.subject.controller.dto.response.SubjectCreateResponse;
 import com.cpa.yusin.quiz.subject.controller.dto.response.SubjectDTO;
-import com.cpa.yusin.quiz.subject.domain.SubjectDomain;
+import com.cpa.yusin.quiz.subject.domain.Subject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
@@ -15,7 +15,6 @@ import org.springframework.http.ResponseEntity;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 
 class AdminSubjectControllerTest
 {
@@ -52,7 +51,7 @@ class AdminSubjectControllerTest
     void update()
     {
         // given
-        testContainer.subjectRepository.save(SubjectDomain.builder().id(1L).name("English").build());
+        testContainer.subjectRepository.save(Subject.builder().id(1L).name("English").build());
 
         SubjectUpdateRequest request = SubjectUpdateRequest.builder()
                 .name("Japanese")
@@ -75,7 +74,7 @@ class AdminSubjectControllerTest
     void getById()
     {
         // given
-        testContainer.subjectRepository.save(SubjectDomain.builder().id(1L).name("English").build());
+        testContainer.subjectRepository.save(Subject.builder().id(1L).name("English").build());
 
         // when
         ResponseEntity<GlobalResponse<SubjectDTO>> result = testContainer.adminSubjectController.getById(1L);
@@ -93,9 +92,9 @@ class AdminSubjectControllerTest
     void getAll()
     {
         // given
-        testContainer.subjectRepository.save(SubjectDomain.builder().id(1L).name("Chemistry").build());
-        testContainer.subjectRepository.save(SubjectDomain.builder().id(2L).name("Physics").build());
-        testContainer.subjectRepository.save(SubjectDomain.builder().id(3L).name("Biology").build());
+        testContainer.subjectRepository.save(Subject.builder().id(1L).name("Chemistry").build());
+        testContainer.subjectRepository.save(Subject.builder().id(2L).name("Physics").build());
+        testContainer.subjectRepository.save(Subject.builder().id(3L).name("Biology").build());
 
         // when
         ResponseEntity<GlobalResponse<List<SubjectDTO>>> result = testContainer.adminSubjectController.getAll();
@@ -119,7 +118,7 @@ class AdminSubjectControllerTest
     void deleteById()
     {
         // given
-        testContainer.subjectRepository.save(SubjectDomain.builder().id(1L).name("Chemistry").build());
+        testContainer.subjectRepository.save(Subject.builder().id(1L).name("Chemistry").build());
 
         // when
         ResponseEntity<Object> result = testContainer.adminSubjectController.deleteById(1L);

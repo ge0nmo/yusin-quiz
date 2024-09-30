@@ -1,24 +1,36 @@
 package com.cpa.yusin.quiz.problem.domain;
 
-import com.cpa.yusin.quiz.exam.domain.ExamDomain;
+import com.cpa.yusin.quiz.exam.domain.Exam;
 import com.cpa.yusin.quiz.global.exception.ExceptionMessage;
 import com.cpa.yusin.quiz.global.exception.GlobalException;
 import com.cpa.yusin.quiz.problem.controller.dto.request.ProblemRequest;
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
-
+@AllArgsConstructor
+@NoArgsConstructor
+@Entity
 @Getter
 @Builder
-public class ProblemDomain
+public class Problem
 {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(nullable = false)
     private String content;
+
+    @Column(nullable = false)
     private int number;
-    private ExamDomain exam;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "exam_id", nullable = false)
+    private Exam exam;
+
 
     public void update(long examId, ProblemRequest request)
     {

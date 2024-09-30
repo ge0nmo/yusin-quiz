@@ -1,17 +1,17 @@
 package com.cpa.yusin.quiz.exam.service.port;
 
-import com.cpa.yusin.quiz.exam.domain.ExamDomain;
+import com.cpa.yusin.quiz.exam.domain.Exam;
 
 import java.util.List;
 import java.util.Optional;
 
 public interface ExamRepository
 {
-    ExamDomain save(ExamDomain exam);
+    Exam save(Exam exam);
 
-    Optional<ExamDomain> findById(long id);
+    Optional<Exam> findById(long id);
 
-    List<ExamDomain> findAllBySubjectId(long subjectId, int year);
+    List<Exam> findAllBySubjectId(long subjectId, int year);
 
     void deleteById(long id);
 

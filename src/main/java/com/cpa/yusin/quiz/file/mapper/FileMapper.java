@@ -1,7 +1,7 @@
 package com.cpa.yusin.quiz.file.mapper;
 
 import com.cpa.yusin.quiz.file.controller.dto.response.FileResponse;
-import com.cpa.yusin.quiz.file.domain.FileDomain;
+import com.cpa.yusin.quiz.file.domain.File;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
@@ -11,12 +11,12 @@ import java.util.Objects;
 @Component
 public class FileMapper
 {
-    public FileDomain toFileDomain(String url, String uniqueFilename, MultipartFile file)
+    public File toFileDomain(String url, String uniqueFilename, MultipartFile file)
     {
         if(!StringUtils.hasLength(url) || !StringUtils.hasLength(uniqueFilename) || Objects.isNull(file))
             return null;
 
-        return FileDomain.builder()
+        return File.builder()
                 .url(url)
                 .size(file.getSize())
                 .contentType(file.getContentType())
@@ -26,13 +26,13 @@ public class FileMapper
                 .build();
     }
 
-    public FileResponse domainToFileResponse(FileDomain fileDomain)
+    public FileResponse domainToFileResponse(File file)
     {
-        if(Objects.isNull(fileDomain))
+        if(Objects.isNull(file))
             return null;
 
         return FileResponse.builder()
-                .url(fileDomain.getUrl())
+                .url(file.getUrl())
                 .build();
     }
 }

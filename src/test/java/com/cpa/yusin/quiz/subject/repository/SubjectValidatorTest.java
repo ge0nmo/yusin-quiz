@@ -2,7 +2,7 @@ package com.cpa.yusin.quiz.subject.repository;
 
 import com.cpa.yusin.quiz.global.exception.GlobalException;
 import com.cpa.yusin.quiz.config.TestContainer;
-import com.cpa.yusin.quiz.subject.domain.SubjectDomain;
+import com.cpa.yusin.quiz.subject.domain.Subject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -17,7 +17,7 @@ class SubjectValidatorTest
     {
         testContainer = new TestContainer();
 
-        testContainer.subjectRepository.save(SubjectDomain.builder()
+        testContainer.subjectRepository.save(Subject.builder()
                 .id(1L)
                 .name("Economics")
                 .build());

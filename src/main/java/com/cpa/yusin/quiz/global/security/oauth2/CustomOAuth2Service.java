@@ -3,8 +3,7 @@ package com.cpa.yusin.quiz.global.security.oauth2;
 import com.cpa.yusin.quiz.common.service.UuidHolder;
 import com.cpa.yusin.quiz.global.exception.ExceptionMessage;
 import com.cpa.yusin.quiz.global.exception.GlobalException;
-import com.cpa.yusin.quiz.member.domain.MemberDomain;
-import com.cpa.yusin.quiz.member.infrastructure.Member;
+import com.cpa.yusin.quiz.member.domain.Member;
 import com.cpa.yusin.quiz.global.details.MemberDetails;
 import com.cpa.yusin.quiz.member.service.port.MemberRepository;
 import com.cpa.yusin.quiz.global.security.oauth2.user.OAuth2UserInfo;
@@ -19,7 +18,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import java.util.Optional;
-import java.util.UUID;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -47,27 +45,27 @@ public class CustomOAuth2Service extends DefaultOAuth2UserService
             throw new GlobalException(ExceptionMessage.INVALID_EMAIL);
 
         log.info("email = {}", oAuthUserInfo.getEmail());
-        MemberDomain memberDomain;
-        Optional<MemberDomain> optionalMember = memberRepository.findByEmail(oAuthUserInfo.getEmail());
+        Member member;
+        Optional<Member> optionalMember = memberRepository.findByEmail(oAuthUserInfo.getEmail());
         String registrationId = request.getClientRegistration().getRegistrationId();
         log.info("registrationId = {}", registrationId);
 
         if(optionalMember.isPresent()){
-            memberDomain = optionalMember.get();
-            if(!memberDomain.getPlatform().name().equalsIgnoreCase(request.getClientRegistration().getRegistrationId()))
+            member = optionalMember.get();
+            if(!member.getPlatform().name().equalsIgnoreCase(request.getClientRegistration().getRegistrationId()))
                 throw new GlobalException(ExceptionMessage.USER_NOT_FOUND);
 
-            memberDomain.updateFromOauth2(oAuth2User.getName());
+            member.updateFromOauth2(oAuth2User.getName());
         } else{
-            memberDomain = registerMember(oAuthUserInfo);
+            member = registerMember(oAuthUserInfo);
         }
 
-        return new MemberDetails(memberDomain, oAuth2User.getAttributes());
+        return new MemberDetails(member, oAuth2User.getAttributes());
     }
 
-    private MemberDomain registerMember(OAuth2UserInfo oAuth2UserInfo)
+    private Member registerMember(OAuth2UserInfo oAuth2UserInfo)
     {
-        MemberDomain member = MemberDomain.fromOAuth2(oAuth2UserInfo, uuidHolder);
+        Member member = Member.fromOAuth2(oAuth2UserInfo, uuidHolder);
         return memberRepository.save(member);
     }
 }

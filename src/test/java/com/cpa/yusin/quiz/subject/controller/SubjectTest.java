@@ -1,13 +1,13 @@
 package com.cpa.yusin.quiz.subject.controller;
 
 import com.cpa.yusin.quiz.config.TeardownExtension;
-import com.cpa.yusin.quiz.member.domain.MemberDomain;
+import com.cpa.yusin.quiz.member.domain.Member;
 import com.cpa.yusin.quiz.member.domain.type.Platform;
 import com.cpa.yusin.quiz.member.domain.type.Role;
 import com.cpa.yusin.quiz.member.service.port.MemberRepository;
 import com.cpa.yusin.quiz.subject.controller.dto.request.SubjectCreateRequest;
 import com.cpa.yusin.quiz.subject.controller.dto.request.SubjectUpdateRequest;
-import com.cpa.yusin.quiz.subject.domain.SubjectDomain;
+import com.cpa.yusin.quiz.subject.domain.Subject;
 import com.cpa.yusin.quiz.subject.service.port.SubjectRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -47,12 +47,12 @@ public class SubjectTest
 
     ObjectMapper objectMapper = new ObjectMapper();
 
-    MemberDomain admin;
+    Member admin;
 
     @BeforeEach
     void setUp()
     {
-        admin = memberRepository.save(MemberDomain.builder()
+        admin = memberRepository.save(Member.builder()
                 .id(1L)
                 .email("admin@gmail.com")
                 .username("admin")
@@ -101,7 +101,7 @@ public class SubjectTest
     void save_duplicatedName() throws Exception
     {
         // given
-        subjectRepository.save(SubjectDomain.builder()
+        subjectRepository.save(Subject.builder()
                 .id(1L)
                 .name("회계학")
                 .build());
@@ -140,7 +140,7 @@ public class SubjectTest
     void update_success() throws Exception
     {
         // given
-        SubjectDomain subject = subjectRepository.save(SubjectDomain.builder()
+        Subject subject = subjectRepository.save(Subject.builder()
                 .id(1L)
                 .name("회계학")
                 .build());
@@ -180,12 +180,12 @@ public class SubjectTest
     void update_duplicatedName() throws Exception
     {
         // given
-        SubjectDomain subject = subjectRepository.save(SubjectDomain.builder()
+        Subject subject = subjectRepository.save(Subject.builder()
                 .id(1L)
                 .name("회계학")
                 .build());
 
-        subjectRepository.save(SubjectDomain.builder()
+        subjectRepository.save(Subject.builder()
                 .id(2L)
                 .name("경제학")
                 .build());
@@ -224,7 +224,7 @@ public class SubjectTest
     void getById_success() throws Exception
     {
         // given
-        SubjectDomain subject = subjectRepository.save(SubjectDomain.builder()
+        Subject subject = subjectRepository.save(Subject.builder()
                 .id(1L)
                 .name("회계학")
                 .build());
@@ -253,11 +253,11 @@ public class SubjectTest
     void getSubjects() throws Exception
     {
         // given
-        subjectRepository.save(SubjectDomain.builder().id(1L).name("회계학").build());
-        subjectRepository.save(SubjectDomain.builder().id(2L).name("경제학").build());
-        subjectRepository.save(SubjectDomain.builder().id(3L).name("세법").build());
-        subjectRepository.save(SubjectDomain.builder().id(4L).name("경영학").build());
-        subjectRepository.save(SubjectDomain.builder().id(5L).name("상법").build());
+        subjectRepository.save(Subject.builder().id(1L).name("회계학").build());
+        subjectRepository.save(Subject.builder().id(2L).name("경제학").build());
+        subjectRepository.save(Subject.builder().id(3L).name("세법").build());
+        subjectRepository.save(Subject.builder().id(4L).name("경영학").build());
+        subjectRepository.save(Subject.builder().id(5L).name("상법").build());
 
 
 
@@ -284,7 +284,7 @@ public class SubjectTest
     void deleteById() throws Exception
     {
         // given
-        SubjectDomain subject = subjectRepository.save(SubjectDomain.builder().id(1L).name("회계학").build());
+        Subject subject = subjectRepository.save(Subject.builder().id(1L).name("회계학").build());
 
         // when
         ResultActions resultActions = mvc

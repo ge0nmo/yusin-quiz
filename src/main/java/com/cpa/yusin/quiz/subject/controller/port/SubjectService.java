@@ -4,7 +4,7 @@ import com.cpa.yusin.quiz.subject.controller.dto.request.SubjectCreateRequest;
 import com.cpa.yusin.quiz.subject.controller.dto.request.SubjectUpdateRequest;
 import com.cpa.yusin.quiz.subject.controller.dto.response.SubjectCreateResponse;
 import com.cpa.yusin.quiz.subject.controller.dto.response.SubjectDTO;
-import com.cpa.yusin.quiz.subject.domain.SubjectDomain;
+import com.cpa.yusin.quiz.subject.domain.Subject;
 
 import java.util.List;
 
@@ -16,7 +16,7 @@ public interface SubjectService
 
     SubjectDTO getById(long id);
 
-    SubjectDomain findById(long id);
+    Subject findById(long id);
 
     List<SubjectDTO> getAll();
 

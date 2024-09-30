@@ -3,7 +3,7 @@ package com.cpa.yusin.quiz.problem.controller.port;
 import com.cpa.yusin.quiz.problem.controller.dto.request.ProblemRequest;
 import com.cpa.yusin.quiz.problem.controller.dto.response.ProblemDTO;
 import com.cpa.yusin.quiz.problem.controller.dto.response.ProblemResponse;
-import com.cpa.yusin.quiz.problem.domain.ProblemDomain;
+import com.cpa.yusin.quiz.problem.domain.Problem;
 
 import java.util.List;
 
@@ -15,5 +15,5 @@ public interface ProblemService
 
     ProblemDTO getById(long id);
 
-    ProblemDomain findById(long id);
+    Problem findById(long id);
 }

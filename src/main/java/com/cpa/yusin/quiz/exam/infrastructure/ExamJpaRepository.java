@@ -1,5 +1,6 @@
 package com.cpa.yusin.quiz.exam.infrastructure;
 
+import com.cpa.yusin.quiz.exam.domain.Exam;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;

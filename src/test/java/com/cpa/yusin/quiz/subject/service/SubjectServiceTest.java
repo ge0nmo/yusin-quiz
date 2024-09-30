@@ -1,15 +1,15 @@
 package com.cpa.yusin.quiz.subject.service;
 
-import com.cpa.yusin.quiz.choice.domain.ChoiceDomain;
-import com.cpa.yusin.quiz.exam.domain.ExamDomain;
+import com.cpa.yusin.quiz.choice.domain.Choice;
+import com.cpa.yusin.quiz.exam.domain.Exam;
 import com.cpa.yusin.quiz.global.exception.GlobalException;
 import com.cpa.yusin.quiz.config.TestContainer;
-import com.cpa.yusin.quiz.problem.domain.ProblemDomain;
+import com.cpa.yusin.quiz.problem.domain.Problem;
 import com.cpa.yusin.quiz.subject.controller.dto.request.SubjectCreateRequest;
 import com.cpa.yusin.quiz.subject.controller.dto.request.SubjectUpdateRequest;
 import com.cpa.yusin.quiz.subject.controller.dto.response.SubjectCreateResponse;
 import com.cpa.yusin.quiz.subject.controller.dto.response.SubjectDTO;
-import com.cpa.yusin.quiz.subject.domain.SubjectDomain;
+import com.cpa.yusin.quiz.subject.domain.Subject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -28,17 +28,17 @@ class SubjectServiceTest
     {
         testContainer = new TestContainer();
 
-        testContainer.subjectRepository.save(SubjectDomain.builder()
+        testContainer.subjectRepository.save(Subject.builder()
                 .id(1L)
                 .name("Economics")
                 .build());
 
-        testContainer.subjectRepository.save(SubjectDomain.builder()
+        testContainer.subjectRepository.save(Subject.builder()
                 .id(2L)
                 .name("Chemistry")
                 .build());
 
-        testContainer.subjectRepository.save(SubjectDomain.builder()
+        testContainer.subjectRepository.save(Subject.builder()
                 .id(3L)
                 .name("English")
                 .build());
@@ -96,7 +96,7 @@ class SubjectServiceTest
         long id = 1L;
 
         // when
-        SubjectDomain result = testContainer.subjectService.findById(id);
+        Subject result = testContainer.subjectService.findById(id);
 
         // then
         assertThat(result.getId()).isEqualTo(1L);
@@ -168,33 +168,33 @@ class SubjectServiceTest
     void delete()
     {
         // given
-        SubjectDomain physics = testContainer.subjectRepository.save(SubjectDomain.builder()
+        Subject physics = testContainer.subjectRepository.save(Subject.builder()
                 .id(1L)
                 .name("Physics")
                 .build());
 
-        ExamDomain physicsExam1 = testContainer.examRepository.save(ExamDomain.builder()
+        Exam physicsExam1 = testContainer.examRepository.save(Exam.builder()
                 .id(1L)
                 .name("2024 1차")
                 .year(2024)
                 .subjectId(physics.getId())
                 .build());
 
-        ProblemDomain physicsProblem1 = testContainer.problemRepository.save(ProblemDomain.builder()
+        Problem physicsProblem1 = testContainer.problemRepository.save(Problem.builder()
                 .id(1L)
                 .content("content abc")
                 .number(1)
                 .exam(physicsExam1)
                 .build());
 
-        testContainer.problemRepository.save(ProblemDomain.builder()
+        testContainer.problemRepository.save(Problem.builder()
                 .id(2L)
                 .content("content zxc")
                 .number(2)
                 .exam(physicsExam1)
                 .build());
 
-        testContainer.choiceRepository.save(ChoiceDomain.builder()
+        testContainer.choiceRepository.save(Choice.builder()
                 .id(1L)
                 .content("choice 1")
                 .number(1)
@@ -208,11 +208,11 @@ class SubjectServiceTest
         boolean result = testContainer.subjectService.deleteById(subjectId);
 
         // then
-        Optional<SubjectDomain> removedSubject = testContainer.subjectRepository.findById(subjectId);
-        Optional<ExamDomain> removedExam = testContainer.examRepository.findById(physicsExam1.getId());
-        Optional<ProblemDomain> removedProblem1 = testContainer.problemRepository.findById(physicsProblem1.getId());
-        Optional<ProblemDomain> removedProblem2 = testContainer.problemRepository.findById(2L);
-        Optional<ChoiceDomain> removedChoice = testContainer.choiceRepository.findById(1L);
+        Optional<Subject> removedSubject = testContainer.subjectRepository.findById(subjectId);
+        Optional<Exam> removedExam = testContainer.examRepository.findById(physicsExam1.getId());
+        Optional<Problem> removedProblem1 = testContainer.problemRepository.findById(physicsProblem1.getId());
+        Optional<Problem> removedProblem2 = testContainer.problemRepository.findById(2L);
+        Optional<Choice> removedChoice = testContainer.choiceRepository.findById(1L);
 
         assertThat(result).isTrue();
 

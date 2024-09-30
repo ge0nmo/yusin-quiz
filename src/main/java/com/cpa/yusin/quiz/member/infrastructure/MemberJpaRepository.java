@@ -1,5 +1,6 @@
 package com.cpa.yusin.quiz.member.infrastructure;
 
+import com.cpa.yusin.quiz.member.domain.Member;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;

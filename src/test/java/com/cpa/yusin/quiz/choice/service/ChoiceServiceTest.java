@@ -1,9 +1,9 @@
 package com.cpa.yusin.quiz.choice.service;
 
 import com.cpa.yusin.quiz.choice.controller.dto.request.ChoiceRequest;
-import com.cpa.yusin.quiz.choice.domain.ChoiceDomain;
+import com.cpa.yusin.quiz.choice.domain.Choice;
 import com.cpa.yusin.quiz.config.MockSetup;
-import com.cpa.yusin.quiz.problem.domain.ProblemDomain;
+import com.cpa.yusin.quiz.problem.domain.Problem;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
@@ -19,8 +19,8 @@ class ChoiceServiceTest extends MockSetup
     void saveOrUpdate()
     {
         // given
-        ProblemDomain problemDomain = physicsProblem2;
-        Map<ProblemDomain, List<ChoiceRequest>> choiceMap = new HashMap<>();
+        Problem problem = physicsProblem2;
+        Map<Problem, List<ChoiceRequest>> choiceMap = new HashMap<>();
 
         List<ChoiceRequest> choices = List.of(
                 ChoiceRequest.builder().content("problem1 - choice1").number(1).isAnswer(true).build(),
@@ -31,13 +31,13 @@ class ChoiceServiceTest extends MockSetup
 
         );
 
-        choiceMap.put(problemDomain, choices);
+        choiceMap.put(problem, choices);
 
         // when
         testContainer.choiceService.saveOrUpdate(choiceMap);
 
         // then
-        List<ChoiceDomain> choiceDomains = testContainer.choiceRepository.findAllByProblemId(problemDomain.getId());
+        List<Choice> choiceDomains = testContainer.choiceRepository.findAllByProblemId(problem.getId());
         assertThat(choiceDomains).hasSize(5);
 
         assertThat(choiceDomains.getFirst().getContent()).isEqualTo("problem1 - choice1");

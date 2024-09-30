@@ -1,11 +1,10 @@
 package com.cpa.yusin.quiz.member.service;
 
 import com.cpa.yusin.quiz.config.TestContainer;
-import com.cpa.yusin.quiz.global.exception.ExceptionMessage;
 import com.cpa.yusin.quiz.global.exception.GlobalException;
 import com.cpa.yusin.quiz.member.controller.dto.request.MemberUpdateRequest;
 import com.cpa.yusin.quiz.member.controller.dto.response.MemberDTO;
-import com.cpa.yusin.quiz.member.domain.MemberDomain;
+import com.cpa.yusin.quiz.member.domain.Member;
 import com.cpa.yusin.quiz.member.domain.type.Platform;
 import com.cpa.yusin.quiz.member.domain.type.Role;
 import org.junit.jupiter.api.BeforeEach;
@@ -22,15 +21,15 @@ class MemberServiceTest
 {
     TestContainer testContainer;
 
-    MemberDomain memberDomain;
+    Member member;
 
     @BeforeEach
     void setUp()
     {
         testContainer = new TestContainer();
 
-        memberDomain = testContainer.memberRepository
-                .save(MemberDomain.builder()
+        member = testContainer.memberRepository
+                .save(Member.builder()
                         .id(1L)
                         .email("test@gmail.com")
                         .password("aaaa")
@@ -73,7 +72,7 @@ class MemberServiceTest
         // given
 
         // when
-        MemberDomain result = testContainer.memberService
+        Member result = testContainer.memberService
                 .findById(1L);
 
         // then
@@ -99,28 +98,28 @@ class MemberServiceTest
     void getAllByKeyword()
     {
         // given
-        testContainer.memberRepository.save(MemberDomain.builder().id(2L).email("abc@gmail.com").username("Harry")
+        testContainer.memberRepository.save(Member.builder().id(2L).email("abc@gmail.com").username("Harry")
                 .password("aaaa").role(Role.USER).platform(Platform.HOME).build());
 
-        testContainer.memberRepository.save(MemberDomain.builder().id(3L).email("zvde@gmail.com").username("Rachel")
+        testContainer.memberRepository.save(Member.builder().id(3L).email("zvde@gmail.com").username("Rachel")
                 .password("aaaa").role(Role.USER).platform(Platform.HOME).build());
 
-        testContainer.memberRepository.save(MemberDomain.builder().id(4L).email("aa222@gmail.com").username("John")
+        testContainer.memberRepository.save(Member.builder().id(4L).email("aa222@gmail.com").username("John")
                 .password("aaaa").role(Role.USER).platform(Platform.HOME).build());
 
-        testContainer.memberRepository.save(MemberDomain.builder().id(5L).email("naver@gmail.com").username("Mike")
+        testContainer.memberRepository.save(Member.builder().id(5L).email("naver@gmail.com").username("Mike")
                 .password("aaaa").role(Role.USER).platform(Platform.HOME).build());
 
-        testContainer.memberRepository.save(MemberDomain.builder().id(6L).email("google@gmail.com").username("David")
+        testContainer.memberRepository.save(Member.builder().id(6L).email("google@gmail.com").username("David")
                 .password("aaaa").role(Role.USER).platform(Platform.HOME).build());
 
-        testContainer.memberRepository.save(MemberDomain.builder().id(7L).email("mac@gmail.com").username("James")
+        testContainer.memberRepository.save(Member.builder().id(7L).email("mac@gmail.com").username("James")
                 .password("aaaa").role(Role.USER).platform(Platform.HOME).build());
 
-        testContainer.memberRepository.save(MemberDomain.builder().id(8L).email("pro@gmail.com").username("Pinkman")
+        testContainer.memberRepository.save(Member.builder().id(8L).email("pro@gmail.com").username("Pinkman")
                 .password("aaaa").role(Role.USER).platform(Platform.HOME).build());
 
-        testContainer.memberRepository.save(MemberDomain.builder().id(9L).email("ama@gmail.com").username("Tom")
+        testContainer.memberRepository.save(Member.builder().id(9L).email("ama@gmail.com").username("Tom")
                 .password("aaaa").role(Role.USER).platform(Platform.HOME).build());
 
 
@@ -145,28 +144,28 @@ class MemberServiceTest
     void getAllByKeyword_keywordNull()
     {
         // given
-        testContainer.memberRepository.save(MemberDomain.builder().id(2L).email("abc@gmail.com").username("Harry")
+        testContainer.memberRepository.save(Member.builder().id(2L).email("abc@gmail.com").username("Harry")
                 .password("aaaa").role(Role.USER).platform(Platform.HOME).build());
 
-        testContainer.memberRepository.save(MemberDomain.builder().id(3L).email("zvde@gmail.com").username("Rachel")
+        testContainer.memberRepository.save(Member.builder().id(3L).email("zvde@gmail.com").username("Rachel")
                 .password("aaaa").role(Role.USER).platform(Platform.HOME).build());
 
-        testContainer.memberRepository.save(MemberDomain.builder().id(4L).email("aa222@gmail.com").username("John")
+        testContainer.memberRepository.save(Member.builder().id(4L).email("aa222@gmail.com").username("John")
                 .password("aaaa").role(Role.USER).platform(Platform.HOME).build());
 
-        testContainer.memberRepository.save(MemberDomain.builder().id(5L).email("naver@gmail.com").username("Mike")
+        testContainer.memberRepository.save(Member.builder().id(5L).email("naver@gmail.com").username("Mike")
                 .password("aaaa").role(Role.USER).platform(Platform.HOME).build());
 
-        testContainer.memberRepository.save(MemberDomain.builder().id(6L).email("google@gmail.com").username("David")
+        testContainer.memberRepository.save(Member.builder().id(6L).email("google@gmail.com").username("David")
                 .password("aaaa").role(Role.USER).platform(Platform.HOME).build());
 
-        testContainer.memberRepository.save(MemberDomain.builder().id(7L).email("mac@gmail.com").username("James")
+        testContainer.memberRepository.save(Member.builder().id(7L).email("mac@gmail.com").username("James")
                 .password("aaaa").role(Role.USER).platform(Platform.HOME).build());
 
-        testContainer.memberRepository.save(MemberDomain.builder().id(8L).email("pro@gmail.com").username("Pinkman")
+        testContainer.memberRepository.save(Member.builder().id(8L).email("pro@gmail.com").username("Pinkman")
                 .password("aaaa").role(Role.USER).platform(Platform.HOME).build());
 
-        testContainer.memberRepository.save(MemberDomain.builder().id(9L).email("ama@gmail.com").username("Tom")
+        testContainer.memberRepository.save(Member.builder().id(9L).email("ama@gmail.com").username("Tom")
                 .password("aaaa").role(Role.USER).platform(Platform.HOME).build());
 
 
@@ -190,10 +189,10 @@ class MemberServiceTest
                 .build();
 
         // when
-        testContainer.memberService.update(memberDomain.getId(), request, memberDomain);
+        testContainer.memberService.update(member.getId(), request, member);
 
         // then
-        MemberDomain updatedMember = testContainer.memberRepository.findById(memberDomain.getId()).orElseThrow();
+        Member updatedMember = testContainer.memberRepository.findById(member.getId()).orElseThrow();
 
         assertThat(updatedMember.getUsername()).isEqualTo("update");
     }
@@ -207,7 +206,7 @@ class MemberServiceTest
                 .build();
 
         // when
-        assertThatThrownBy(() -> testContainer.memberService.update(2L, request, memberDomain))
+        assertThatThrownBy(() -> testContainer.memberService.update(2L, request, member))
                 .isInstanceOf(GlobalException.class);
 
         // then

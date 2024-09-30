@@ -1,6 +1,6 @@
 package com.cpa.yusin.quiz.subject.infrastructure;
 
-import com.cpa.yusin.quiz.subject.domain.SubjectDomain;
+import com.cpa.yusin.quiz.subject.domain.Subject;
 import com.cpa.yusin.quiz.subject.service.port.SubjectRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -15,25 +15,21 @@ public class SubjectRepositoryImpl implements SubjectRepository
     private final SubjectJpaRepository subjectJpaRepository;
 
     @Override
-    public SubjectDomain save(SubjectDomain subjectDomain)
+    public Subject save(Subject subject)
     {
-        return subjectJpaRepository.save(Subject.from(subjectDomain))
-                .toModel();
+        return subjectJpaRepository.save(subject);
     }
 
     @Override
-    public Optional<SubjectDomain> findById(long id)
+    public Optional<Subject> findById(long id)
     {
-        return subjectJpaRepository.findById(id)
-                .map(Subject::toModel);
+        return subjectJpaRepository.findById(id);
     }
 
     @Override
-    public List<SubjectDomain> findAll()
+    public List<Subject> findAll()
     {
-        return subjectJpaRepository.findAll().stream()
-                .map(Subject::toModel)
-                .toList();
+        return subjectJpaRepository.findAll();
     }
 
     @Override

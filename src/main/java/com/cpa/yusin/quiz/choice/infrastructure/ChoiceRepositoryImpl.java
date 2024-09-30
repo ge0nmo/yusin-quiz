@@ -1,6 +1,6 @@
 package com.cpa.yusin.quiz.choice.infrastructure;
 
-import com.cpa.yusin.quiz.choice.domain.ChoiceDomain;
+import com.cpa.yusin.quiz.choice.domain.Choice;
 import com.cpa.yusin.quiz.choice.service.port.ChoiceRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -15,53 +15,39 @@ public class ChoiceRepositoryImpl implements ChoiceRepository
     private final ChoiceJpaRepository choiceJpaRepository;
 
     @Override
-    public ChoiceDomain save(ChoiceDomain domain)
+    public Choice save(Choice choice)
     {
-        return choiceJpaRepository.save(Choice.from(domain))
-                .toModel();
+        return choiceJpaRepository.save(choice);
     }
 
     @Override
-    public List<ChoiceDomain> saveAll(List<ChoiceDomain> domains)
+    public List<Choice> saveAll(List<Choice> choices)
     {
-        List<Choice> choices = domains.stream()
-                .map(Choice::from)
-                .toList();
-
-        return choiceJpaRepository.saveAll(choices).stream()
-                .map(Choice::toModel)
-                .toList();
+        return choiceJpaRepository.saveAll(choices);
     }
 
     @Override
-    public List<ChoiceDomain> findAllByProblemId(long problemId)
+    public List<Choice> findAllByProblemId(long problemId)
     {
-        return choiceJpaRepository.findAllByProblemId(problemId).stream()
-                .map(Choice::toModel)
-                .toList();
+        return choiceJpaRepository.findAllByProblemId(problemId);
     }
 
     @Override
-    public List<ChoiceDomain> findAllByProblemIds(List<Long> problemIds)
+    public List<Choice> findAllByProblemIds(List<Long> problemIds)
     {
-        return choiceJpaRepository.findAllByProblemIds(problemIds).stream()
-                .map(Choice::toModel)
-                .toList();
+        return choiceJpaRepository.findAllByProblemIds(problemIds);
     }
 
     @Override
-    public List<ChoiceDomain> findAllByExamId(long examId)
+    public List<Choice> findAllByExamId(long examId)
     {
-        return choiceJpaRepository.findAllByExamId(examId).stream()
-                .map(Choice::toModel)
-                .toList();
+        return choiceJpaRepository.findAllByExamId(examId);
     }
 
     @Override
-    public Optional<ChoiceDomain> findById(long id)
+    public Optional<Choice> findById(long id)
     {
-        return choiceJpaRepository.findById(id)
-                .map(Choice::toModel);
+        return choiceJpaRepository.findById(id);
     }
 
     @Override

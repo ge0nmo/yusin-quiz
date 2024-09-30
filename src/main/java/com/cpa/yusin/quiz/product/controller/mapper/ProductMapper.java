@@ -1,26 +1,26 @@
-package com.cpa.yusin.quiz.product.mapper;
+package com.cpa.yusin.quiz.product.controller.mapper;
 
 import com.cpa.yusin.quiz.product.controller.dto.request.ProductRegisterRequest;
 import com.cpa.yusin.quiz.product.controller.dto.response.ProductDTO;
 import com.cpa.yusin.quiz.product.controller.dto.response.ProductRegisterResponse;
-import com.cpa.yusin.quiz.product.domain.ProductDomain;
+import com.cpa.yusin.quiz.product.domain.Product;
 import org.springframework.stereotype.Component;
 
 @Component
 public class ProductMapper
 {
-    public ProductDomain toProductDomain(ProductRegisterRequest request)
+    public Product toProductDomain(ProductRegisterRequest request)
     {
         if(request == null)
             return null;
 
-        return ProductDomain.builder()
+        return Product.builder()
                 .durationMonth(request.getDurationMonths())
                 .price(request.getPrice())
                 .build();
     }
 
-    public ProductRegisterResponse toProductRegisterResponse(ProductDomain domain)
+    public ProductRegisterResponse toProductRegisterResponse(Product domain)
     {
         if(domain == null)
             return null;
@@ -34,7 +34,7 @@ public class ProductMapper
                 .build();
     }
 
-    public ProductDTO toProductDTO(ProductDomain domain)
+    public ProductDTO toProductDTO(Product domain)
     {
         if(domain == null)
             return null;

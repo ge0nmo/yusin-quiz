@@ -1,23 +1,23 @@
 package com.cpa.yusin.quiz.choice.service.port;
 
-import com.cpa.yusin.quiz.choice.domain.ChoiceDomain;
+import com.cpa.yusin.quiz.choice.domain.Choice;
 
 import java.util.List;
 import java.util.Optional;
 
 public interface ChoiceRepository
 {
-    ChoiceDomain save(ChoiceDomain domain);
+    Choice save(Choice domain);
 
-    List<ChoiceDomain> saveAll(List<ChoiceDomain> domains);
+    List<Choice> saveAll(List<Choice> domains);
 
-    List<ChoiceDomain> findAllByProblemId(long problemId);
+    List<Choice> findAllByProblemId(long problemId);
 
-    List<ChoiceDomain> findAllByProblemIds(List<Long> problemIds);
+    List<Choice> findAllByProblemIds(List<Long> problemIds);
 
-    List<ChoiceDomain> findAllByExamId(long examId);
+    List<Choice> findAllByExamId(long examId);
 
-    Optional<ChoiceDomain> findById(long id);
+    Optional<Choice> findById(long id);
 
     void deleteById(long id);
 

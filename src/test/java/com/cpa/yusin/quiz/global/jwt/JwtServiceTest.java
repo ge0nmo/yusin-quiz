@@ -1,7 +1,7 @@
 package com.cpa.yusin.quiz.global.jwt;
 
 import com.cpa.yusin.quiz.global.details.MemberDetails;
-import com.cpa.yusin.quiz.member.domain.MemberDomain;
+import com.cpa.yusin.quiz.member.domain.Member;
 import com.cpa.yusin.quiz.member.domain.type.Platform;
 import com.cpa.yusin.quiz.member.domain.type.Role;
 import com.cpa.yusin.quiz.config.TestContainer;
@@ -24,7 +24,7 @@ class JwtServiceTest
         String email = "test@gmail.com";
 
         testContainer.memberRepository
-                .save(MemberDomain.builder()
+                .save(Member.builder()
                         .id(1L)
                         .email(email)
                         .password("aaaa")

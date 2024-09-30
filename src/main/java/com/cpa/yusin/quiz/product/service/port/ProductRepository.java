@@ -1,17 +1,17 @@
 package com.cpa.yusin.quiz.product.service.port;
 
-import com.cpa.yusin.quiz.product.domain.ProductDomain;
+import com.cpa.yusin.quiz.product.domain.Product;
 
 import java.util.List;
 import java.util.Optional;
 
 public interface ProductRepository
 {
-    ProductDomain save(ProductDomain product);
+    Product save(Product product);
 
-    Optional<ProductDomain> findById(Long id);
+    Optional<Product> findById(Long id);
 
-    List<ProductDomain> findAll();
+    List<Product> findAll();
 
     void deleteById(Long id);
 

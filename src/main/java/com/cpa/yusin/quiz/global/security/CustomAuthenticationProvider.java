@@ -57,6 +57,6 @@ public class CustomAuthenticationProvider implements AuthenticationProvider
 
     private boolean validatePlatform(MemberDetails memberDetails)
     {
-        return Platform.HOME.equals(memberDetails.getMemberDomain().getPlatform());
+        return Platform.HOME.equals(memberDetails.getMember().getPlatform());
     }
 }

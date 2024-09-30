@@ -22,7 +22,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.Mockito.when;
 
-class MemberDomainTest
+class MemberTest
 {
     @Mock
     PasswordEncoder passwordEncoder;
@@ -50,15 +50,15 @@ class MemberDomainTest
         when(passwordEncoder.matches(rawPassword, encodedPassword)).thenReturn(true);
 
         // when
-        MemberDomain memberDomain = MemberDomain.fromHome(johnDoe, passwordEncoder);
+        Member member = Member.fromHome(johnDoe, passwordEncoder);
 
         // then
-        assertThat(memberDomain.getRole()).isEqualTo(Role.USER);
-        assertThat(memberDomain.getPlatform()).isEqualTo(Platform.HOME);
-        assertThat(memberDomain.getPassword()).isEqualTo(encodedPassword);
-        assertThat(memberDomain.getEmail()).isEqualTo("test@naver.com");
-        assertThat(memberDomain.getUsername()).isEqualTo("John Doe");
-        assertThat(passwordEncoder.matches(rawPassword, memberDomain.getPassword())).isTrue();
+        assertThat(member.getRole()).isEqualTo(Role.USER);
+        assertThat(member.getPlatform()).isEqualTo(Platform.HOME);
+        assertThat(member.getPassword()).isEqualTo(encodedPassword);
+        assertThat(member.getEmail()).isEqualTo("test@naver.com");
+        assertThat(member.getUsername()).isEqualTo("John Doe");
+        assertThat(passwordEncoder.matches(rawPassword, member.getPassword())).isTrue();
 
     }
 
@@ -71,21 +71,21 @@ class MemberDomainTest
         FakeUuidHolder uuidHolder = new FakeUuidHolder("randomPassword");
 
         // when
-        MemberDomain memberDomain = MemberDomain.fromOAuth2(oAuth2UserInfo, uuidHolder);
+        Member member = Member.fromOAuth2(oAuth2UserInfo, uuidHolder);
 
         // then
-        assertThat(memberDomain.getRole()).isEqualTo(Role.USER);
-        assertThat(memberDomain.getPlatform()).isEqualTo(Platform.GOOGLE);
-        assertThat(memberDomain.getPassword()).isEqualTo("randomPassword");
-        assertThat(memberDomain.getEmail()).isEqualTo("test@gmail.com");
-        assertThat(memberDomain.getUsername()).isEqualTo("test user");
+        assertThat(member.getRole()).isEqualTo(Role.USER);
+        assertThat(member.getPlatform()).isEqualTo(Platform.GOOGLE);
+        assertThat(member.getPassword()).isEqualTo("randomPassword");
+        assertThat(member.getEmail()).isEqualTo("test@gmail.com");
+        assertThat(member.getUsername()).isEqualTo("test user");
     }
 
     @Test
     void updateMemberDomainFromOAuthLogin()
     {
         // given
-        MemberDomain memberDomain = MemberDomain.builder()
+        Member member = Member.builder()
                 .id(1L)
                 .role(Role.USER)
                 .platform(Platform.GOOGLE)
@@ -95,14 +95,14 @@ class MemberDomainTest
                 .build();
 
         // when
-        memberDomain.updateFromOauth2("James");
+        member.updateFromOauth2("James");
 
         // then
-        assertThat(memberDomain.getUsername()).isEqualTo("James");
-        assertThat(memberDomain.getEmail()).isEqualTo("test@naver.com");
-        assertThat(memberDomain.getRole()).isEqualTo(Role.USER);
-        assertThat(memberDomain.getPlatform()).isEqualTo(Platform.GOOGLE);
-        assertThat(memberDomain.getPassword()).isEqualTo("123123");
+        assertThat(member.getUsername()).isEqualTo("James");
+        assertThat(member.getEmail()).isEqualTo("test@naver.com");
+        assertThat(member.getRole()).isEqualTo(Role.USER);
+        assertThat(member.getPlatform()).isEqualTo(Platform.GOOGLE);
+        assertThat(member.getPassword()).isEqualTo("123123");
 
     }
 
@@ -110,7 +110,7 @@ class MemberDomainTest
     void update()
     {
         // given
-        MemberDomain memberDomain = MemberDomain.builder()
+        Member member = Member.builder()
                 .id(1L)
                 .role(Role.USER)
                 .platform(Platform.GOOGLE)
@@ -118,8 +118,6 @@ class MemberDomainTest
                 .email("test@naver.com")
                 .username("John Doe")
                 .subscriptionExpiredAt(null)
-                .createdAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now())
                 .build();
 
         MemberUpdateRequest request = MemberUpdateRequest.builder()
@@ -127,10 +125,10 @@ class MemberDomainTest
                 .build();
 
         // when
-        memberDomain.update(request);
+        member.update(request);
 
         // then
-        assertThat(memberDomain.getUsername()).isEqualTo("Mike");
+        assertThat(member.getUsername()).isEqualTo("Mike");
     }
 
     @DisplayName("validateMember - ADMIN can pass validation")
@@ -138,7 +136,7 @@ class MemberDomainTest
     void validateMember1()
     {
         // given
-        MemberDomain memberDomain = MemberDomain.builder()
+        Member member = Member.builder()
                 .id(1L)
                 .role(Role.ADMIN)
                 .platform(Platform.GOOGLE)
@@ -148,7 +146,7 @@ class MemberDomainTest
                 .build();
 
         // when and then
-        assertDoesNotThrow(() -> memberDomain.validateMember(2L, memberDomain));
+        assertDoesNotThrow(() -> member.validateMember(2L, member));
     }
 
     @DisplayName("validateMember - memberId should be the same if it's USER")
@@ -156,7 +154,7 @@ class MemberDomainTest
     void validateMember2()
     {
         // given
-        MemberDomain memberDomain = MemberDomain.builder()
+        Member member = Member.builder()
                 .id(1L)
                 .role(Role.USER)
                 .platform(Platform.GOOGLE)
@@ -166,7 +164,7 @@ class MemberDomainTest
                 .build();
 
         // when and then
-        assertThatThrownBy(() -> memberDomain.validateMember(2L, memberDomain))
+        assertThatThrownBy(() -> member.validateMember(2L, member))
                 .isInstanceOf(GlobalException.class);
     }
 

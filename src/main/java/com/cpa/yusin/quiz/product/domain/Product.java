@@ -1,26 +1,35 @@
 package com.cpa.yusin.quiz.product.domain;
 
+import com.cpa.yusin.quiz.common.infrastructure.BaseEntity;
 import com.cpa.yusin.quiz.product.controller.dto.request.ProductUpdateRequest;
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 
+@Entity
+@AllArgsConstructor
+@NoArgsConstructor
 @Builder
 @Getter
-public class ProductDomain
+public class Product extends BaseEntity
 {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private int durationMonth;
+
+    @Column(nullable = false, unique = true)
+    private Integer durationMonth;
+
+    @Column(nullable = false)
     private BigDecimal price;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
 
     public void update(ProductUpdateRequest request)
     {
         this.durationMonth = request.getDurationMonths();
         this.price = request.getPrice();
-        this.updatedAt = LocalDateTime.now();
     }
 }

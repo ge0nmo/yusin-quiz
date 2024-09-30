@@ -10,7 +10,7 @@ import com.cpa.yusin.quiz.member.controller.dto.response.LoginResponse;
 import com.cpa.yusin.quiz.member.controller.dto.response.MemberCreateResponse;
 import com.cpa.yusin.quiz.member.controller.mapper.MemberMapper;
 import com.cpa.yusin.quiz.member.controller.port.AuthenticationService;
-import com.cpa.yusin.quiz.member.domain.MemberDomain;
+import com.cpa.yusin.quiz.member.domain.Member;
 import com.cpa.yusin.quiz.member.service.port.MemberRepository;
 import com.cpa.yusin.quiz.member.service.port.MemberValidator;
 import lombok.RequiredArgsConstructor;
@@ -40,7 +40,7 @@ public class AuthenticationServiceImpl implements AuthenticationService
 
         MemberDetails memberDetails = memberDetailsService.loadUserByUsername(request.getEmail());
 
-        MemberDomain member = memberDetails.getMemberDomain();
+        Member member = memberDetails.getMember();
 
         String accessToken = jwtService.createAccessToken(member.getEmail());
 
@@ -52,10 +52,10 @@ public class AuthenticationServiceImpl implements AuthenticationService
     {
         memberValidator.validateEmail(request.getEmail());
 
-        MemberDomain memberDomain = MemberDomain.fromHome(request, passwordEncoder);
-        memberDomain = memberRepository.save(memberDomain);
+        Member member = Member.fromHome(request, passwordEncoder);
+        member = memberRepository.save(member);
 
-        return memberMapper.toMemberCreateResponse(memberDomain);
+        return memberMapper.toMemberCreateResponse(member);
     }
 
 

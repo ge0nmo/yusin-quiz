@@ -7,7 +7,7 @@ import com.cpa.yusin.quiz.exam.controller.dto.request.ExamDeleteRequest;
 import com.cpa.yusin.quiz.exam.controller.dto.request.ExamUpdateRequest;
 import com.cpa.yusin.quiz.exam.controller.dto.response.ExamCreateResponse;
 import com.cpa.yusin.quiz.exam.controller.dto.response.ExamDTO;
-import com.cpa.yusin.quiz.subject.domain.SubjectDomain;
+import com.cpa.yusin.quiz.subject.domain.Subject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
@@ -27,7 +27,7 @@ class ExamControllerAdminTest
     {
         testContainer = new TestContainer();
 
-        testContainer.subjectRepository.save(SubjectDomain.builder()
+        testContainer.subjectRepository.save(Subject.builder()
                 .id(1L)
                 .name("Physics")
                 .build());

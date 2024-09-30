@@ -5,7 +5,6 @@ import com.cpa.yusin.quiz.product.controller.dto.request.ProductRegisterRequest;
 import com.cpa.yusin.quiz.product.controller.dto.response.ProductDTO;
 import com.cpa.yusin.quiz.product.controller.dto.response.ProductRegisterResponse;
 import com.cpa.yusin.quiz.product.controller.port.ProductService;
-import com.cpa.yusin.quiz.product.domain.ProductDomain;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

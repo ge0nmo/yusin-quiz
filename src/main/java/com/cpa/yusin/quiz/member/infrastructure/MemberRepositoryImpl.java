@@ -1,6 +1,6 @@
 package com.cpa.yusin.quiz.member.infrastructure;
 
-import com.cpa.yusin.quiz.member.domain.MemberDomain;
+import com.cpa.yusin.quiz.member.domain.Member;
 import com.cpa.yusin.quiz.member.service.port.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -16,17 +16,15 @@ public class MemberRepositoryImpl implements MemberRepository
     private final MemberJpaRepository memberJpaRepository;
 
     @Override
-    public Optional<MemberDomain> findByEmail(String email)
+    public Optional<Member> findByEmail(String email)
     {
-        return memberJpaRepository.findByEmail(email)
-                .map(Member::toDomain);
+        return memberJpaRepository.findByEmail(email);
     }
 
     @Override
-    public Page<MemberDomain> findAllByKeyword(String keyword, Pageable pageable)
+    public Page<Member> findAllByKeyword(String keyword, Pageable pageable)
     {
-        return memberJpaRepository.findAllByKeyword(keyword, pageable)
-                .map(Member::toDomain);
+        return memberJpaRepository.findAllByKeyword(keyword, pageable);
     }
 
     @Override
@@ -36,17 +34,15 @@ public class MemberRepositoryImpl implements MemberRepository
     }
 
     @Override
-    public MemberDomain save(MemberDomain memberDomain)
+    public Member save(Member member)
     {
-        return memberJpaRepository.save(Member.fromDomain(memberDomain))
-                .toDomain();
+        return memberJpaRepository.save(member);
     }
 
     @Override
-    public Optional<MemberDomain> findById(long id)
+    public Optional<Member> findById(long id)
     {
-        return memberJpaRepository.findById(id)
-                .map(Member::toDomain);
+        return memberJpaRepository.findById(id);
     }
 
     @Override

@@ -1,6 +1,6 @@
 package com.cpa.yusin.quiz.problem.infrastructure;
 
-import com.cpa.yusin.quiz.problem.domain.ProblemDomain;
+import com.cpa.yusin.quiz.problem.domain.Problem;
 import com.cpa.yusin.quiz.problem.service.port.ProblemRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -16,37 +16,27 @@ public class ProblemRepositoryImpl implements ProblemRepository
 
 
     @Override
-    public ProblemDomain save(ProblemDomain domain)
+    public Problem save(Problem problem)
     {
-        return problemJpaRepository.save(Problem.from(domain))
-                .toModel();
+        return problemJpaRepository.save(problem);
     }
 
     @Override
-    public List<ProblemDomain> saveAll(List<ProblemDomain> domains)
+    public List<Problem> saveAll(List<Problem> problems)
     {
-        List<Problem> problems = domains.stream()
-                .map(Problem::from)
-                .toList();
-
-        return problemJpaRepository.saveAll(problems).stream()
-                .map(Problem::toModel)
-                .toList();
+        return problemJpaRepository.saveAll(problems);
     }
 
     @Override
-    public List<ProblemDomain> findAllByExamId(long examId)
+    public List<Problem> findAllByExamId(long examId)
     {
-        return problemJpaRepository.findAllByExamId(examId).stream()
-                .map(Problem::toModel)
-                .toList();
+        return problemJpaRepository.findAllByExamId(examId);
     }
 
     @Override
-    public Optional<ProblemDomain> findById(long id)
+    public Optional<Problem> findById(long id)
     {
-        return problemJpaRepository.findById(id)
-                .map(Problem::toModel);
+        return problemJpaRepository.findById(id);
     }
 
     @Override

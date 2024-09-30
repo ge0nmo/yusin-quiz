@@ -9,7 +9,7 @@ import com.cpa.yusin.quiz.subject.controller.dto.response.SubjectCreateResponse;
 import com.cpa.yusin.quiz.subject.controller.dto.response.SubjectDTO;
 import com.cpa.yusin.quiz.subject.controller.mapper.SubjectMapper;
 import com.cpa.yusin.quiz.subject.controller.port.SubjectService;
-import com.cpa.yusin.quiz.subject.domain.SubjectDomain;
+import com.cpa.yusin.quiz.subject.domain.Subject;
 import com.cpa.yusin.quiz.subject.service.port.SubjectRepository;
 import com.cpa.yusin.quiz.subject.service.port.SubjectValidator;
 import lombok.RequiredArgsConstructor;
@@ -34,24 +34,26 @@ public class SubjectServiceImpl implements SubjectService
     public SubjectCreateResponse save(SubjectCreateRequest request)
     {
         subjectValidator.validateName(request.getName());
-        SubjectDomain domain = subjectRepository.save(SubjectDomain.from(request));
+        Subject subject = subjectMapper.toSubjectEntity(request);
 
-        return subjectMapper.toSubjectCreateResponse(domain);
+        subject = subjectRepository.save(subject);
+
+        return subjectMapper.toSubjectCreateResponse(subject);
     }
 
     @Transactional
     @Override
     public void update(long id, SubjectUpdateRequest request)
     {
-        SubjectDomain domain = findById(id);
-        subjectValidator.validateName(domain.getId(), request.getName());
+        Subject subject = findById(id);
+        subjectValidator.validateName(subject.getId(), request.getName());
 
-        domain.update(request);
-        subjectRepository.save(domain);
+        subject.update(request);
+        subjectRepository.save(subject);
     }
 
     @Override
-    public SubjectDomain findById(long id)
+    public Subject findById(long id)
     {
         return subjectRepository.findById(id)
                 .orElseThrow(() -> new GlobalException(ExceptionMessage.SUBJECT_NOT_FOUND));

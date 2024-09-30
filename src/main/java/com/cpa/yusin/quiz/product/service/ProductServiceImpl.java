@@ -7,8 +7,8 @@ import com.cpa.yusin.quiz.product.controller.dto.request.ProductUpdateRequest;
 import com.cpa.yusin.quiz.product.controller.dto.response.ProductDTO;
 import com.cpa.yusin.quiz.product.controller.dto.response.ProductRegisterResponse;
 import com.cpa.yusin.quiz.product.controller.port.ProductService;
-import com.cpa.yusin.quiz.product.domain.ProductDomain;
-import com.cpa.yusin.quiz.product.mapper.ProductMapper;
+import com.cpa.yusin.quiz.product.domain.Product;
+import com.cpa.yusin.quiz.product.controller.mapper.ProductMapper;
 import com.cpa.yusin.quiz.product.service.port.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -29,7 +29,7 @@ public class ProductServiceImpl implements ProductService
     @Override
     public ProductRegisterResponse save(ProductRegisterRequest request)
     {
-        ProductDomain product = productMapper.toProductDomain(request);
+        Product product = productMapper.toProductDomain(request);
 
         product = productRepository.save(product);
         return productMapper.toProductRegisterResponse(product);
@@ -38,14 +38,14 @@ public class ProductServiceImpl implements ProductService
     @Override
     public void update(long productId, ProductUpdateRequest request)
     {
-        ProductDomain product = findById(productId);
+        Product product = findById(productId);
 
         product.update(request);
         productRepository.save(product);
     }
 
     @Override
-    public ProductDomain findById(Long id)
+    public Product findById(Long id)
     {
         return productRepository.findById(id)
                 .orElseThrow(() -> new GlobalException(ExceptionMessage.PROBLEM_NOT_FOUND));

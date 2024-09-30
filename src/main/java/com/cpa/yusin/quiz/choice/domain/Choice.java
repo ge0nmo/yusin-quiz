@@ -1,26 +1,43 @@
 package com.cpa.yusin.quiz.choice.domain;
 
 import com.cpa.yusin.quiz.choice.controller.dto.request.ChoiceRequest;
+import com.cpa.yusin.quiz.common.infrastructure.BaseEntity;
 import com.cpa.yusin.quiz.global.exception.ExceptionMessage;
 import com.cpa.yusin.quiz.global.exception.GlobalException;
-import com.cpa.yusin.quiz.problem.domain.ProblemDomain;
+import com.cpa.yusin.quiz.problem.domain.Problem;
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
-
+@Entity
+@AllArgsConstructor
+@Table(uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"problem_id", "number"})
+})
+@NoArgsConstructor
 @Getter
 @Builder
-public class ChoiceDomain
+public class Choice extends BaseEntity
 {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private Integer number;
-    private String content;
-    private Boolean isAnswer;
-    private ProblemDomain problem;
 
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+    @Column(nullable = false)
+    private String content;
+
+    @Column(nullable = false)
+    private Integer number;
+
+    @Column(nullable = false)
+    private Boolean isAnswer;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(nullable = false, name = "problem_id")
+    private Problem problem;
+
 
     public void update(long problemId, ChoiceRequest request)
     {

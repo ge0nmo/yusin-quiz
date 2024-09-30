@@ -1,14 +1,13 @@
 package com.cpa.yusin.quiz.problem.service;
 
 import com.cpa.yusin.quiz.choice.controller.dto.request.ChoiceRequest;
-import com.cpa.yusin.quiz.choice.domain.ChoiceDomain;
+import com.cpa.yusin.quiz.choice.domain.Choice;
 import com.cpa.yusin.quiz.config.MockSetup;
 import com.cpa.yusin.quiz.problem.controller.dto.request.ProblemRequest;
 import com.cpa.yusin.quiz.problem.controller.dto.response.ProblemResponse;
-import com.cpa.yusin.quiz.problem.domain.ProblemDomain;
+import com.cpa.yusin.quiz.problem.domain.Problem;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.testcontainers.shaded.com.fasterxml.jackson.core.JsonProcessingException;
 
 import java.util.List;
 
@@ -37,29 +36,29 @@ class ProblemServiceTest extends MockSetup
         testContainer.problemService.saveOrUpdateProblem(biologyExam2.getId(), request);
 
         // then
-        List<ChoiceDomain> choiceDomains = testContainer.choiceRepository.findAllByExamId(biologyExam2.getId());
-        assertThat(choiceDomains).hasSize(5);
-        assertThat(choiceDomains.getFirst().getContent()).isEqualTo("problem1 - choice1");
-        assertThat(choiceDomains.getFirst().getNumber()).isEqualTo(1);
-        assertThat(choiceDomains.getFirst().getIsAnswer()).isTrue();
+        List<Choice> choices = testContainer.choiceRepository.findAllByExamId(biologyExam2.getId());
+        assertThat(choices).hasSize(5);
+        assertThat(choices.getFirst().getContent()).isEqualTo("problem1 - choice1");
+        assertThat(choices.getFirst().getNumber()).isEqualTo(1);
+        assertThat(choices.getFirst().getIsAnswer()).isTrue();
 
-        assertThat(choiceDomains.get(1).getContent()).isEqualTo("problem1 - choice2");
-        assertThat(choiceDomains.get(1).getNumber()).isEqualTo(2);
-        assertThat(choiceDomains.get(1).getIsAnswer()).isFalse();
+        assertThat(choices.get(1).getContent()).isEqualTo("problem1 - choice2");
+        assertThat(choices.get(1).getNumber()).isEqualTo(2);
+        assertThat(choices.get(1).getIsAnswer()).isFalse();
 
-        assertThat(choiceDomains.get(2).getContent()).isEqualTo("problem1 - choice3");
-        assertThat(choiceDomains.get(2).getNumber()).isEqualTo(3);
-        assertThat(choiceDomains.get(2).getIsAnswer()).isFalse();
+        assertThat(choices.get(2).getContent()).isEqualTo("problem1 - choice3");
+        assertThat(choices.get(2).getNumber()).isEqualTo(3);
+        assertThat(choices.get(2).getIsAnswer()).isFalse();
 
-        assertThat(choiceDomains.get(3).getContent()).isEqualTo("problem1 - choice4");
-        assertThat(choiceDomains.get(3).getNumber()).isEqualTo(4);
-        assertThat(choiceDomains.get(3).getIsAnswer()).isFalse();
+        assertThat(choices.get(3).getContent()).isEqualTo("problem1 - choice4");
+        assertThat(choices.get(3).getNumber()).isEqualTo(4);
+        assertThat(choices.get(3).getIsAnswer()).isFalse();
 
-        assertThat(choiceDomains.get(4).getContent()).isEqualTo("problem1 - choice5");
-        assertThat(choiceDomains.get(4).getNumber()).isEqualTo(5);
-        assertThat(choiceDomains.get(4).getIsAnswer()).isFalse();
+        assertThat(choices.get(4).getContent()).isEqualTo("problem1 - choice5");
+        assertThat(choices.get(4).getNumber()).isEqualTo(5);
+        assertThat(choices.get(4).getIsAnswer()).isFalse();
 
-        List<ProblemDomain> problems = testContainer.problemRepository.findAllByExamId(biologyExam2.getId());
+        List<Problem> problems = testContainer.problemRepository.findAllByExamId(biologyExam2.getId());
         assertThat(problems).hasSize(1);
 
         assertThat(problems.getFirst().getContent()).isEqualTo("problem1");
@@ -85,12 +84,12 @@ class ProblemServiceTest extends MockSetup
         testContainer.problemService.saveOrUpdateProblem(physicsExam1.getId(), request);
 
         // then
-        List<ChoiceDomain> choiceDomains = testContainer.choiceRepository.findAllByExamId(physicsExam1.getId());
+        List<Choice> choices = testContainer.choiceRepository.findAllByExamId(physicsExam1.getId());
 
-        assertThat(choiceDomains).hasSize(2);
-        assertThat(choiceDomains.getFirst().getContent()).isEqualTo("problem1 - choice1");
-        assertThat(choiceDomains.getFirst().getNumber()).isEqualTo(1);
-        assertThat(choiceDomains.getFirst().getIsAnswer()).isFalse();
+        assertThat(choices).hasSize(2);
+        assertThat(choices.getFirst().getContent()).isEqualTo("problem1 - choice1");
+        assertThat(choices.getFirst().getNumber()).isEqualTo(1);
+        assertThat(choices.getFirst().getIsAnswer()).isFalse();
     }
 
     @Test
@@ -119,14 +118,14 @@ class ProblemServiceTest extends MockSetup
         // given
         long examId = physicsExam1.getId();
 
-        ProblemDomain biologyProblem = ProblemDomain.builder()
+        Problem biologyProblem = Problem.builder()
                 .id(10L)
                 .number(10)
                 .content("biology")
                 .exam(biologyExam1)
                 .build();
 
-        testContainer.choiceRepository.save(ChoiceDomain.builder()
+        testContainer.choiceRepository.save(Choice.builder()
                 .id(10L)
                 .number(1)
                 .content("biology content")

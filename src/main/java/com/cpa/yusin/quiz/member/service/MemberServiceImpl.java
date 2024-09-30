@@ -6,7 +6,7 @@ import com.cpa.yusin.quiz.member.controller.dto.request.MemberUpdateRequest;
 import com.cpa.yusin.quiz.member.controller.dto.response.MemberDTO;
 import com.cpa.yusin.quiz.member.controller.mapper.MemberMapper;
 import com.cpa.yusin.quiz.member.controller.port.MemberService;
-import com.cpa.yusin.quiz.member.domain.MemberDomain;
+import com.cpa.yusin.quiz.member.domain.Member;
 import com.cpa.yusin.quiz.member.service.port.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,11 +28,11 @@ public class MemberServiceImpl implements MemberService
 
     @Transactional
     @Override
-    public void update(long memberId, MemberUpdateRequest request, MemberDomain loggedInMember)
+    public void update(long memberId, MemberUpdateRequest request, Member loggedInMember)
     {
         loggedInMember.validateMember(memberId, loggedInMember);
 
-        MemberDomain targetMember = findById(memberId);
+        Member targetMember = findById(memberId);
         targetMember.update(request);
 
         log.info("targetMember {}", targetMember );
@@ -59,7 +59,7 @@ public class MemberServiceImpl implements MemberService
     }
 
     @Override
-    public MemberDomain findById(long id)
+    public Member findById(long id)
     {
         return memberRepository.findById(id)
                 .orElseThrow(() -> new GlobalException(ExceptionMessage.USER_NOT_FOUND));
@@ -67,9 +67,9 @@ public class MemberServiceImpl implements MemberService
 
     @Transactional
     @Override
-    public void deleteById(long id, MemberDomain loggedInMember)
+    public void deleteById(long id, Member loggedInMember)
     {
-        MemberDomain targetMember = findById(id);
+        Member targetMember = findById(id);
 
         targetMember.validateMember(id, loggedInMember);
         memberRepository.deleteById(id);

@@ -4,10 +4,9 @@ import com.cpa.yusin.quiz.exam.controller.dto.request.ExamCreateRequest;
 import com.cpa.yusin.quiz.exam.controller.dto.request.ExamUpdateRequest;
 import com.cpa.yusin.quiz.exam.controller.dto.response.ExamCreateResponse;
 import com.cpa.yusin.quiz.exam.controller.dto.response.ExamDTO;
-import com.cpa.yusin.quiz.exam.domain.ExamDomain;
+import com.cpa.yusin.quiz.exam.domain.Exam;
 
 import java.util.List;
-import java.util.Optional;
 
 public interface ExamService
 {
@@ -15,7 +14,7 @@ public interface ExamService
 
     void update(long examId, ExamUpdateRequest request);
 
-    ExamDomain findById(long id);
+    Exam findById(long id);
 
     ExamDTO getById(long id);
 

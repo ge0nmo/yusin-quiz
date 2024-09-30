@@ -1,6 +1,5 @@
 package com.cpa.yusin.quiz.member.controller.dto.response;
 
-import com.cpa.yusin.quiz.member.domain.MemberDomain;
 import com.cpa.yusin.quiz.member.domain.type.Platform;
 import com.cpa.yusin.quiz.member.domain.type.Role;
 import lombok.Builder;

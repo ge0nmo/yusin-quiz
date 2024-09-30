@@ -1,5 +1,6 @@
 package com.cpa.yusin.quiz.member.domain;
 
+import com.cpa.yusin.quiz.common.infrastructure.BaseEntity;
 import com.cpa.yusin.quiz.common.service.UuidHolder;
 import com.cpa.yusin.quiz.global.exception.ExceptionMessage;
 import com.cpa.yusin.quiz.global.exception.GlobalException;
@@ -8,32 +9,46 @@ import com.cpa.yusin.quiz.member.controller.dto.request.MemberCreateRequest;
 import com.cpa.yusin.quiz.member.controller.dto.request.MemberUpdateRequest;
 import com.cpa.yusin.quiz.member.domain.type.Platform;
 import com.cpa.yusin.quiz.member.domain.type.Role;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.ToString;
+import jakarta.persistence.*;
+import lombok.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDateTime;
 
 @ToString
+@Entity
+@AllArgsConstructor
+@NoArgsConstructor
 @Builder
 @Getter
-public class MemberDomain
+public class Member extends BaseEntity
 {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(nullable = false, unique = true, updatable = false)
     private String email;
+
+    @Column(nullable = false)
     private String password;
+
+    @Column(nullable = false)
     private String username;
+
+    @Column(nullable = false, updatable = false)
+    @Enumerated(EnumType.STRING)
     private Platform platform;
+
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
     private Role role;
+
     private LocalDateTime subscriptionExpiredAt;
 
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
-
-    public static MemberDomain fromHome(MemberCreateRequest request, PasswordEncoder passwordEncoder)
+    public static Member fromHome(MemberCreateRequest request, PasswordEncoder passwordEncoder)
     {
-        return MemberDomain.builder()
+        return Member.builder()
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .username(request.getUsername())
@@ -43,9 +58,9 @@ public class MemberDomain
                 .build();
     }
 
-    public static MemberDomain fromOAuth2(OAuth2UserInfo oAuth2UserInfo, UuidHolder uuidHolder)
+    public static Member fromOAuth2(OAuth2UserInfo oAuth2UserInfo, UuidHolder uuidHolder)
     {
-        return MemberDomain.builder()
+        return Member.builder()
                 .email(oAuth2UserInfo.getEmail())
                 .password(uuidHolder.getRandom())
                 .username(oAuth2UserInfo.getName())
@@ -64,7 +79,7 @@ public class MemberDomain
         this.username = request.getUsername();
     }
 
-    public void validateMember(long memberId, MemberDomain member)
+    public void validateMember(long memberId, Member member)
     {
         if(member.getId().equals(memberId) || Role.ADMIN.equals(member.getRole())){
             return;

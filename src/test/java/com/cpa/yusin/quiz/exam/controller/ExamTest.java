@@ -4,13 +4,13 @@ import com.cpa.yusin.quiz.config.TeardownExtension;
 import com.cpa.yusin.quiz.exam.controller.dto.request.ExamCreateRequest;
 import com.cpa.yusin.quiz.exam.controller.dto.request.ExamDeleteRequest;
 import com.cpa.yusin.quiz.exam.controller.dto.request.ExamUpdateRequest;
-import com.cpa.yusin.quiz.exam.domain.ExamDomain;
+import com.cpa.yusin.quiz.exam.domain.Exam;
 import com.cpa.yusin.quiz.exam.service.port.ExamRepository;
-import com.cpa.yusin.quiz.member.domain.MemberDomain;
+import com.cpa.yusin.quiz.member.domain.Member;
 import com.cpa.yusin.quiz.member.domain.type.Platform;
 import com.cpa.yusin.quiz.member.domain.type.Role;
 import com.cpa.yusin.quiz.member.service.port.MemberRepository;
-import com.cpa.yusin.quiz.subject.domain.SubjectDomain;
+import com.cpa.yusin.quiz.subject.domain.Subject;
 import com.cpa.yusin.quiz.subject.service.port.SubjectRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -62,9 +62,9 @@ class ExamTest
 
     private final ObjectMapper mapper = new ObjectMapper();
 
-    SubjectDomain economics;
+    Subject economics;
 
-    MemberDomain admin;
+    Member admin;
 
     @BeforeEach
     void setUp(WebApplicationContext webApplicationContext, RestDocumentationContextProvider restDocumentation) {
@@ -72,22 +72,18 @@ class ExamTest
                 .apply(documentationConfiguration(restDocumentation))
                 .build();
 
-        admin = memberRepository.save(MemberDomain.builder()
+        admin = memberRepository.save(Member.builder()
                 .email("John@gmail.com")
                 .password("12341234")
                 .username("John")
                 .platform(Platform.HOME)
                 .role(Role.ADMIN)
-                .createdAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now())
                 .build());
 
 
-        economics = subjectRepository.save(SubjectDomain.builder()
+        economics = subjectRepository.save(Subject.builder()
                 .id(1L)
                 .name("경제학")
-                .createdAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now())
                 .build());
     }
 
@@ -191,14 +187,12 @@ class ExamTest
         // given
         Long subjectId = economics.getId();
 
-        examRepository.save(ExamDomain.builder()
+        examRepository.save(Exam.builder()
                 .id(1L)
                 .name("1차")
                 .year(2024)
                 .maxProblemCount(40)
                 .subjectId(economics.getId())
-                .createdAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now())
                 .build());
 
         ExamCreateRequest request = ExamCreateRequest.builder()
@@ -245,14 +239,12 @@ class ExamTest
     void update_success() throws Exception
     {
         // given
-        ExamDomain exam = examRepository.save(ExamDomain.builder()
+        Exam exam = examRepository.save(Exam.builder()
                 .id(1L)
                 .name("1차")
                 .year(2024)
                 .maxProblemCount(40)
                 .subjectId(economics.getId())
-                .createdAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now())
                 .build());
 
         ExamUpdateRequest request = ExamUpdateRequest.builder()
@@ -295,14 +287,12 @@ class ExamTest
     void update_fail_noFields() throws Exception
     {
         // given
-        ExamDomain exam = examRepository.save(ExamDomain.builder()
+        Exam exam = examRepository.save(Exam.builder()
                 .id(1L)
                 .name("1차")
                 .year(2024)
                 .maxProblemCount(40)
                 .subjectId(economics.getId())
-                .createdAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now())
                 .build());
 
         ExamUpdateRequest request = ExamUpdateRequest.builder()
@@ -343,24 +333,20 @@ class ExamTest
     void update_fail_duplicated() throws Exception
     {
         // given
-        ExamDomain exam = examRepository.save(ExamDomain.builder()
+        Exam exam = examRepository.save(Exam.builder()
                 .id(1L)
                 .name("1차")
                 .year(2024)
                 .maxProblemCount(40)
                 .subjectId(economics.getId())
-                .createdAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now())
                 .build());
 
-        examRepository.save(ExamDomain.builder()
+        examRepository.save(Exam.builder()
                 .id(2L)
                 .name("2차")
                 .year(2024)
                 .maxProblemCount(40)
                 .subjectId(economics.getId())
-                .createdAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now())
                 .build());
 
         ExamUpdateRequest request = ExamUpdateRequest.builder()
@@ -401,14 +387,12 @@ class ExamTest
     void getById_success() throws Exception
     {
         // given
-        ExamDomain exam = examRepository.save(ExamDomain.builder()
+        Exam exam = examRepository.save(Exam.builder()
                 .id(1L)
                 .name("1차")
                 .year(2024)
                 .maxProblemCount(40)
                 .subjectId(economics.getId())
-                .createdAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now())
                 .build());
 
         // when
@@ -466,34 +450,28 @@ class ExamTest
     void getBySubjectIdAndYear_success() throws Exception
     {
         // given
-        examRepository.save(ExamDomain.builder()
+        examRepository.save(Exam.builder()
                 .id(1L)
                 .name("1차")
                 .year(2024)
                 .maxProblemCount(40)
                 .subjectId(economics.getId())
-                .createdAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now())
                 .build());
 
-        examRepository.save(ExamDomain.builder()
+        examRepository.save(Exam.builder()
                 .id(2L)
                 .name("2차")
                 .year(2024)
                 .maxProblemCount(40)
                 .subjectId(economics.getId())
-                .createdAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now())
                 .build());
 
-        examRepository.save(ExamDomain.builder()
+        examRepository.save(Exam.builder()
                 .id(3L)
                 .name("3차")
                 .year(2024)
                 .maxProblemCount(40)
                 .subjectId(economics.getId())
-                .createdAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now())
                 .build());
 
         // when
@@ -529,34 +507,28 @@ class ExamTest
     void deleteById_success() throws Exception
     {
         // given
-        ExamDomain exam1 = examRepository.save(ExamDomain.builder()
+        Exam exam1 = examRepository.save(Exam.builder()
                 .id(1L)
                 .name("1차")
                 .year(2024)
                 .maxProblemCount(40)
                 .subjectId(economics.getId())
-                .createdAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now())
                 .build());
 
-        ExamDomain exam2 = examRepository.save(ExamDomain.builder()
+        Exam exam2 = examRepository.save(Exam.builder()
                 .id(2L)
                 .name("2차")
                 .year(2024)
                 .maxProblemCount(40)
                 .subjectId(economics.getId())
-                .createdAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now())
                 .build());
 
-        ExamDomain exam3 = examRepository.save(ExamDomain.builder()
+        Exam exam3 = examRepository.save(Exam.builder()
                 .id(3L)
                 .name("3차")
                 .year(2024)
                 .maxProblemCount(40)
                 .subjectId(economics.getId())
-                .createdAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now())
                 .build());
 
         ExamDeleteRequest request = ExamDeleteRequest.builder()

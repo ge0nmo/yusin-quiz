@@ -4,7 +4,7 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.cpa.yusin.quiz.file.controller.dto.response.FileResponse;
 import com.cpa.yusin.quiz.file.controller.port.FileService;
-import com.cpa.yusin.quiz.file.domain.FileDomain;
+import com.cpa.yusin.quiz.file.domain.File;
 import com.cpa.yusin.quiz.file.mapper.FileMapper;
 import com.cpa.yusin.quiz.file.service.port.FileRepository;
 import com.cpa.yusin.quiz.global.exception.ExceptionMessage;
@@ -45,7 +45,7 @@ public class FileServiceImpl implements FileService
         String url = updateFileToS3(uniqueFilename, file);
         log.info("url = {}", url);
 
-        FileDomain fileDomain = fileMapper.toFileDomain(url, uniqueFilename, file);
+        File fileDomain = fileMapper.toFileDomain(url, uniqueFilename, file);
 
         fileDomain = fileRepository.save(fileDomain);
 

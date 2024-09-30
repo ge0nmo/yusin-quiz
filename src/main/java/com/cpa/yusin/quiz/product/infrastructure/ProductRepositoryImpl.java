@@ -1,6 +1,6 @@
 package com.cpa.yusin.quiz.product.infrastructure;
 
-import com.cpa.yusin.quiz.product.domain.ProductDomain;
+import com.cpa.yusin.quiz.product.domain.Product;
 import com.cpa.yusin.quiz.product.service.port.ProductRepository;
 import org.springframework.stereotype.Component;
 
@@ -19,25 +19,21 @@ public class ProductRepositoryImpl implements ProductRepository
 
 
     @Override
-    public ProductDomain save(ProductDomain product)
+    public Product save(Product product)
     {
-        return productJpaRepository.save(Product.from(product))
-                .toModel();
+        return productJpaRepository.save(product);
     }
 
     @Override
-    public Optional<ProductDomain> findById(Long id)
+    public Optional<Product> findById(Long id)
     {
-        return productJpaRepository.findById(id)
-                .map(Product::toModel);
+        return productJpaRepository.findById(id);
     }
 
     @Override
-    public List<ProductDomain> findAll()
+    public List<Product> findAll()
     {
-        return productJpaRepository.findAll().stream()
-                .map(Product::toModel)
-                .toList();
+        return productJpaRepository.findAll();
     }
 
     @Override
