@@ -10,6 +10,7 @@ import com.cpa.yusin.quiz.product.controller.port.ProductService;
 import com.cpa.yusin.quiz.product.domain.Product;
 import com.cpa.yusin.quiz.product.controller.mapper.ProductMapper;
 import com.cpa.yusin.quiz.product.service.port.ProductRepository;
+import com.cpa.yusin.quiz.product.service.port.ProductValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,21 +25,26 @@ public class ProductServiceImpl implements ProductService
 {
     private final ProductRepository productRepository;
     private final ProductMapper productMapper;
+    private final ProductValidator productValidator;
 
     @Transactional
     @Override
     public ProductRegisterResponse save(ProductRegisterRequest request)
     {
+        productValidator.validateDurationMonth(request.getDurationMonths());
+
         Product product = productMapper.toProductDomain(request);
 
         product = productRepository.save(product);
         return productMapper.toProductRegisterResponse(product);
     }
 
+    @Transactional
     @Override
     public void update(long productId, ProductUpdateRequest request)
     {
         Product product = findById(productId);
+        productValidator.validateDurationMonth(productId, request.getDurationMonths());
 
         product.update(request);
         productRepository.save(product);
@@ -48,7 +54,7 @@ public class ProductServiceImpl implements ProductService
     public Product findById(Long id)
     {
         return productRepository.findById(id)
-                .orElseThrow(() -> new GlobalException(ExceptionMessage.PROBLEM_NOT_FOUND));
+                .orElseThrow(() -> new GlobalException(ExceptionMessage.PRODUCT_NOT_FOUND));
     }
 
     @Override
@@ -58,7 +64,7 @@ public class ProductServiceImpl implements ProductService
     }
 
     @Override
-    public List<ProductDTO> findAll()
+    public List<ProductDTO> getAll()
     {
         return productRepository.findAll().stream()
                 .map(productMapper::toProductDTO)
@@ -66,12 +72,13 @@ public class ProductServiceImpl implements ProductService
                 .toList();
     }
 
+    @Transactional
     @Override
-    public boolean deleteById(Long id)
+    public void deleteById(Long id)
     {
-        productRepository.deleteById(id);
+        findById(id);
 
-        return !productRepository.existsById(id);
+        productRepository.deleteById(id);
     }
 
 

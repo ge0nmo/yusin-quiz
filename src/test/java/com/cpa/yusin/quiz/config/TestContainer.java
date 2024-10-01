@@ -33,6 +33,13 @@ import com.cpa.yusin.quiz.problem.controller.mapper.ProblemMapper;
 import com.cpa.yusin.quiz.problem.controller.port.ProblemService;
 import com.cpa.yusin.quiz.problem.service.ProblemServiceImpl;
 import com.cpa.yusin.quiz.problem.service.port.ProblemRepository;
+import com.cpa.yusin.quiz.product.controller.ProductAdminController;
+import com.cpa.yusin.quiz.product.controller.mapper.ProductMapper;
+import com.cpa.yusin.quiz.product.controller.port.ProductService;
+import com.cpa.yusin.quiz.product.infrastructure.ProductValidatorImpl;
+import com.cpa.yusin.quiz.product.service.ProductServiceImpl;
+import com.cpa.yusin.quiz.product.service.port.ProductRepository;
+import com.cpa.yusin.quiz.product.service.port.ProductValidator;
 import com.cpa.yusin.quiz.subject.controller.AdminSubjectController;
 import com.cpa.yusin.quiz.subject.controller.mapper.SubjectMapper;
 import com.cpa.yusin.quiz.subject.controller.port.SubjectService;
@@ -91,6 +98,16 @@ public class TestContainer
     public final ProblemService problemService;
     public final AdminProblemController adminProblemController;
 
+
+    /**
+     *  product
+     */
+    public final ProductRepository productRepository;
+    public final ProductService productService;
+    public final ProductMapper productMapper;
+    public final ProductValidator productValidator;
+    public final ProductAdminController productAdminController;
+
     public final CascadeDeleteService cascadeDeleteService;
 
     public TestContainer()
@@ -134,6 +151,11 @@ public class TestContainer
                 this.examService, this.choiceService);
         this.adminProblemController = new AdminProblemController(this.problemService);
 
+        this.productRepository = new FakeProductRepository();
+        this.productMapper = new ProductMapper();
+        this.productValidator = new ProductValidatorImpl(this.productRepository);
+        this.productService = new ProductServiceImpl(productRepository, productMapper, productValidator);
+        this.productAdminController = new ProductAdminController(this.productService);
 
     }
 

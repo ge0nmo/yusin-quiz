@@ -9,6 +9,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.util.Objects;
 
 @Entity
 @AllArgsConstructor
@@ -31,5 +32,20 @@ public class Product extends BaseEntity
     {
         this.durationMonth = request.getDurationMonths();
         this.price = request.getPrice();
+    }
+
+    @Override
+    public boolean equals(Object o)
+    {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Product product = (Product) o;
+        return Objects.equals(id, product.id);
+    }
+
+    @Override
+    public int hashCode()
+    {
+        return Objects.hashCode(id);
     }
 }
