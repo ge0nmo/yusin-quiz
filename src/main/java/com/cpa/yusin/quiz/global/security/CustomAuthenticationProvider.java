@@ -46,17 +46,21 @@ public class CustomAuthenticationProvider implements AuthenticationProvider
 
     private void validateMember(String password, MemberDetails memberDetails)
     {
-        if(!validatePassword(password, memberDetails) || !validatePlatform(memberDetails))
+        validatePassword(password, memberDetails);
+        validatePlatform(memberDetails);
+    }
+
+    private void validatePassword(String password, MemberDetails memberDetails)
+    {
+        if(!passwordEncoder.matches(password, memberDetails.getPassword())){
             throw new GlobalException(ExceptionMessage.USER_NOT_FOUND);
+        }
     }
 
-    private boolean validatePassword(String password, MemberDetails memberDetails)
+    private void validatePlatform(MemberDetails memberDetails)
     {
-        return passwordEncoder.matches(password, memberDetails.getPassword());
-    }
-
-    private boolean validatePlatform(MemberDetails memberDetails)
-    {
-        return Platform.HOME.equals(memberDetails.getMember().getPlatform());
+        if(!Platform.HOME.equals(memberDetails.getMember().getPlatform())) {
+            throw new GlobalException(ExceptionMessage.USER_NOT_FOUND);
+        }
     }
 }

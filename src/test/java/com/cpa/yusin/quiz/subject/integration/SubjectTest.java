@@ -17,20 +17,25 @@ import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDoc
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.restdocs.RestDocumentationContextProvider;
+import org.springframework.restdocs.RestDocumentationExtension;
 import org.springframework.restdocs.payload.JsonFieldType;
 import org.springframework.security.test.context.support.TestExecutionEvent;
 import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.context.WebApplicationContext;
 import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
+import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.documentationConfiguration;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.*;
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.*;
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@ExtendWith(TeardownExtension.class)
+@ExtendWith({RestDocumentationExtension.class, TeardownExtension.class})
 @AutoConfigureMockMvc
 @SpringBootTest
 @AutoConfigureRestDocs
@@ -45,13 +50,17 @@ public class SubjectTest
     @Autowired
     private MemberRepository memberRepository;
 
-    ObjectMapper objectMapper = new ObjectMapper();
+    ObjectMapper objectMapper;
 
     Member admin;
 
     @BeforeEach
-    void setUp()
+    void setUp(WebApplicationContext webApplicationContext, RestDocumentationContextProvider restDocumentation)
     {
+        this.mvc = MockMvcBuilders.webAppContextSetup(webApplicationContext)
+                .apply(documentationConfiguration(restDocumentation))
+                .build();
+
         admin = memberRepository.save(Member.builder()
                 .id(1L)
                 .email("admin@gmail.com")
@@ -60,6 +69,8 @@ public class SubjectTest
                 .platform(Platform.HOME)
                 .role(Role.ADMIN)
                 .build());
+
+        objectMapper = new ObjectMapper();
     }
 
     @WithUserDetails(value = "admin@gmail.com", setupBefore = TestExecutionEvent.TEST_EXECUTION)

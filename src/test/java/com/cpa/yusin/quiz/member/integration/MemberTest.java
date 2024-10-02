@@ -20,23 +20,28 @@ import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDoc
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.restdocs.RestDocumentationContextProvider;
+import org.springframework.restdocs.RestDocumentationExtension;
 import org.springframework.restdocs.payload.JsonFieldType;
 import org.springframework.security.test.context.support.TestExecutionEvent;
 import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.context.WebApplicationContext;
 import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.util.HashMap;
 
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
+import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.documentationConfiguration;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.*;
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.*;
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@ExtendWith(TeardownExtension.class)
+@ExtendWith({RestDocumentationExtension.class, TeardownExtension.class})
 @AutoConfigureMockMvc
 @SpringBootTest
 @AutoConfigureRestDocs
@@ -59,21 +64,41 @@ class MemberTest
     Member member;
 
     @BeforeEach
-    void setUp()
+    void setUp(WebApplicationContext webApplicationContext, RestDocumentationContextProvider restDocumentation)
     {
-        MemberCreateResponse response = authenticationService.signUp(MemberCreateRequest.builder()
-                .email("David@naver.com").password("12341234").username("David").build());
+        this.mvc = MockMvcBuilders.webAppContextSetup(webApplicationContext)
+                .apply(documentationConfiguration(restDocumentation))
+                .build();
 
-        memberId = response.getId();
+        MemberCreateResponse savedMember = authenticationService.signUp(MemberCreateRequest.builder()
+                .email("David@naver.com")
+                .password("12341234")
+                .username("David")
+                .build());
 
-        authenticationService.signUp(MemberCreateRequest.builder()
-                .email("Mike@gmail.com").password("12341234").username("Mike").build());
 
-        authenticationService.signUp(MemberCreateRequest.builder()
-                .email("Gale@github.com").password("12341234").username("Gale").build());
+        memberId = savedMember.getId();
 
+        memberRepository.save(Member.builder()
+                .id(2L)
+                .email("Mike@gmail.com")
+                .password("12341234")
+                .username("Mike")
+                .role(Role.ADMIN)
+                .platform(Platform.HOME)
+                .build());
+
+        memberRepository.save(Member.builder()
+                .id(3L)
+                .email("Gale@github.com")
+                .password("12341234")
+                .username("Gale")
+                .role(Role.ADMIN)
+                .platform(Platform.HOME)
+                .build());
 
         member = memberRepository.save(Member.builder()
+                .id(4L)
                 .email("John@gmail.com")
                 .password("12341234")
                 .username("John")
@@ -130,9 +155,9 @@ class MemberTest
     {
         // given
         MemberCreateRequest request = MemberCreateRequest.builder()
-                //.username("Lee")
+                .username("Lee")
                 .email("test1")
-                //.password("123123")
+                .password("123123")
                 .build();
 
         String requestBody = om.writeValueAsString(request);
@@ -510,7 +535,6 @@ class MemberTest
         // when
         ResultActions resultActions = mvc
                 .perform(delete("/api/v1/admin/members/" + 2)
-                        .with(user(memberDetails))
                 );
 
         // then
