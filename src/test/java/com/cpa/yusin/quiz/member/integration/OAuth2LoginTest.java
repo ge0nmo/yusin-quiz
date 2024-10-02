@@ -1,4 +1,4 @@
-package com.cpa.yusin.quiz.member.controller;
+package com.cpa.yusin.quiz.member.integration;
 
 import com.cpa.yusin.quiz.config.TeardownExtension;
 import com.cpa.yusin.quiz.global.security.oauth2.CustomOAuth2Service;

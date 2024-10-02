@@ -1,4 +1,4 @@
-package com.cpa.yusin.quiz.subject.controller;
+package com.cpa.yusin.quiz.subject.integration;
 
 import com.cpa.yusin.quiz.config.TeardownExtension;
 import com.cpa.yusin.quiz.member.domain.Member;

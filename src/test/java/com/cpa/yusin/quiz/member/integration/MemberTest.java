@@ -1,4 +1,4 @@
-package com.cpa.yusin.quiz.member.controller;
+package com.cpa.yusin.quiz.member.integration;
 
 
 import com.cpa.yusin.quiz.config.TeardownExtension;
@@ -27,7 +27,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 
-import java.time.LocalDateTime;
 import java.util.HashMap;
 
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;

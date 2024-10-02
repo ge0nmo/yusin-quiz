@@ -1,4 +1,4 @@
-package com.cpa.yusin.quiz.exam.controller;
+package com.cpa.yusin.quiz.exam.integration;
 
 import com.cpa.yusin.quiz.common.controller.dto.response.GlobalResponse;
 import com.cpa.yusin.quiz.config.TestContainer;
@@ -18,7 +18,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class ExamControllerAdminTest
+class ExamTest
 {
     TestContainer testContainer;
 
