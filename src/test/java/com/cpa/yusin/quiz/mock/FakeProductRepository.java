@@ -70,6 +70,6 @@ public class FakeProductRepository implements ProductRepository
     {
         return data.stream()
                 .anyMatch(product -> Objects.equals(product.getDurationMonth(), durationMonth)
-                        && Objects.equals(product.getId(), id));
+                        && !Objects.equals(product.getId(), id));
     }
 }
