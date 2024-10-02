@@ -1,5 +1,6 @@
 package com.cpa.yusin.quiz.product.controller.dto.request;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -13,6 +14,9 @@ import java.math.BigDecimal;
 @Builder
 public class ProductRegisterRequest
 {
-    private Integer durationMonths;
+    @NotNull
+    private Integer durationMonth;
+
+    @NotNull
     private BigDecimal price;
 }

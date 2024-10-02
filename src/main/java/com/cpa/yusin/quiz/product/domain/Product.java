@@ -30,7 +30,7 @@ public class Product extends BaseEntity
 
     public void update(ProductUpdateRequest request)
     {
-        this.durationMonth = request.getDurationMonths();
+        this.durationMonth = request.getDurationMonth();
         this.price = request.getPrice();
     }
 

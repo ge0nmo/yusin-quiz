@@ -53,6 +53,8 @@ public class SecurityConfig
                                 "/api/v1/sign-up",
                                 "/api/v1/file/**",
                                 "/api/v1/login").permitAll()
+
+                        .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated());
 
         http

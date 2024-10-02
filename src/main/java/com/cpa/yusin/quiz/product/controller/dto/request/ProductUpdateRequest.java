@@ -15,7 +15,7 @@ import java.math.BigDecimal;
 public class ProductUpdateRequest
 {
     @NotNull
-    private Integer durationMonths;
+    private Integer durationMonth;
 
     @NotNull
     private BigDecimal price;

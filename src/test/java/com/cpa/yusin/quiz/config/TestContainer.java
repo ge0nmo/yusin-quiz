@@ -33,7 +33,7 @@ import com.cpa.yusin.quiz.problem.controller.mapper.ProblemMapper;
 import com.cpa.yusin.quiz.problem.controller.port.ProblemService;
 import com.cpa.yusin.quiz.problem.service.ProblemServiceImpl;
 import com.cpa.yusin.quiz.problem.service.port.ProblemRepository;
-import com.cpa.yusin.quiz.product.controller.ProductAdminController;
+import com.cpa.yusin.quiz.product.controller.AdminProductController;
 import com.cpa.yusin.quiz.product.controller.mapper.ProductMapper;
 import com.cpa.yusin.quiz.product.controller.port.ProductService;
 import com.cpa.yusin.quiz.product.infrastructure.ProductValidatorImpl;
@@ -106,7 +106,7 @@ public class TestContainer
     public final ProductService productService;
     public final ProductMapper productMapper;
     public final ProductValidator productValidator;
-    public final ProductAdminController productAdminController;
+    public final AdminProductController adminProductController;
 
     public final CascadeDeleteService cascadeDeleteService;
 
@@ -155,7 +155,7 @@ public class TestContainer
         this.productMapper = new ProductMapper();
         this.productValidator = new ProductValidatorImpl(this.productRepository);
         this.productService = new ProductServiceImpl(productRepository, productMapper, productValidator);
-        this.productAdminController = new ProductAdminController(this.productService);
+        this.adminProductController = new AdminProductController(this.productService);
 
     }
 

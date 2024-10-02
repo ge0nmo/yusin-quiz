@@ -15,7 +15,7 @@ public class ProductMapper
             return null;
 
         return Product.builder()
-                .durationMonth(request.getDurationMonths())
+                .durationMonth(request.getDurationMonth())
                 .price(request.getPrice())
                 .build();
     }
@@ -27,7 +27,7 @@ public class ProductMapper
 
         return ProductRegisterResponse.builder()
                 .id(domain.getId())
-                .durationMonths(domain.getDurationMonth())
+                .durationMonth(domain.getDurationMonth())
                 .price(domain.getPrice())
                 .createdAt(domain.getCreatedAt())
                 .updatedAt(domain.getUpdatedAt())

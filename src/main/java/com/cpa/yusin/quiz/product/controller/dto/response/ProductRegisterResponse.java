@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 public class ProductRegisterResponse
 {
     private final long id;
-    private final int durationMonths;
+    private final int durationMonth;
     private final BigDecimal price;
     private final LocalDateTime createdAt;
     private final LocalDateTime updatedAt;

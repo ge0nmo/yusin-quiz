@@ -31,7 +31,7 @@ public class ProductServiceImpl implements ProductService
     @Override
     public ProductRegisterResponse save(ProductRegisterRequest request)
     {
-        productValidator.validateDurationMonth(request.getDurationMonths());
+        productValidator.validateDurationMonth(request.getDurationMonth());
 
         Product product = productMapper.toProductDomain(request);
 
@@ -44,7 +44,7 @@ public class ProductServiceImpl implements ProductService
     public void update(long productId, ProductUpdateRequest request)
     {
         Product product = findById(productId);
-        productValidator.validateDurationMonth(productId, request.getDurationMonths());
+        productValidator.validateDurationMonth(productId, request.getDurationMonth());
 
         product.update(request);
         productRepository.save(product);

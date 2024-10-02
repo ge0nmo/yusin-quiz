@@ -39,7 +39,7 @@ class ProductServiceTest
     {
         // given
         ProductRegisterRequest request = ProductRegisterRequest.builder()
-                .durationMonths(2)
+                .durationMonth(2)
                 .price(BigDecimal.valueOf(4000))
                 .build();
 
@@ -48,7 +48,7 @@ class ProductServiceTest
 
         // then
         assertThat(result.getPrice()).isEqualTo(BigDecimal.valueOf(4000));
-        assertThat(result.getDurationMonths()).isEqualTo(2);
+        assertThat(result.getDurationMonth()).isEqualTo(2);
     }
 
     @Test
@@ -58,7 +58,7 @@ class ProductServiceTest
         long productId = 1L;
 
         ProductUpdateRequest request = ProductUpdateRequest.builder()
-                .durationMonths(2)
+                .durationMonth(2)
                 .price(BigDecimal.valueOf(4000))
                 .build();
 
@@ -82,7 +82,7 @@ class ProductServiceTest
         long productId = 5L;
 
         ProductUpdateRequest request = ProductUpdateRequest.builder()
-                .durationMonths(2)
+                .durationMonth(2)
                 .price(BigDecimal.valueOf(4000))
                 .build();
 

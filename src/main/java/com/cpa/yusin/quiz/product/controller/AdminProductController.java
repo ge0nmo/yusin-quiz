@@ -6,23 +6,25 @@ import com.cpa.yusin.quiz.product.controller.dto.request.ProductUpdateRequest;
 import com.cpa.yusin.quiz.product.controller.dto.response.ProductDTO;
 import com.cpa.yusin.quiz.product.controller.dto.response.ProductRegisterResponse;
 import com.cpa.yusin.quiz.product.controller.port.ProductService;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@RequestMapping("/api/v1/product")
+@RequestMapping("/api/v1/admin/product")
 @RequiredArgsConstructor
 @RestController
-public class ProductAdminController
+public class AdminProductController
 {
     private final ProductService productService;
 
     @PostMapping
-    public ResponseEntity<GlobalResponse<ProductRegisterResponse>> save(@RequestBody ProductRegisterRequest productRegisterRequest)
+    public ResponseEntity<GlobalResponse<ProductRegisterResponse>> save(@Valid @RequestBody ProductRegisterRequest productRegisterRequest)
     {
         ProductRegisterResponse response = productService.save(productRegisterRequest);
 
@@ -32,7 +34,7 @@ public class ProductAdminController
 
     @PatchMapping("/{id}")
     public ResponseEntity<GlobalResponse<ProductDTO>> update(@Positive @PathVariable("id") Long id,
-                                                             @RequestBody ProductUpdateRequest productUpdateRequest)
+                                                             @Validated @RequestBody ProductUpdateRequest productUpdateRequest)
     {
         productService.update(id, productUpdateRequest);
         ProductDTO response = productService.getById(id);
