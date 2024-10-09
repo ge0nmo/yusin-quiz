@@ -79,6 +79,7 @@ class SubscriptionPlanIntegrationTest
     {
         // given
         SubscriptionPlanRegisterRequest request = SubscriptionPlanRegisterRequest.builder()
+                .name("1개월 플랜")
                 .price(BigDecimal.valueOf(3000))
                 .durationMonth(1)
                 .build();
@@ -96,12 +97,14 @@ class SubscriptionPlanIntegrationTest
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),
                         requestFields(
+                                fieldWithPath("name").description("구독 플랜 이름"),
                                 fieldWithPath("durationMonth").description("구독 플랜 기간"),
                                 fieldWithPath("price").description("구독 플랜 가격")
                         ),
 
                         responseFields(
                                 fieldWithPath("data.id").description("구독 플랜 식별자").type(JsonFieldType.NUMBER),
+                                fieldWithPath("data.name").description("구독 플랜 이름").type(JsonFieldType.STRING),
                                 fieldWithPath("data.durationMonth").description("구독 플랜 기간").type(JsonFieldType.NUMBER),
                                 fieldWithPath("data.price").description("구독 플랜 가격").type(JsonFieldType.NUMBER),
                                 fieldWithPath("data.createdAt").description("구독 플랜 등록 날짜").type(JsonFieldType.STRING),
@@ -132,6 +135,7 @@ class SubscriptionPlanIntegrationTest
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),
                         requestFields(
+                                fieldWithPath("name").description("구독 플랜 이름"),
                                 fieldWithPath("durationMonth").description("구독 플랜 기간"),
                                 fieldWithPath("price").description("구독 플랜 가격")
                         ),
@@ -152,11 +156,17 @@ class SubscriptionPlanIntegrationTest
     void update() throws Exception
     {
         // given
-        subscriptionPlanRepository.save(SubscriptionPlan.builder().id(1L).price(BigDecimal.valueOf(3000)).durationMonth(1).build());
+        subscriptionPlanRepository.save(
+                SubscriptionPlan.builder()
+                        .id(1L).name("1개월 플랜")
+                        .price(BigDecimal.valueOf(3000))
+                        .durationMonth(1)
+                        .build());
 
         long productId = 1L;
 
         SubscriptionPlanUpdateRequest request = SubscriptionPlanUpdateRequest.builder()
+                .name("3개월 플랜")
                 .durationMonth(3)
                 .price(BigDecimal.valueOf(5000))
                 .build();
@@ -174,12 +184,14 @@ class SubscriptionPlanIntegrationTest
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),
                         requestFields(
+                                fieldWithPath("name").description("구독 플랜 이름"),
                                 fieldWithPath("durationMonth").description("구독 플랜 기간"),
                                 fieldWithPath("price").description("구독 플랜 가격")
                         ),
 
                         responseFields(
                                 fieldWithPath("data.id").description("구독 플랜 고유 식별자").type(JsonFieldType.NUMBER),
+                                fieldWithPath("data.name").description("구독 플랜 이름").type(JsonFieldType.STRING),
                                 fieldWithPath("data.durationMonth").description("구독 플랜 기간").type(JsonFieldType.NUMBER),
                                 fieldWithPath("data.price").description("구독 플랜 가격").type(JsonFieldType.NUMBER),
                                 fieldWithPath("data.createdAt").description("구독 플랜 등록 날짜").type(JsonFieldType.STRING),
@@ -194,7 +206,13 @@ class SubscriptionPlanIntegrationTest
     void update_throwExceptionWhenFieldsAreNull() throws Exception
     {
         // given
-        SubscriptionPlan savedSubscriptionPlan = subscriptionPlanRepository.save(SubscriptionPlan.builder().id(1L).price(BigDecimal.valueOf(3000)).durationMonth(1).build());
+        SubscriptionPlan savedSubscriptionPlan = subscriptionPlanRepository.save(
+                SubscriptionPlan.builder()
+                        .id(1L)
+                        .name("1개월 플랜")
+                        .price(BigDecimal.valueOf(3000))
+                        .durationMonth(1)
+                        .build());
 
         SubscriptionPlanUpdateRequest request = SubscriptionPlanUpdateRequest.builder()
                 .build();
@@ -213,6 +231,7 @@ class SubscriptionPlanIntegrationTest
                         preprocessResponse(prettyPrint()),
                         requestFields(
                                 fieldWithPath("durationMonth").description("구독 플랜 기간"),
+                                fieldWithPath("name").description("구독 플랜 이름"),
                                 fieldWithPath("price").description("구독 플랜 가격")
                         ),
 
@@ -232,7 +251,13 @@ class SubscriptionPlanIntegrationTest
     void getById() throws Exception
     {
         // given
-        SubscriptionPlan savedSubscriptionPlan = subscriptionPlanRepository.save(SubscriptionPlan.builder().id(1L).price(BigDecimal.valueOf(3000)).durationMonth(1).build());
+        SubscriptionPlan savedSubscriptionPlan = subscriptionPlanRepository.save(
+                SubscriptionPlan.builder()
+                        .id(1L)
+                        .name("1개월 플랜")
+                        .price(BigDecimal.valueOf(3000))
+                        .durationMonth(1)
+                        .build());
 
         // when
         ResultActions resultActions = mvc.perform(get("/api/v1/admin/product/" + savedSubscriptionPlan.getId())
@@ -247,6 +272,7 @@ class SubscriptionPlanIntegrationTest
 
                         responseFields(
                                 fieldWithPath("data.id").description("구독 플랜 고유 식별자").type(JsonFieldType.NUMBER),
+                                fieldWithPath("data.name").description("구독 플랜 이름").type(JsonFieldType.STRING),
                                 fieldWithPath("data.durationMonth").description("구독 플랜 기간").type(JsonFieldType.NUMBER),
                                 fieldWithPath("data.price").description("구독 플랜 가격").type(JsonFieldType.NUMBER),
                                 fieldWithPath("data.createdAt").description("구독 플랜 등록 날짜").type(JsonFieldType.STRING),
@@ -261,10 +287,10 @@ class SubscriptionPlanIntegrationTest
     void getAllProducts() throws Exception
     {
         // given
-        subscriptionPlanRepository.save(SubscriptionPlan.builder().id(1L).price(BigDecimal.valueOf(3000)).durationMonth(1).build());
-        subscriptionPlanRepository.save(SubscriptionPlan.builder().id(2L).price(BigDecimal.valueOf(6000)).durationMonth(3).build());
-        subscriptionPlanRepository.save(SubscriptionPlan.builder().id(3L).price(BigDecimal.valueOf(10000)).durationMonth(6).build());
-        subscriptionPlanRepository.save(SubscriptionPlan.builder().id(4L).price(BigDecimal.valueOf(15000)).durationMonth(12).build());
+        subscriptionPlanRepository.save(SubscriptionPlan.builder().id(1L).name("1개월 플랜").price(BigDecimal.valueOf(3000)).durationMonth(1).build());
+        subscriptionPlanRepository.save(SubscriptionPlan.builder().id(2L).name("3개월 플랜").price(BigDecimal.valueOf(6000)).durationMonth(3).build());
+        subscriptionPlanRepository.save(SubscriptionPlan.builder().id(3L).name("6개월 플랜").price(BigDecimal.valueOf(10000)).durationMonth(6).build());
+        subscriptionPlanRepository.save(SubscriptionPlan.builder().id(4L).name("1년 플랜").price(BigDecimal.valueOf(15000)).durationMonth(12).build());
 
         // when
         ResultActions resultActions = mvc
@@ -279,6 +305,7 @@ class SubscriptionPlanIntegrationTest
 
                         responseFields(
                                 fieldWithPath("data[].id").description("구독 플랜 고유 식별자").type(JsonFieldType.NUMBER),
+                                fieldWithPath("data[].name").description("구독 플랜 이름").type(JsonFieldType.STRING),
                                 fieldWithPath("data[].durationMonth").description("구독 플랜 기간").type(JsonFieldType.NUMBER),
                                 fieldWithPath("data[].price").description("구독 플랜 가격").type(JsonFieldType.NUMBER),
                                 fieldWithPath("data[].createdAt").description("구독 플랜 등록 날짜").type(JsonFieldType.STRING),
@@ -293,7 +320,13 @@ class SubscriptionPlanIntegrationTest
     void deleteById() throws Exception
     {
         // given
-        SubscriptionPlan savedSubscriptionPlan = subscriptionPlanRepository.save(SubscriptionPlan.builder().id(1L).price(BigDecimal.valueOf(3000)).durationMonth(1).build());
+        SubscriptionPlan savedSubscriptionPlan = subscriptionPlanRepository.save(
+                SubscriptionPlan.builder()
+                        .id(1L)
+                        .price(BigDecimal.valueOf(3000))
+                        .name("1개월 플랜")
+                        .durationMonth(1)
+                        .build());
 
         // when
         ResultActions resultActions = mvc

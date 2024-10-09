@@ -1,5 +1,6 @@
 package com.cpa.yusin.quiz.subscriptionPlan.controller.dto.request;
 
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -14,6 +15,9 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 public class SubscriptionPlanUpdateRequest
 {
+    @NotBlank
+    private String name;
+
     @NotNull
     private Integer durationMonth;
 

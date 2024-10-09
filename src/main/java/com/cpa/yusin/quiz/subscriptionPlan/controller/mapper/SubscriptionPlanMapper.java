@@ -15,6 +15,7 @@ public class SubscriptionPlanMapper
             return null;
 
         return SubscriptionPlan.builder()
+                .name(request.getName())
                 .durationMonth(request.getDurationMonth())
                 .price(request.getPrice())
                 .build();
@@ -27,6 +28,7 @@ public class SubscriptionPlanMapper
 
         return SubscriptionPlanRegisterResponse.builder()
                 .id(domain.getId())
+                .name(domain.getName())
                 .durationMonth(domain.getDurationMonth())
                 .price(domain.getPrice())
                 .createdAt(domain.getCreatedAt())
@@ -41,6 +43,7 @@ public class SubscriptionPlanMapper
 
         return SubscriptionPlanDTO.builder()
                 .id(domain.getId())
+                .name(domain.getName())
                 .durationMonth(domain.getDurationMonth())
                 .price(domain.getPrice())
                 .createdAt(domain.getCreatedAt())

@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 public class SubscriptionPlanRegisterResponse
 {
     private final long id;
+    private final String name;
     private final int durationMonth;
     private final BigDecimal price;
     private final LocalDateTime createdAt;

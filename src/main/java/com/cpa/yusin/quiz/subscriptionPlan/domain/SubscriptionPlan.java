@@ -22,6 +22,9 @@ public class SubscriptionPlan extends BaseEntity
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false)
+    private String name;
+
     @Column(nullable = false, unique = true)
     private Integer durationMonth;
 
@@ -30,6 +33,7 @@ public class SubscriptionPlan extends BaseEntity
 
     public void update(SubscriptionPlanUpdateRequest request)
     {
+        this.name = request.getName();
         this.durationMonth = request.getDurationMonth();
         this.price = request.getPrice();
     }

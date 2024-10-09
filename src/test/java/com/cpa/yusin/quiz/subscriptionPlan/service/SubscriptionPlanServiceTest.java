@@ -26,10 +26,10 @@ class SubscriptionPlanServiceTest
     {
         testContainer = new TestContainer();
 
-        testContainer.subscriptionPlanRepository.save(SubscriptionPlan.builder().id(1L).price(BigDecimal.valueOf(3000)).durationMonth(1).build());
-        testContainer.subscriptionPlanRepository.save(SubscriptionPlan.builder().id(2L).price(BigDecimal.valueOf(6000)).durationMonth(3).build());
-        testContainer.subscriptionPlanRepository.save(SubscriptionPlan.builder().id(3L).price(BigDecimal.valueOf(10000)).durationMonth(6).build());
-        testContainer.subscriptionPlanRepository.save(SubscriptionPlan.builder().id(4L).price(BigDecimal.valueOf(15000)).durationMonth(12).build());
+        testContainer.subscriptionPlanRepository.save(SubscriptionPlan.builder().id(1L).name("1개월 플랜").price(BigDecimal.valueOf(3000)).durationMonth(1).build());
+        testContainer.subscriptionPlanRepository.save(SubscriptionPlan.builder().id(2L).name("3개월 플랜").price(BigDecimal.valueOf(6000)).durationMonth(3).build());
+        testContainer.subscriptionPlanRepository.save(SubscriptionPlan.builder().id(3L).name("6개월 플랜").price(BigDecimal.valueOf(10000)).durationMonth(6).build());
+        testContainer.subscriptionPlanRepository.save(SubscriptionPlan.builder().id(4L).name("1년 플랜").price(BigDecimal.valueOf(15000)).durationMonth(12).build());
     }
 
     @Test
@@ -38,6 +38,7 @@ class SubscriptionPlanServiceTest
         // given
         SubscriptionPlanRegisterRequest request = SubscriptionPlanRegisterRequest.builder()
                 .durationMonth(2)
+                .name("2개월 플랜")
                 .price(BigDecimal.valueOf(4000))
                 .build();
 
@@ -56,6 +57,7 @@ class SubscriptionPlanServiceTest
         long subscriptionPlanId = 1L;
 
         SubscriptionPlanUpdateRequest request = SubscriptionPlanUpdateRequest.builder()
+                .name("2개월 플랜")
                 .durationMonth(2)
                 .price(BigDecimal.valueOf(4000))
                 .build();
@@ -80,6 +82,7 @@ class SubscriptionPlanServiceTest
         long subscriptionPlanId = 5L;
 
         SubscriptionPlanUpdateRequest request = SubscriptionPlanUpdateRequest.builder()
+                .name("2개월 플랜")
                 .durationMonth(2)
                 .price(BigDecimal.valueOf(4000))
                 .build();
@@ -87,7 +90,7 @@ class SubscriptionPlanServiceTest
         // when
 
         // then
-        assertThatThrownBy(() -> testContainer.subscriptionPlanService.findById(subscriptionPlanId))
+        assertThatThrownBy(() -> testContainer.subscriptionPlanService.update(subscriptionPlanId, request))
                 .isInstanceOf(GlobalException.class);
     }
 
