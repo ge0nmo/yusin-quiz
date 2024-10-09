@@ -68,8 +68,6 @@ dependencies {
     testImplementation group: 'io.findify', name: 's3mock_2.13', version: '0.2.6'
     implementation group: 'com.adobe.testing', name: 's3mock', version: '3.10.0'
 
-
-
 }
 
 tasks.named('test') {

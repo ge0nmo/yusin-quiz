@@ -18,7 +18,7 @@ import java.time.LocalDateTime;
 @ToString
 @Entity
 @AllArgsConstructor
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Builder
 @Getter
 public class Member extends BaseEntity

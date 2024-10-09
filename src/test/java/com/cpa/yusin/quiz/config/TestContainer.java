@@ -33,13 +33,13 @@ import com.cpa.yusin.quiz.problem.controller.mapper.ProblemMapper;
 import com.cpa.yusin.quiz.problem.controller.port.ProblemService;
 import com.cpa.yusin.quiz.problem.service.ProblemServiceImpl;
 import com.cpa.yusin.quiz.problem.service.port.ProblemRepository;
-import com.cpa.yusin.quiz.product.controller.AdminProductController;
-import com.cpa.yusin.quiz.product.controller.mapper.ProductMapper;
-import com.cpa.yusin.quiz.product.controller.port.ProductService;
-import com.cpa.yusin.quiz.product.infrastructure.ProductValidatorImpl;
-import com.cpa.yusin.quiz.product.service.ProductServiceImpl;
-import com.cpa.yusin.quiz.product.service.port.ProductRepository;
-import com.cpa.yusin.quiz.product.service.port.ProductValidator;
+import com.cpa.yusin.quiz.subscriptionPlan.controller.AdminSubscriptionPlanController;
+import com.cpa.yusin.quiz.subscriptionPlan.controller.mapper.SubscriptionPlanMapper;
+import com.cpa.yusin.quiz.subscriptionPlan.controller.port.SubscriptionPlanService;
+import com.cpa.yusin.quiz.subscriptionPlan.infrastructure.SubscriptionPlanValidatorImpl;
+import com.cpa.yusin.quiz.subscriptionPlan.service.SubscriptionPlanServiceImpl;
+import com.cpa.yusin.quiz.subscriptionPlan.service.port.SubscriptionPlanRepository;
+import com.cpa.yusin.quiz.subscriptionPlan.service.port.SubscriptionPlanValidator;
 import com.cpa.yusin.quiz.subject.controller.AdminSubjectController;
 import com.cpa.yusin.quiz.subject.controller.mapper.SubjectMapper;
 import com.cpa.yusin.quiz.subject.controller.port.SubjectService;
@@ -100,13 +100,13 @@ public class TestContainer
 
 
     /**
-     *  product
+     *  subscriptionPlan
      */
-    public final ProductRepository productRepository;
-    public final ProductService productService;
-    public final ProductMapper productMapper;
-    public final ProductValidator productValidator;
-    public final AdminProductController adminProductController;
+    public final SubscriptionPlanRepository subscriptionPlanRepository;
+    public final SubscriptionPlanService subscriptionPlanService;
+    public final SubscriptionPlanMapper subscriptionPlanMapper;
+    public final SubscriptionPlanValidator subscriptionPlanValidator;
+    public final AdminSubscriptionPlanController adminSubscriptionPlanController;
 
     public final CascadeDeleteService cascadeDeleteService;
 
@@ -151,11 +151,11 @@ public class TestContainer
                 this.examService, this.choiceService);
         this.adminProblemController = new AdminProblemController(this.problemService);
 
-        this.productRepository = new FakeProductRepository();
-        this.productMapper = new ProductMapper();
-        this.productValidator = new ProductValidatorImpl(this.productRepository);
-        this.productService = new ProductServiceImpl(productRepository, productMapper, productValidator);
-        this.adminProductController = new AdminProductController(this.productService);
+        this.subscriptionPlanRepository = new FakeSubscriptionPlanRepository();
+        this.subscriptionPlanMapper = new SubscriptionPlanMapper();
+        this.subscriptionPlanValidator = new SubscriptionPlanValidatorImpl(this.subscriptionPlanRepository);
+        this.subscriptionPlanService = new SubscriptionPlanServiceImpl(subscriptionPlanRepository, subscriptionPlanMapper, subscriptionPlanValidator);
+        this.adminSubscriptionPlanController = new AdminSubscriptionPlanController(this.subscriptionPlanService);
 
     }
 
