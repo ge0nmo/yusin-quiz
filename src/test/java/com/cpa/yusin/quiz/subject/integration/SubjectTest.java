@@ -285,7 +285,13 @@ public class SubjectTest
 
                         responseFields(
                                 fieldWithPath("data[].id").type(JsonFieldType.NUMBER).description("과목 고유 식별자"),
-                                fieldWithPath("data[].name").type(JsonFieldType.STRING).description("과목 이름")
+                                fieldWithPath("data[].name").type(JsonFieldType.STRING).description("과목 이름"),
+
+                                fieldWithPath("pageInfo").type(JsonFieldType.OBJECT).description("페이지 정보").optional(),
+                                fieldWithPath("pageInfo.totalElements").type(JsonFieldType.NUMBER).description("총 데이터 수").optional(),
+                                fieldWithPath("pageInfo.totalPages").type(JsonFieldType.NUMBER).description("총 페이지 수").optional(),
+                                fieldWithPath("pageInfo.currentPage").type(JsonFieldType.NUMBER).description("현재 페이지").optional(),
+                                fieldWithPath("pageInfo.pageSize").type(JsonFieldType.NUMBER).description("페이지 크기").optional()
                         )
                 ));
     }

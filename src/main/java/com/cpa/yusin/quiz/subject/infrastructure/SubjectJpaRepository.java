@@ -1,6 +1,8 @@
 package com.cpa.yusin.quiz.subject.infrastructure;
 
 import com.cpa.yusin.quiz.subject.domain.Subject;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -15,4 +17,7 @@ public interface SubjectJpaRepository extends JpaRepository<Subject, Long>
             "FROM Subject s " +
             "WHERE s.id != :id AND s.name = :name ")
     boolean existsByNameAndIdNot(@Param("id") long id, @Param("name") String name);
+
+    @Query("SELECT s FROM Subject s ORDER BY s.name ASC ")
+    Page<Subject> findAllOrderByNameAsc(Pageable pageable);
 }

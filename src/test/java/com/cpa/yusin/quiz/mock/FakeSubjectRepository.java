@@ -2,6 +2,9 @@ package com.cpa.yusin.quiz.mock;
 
 import com.cpa.yusin.quiz.subject.domain.Subject;
 import com.cpa.yusin.quiz.subject.service.port.SubjectRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
@@ -37,10 +40,14 @@ public class FakeSubjectRepository implements SubjectRepository
     }
 
     @Override
-    public List<Subject> findAll()
+    public Page<Subject> findAll(Pageable pageable)
     {
-        return data.stream()
+        List<Subject> result = data.stream()
+                .limit(pageable.getPageSize())
+                .skip(pageable.getOffset())
                 .toList();
+
+        return new PageImpl<>(result, pageable, data.size());
     }
 
     @Override
@@ -68,5 +75,17 @@ public class FakeSubjectRepository implements SubjectRepository
     {
         return data.stream()
                 .anyMatch(item -> !item.getId().equals(id) && item.getName().equals(name));
+    }
+
+    @Override
+    public Page<Subject> findAllOrderByName(Pageable pageable)
+    {
+        List<Subject> result = data.stream()
+                .sorted(Comparator.comparing(Subject::getName))
+                .limit(pageable.getPageSize())
+                .skip(pageable.getOffset())
+                .toList();
+
+        return new PageImpl<>(result, pageable, data.size());
     }
 }

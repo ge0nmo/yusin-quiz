@@ -9,6 +9,8 @@ import com.cpa.yusin.quiz.subject.controller.port.SubjectService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
@@ -55,10 +57,10 @@ public class AdminSubjectController
 
 
     @GetMapping
-    public ResponseEntity<GlobalResponse<List<SubjectDTO>>> getAll()
+    public ResponseEntity<GlobalResponse<List<SubjectDTO>>> getAll(@PageableDefault Pageable pageable)
     {
         return ResponseEntity
-                .ok(new GlobalResponse<>(subjectService.getAll()));
+                .ok(subjectService.getAll(pageable.previousOrFirst()));
     }
 
     @DeleteMapping("/{id}")

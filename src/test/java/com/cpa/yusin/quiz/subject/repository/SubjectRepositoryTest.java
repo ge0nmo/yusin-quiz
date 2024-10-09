@@ -4,6 +4,8 @@ import com.cpa.yusin.quiz.config.TestContainer;
 import com.cpa.yusin.quiz.subject.domain.Subject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 import java.util.Optional;
@@ -73,9 +75,13 @@ class SubjectRepositoryTest
     void findAll()
     {
         // given
+        int page = 1;
+        int size = 10;
+        Pageable pageable = PageRequest.of(page, size);
 
         // when
-        List<Subject> result = testContainer.subjectRepository.findAll();
+        List<Subject> result = testContainer.subjectRepository.findAll(pageable.previousOrFirst())
+                .getContent();
 
         // then
         assertThat(result)

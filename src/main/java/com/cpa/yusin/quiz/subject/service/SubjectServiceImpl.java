@@ -1,5 +1,7 @@
 package com.cpa.yusin.quiz.subject.service;
 
+import com.cpa.yusin.quiz.common.controller.dto.response.GlobalResponse;
+import com.cpa.yusin.quiz.common.controller.dto.response.PageInfo;
 import com.cpa.yusin.quiz.common.service.CascadeDeleteService;
 import com.cpa.yusin.quiz.global.exception.ExceptionMessage;
 import com.cpa.yusin.quiz.global.exception.GlobalException;
@@ -13,6 +15,8 @@ import com.cpa.yusin.quiz.subject.domain.Subject;
 import com.cpa.yusin.quiz.subject.service.port.SubjectRepository;
 import com.cpa.yusin.quiz.subject.service.port.SubjectValidator;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -67,13 +71,12 @@ public class SubjectServiceImpl implements SubjectService
     }
 
     @Override
-    public List<SubjectDTO> getAll()
+    public GlobalResponse<List<SubjectDTO>> getAll(Pageable pageable)
     {
-        List<SubjectDTO> response = subjectMapper.toSubjectDTOs(subjectRepository.findAll());
+        Page<Subject> result = subjectRepository.findAllOrderByName(pageable);
+        List<SubjectDTO> response = subjectMapper.toSubjectDTOs(result.getContent());
 
-        return response.stream()
-                .sorted(Comparator.comparing(SubjectDTO::getName))
-                .toList();
+        return new GlobalResponse<>(response, PageInfo.of(result));
     }
 
     @Override

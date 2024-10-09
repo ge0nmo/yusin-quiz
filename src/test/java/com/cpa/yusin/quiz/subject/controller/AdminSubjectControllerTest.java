@@ -9,6 +9,8 @@ import com.cpa.yusin.quiz.subject.controller.dto.response.SubjectDTO;
 import com.cpa.yusin.quiz.subject.domain.Subject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
@@ -95,9 +97,12 @@ class AdminSubjectControllerTest
         testContainer.subjectRepository.save(Subject.builder().id(1L).name("Chemistry").build());
         testContainer.subjectRepository.save(Subject.builder().id(2L).name("Physics").build());
         testContainer.subjectRepository.save(Subject.builder().id(3L).name("Biology").build());
+        int page = 1;
+        int size = 10;
+        Pageable pageable = PageRequest.of(page, size);
 
         // when
-        ResponseEntity<GlobalResponse<List<SubjectDTO>>> result = testContainer.adminSubjectController.getAll();
+        ResponseEntity<GlobalResponse<List<SubjectDTO>>> result = testContainer.adminSubjectController.getAll(pageable);
 
         // then
         assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);

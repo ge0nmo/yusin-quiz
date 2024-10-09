@@ -3,6 +3,8 @@ package com.cpa.yusin.quiz.subject.infrastructure;
 import com.cpa.yusin.quiz.subject.domain.Subject;
 import com.cpa.yusin.quiz.subject.service.port.SubjectRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -27,9 +29,9 @@ public class SubjectRepositoryImpl implements SubjectRepository
     }
 
     @Override
-    public List<Subject> findAll()
+    public Page<Subject> findAll(Pageable pageable)
     {
-        return subjectJpaRepository.findAll();
+        return subjectJpaRepository.findAll(pageable);
     }
 
     @Override
@@ -54,5 +56,11 @@ public class SubjectRepositoryImpl implements SubjectRepository
     public boolean existsByNameAndIdNot(long id, String name)
     {
         return subjectJpaRepository.existsByNameAndIdNot(id, name);
+    }
+
+    @Override
+    public Page<Subject> findAllOrderByName(Pageable pageable)
+    {
+        return subjectJpaRepository.findAllOrderByNameAsc(pageable);
     }
 }
