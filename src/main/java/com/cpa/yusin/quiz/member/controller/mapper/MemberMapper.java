@@ -33,8 +33,6 @@ public class MemberMapper
                 .username(member.getUsername())
                 .platform(member.getPlatform())
                 .role(member.getRole())
-                .subscriberExpiredAt(member.getSubscriptionExpiredAt() == null
-                        ? null : member.getSubscriptionExpiredAt())
                 .createdAt(member.getCreatedAt())
                 .updatedAt(member.getUpdatedAt())
                 .build();

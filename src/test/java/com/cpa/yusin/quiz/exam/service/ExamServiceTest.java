@@ -58,7 +58,7 @@ class ExamServiceTest
         testContainer.examService.save(1L, ExamCreateRequest.builder().name("1차").year(2024).maxProblemCount(40).build());
 
         ExamUpdateRequest request = ExamUpdateRequest.builder()
-                .name("update exam")
+                .name("completePayment exam")
                 .year(2020)
                 .maxProblemCount(40)
                 .build();
@@ -69,7 +69,7 @@ class ExamServiceTest
         // then
         Exam exam = testContainer.examRepository.findById(1L).orElseThrow();
 
-        assertThat(exam.getName()).isEqualTo("update exam");
+        assertThat(exam.getName()).isEqualTo("completePayment exam");
         assertThat(exam.getYear()).isEqualTo(2020);
     }
 

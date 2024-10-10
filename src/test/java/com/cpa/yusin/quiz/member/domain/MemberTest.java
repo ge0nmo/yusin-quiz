@@ -117,7 +117,6 @@ class MemberTest
                 .password("123123")
                 .email("test@naver.com")
                 .username("John Doe")
-                .subscriptionExpiredAt(null)
                 .build();
 
         MemberUpdateRequest request = MemberUpdateRequest.builder()

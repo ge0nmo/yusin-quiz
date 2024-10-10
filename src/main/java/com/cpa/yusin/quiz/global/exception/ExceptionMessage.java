@@ -31,7 +31,11 @@ public enum ExceptionMessage
 
     PRODUCT_NOT_FOUND("해당 상품을 찾을 수 없습니다"),
 
-    PRODUCT_DUPLICATED("동일한 상품 정보가 존재합니다.")
+    PRODUCT_DUPLICATED("동일한 상품 정보가 존재합니다."),
+
+    PAYMENT_NOT_COMPLETED("결제에 실패했습니다"),
+
+    PAYMENT_PRICE_ERROR("결제 금액이 일치하지 않습니다.")
 ;
 
     private final String message;

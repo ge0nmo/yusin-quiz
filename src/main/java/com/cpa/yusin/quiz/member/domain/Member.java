@@ -44,8 +44,6 @@ public class Member extends BaseEntity
     @Enumerated(EnumType.STRING)
     private Role role;
 
-    private LocalDateTime subscriptionExpiredAt;
-
     public static Member fromHome(MemberCreateRequest request, PasswordEncoder passwordEncoder)
     {
         return Member.builder()
@@ -54,7 +52,6 @@ public class Member extends BaseEntity
                 .username(request.getUsername())
                 .platform(Platform.HOME)
                 .role(Role.USER)
-                .subscriptionExpiredAt(null)
                 .build();
     }
 
@@ -66,7 +63,6 @@ public class Member extends BaseEntity
                 .username(oAuth2UserInfo.getName())
                 .platform(oAuth2UserInfo.getPlatform())
                 .role(Role.USER)
-                .subscriptionExpiredAt(null)
                 .build();
     }
 
@@ -86,5 +82,10 @@ public class Member extends BaseEntity
         }
 
         throw new GlobalException(ExceptionMessage.NO_AUTHORIZATION);
+    }
+
+    public void activeSubscription()
+    {
+        this.role = Role.SUBSCRIBER;
     }
 }

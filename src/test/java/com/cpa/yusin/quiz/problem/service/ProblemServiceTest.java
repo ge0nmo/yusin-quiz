@@ -65,7 +65,7 @@ class ProblemServiceTest extends MockSetup
         assertThat(problems.getFirst().getNumber()).isEqualTo(1);
     }
 
-    @DisplayName("update when ids exist in the request")
+    @DisplayName("completePayment when ids exist in the request")
     @Test
     void saveOrUpdate2()
     {

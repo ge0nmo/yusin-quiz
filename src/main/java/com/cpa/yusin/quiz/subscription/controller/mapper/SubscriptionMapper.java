@@ -2,6 +2,7 @@ package com.cpa.yusin.quiz.subscription.controller.mapper;
 
 import com.cpa.yusin.quiz.member.domain.Member;
 import com.cpa.yusin.quiz.payment.domain.Payment;
+import com.cpa.yusin.quiz.subscription.controller.dto.response.SubscriptionCreateResponse;
 import com.cpa.yusin.quiz.subscription.domain.Subscription;
 import com.cpa.yusin.quiz.subscription.domain.type.SubscriptionStatus;
 import com.cpa.yusin.quiz.subscriptionPlan.domain.SubscriptionPlan;
@@ -25,4 +26,14 @@ public class SubscriptionMapper
                 .expiredDate(now.plusMonths(plan.getDurationMonth()))
                 .build();
     }
+
+    public SubscriptionCreateResponse toSubscriptionCreateResponse(Subscription subscription)
+    {
+        return SubscriptionCreateResponse.builder()
+                .id(subscription.getId())
+                .status(subscription.getStatus())
+                .build();
+    }
 }
+
+

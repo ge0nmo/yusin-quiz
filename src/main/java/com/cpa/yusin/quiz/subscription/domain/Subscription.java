@@ -31,19 +31,37 @@ public class Subscription extends BaseEntity
     private SubscriptionPlan plan;
 
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @JoinColumn(name = "payment_id", nullable = false, unique = true)
+    @JoinColumn(name = "payment_id")
     private Payment payment;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private SubscriptionStatus status;
 
-    @Column(nullable = false)
     private LocalDateTime startDate;
 
     private LocalDateTime expiredDate;
 
     private LocalDateTime cancelledAt;
+
+    public static Subscription initiate(Member member, SubscriptionPlan plan, Payment payment)
+    {
+        Subscription subscription = new Subscription();
+        subscription.member = member;
+        subscription.plan = plan;
+        subscription.payment = payment;
+        subscription.status = SubscriptionStatus.PENDING;
+
+        return subscription;
+    }
+
+    public void activeSubscription(int durationMonth)
+    {
+        LocalDateTime now = LocalDateTime.now();
+        this.status = SubscriptionStatus.ACTIVE;
+        this.startDate = now;
+        this.expiredDate = now.plusMonths(durationMonth);
+    }
 
     public void cancel()
     {

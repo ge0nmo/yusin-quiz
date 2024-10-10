@@ -185,7 +185,7 @@ class MemberServiceTest
     {
         // given
         MemberUpdateRequest request = MemberUpdateRequest.builder()
-                .username("update")
+                .username("completePayment")
                 .build();
 
         // when
@@ -194,7 +194,7 @@ class MemberServiceTest
         // then
         Member updatedMember = testContainer.memberRepository.findById(member.getId()).orElseThrow();
 
-        assertThat(updatedMember.getUsername()).isEqualTo("update");
+        assertThat(updatedMember.getUsername()).isEqualTo("completePayment");
     }
 
     @Test
@@ -202,7 +202,7 @@ class MemberServiceTest
     {
         // given
         MemberUpdateRequest request = MemberUpdateRequest.builder()
-                .username("update")
+                .username("completePayment")
                 .build();
 
         // when

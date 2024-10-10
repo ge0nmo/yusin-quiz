@@ -262,7 +262,7 @@ class ExamTest
         // then
         resultActions
                 .andExpect(status().isOk())
-                .andDo(document("exam-update-success",
+                .andDo(document("exam-completePayment-success",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),
 
@@ -307,7 +307,7 @@ class ExamTest
         // then
         resultActions
                 .andExpect(status().isBadRequest())
-                .andDo(document("exam-update-fail-no-fields",
+                .andDo(document("exam-completePayment-fail-no-fields",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),
 
@@ -364,7 +364,7 @@ class ExamTest
         // then
         resultActions
                 .andExpect(status().isInternalServerError())
-                .andDo(document("exam-update-fail-duplicated",
+                .andDo(document("exam-completePayment-fail-duplicated",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),
 
