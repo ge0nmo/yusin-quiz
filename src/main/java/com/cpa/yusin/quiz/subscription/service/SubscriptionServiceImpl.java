@@ -4,6 +4,7 @@ import com.cpa.yusin.quiz.common.service.MerchantIdGenerator;
 import com.cpa.yusin.quiz.global.exception.ExceptionMessage;
 import com.cpa.yusin.quiz.global.exception.SubscriptionException;
 import com.cpa.yusin.quiz.member.domain.Member;
+import com.cpa.yusin.quiz.payment.controller.mapper.PaymentMapper;
 import com.cpa.yusin.quiz.payment.domain.Payment;
 import com.cpa.yusin.quiz.payment.service.port.PaymentRepository;
 import com.cpa.yusin.quiz.subscription.controller.dto.response.SubscriptionCreateResponse;
@@ -29,6 +30,7 @@ public class SubscriptionServiceImpl implements SubscriptionService
     private final SubscriptionPlanRepository subscriptionPlanRepository;
     private final MerchantIdGenerator merchantIdGenerator;
     private final SubscriptionMapper subscriptionMapper;
+    private final PaymentMapper paymentMapper;
 
     @Transactional
     @Override
@@ -43,6 +45,7 @@ public class SubscriptionServiceImpl implements SubscriptionService
 
         Subscription subscription = Subscription.initiate(member, subscriptionPlan, prePayment);
 
-        return subscriptionMapper.toSubscriptionCreateResponse(subscriptionRepository.save(subscription));
+        subscription = subscriptionRepository.save(subscription);
+        return subscriptionMapper.toSubscriptionCreateResponse(subscription, paymentMapper.toPaymentRegisterResponse(prePayment));
     }
 }

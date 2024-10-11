@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@RequestMapping("/api/v1/admin/product")
+@RequestMapping("/api/v1/admin/plan")
 @RequiredArgsConstructor
 @RestController
 public class AdminSubscriptionPlanController
@@ -24,9 +24,10 @@ public class AdminSubscriptionPlanController
     private final SubscriptionPlanService subscriptionPlanService;
 
     @PostMapping
-    public ResponseEntity<GlobalResponse<SubscriptionPlanRegisterResponse>> save(@Valid @RequestBody SubscriptionPlanRegisterRequest subscriptionPlanRegisterRequest)
+    public ResponseEntity<GlobalResponse<SubscriptionPlanRegisterResponse>> save(@Valid @RequestBody SubscriptionPlanRegisterRequest request)
     {
-        SubscriptionPlanRegisterResponse response = subscriptionPlanService.save(subscriptionPlanRegisterRequest);
+        SubscriptionPlanRegisterResponse response = subscriptionPlanService.save(request);
+
 
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(new GlobalResponse<>(response));

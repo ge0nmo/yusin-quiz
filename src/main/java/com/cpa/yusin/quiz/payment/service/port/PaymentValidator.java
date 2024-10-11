@@ -21,13 +21,13 @@ public class PaymentValidator
 {
     private final IamportClient iamportClient;
 
-    @Transactional
+    @Transactional(noRollbackFor = PaymentException.class)
     public void validatePrice(Payment payment, BigDecimal paidAmount, String portOnePaymentId)
     {
-        if(paidAmount.compareTo(payment.getAmount()) != 0){
+        if (paidAmount.compareTo(payment.getAmount()) != 0) {
             try {
                 iamportClient.cancelPaymentByImpUid(new CancelData(portOnePaymentId, true, paidAmount));
-                payment.completePayment(PaymentStatus.FAILED, "금액이 일치하지 않습니다.", portOnePaymentId);
+                payment.completePayment(PaymentStatus.FAILED,"금액이 일치하지 않습니다.", portOnePaymentId, paidAmount);
                 throw new PaymentException(ExceptionMessage.PAYMENT_PRICE_ERROR);
             } catch (IamportResponseException | IOException e) {
                 throw new RuntimeException(e);
@@ -36,10 +36,11 @@ public class PaymentValidator
         }
     }
 
-    public void validatePayment(String paymentStatus, String failureMessage, String portOnePaymentId, Payment payment)
+    @Transactional(noRollbackFor = PaymentException.class)
+    public void validatePayment(String paymentStatus, String failureMessage, String portOnePaymentId, BigDecimal paidAmount, Payment payment)
     {
-        if(!paymentStatus.equals("paid")){
-            payment.completePayment(PaymentStatus.FAILED, failureMessage, portOnePaymentId);
+        if (!paymentStatus.equals("paid")) {
+            payment.completePayment(PaymentStatus.FAILED, failureMessage, portOnePaymentId, paidAmount);
             throw new PaymentException(ExceptionMessage.PAYMENT_NOT_COMPLETED);
         }
     }

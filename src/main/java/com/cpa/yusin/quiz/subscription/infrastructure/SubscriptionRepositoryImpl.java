@@ -11,16 +11,18 @@ import java.util.Optional;
 @Repository
 public class SubscriptionRepositoryImpl implements SubscriptionRepository
 {
+    private final SubscriptionJpaRepository subscriptionJpaRepository;
+
     @Override
     public Subscription save(Subscription subscription)
     {
-        return null;
+        return subscriptionJpaRepository.save(subscription);
     }
 
     @Override
     public Optional<Subscription> findById(long id)
     {
-        return Optional.empty();
+        return subscriptionJpaRepository.findById(id);
     }
 
     @Override

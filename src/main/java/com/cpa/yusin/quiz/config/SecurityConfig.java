@@ -61,7 +61,7 @@ public class SecurityConfig
                                 "/api/v1/oauth2/**",
                                 "/api/v1/sign-up",
                                 "/api/v1/file/**",
-                                "/api/v1/payment",
+                                "/api/v1/payment/**",
                                 "/api/v1/login").permitAll()
 
                         .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")

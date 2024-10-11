@@ -7,4 +7,6 @@ import com.siot.IamportRestClient.response.Payment;
 public interface PaymentService
 {
     IamportResponse<Payment> verifyPayment(PaymentWebHookDTO webHookDTO);
+
+    IamportResponse<Payment> verifyPayment(String portOnePaymentId);
 }

@@ -2,6 +2,7 @@ package com.cpa.yusin.quiz.global.details;
 
 import com.cpa.yusin.quiz.member.domain.Member;
 import lombok.Getter;
+import lombok.ToString;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -11,6 +12,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 
+@ToString
 @Getter
 public class MemberDetails implements UserDetails, OAuth2User
 {
@@ -50,7 +52,7 @@ public class MemberDetails implements UserDetails, OAuth2User
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities()
     {
-        return Collections.singletonList(new SimpleGrantedAuthority(member.getRole().name()));
+        return Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + member.getRole().name()));
     }
 
 }

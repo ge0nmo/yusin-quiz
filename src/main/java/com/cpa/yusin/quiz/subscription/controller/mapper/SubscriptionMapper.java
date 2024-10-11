@@ -1,6 +1,7 @@
 package com.cpa.yusin.quiz.subscription.controller.mapper;
 
 import com.cpa.yusin.quiz.member.domain.Member;
+import com.cpa.yusin.quiz.payment.controller.dto.response.PaymentRegisterResponse;
 import com.cpa.yusin.quiz.payment.domain.Payment;
 import com.cpa.yusin.quiz.subscription.controller.dto.response.SubscriptionCreateResponse;
 import com.cpa.yusin.quiz.subscription.domain.Subscription;
@@ -27,11 +28,12 @@ public class SubscriptionMapper
                 .build();
     }
 
-    public SubscriptionCreateResponse toSubscriptionCreateResponse(Subscription subscription)
+    public SubscriptionCreateResponse toSubscriptionCreateResponse(Subscription subscription, PaymentRegisterResponse payment)
     {
         return SubscriptionCreateResponse.builder()
                 .id(subscription.getId())
                 .status(subscription.getStatus())
+                .payment(payment)
                 .build();
     }
 }

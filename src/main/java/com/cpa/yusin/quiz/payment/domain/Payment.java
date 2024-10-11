@@ -23,6 +23,8 @@ public class Payment extends BaseEntity
     @Column(nullable = false)
     private BigDecimal amount;
 
+    private BigDecimal paidAmount;
+
     @Enumerated(EnumType.STRING)
     private PaymentStatus status;
 
@@ -44,10 +46,11 @@ public class Payment extends BaseEntity
         return payment;
     }
 
-    public void completePayment(PaymentStatus status, String failureReason, String portOnePaymentId)
+    public void completePayment(PaymentStatus status, String failureReason, String portOnePaymentId, BigDecimal paidAmount)
     {
         this.status = status;
         this.failureReason = failureReason;
         this.portOnePaymentId = portOnePaymentId;
+        this.paidAmount = paidAmount;
     }
 }

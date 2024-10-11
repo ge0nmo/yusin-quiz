@@ -52,9 +52,13 @@ public class SecurityFilter extends OncePerRequestFilter
             filterChain.doFilter(request, response);
         }
 
+        log.info("===validation passed===");
+
         SecurityContext context = SecurityContextHolder.createEmptyContext();
         UsernamePasswordAuthenticationToken authenticationToken
                 = new UsernamePasswordAuthenticationToken(memberDetails, null, memberDetails.getAuthorities());
+
+        log.info("member details = {}", memberDetails);
 
         context.setAuthentication(authenticationToken);
         SecurityContextHolder.setContext(context);

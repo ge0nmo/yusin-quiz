@@ -10,4 +10,5 @@ public interface PaymentRepository
 
     Optional<Payment> findById(long id);
 
+    Optional<Payment> findByMerchantUid(String merchantUid);
 }

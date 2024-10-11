@@ -40,6 +40,7 @@ public enum ExceptionMessage
     /**
      * payment
      */
+    PAYMENT_NOT_FOUND("결제 정보를 찾을 수 없습니다"),
 
     PAYMENT_NOT_COMPLETED("결제에 실패했습니다"),
 

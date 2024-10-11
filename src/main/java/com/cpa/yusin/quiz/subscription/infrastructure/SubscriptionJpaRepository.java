@@ -1,5 +1,9 @@
 package com.cpa.yusin.quiz.subscription.infrastructure;
 
-public interface SubscriptionJpaRepository
+import com.cpa.yusin.quiz.subscription.domain.Subscription;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface SubscriptionJpaRepository extends JpaRepository<Subscription, Long>
 {
+
 }

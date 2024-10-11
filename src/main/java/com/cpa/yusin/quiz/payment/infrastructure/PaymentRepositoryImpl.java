@@ -11,15 +11,23 @@ import java.util.Optional;
 @Repository
 public class PaymentRepositoryImpl implements PaymentRepository
 {
+    private final PaymentJpaRepository paymentJpaRepository;
+
     @Override
     public Payment save(Payment payment)
     {
-        return null;
+        return paymentJpaRepository.save(payment);
     }
 
     @Override
     public Optional<Payment> findById(long id)
     {
-        return Optional.empty();
+        return paymentJpaRepository.findById(id);
+    }
+
+    @Override
+    public Optional<Payment> findByMerchantUid(String merchantUid)
+    {
+        return paymentJpaRepository.findByMerchantUid(merchantUid);
     }
 }
