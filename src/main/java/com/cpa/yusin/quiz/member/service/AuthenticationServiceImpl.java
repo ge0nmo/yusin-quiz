@@ -44,7 +44,7 @@ public class AuthenticationServiceImpl implements AuthenticationService
 
         String accessToken = jwtService.createAccessToken(member.getEmail());
 
-        return LoginResponse.from(member.getId(), member.getEmail(), accessToken);
+        return LoginResponse.from(member.getId(), member.getEmail(), member.getRole(), accessToken);
     }
 
     @Override

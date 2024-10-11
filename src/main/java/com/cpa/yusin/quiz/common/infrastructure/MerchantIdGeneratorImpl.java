@@ -13,7 +13,7 @@ public class MerchantIdGeneratorImpl implements MerchantIdGenerator
     private static final String PID = "pid-";
 
     @Override
-    public String generatePID(long memberId)
+    public String generateId(long memberId)
     {
         return PID + memberId + "-" + clockHolder.getCurrentTime();
     }

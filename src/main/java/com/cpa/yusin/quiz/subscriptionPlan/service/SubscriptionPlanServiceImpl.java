@@ -1,7 +1,6 @@
 package com.cpa.yusin.quiz.subscriptionPlan.service;
 
 import com.cpa.yusin.quiz.global.exception.ExceptionMessage;
-import com.cpa.yusin.quiz.global.exception.PaymentException;
 import com.cpa.yusin.quiz.global.exception.SubscriptionPlanException;
 import com.cpa.yusin.quiz.subscriptionPlan.controller.dto.request.SubscriptionPlanRegisterRequest;
 import com.cpa.yusin.quiz.subscriptionPlan.controller.dto.request.SubscriptionPlanUpdateRequest;
@@ -34,10 +33,10 @@ public class SubscriptionPlanServiceImpl implements SubscriptionPlanService
     {
         subscriptionPlanValidator.validateDurationMonth(request.getDurationMonth());
 
-        SubscriptionPlan subscriptionPlan = subscriptionPlanMapper.toProductDomain(request);
+        SubscriptionPlan subscriptionPlan = subscriptionPlanMapper.toPlanEntity(request);
 
         subscriptionPlan = subscriptionPlanRepository.save(subscriptionPlan);
-        return subscriptionPlanMapper.toProductRegisterResponse(subscriptionPlan);
+        return subscriptionPlanMapper.toPlanRegisterResponse(subscriptionPlan);
     }
 
     @Transactional
@@ -61,14 +60,14 @@ public class SubscriptionPlanServiceImpl implements SubscriptionPlanService
     @Override
     public SubscriptionPlanDTO getById(Long id)
     {
-        return subscriptionPlanMapper.toProductDTO(findById(id));
+        return subscriptionPlanMapper.toPlanDTO(findById(id));
     }
 
     @Override
     public List<SubscriptionPlanDTO> getAll()
     {
         return subscriptionPlanRepository.findAll().stream()
-                .map(subscriptionPlanMapper::toProductDTO)
+                .map(subscriptionPlanMapper::toPlanDTO)
                 .sorted(Comparator.comparing(SubscriptionPlanDTO::getDurationMonth))
                 .toList();
     }

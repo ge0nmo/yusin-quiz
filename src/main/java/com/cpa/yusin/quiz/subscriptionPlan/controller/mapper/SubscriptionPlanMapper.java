@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class SubscriptionPlanMapper
 {
-    public SubscriptionPlan toProductDomain(SubscriptionPlanRegisterRequest request)
+    public SubscriptionPlan toPlanEntity(SubscriptionPlanRegisterRequest request)
     {
         if(request == null)
             return null;
@@ -21,7 +21,7 @@ public class SubscriptionPlanMapper
                 .build();
     }
 
-    public SubscriptionPlanRegisterResponse toProductRegisterResponse(SubscriptionPlan domain)
+    public SubscriptionPlanRegisterResponse toPlanRegisterResponse(SubscriptionPlan domain)
     {
         if(domain == null)
             return null;
@@ -31,12 +31,10 @@ public class SubscriptionPlanMapper
                 .name(domain.getName())
                 .durationMonth(domain.getDurationMonth())
                 .price(domain.getPrice())
-                .createdAt(domain.getCreatedAt())
-                .updatedAt(domain.getUpdatedAt())
                 .build();
     }
 
-    public SubscriptionPlanDTO toProductDTO(SubscriptionPlan domain)
+    public SubscriptionPlanDTO toPlanDTO(SubscriptionPlan domain)
     {
         if(domain == null)
             return null;
@@ -46,8 +44,6 @@ public class SubscriptionPlanMapper
                 .name(domain.getName())
                 .durationMonth(domain.getDurationMonth())
                 .price(domain.getPrice())
-                .createdAt(domain.getCreatedAt())
-                .updatedAt(domain.getUpdatedAt())
                 .build();
     }
 }

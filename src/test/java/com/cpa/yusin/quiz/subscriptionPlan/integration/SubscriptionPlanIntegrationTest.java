@@ -106,9 +106,7 @@ class SubscriptionPlanIntegrationTest
                                 fieldWithPath("data.id").description("구독 플랜 식별자").type(JsonFieldType.NUMBER),
                                 fieldWithPath("data.name").description("구독 플랜 이름").type(JsonFieldType.STRING),
                                 fieldWithPath("data.durationMonth").description("구독 플랜 기간").type(JsonFieldType.NUMBER),
-                                fieldWithPath("data.price").description("구독 플랜 가격").type(JsonFieldType.NUMBER),
-                                fieldWithPath("data.createdAt").description("구독 플랜 등록 날짜").type(JsonFieldType.STRING),
-                                fieldWithPath("data.updatedAt").description("구독 플랜 수정 날짜").type(JsonFieldType.STRING)
+                                fieldWithPath("data.price").description("구독 플랜 가격").type(JsonFieldType.NUMBER)
                         )
                 ))
         ;
@@ -193,9 +191,7 @@ class SubscriptionPlanIntegrationTest
                                 fieldWithPath("data.id").description("구독 플랜 고유 식별자").type(JsonFieldType.NUMBER),
                                 fieldWithPath("data.name").description("구독 플랜 이름").type(JsonFieldType.STRING),
                                 fieldWithPath("data.durationMonth").description("구독 플랜 기간").type(JsonFieldType.NUMBER),
-                                fieldWithPath("data.price").description("구독 플랜 가격").type(JsonFieldType.NUMBER),
-                                fieldWithPath("data.createdAt").description("구독 플랜 등록 날짜").type(JsonFieldType.STRING),
-                                fieldWithPath("data.updatedAt").description("구독 플랜 수정 날짜").type(JsonFieldType.STRING)
+                                fieldWithPath("data.price").description("구독 플랜 가격").type(JsonFieldType.NUMBER)
                         )
                 ))
         ;
@@ -274,9 +270,7 @@ class SubscriptionPlanIntegrationTest
                                 fieldWithPath("data.id").description("구독 플랜 고유 식별자").type(JsonFieldType.NUMBER),
                                 fieldWithPath("data.name").description("구독 플랜 이름").type(JsonFieldType.STRING),
                                 fieldWithPath("data.durationMonth").description("구독 플랜 기간").type(JsonFieldType.NUMBER),
-                                fieldWithPath("data.price").description("구독 플랜 가격").type(JsonFieldType.NUMBER),
-                                fieldWithPath("data.createdAt").description("구독 플랜 등록 날짜").type(JsonFieldType.STRING),
-                                fieldWithPath("data.updatedAt").description("구독 플랜 수정 날짜").type(JsonFieldType.STRING)
+                                fieldWithPath("data.price").description("구독 플랜 가격").type(JsonFieldType.NUMBER)
                         )
                 ))
         ;
@@ -307,9 +301,7 @@ class SubscriptionPlanIntegrationTest
                                 fieldWithPath("data[].id").description("구독 플랜 고유 식별자").type(JsonFieldType.NUMBER),
                                 fieldWithPath("data[].name").description("구독 플랜 이름").type(JsonFieldType.STRING),
                                 fieldWithPath("data[].durationMonth").description("구독 플랜 기간").type(JsonFieldType.NUMBER),
-                                fieldWithPath("data[].price").description("구독 플랜 가격").type(JsonFieldType.NUMBER),
-                                fieldWithPath("data[].createdAt").description("구독 플랜 등록 날짜").type(JsonFieldType.STRING),
-                                fieldWithPath("data[].updatedAt").description("구독 플랜 수정 날짜").type(JsonFieldType.STRING)
+                                fieldWithPath("data[].price").description("구독 플랜 가격").type(JsonFieldType.NUMBER)
                         )
                 ))
         ;

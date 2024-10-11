@@ -42,7 +42,7 @@ public class Payment extends BaseEntity
 
     private String failureReason;
 
-    @OneToOne(mappedBy = "payment")
+    @OneToOne(mappedBy = "payment", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private Subscription subscription;
 
     public static Payment initiate(BigDecimal amount, String merchantId)

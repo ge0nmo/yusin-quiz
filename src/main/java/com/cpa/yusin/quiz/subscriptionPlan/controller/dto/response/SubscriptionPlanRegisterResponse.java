@@ -14,6 +14,4 @@ public class SubscriptionPlanRegisterResponse
     private final String name;
     private final int durationMonth;
     private final BigDecimal price;
-    private final LocalDateTime createdAt;
-    private final LocalDateTime updatedAt;
 }

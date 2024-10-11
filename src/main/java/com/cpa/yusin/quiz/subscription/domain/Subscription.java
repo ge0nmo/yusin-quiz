@@ -30,7 +30,7 @@ public class Subscription extends BaseEntity
     @JoinColumn(name = "plan_id", nullable = false)
     private SubscriptionPlan plan;
 
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "payment_id")
     private Payment payment;
 

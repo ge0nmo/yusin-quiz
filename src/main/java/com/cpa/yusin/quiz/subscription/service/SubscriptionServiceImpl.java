@@ -4,7 +4,6 @@ import com.cpa.yusin.quiz.common.service.MerchantIdGenerator;
 import com.cpa.yusin.quiz.global.exception.ExceptionMessage;
 import com.cpa.yusin.quiz.global.exception.SubscriptionException;
 import com.cpa.yusin.quiz.member.domain.Member;
-import com.cpa.yusin.quiz.payment.controller.mapper.PaymentMapper;
 import com.cpa.yusin.quiz.payment.domain.Payment;
 import com.cpa.yusin.quiz.payment.service.port.PaymentRepository;
 import com.cpa.yusin.quiz.subscription.controller.dto.response.SubscriptionCreateResponse;
@@ -42,13 +41,13 @@ public class SubscriptionServiceImpl implements SubscriptionService
 
         subscriptionValidator.validateSubscription(member.getId());
 
-        String merchantId = merchantIdGenerator.generatePID(member.getId());
+        String merchantId = merchantIdGenerator.generateId(member.getId());
         Payment prePayment = Payment.initiate(subscriptionPlan.getPrice(), merchantId);
         prePayment = paymentRepository.save(prePayment);
 
         Subscription subscription = Subscription.initiate(member, subscriptionPlan, prePayment);
 
         subscription = subscriptionRepository.save(subscription);
-        return subscriptionMapper.toSubscriptionCreateResponse(subscription, prePayment);
+        return subscriptionMapper.toSubscriptionCreateResponse(subscription, prePayment, subscriptionPlan);
     }
 }
