@@ -85,7 +85,7 @@ class SubscriptionPlanIntegrationTest
                 .build();
 
         // when
-        ResultActions resultActions = mvc.perform(post("/api/v1/admin/product")
+        ResultActions resultActions = mvc.perform(post("/api/v1/admin/plan")
                 .content(objectMapper.writeValueAsString(request))
                 .contentType(MediaType.APPLICATION_JSON)
         );
@@ -93,7 +93,7 @@ class SubscriptionPlanIntegrationTest
         // then
         resultActions
                 .andExpect(status().isCreated())
-                .andDo(document("saveProductSuccess",
+                .andDo(document("savePlanSuccess",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),
                         requestFields(
@@ -123,7 +123,7 @@ class SubscriptionPlanIntegrationTest
                 .build();
 
         // when
-        ResultActions resultActions = mvc.perform(post("/api/v1/admin/product")
+        ResultActions resultActions = mvc.perform(post("/api/v1/admin/plan")
                 .content(objectMapper.writeValueAsString(request))
                 .contentType(MediaType.APPLICATION_JSON)
         );
@@ -131,7 +131,7 @@ class SubscriptionPlanIntegrationTest
         // then
         resultActions
                 .andExpect(status().isBadRequest())
-                .andDo(document("saveProductNullValue",
+                .andDo(document("savePlanNullValue",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),
                         requestFields(
@@ -172,7 +172,7 @@ class SubscriptionPlanIntegrationTest
                 .build();
 
         // when
-        ResultActions resultActions = mvc.perform(patch("/api/v1/admin/product/" + productId)
+        ResultActions resultActions = mvc.perform(patch("/api/v1/admin/plan/" + productId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request))
         );
@@ -218,7 +218,7 @@ class SubscriptionPlanIntegrationTest
                 .build();
 
         // when
-        ResultActions resultActions = mvc.perform(patch("/api/v1/admin/product/" + savedSubscriptionPlan.getId())
+        ResultActions resultActions = mvc.perform(patch("/api/v1/admin/plan/" + savedSubscriptionPlan.getId())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request))
         );
@@ -226,7 +226,7 @@ class SubscriptionPlanIntegrationTest
         // then
         resultActions
                 .andExpect(status().isBadRequest())
-                .andDo(document("updateProductNullValue",
+                .andDo(document("updatePlanNullValue",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),
                         requestFields(
@@ -260,13 +260,13 @@ class SubscriptionPlanIntegrationTest
                         .build());
 
         // when
-        ResultActions resultActions = mvc.perform(get("/api/v1/admin/product/" + savedSubscriptionPlan.getId())
+        ResultActions resultActions = mvc.perform(get("/api/v1/admin/plan/" + savedSubscriptionPlan.getId())
         );
 
         // then
         resultActions
                 .andExpect(status().isOk())
-                .andDo(document("getProductById",
+                .andDo(document("getPlanById",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),
 
@@ -294,7 +294,7 @@ class SubscriptionPlanIntegrationTest
 
         // when
         ResultActions resultActions = mvc
-                .perform(get("/api/v1/admin/product"));
+                .perform(get("/api/v1/admin/plan"));
 
         // then
         resultActions
@@ -330,12 +330,12 @@ class SubscriptionPlanIntegrationTest
 
         // when
         ResultActions resultActions = mvc
-                .perform(delete("/api/v1/admin/product/" + savedSubscriptionPlan.getId()));
+                .perform(delete("/api/v1/admin/plan/" + savedSubscriptionPlan.getId()));
 
         // then
         resultActions
                 .andExpect(status().isNoContent())
-                .andDo(document("deleteProductById",
+                .andDo(document("deletePlanById",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint())
                 ));
