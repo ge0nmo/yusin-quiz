@@ -61,11 +61,9 @@ public class PaymentServiceImpl implements PaymentService
 
     private IamportResponse<Payment> verificationProcess(IamportResponse<Payment> iamportResponse)
     {
-        String merchantUid = iamportResponse.getResponse().getMerchantUid();
         String portOnePaymentId = iamportResponse.getResponse().getImpUid();
 
-        com.cpa.yusin.quiz.payment.domain.Payment payment = paymentRepository.findByMerchantUid(merchantUid)
-                .orElseThrow(() -> new PaymentException(ExceptionMessage.PAYMENT_NOT_FOUND));
+        com.cpa.yusin.quiz.payment.domain.Payment payment = findByMerchantUid(portOnePaymentId);
 
         if(PaymentStatus.COMPLETED.equals(payment.getStatus())){
             return iamportResponse;
@@ -73,7 +71,6 @@ public class PaymentServiceImpl implements PaymentService
 
         Subscription subscription = payment.getSubscription();
         SubscriptionPlan subscriptionPlan = subscription.getPlan();
-        // entity payment
 
         paymentValidator.validatePayment(iamportResponse.getResponse().getStatus(),
                                          iamportResponse.getResponse().getFailReason(),
@@ -89,4 +86,9 @@ public class PaymentServiceImpl implements PaymentService
         return iamportResponse;
     }
 
+    public com.cpa.yusin.quiz.payment.domain.Payment findByMerchantUid(String merchantUid)
+    {
+        return paymentRepository.findByMerchantUid(merchantUid) // entity payment
+                .orElseThrow(() -> new PaymentException(ExceptionMessage.PAYMENT_NOT_FOUND));
+    }
 }
