@@ -8,7 +8,7 @@ import com.cpa.yusin.quiz.file.domain.File;
 import com.cpa.yusin.quiz.file.mapper.FileMapper;
 import com.cpa.yusin.quiz.file.service.port.FileRepository;
 import com.cpa.yusin.quiz.global.exception.ExceptionMessage;
-import com.cpa.yusin.quiz.global.exception.GlobalException;
+import com.cpa.yusin.quiz.global.exception.FileException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -65,14 +65,14 @@ public class FileServiceImpl implements FileService
             return String.valueOf(amazonS3.getUrl(bucket, objectFilename));
 
         } catch (IOException e) {
-            throw new GlobalException(ExceptionMessage.INVALID_DATA);
+            throw new FileException(ExceptionMessage.INVALID_DATA);
         }
     }
 
     private String extractType(String filename)
     {
         if (!StringUtils.hasLength(filename)) {
-            throw new GlobalException(ExceptionMessage.INVALID_DATA);
+            throw new FileException(ExceptionMessage.INVALID_DATA);
         }
 
         int location = filename.lastIndexOf('.');

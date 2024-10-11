@@ -1,5 +1,6 @@
 package com.cpa.yusin.quiz.payment.service;
 
+import com.cpa.yusin.quiz.common.service.ClockHolder;
 import com.cpa.yusin.quiz.payment.controller.dto.request.PaymentWebHookDTO;
 import com.cpa.yusin.quiz.payment.controller.port.PaymentService;
 import com.cpa.yusin.quiz.payment.domain.type.PaymentStatus;
@@ -27,6 +28,7 @@ public class PaymentServiceImpl implements PaymentService
     private final IamportClient iamportClient;
     private final SubscriptionRepository subscriptionRepository;
     private final PaymentValidator paymentValidator;
+    private final ClockHolder clockHolder;
 
     @Override
     public IamportResponse<Payment> verifyPayment(PaymentWebHookDTO webHookDTO)
@@ -48,7 +50,7 @@ public class PaymentServiceImpl implements PaymentService
             paymentValidator.validatePrice(payment, iamportResponse.getResponse().getAmount(), portOnePaymentId);
 
             payment.completePayment(PaymentStatus.COMPLETED, "", portOnePaymentId);
-            subscription.activeSubscription(subscriptionPlan.getDurationMonth());
+            subscription.activeSubscription(subscriptionPlan.getDurationMonth(), clockHolder.getCurrentDateTime());
 
             return iamportResponse;
         } catch (IamportResponseException | IOException e) {

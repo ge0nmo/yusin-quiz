@@ -1,7 +1,7 @@
 package com.cpa.yusin.quiz.subscriptionPlan.infrastructure;
 
 import com.cpa.yusin.quiz.global.exception.ExceptionMessage;
-import com.cpa.yusin.quiz.global.exception.GlobalException;
+import com.cpa.yusin.quiz.global.exception.PaymentException;
 import com.cpa.yusin.quiz.subscriptionPlan.service.port.SubscriptionPlanRepository;
 import com.cpa.yusin.quiz.subscriptionPlan.service.port.SubscriptionPlanValidator;
 import lombok.RequiredArgsConstructor;
@@ -18,7 +18,7 @@ public class SubscriptionPlanValidatorImpl implements SubscriptionPlanValidator
     public void validateDurationMonth(int durationMonth)
     {
         if(subscriptionPlanRepository.existsByDurationMonth(durationMonth)){
-            throw new GlobalException(ExceptionMessage.PRODUCT_DUPLICATED);
+            throw new PaymentException(ExceptionMessage.PLAN_DUPLICATED);
         }
     }
 
@@ -26,7 +26,7 @@ public class SubscriptionPlanValidatorImpl implements SubscriptionPlanValidator
     public void validateDurationMonth(long id, int durationMonth)
     {
         if(subscriptionPlanRepository.existsByDurationMonthAndIdNot(durationMonth, id)){
-            throw new GlobalException(ExceptionMessage.PRODUCT_DUPLICATED);
+            throw new PaymentException(ExceptionMessage.PLAN_DUPLICATED);
         }
     }
 }

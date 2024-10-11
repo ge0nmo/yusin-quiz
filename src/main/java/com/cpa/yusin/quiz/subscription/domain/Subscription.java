@@ -55,9 +55,8 @@ public class Subscription extends BaseEntity
         return subscription;
     }
 
-    public void activeSubscription(int durationMonth)
+    public void activeSubscription(int durationMonth, LocalDateTime now)
     {
-        LocalDateTime now = LocalDateTime.now();
         this.status = SubscriptionStatus.ACTIVE;
         this.startDate = now;
         this.expiredDate = now.plusMonths(durationMonth);

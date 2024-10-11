@@ -2,8 +2,8 @@ package com.cpa.yusin.quiz.subject.service;
 
 import com.cpa.yusin.quiz.choice.domain.Choice;
 import com.cpa.yusin.quiz.exam.domain.Exam;
-import com.cpa.yusin.quiz.global.exception.GlobalException;
 import com.cpa.yusin.quiz.config.TestContainer;
+import com.cpa.yusin.quiz.global.exception.SubjectException;
 import com.cpa.yusin.quiz.problem.domain.Problem;
 import com.cpa.yusin.quiz.subject.controller.dto.request.SubjectCreateRequest;
 import com.cpa.yusin.quiz.subject.controller.dto.request.SubjectUpdateRequest;
@@ -74,7 +74,7 @@ class SubjectServiceTest
 
         // then
         assertThatThrownBy(() -> testContainer.subjectService.save(request))
-                .isInstanceOf(GlobalException.class);
+                .isInstanceOf(SubjectException.class);
     }
 
     @Test
@@ -115,7 +115,7 @@ class SubjectServiceTest
 
         // then
         assertThatThrownBy(() -> testContainer.subjectService.findById(id))
-                .isInstanceOf(GlobalException.class);
+                .isInstanceOf(SubjectException.class);
     }
 
     @Test
@@ -166,7 +166,7 @@ class SubjectServiceTest
 
         // then
         assertThatThrownBy(() -> testContainer.subjectService.update(id, request))
-                .isInstanceOf(GlobalException.class);
+                .isInstanceOf(SubjectException.class);
     }
 
     @Test

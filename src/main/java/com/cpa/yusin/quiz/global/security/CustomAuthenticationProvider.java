@@ -3,7 +3,7 @@ package com.cpa.yusin.quiz.global.security;
 import com.cpa.yusin.quiz.global.details.MemberDetails;
 import com.cpa.yusin.quiz.global.details.MemberDetailsService;
 import com.cpa.yusin.quiz.global.exception.ExceptionMessage;
-import com.cpa.yusin.quiz.global.exception.GlobalException;
+import com.cpa.yusin.quiz.global.exception.MemberException;
 import com.cpa.yusin.quiz.member.domain.type.Platform;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -29,7 +29,7 @@ public class CustomAuthenticationProvider implements AuthenticationProvider
         MemberDetails memberDetails = memberDetailsService.loadUserByUsername(email);
 
         if(memberDetails == null)
-            throw new GlobalException(ExceptionMessage.USER_NOT_FOUND);
+            throw new MemberException(ExceptionMessage.USER_NOT_FOUND);
 
         String password = authentication.getCredentials().toString();
 
@@ -53,14 +53,14 @@ public class CustomAuthenticationProvider implements AuthenticationProvider
     private void validatePassword(String password, MemberDetails memberDetails)
     {
         if(!passwordEncoder.matches(password, memberDetails.getPassword())){
-            throw new GlobalException(ExceptionMessage.USER_NOT_FOUND);
+            throw new MemberException(ExceptionMessage.USER_NOT_FOUND);
         }
     }
 
     private void validatePlatform(MemberDetails memberDetails)
     {
         if(!Platform.HOME.equals(memberDetails.getMember().getPlatform())) {
-            throw new GlobalException(ExceptionMessage.USER_NOT_FOUND);
+            throw new MemberException(ExceptionMessage.USER_NOT_FOUND);
         }
     }
 }

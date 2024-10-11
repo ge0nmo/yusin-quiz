@@ -3,7 +3,7 @@ package com.cpa.yusin.quiz.choice.domain;
 import com.cpa.yusin.quiz.choice.controller.dto.request.ChoiceRequest;
 import com.cpa.yusin.quiz.common.infrastructure.BaseEntity;
 import com.cpa.yusin.quiz.global.exception.ExceptionMessage;
-import com.cpa.yusin.quiz.global.exception.GlobalException;
+import com.cpa.yusin.quiz.global.exception.ProblemException;
 import com.cpa.yusin.quiz.problem.domain.Problem;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -51,7 +51,7 @@ public class Choice extends BaseEntity
     public void validateProblemId(long problemId)
     {
         if(!this.problem.getId().equals(problemId)){
-            throw new GlobalException(ExceptionMessage.PROBLEM_NOT_FOUND);
+            throw new ProblemException(ExceptionMessage.PROBLEM_NOT_FOUND);
         }
     }
 }

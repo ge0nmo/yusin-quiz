@@ -1,7 +1,7 @@
 package com.cpa.yusin.quiz.subject.repository;
 
-import com.cpa.yusin.quiz.global.exception.GlobalException;
 import com.cpa.yusin.quiz.config.TestContainer;
+import com.cpa.yusin.quiz.global.exception.SubjectException;
 import com.cpa.yusin.quiz.subject.domain.Subject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -45,7 +45,7 @@ class SubjectValidatorTest
 
         // then
         assertThatThrownBy(() -> testContainer.subjectValidator.validateName(name))
-                .isInstanceOf(GlobalException.class);
+                .isInstanceOf(SubjectException.class);
     }
 
     @Test
@@ -72,7 +72,7 @@ class SubjectValidatorTest
 
         // then
         assertThatThrownBy(() -> testContainer.subjectValidator.validateName(name))
-                .isInstanceOf(GlobalException.class);
+                .isInstanceOf(SubjectException.class);
     }
 
 }

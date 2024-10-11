@@ -10,8 +10,8 @@ import com.cpa.yusin.quiz.exam.controller.port.ExamService;
 import com.cpa.yusin.quiz.exam.domain.Exam;
 import com.cpa.yusin.quiz.exam.service.port.ExamRepository;
 import com.cpa.yusin.quiz.exam.service.port.ExamValidator;
+import com.cpa.yusin.quiz.global.exception.ExamException;
 import com.cpa.yusin.quiz.global.exception.ExceptionMessage;
-import com.cpa.yusin.quiz.global.exception.GlobalException;
 import com.cpa.yusin.quiz.subject.controller.port.SubjectService;
 import com.cpa.yusin.quiz.subject.domain.Subject;
 import lombok.RequiredArgsConstructor;
@@ -64,7 +64,7 @@ public class ExamServiceImpl implements ExamService
     public Exam findById(long id)
     {
         return examRepository.findById(id)
-                .orElseThrow(() -> new GlobalException(ExceptionMessage.EXAM_NOT_FOUND));
+                .orElseThrow(() -> new ExamException(ExceptionMessage.EXAM_NOT_FOUND));
     }
 
     @Override

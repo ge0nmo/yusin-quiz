@@ -1,7 +1,7 @@
 package com.cpa.yusin.quiz.subscriptionPlan.validator;
 
 import com.cpa.yusin.quiz.config.TestContainer;
-import com.cpa.yusin.quiz.global.exception.GlobalException;
+import com.cpa.yusin.quiz.global.exception.SubscriptionPlanException;
 import com.cpa.yusin.quiz.subscriptionPlan.domain.SubscriptionPlan;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -48,7 +48,7 @@ class SubscriptionPlanValidatorTest
 
         // then
         assertThatThrownBy(() -> testContainer.subscriptionPlanValidator.validateDurationMonth(durationMonth))
-                .isInstanceOf(GlobalException.class);
+                .isInstanceOf(SubscriptionPlanException.class);
 
     }
 
@@ -78,6 +78,6 @@ class SubscriptionPlanValidatorTest
 
         // then
         assertThatThrownBy(() -> testContainer.subscriptionPlanValidator.validateDurationMonth(id, durationMonth))
-                .isInstanceOf(GlobalException.class);
+                .isInstanceOf(SubscriptionPlanException.class);
     }
 }

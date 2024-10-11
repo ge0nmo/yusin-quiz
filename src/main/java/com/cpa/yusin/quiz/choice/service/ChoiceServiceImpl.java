@@ -6,8 +6,8 @@ import com.cpa.yusin.quiz.choice.controller.mapper.ChoiceMapper;
 import com.cpa.yusin.quiz.choice.controller.port.ChoiceService;
 import com.cpa.yusin.quiz.choice.domain.Choice;
 import com.cpa.yusin.quiz.choice.service.port.ChoiceRepository;
+import com.cpa.yusin.quiz.global.exception.ChoiceException;
 import com.cpa.yusin.quiz.global.exception.ExceptionMessage;
-import com.cpa.yusin.quiz.global.exception.GlobalException;
 import com.cpa.yusin.quiz.problem.domain.Problem;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -79,7 +79,7 @@ public class ChoiceServiceImpl implements ChoiceService
     public Choice findById(long id)
     {
         return choiceRepository.findById(id)
-                .orElseThrow(() -> new GlobalException(ExceptionMessage.CHOICE_NOT_FOUND));
+                .orElseThrow(() -> new ChoiceException(ExceptionMessage.CHOICE_NOT_FOUND));
     }
 
     @Override

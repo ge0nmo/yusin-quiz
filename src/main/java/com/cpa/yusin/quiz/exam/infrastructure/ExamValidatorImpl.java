@@ -2,8 +2,8 @@ package com.cpa.yusin.quiz.exam.infrastructure;
 
 import com.cpa.yusin.quiz.exam.service.port.ExamRepository;
 import com.cpa.yusin.quiz.exam.service.port.ExamValidator;
+import com.cpa.yusin.quiz.global.exception.ExamException;
 import com.cpa.yusin.quiz.global.exception.ExceptionMessage;
-import com.cpa.yusin.quiz.global.exception.GlobalException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -18,7 +18,7 @@ public class ExamValidatorImpl implements ExamValidator
     public void validate(long subjectId, String name, int year)
     {
         if(examRepository.existsBySubjectIdAndNameAndYear(subjectId, name, year)){
-            throw new GlobalException(ExceptionMessage.EXAM_DUPLICATED);
+            throw new ExamException(ExceptionMessage.EXAM_DUPLICATED);
         }
     }
 
@@ -26,7 +26,7 @@ public class ExamValidatorImpl implements ExamValidator
     public void validate(long examId, long subjectId, String name, int year)
     {
         if(examRepository.existsByIdNotAndSubjectIdAndNameAndYear(examId, subjectId, name, year)){
-            throw new GlobalException(ExceptionMessage.EXAM_DUPLICATED);
+            throw new ExamException(ExceptionMessage.EXAM_DUPLICATED);
         }
     }
 

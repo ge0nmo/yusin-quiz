@@ -1,7 +1,7 @@
 package com.cpa.yusin.quiz.subject.infrastructure;
 
 import com.cpa.yusin.quiz.global.exception.ExceptionMessage;
-import com.cpa.yusin.quiz.global.exception.GlobalException;
+import com.cpa.yusin.quiz.global.exception.SubjectException;
 import com.cpa.yusin.quiz.subject.service.port.SubjectRepository;
 import com.cpa.yusin.quiz.subject.service.port.SubjectValidator;
 import lombok.RequiredArgsConstructor;
@@ -17,13 +17,13 @@ public class SubjectValidatorImpl implements SubjectValidator
     public void validateName(String name)
     {
         if(subjectRepository.existsByName(name))
-            throw new GlobalException(ExceptionMessage.SUBJECT_NAME_EXIST);
+            throw new SubjectException(ExceptionMessage.SUBJECT_NAME_EXIST);
     }
 
     @Override
     public void validateName(long id, String name)
     {
         if(subjectRepository.existsByNameAndIdNot(id, name))
-            throw new GlobalException(ExceptionMessage.SUBJECT_NAME_EXIST);
+            throw new SubjectException(ExceptionMessage.SUBJECT_NAME_EXIST);
     }
 }

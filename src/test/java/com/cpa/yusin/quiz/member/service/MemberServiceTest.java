@@ -1,7 +1,7 @@
 package com.cpa.yusin.quiz.member.service;
 
 import com.cpa.yusin.quiz.config.TestContainer;
-import com.cpa.yusin.quiz.global.exception.GlobalException;
+import com.cpa.yusin.quiz.global.exception.MemberException;
 import com.cpa.yusin.quiz.member.controller.dto.request.MemberUpdateRequest;
 import com.cpa.yusin.quiz.member.controller.dto.response.MemberDTO;
 import com.cpa.yusin.quiz.member.domain.Member;
@@ -63,7 +63,7 @@ class MemberServiceTest
 
         // then
         assertThatThrownBy(() -> testContainer.memberService.getById(2L))
-                .isInstanceOf(GlobalException.class);
+                .isInstanceOf(MemberException.class);
     }
 
     @Test
@@ -91,7 +91,7 @@ class MemberServiceTest
 
         // then
         assertThatThrownBy(() -> testContainer.memberService.findById(2L))
-                .isInstanceOf(GlobalException.class);
+                .isInstanceOf(MemberException.class);
     }
 
     @Test
@@ -207,7 +207,7 @@ class MemberServiceTest
 
         // when
         assertThatThrownBy(() -> testContainer.memberService.update(2L, request, member))
-                .isInstanceOf(GlobalException.class);
+                .isInstanceOf(MemberException.class);
 
         // then
     }

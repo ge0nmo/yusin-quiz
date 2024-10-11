@@ -1,8 +1,8 @@
 package com.cpa.yusin.quiz.problem.domain;
 
 import com.cpa.yusin.quiz.exam.domain.Exam;
+import com.cpa.yusin.quiz.global.exception.ExamException;
 import com.cpa.yusin.quiz.global.exception.ExceptionMessage;
-import com.cpa.yusin.quiz.global.exception.GlobalException;
 import com.cpa.yusin.quiz.problem.controller.dto.request.ProblemRequest;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -43,7 +43,7 @@ public class Problem
     private void validateExamId(long examId)
     {
         if(!exam.getId().equals(examId))
-            throw new GlobalException(ExceptionMessage.EXAM_NOT_FOUND);
+            throw new ExamException(ExceptionMessage.EXAM_NOT_FOUND);
 
     }
 }

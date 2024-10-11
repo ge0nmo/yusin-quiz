@@ -2,7 +2,7 @@ package com.cpa.yusin.quiz.global.security.oauth2;
 
 import com.cpa.yusin.quiz.common.service.UuidHolder;
 import com.cpa.yusin.quiz.global.exception.ExceptionMessage;
-import com.cpa.yusin.quiz.global.exception.GlobalException;
+import com.cpa.yusin.quiz.global.exception.MemberException;
 import com.cpa.yusin.quiz.member.domain.Member;
 import com.cpa.yusin.quiz.global.details.MemberDetails;
 import com.cpa.yusin.quiz.member.service.port.MemberRepository;
@@ -42,7 +42,7 @@ public class CustomOAuth2Service extends DefaultOAuth2UserService
         log.info("attributes = {}", oAuth2User.getAttributes());
 
         if(!StringUtils.hasLength(oAuthUserInfo.getEmail()))
-            throw new GlobalException(ExceptionMessage.INVALID_EMAIL);
+            throw new MemberException(ExceptionMessage.INVALID_EMAIL);
 
         log.info("email = {}", oAuthUserInfo.getEmail());
         Member member;
@@ -53,7 +53,7 @@ public class CustomOAuth2Service extends DefaultOAuth2UserService
         if(optionalMember.isPresent()){
             member = optionalMember.get();
             if(!member.getPlatform().name().equalsIgnoreCase(request.getClientRegistration().getRegistrationId()))
-                throw new GlobalException(ExceptionMessage.USER_NOT_FOUND);
+                throw new MemberException(ExceptionMessage.USER_NOT_FOUND);
 
             member.updateFromOauth2(oAuth2User.getName());
         } else{

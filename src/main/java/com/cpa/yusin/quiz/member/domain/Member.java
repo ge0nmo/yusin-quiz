@@ -3,7 +3,7 @@ package com.cpa.yusin.quiz.member.domain;
 import com.cpa.yusin.quiz.common.infrastructure.BaseEntity;
 import com.cpa.yusin.quiz.common.service.UuidHolder;
 import com.cpa.yusin.quiz.global.exception.ExceptionMessage;
-import com.cpa.yusin.quiz.global.exception.GlobalException;
+import com.cpa.yusin.quiz.global.exception.MemberException;
 import com.cpa.yusin.quiz.global.security.oauth2.user.OAuth2UserInfo;
 import com.cpa.yusin.quiz.member.controller.dto.request.MemberCreateRequest;
 import com.cpa.yusin.quiz.member.controller.dto.request.MemberUpdateRequest;
@@ -12,8 +12,6 @@ import com.cpa.yusin.quiz.member.domain.type.Role;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
-
-import java.time.LocalDateTime;
 
 @ToString
 @Entity
@@ -81,7 +79,7 @@ public class Member extends BaseEntity
             return;
         }
 
-        throw new GlobalException(ExceptionMessage.NO_AUTHORIZATION);
+        throw new MemberException(ExceptionMessage.NO_AUTHORIZATION);
     }
 
     public void activeSubscription()

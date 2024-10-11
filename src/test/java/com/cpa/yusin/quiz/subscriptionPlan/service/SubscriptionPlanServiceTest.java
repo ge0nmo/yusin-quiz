@@ -1,7 +1,7 @@
 package com.cpa.yusin.quiz.subscriptionPlan.service;
 
 import com.cpa.yusin.quiz.config.TestContainer;
-import com.cpa.yusin.quiz.global.exception.GlobalException;
+import com.cpa.yusin.quiz.global.exception.SubscriptionPlanException;
 import com.cpa.yusin.quiz.subscriptionPlan.controller.dto.request.SubscriptionPlanRegisterRequest;
 import com.cpa.yusin.quiz.subscriptionPlan.controller.dto.request.SubscriptionPlanUpdateRequest;
 import com.cpa.yusin.quiz.subscriptionPlan.controller.dto.response.SubscriptionPlanDTO;
@@ -91,7 +91,7 @@ class SubscriptionPlanServiceTest
 
         // then
         assertThatThrownBy(() -> testContainer.subscriptionPlanService.update(subscriptionPlanId, request))
-                .isInstanceOf(GlobalException.class);
+                .isInstanceOf(SubscriptionPlanException.class);
     }
 
     @Test
@@ -119,7 +119,7 @@ class SubscriptionPlanServiceTest
 
         // then
         assertThatThrownBy(() -> testContainer.subscriptionPlanService.findById(subscriptionPlanId))
-                .isInstanceOf(GlobalException.class);
+                .isInstanceOf(SubscriptionPlanException.class);
     }
 
     @Test

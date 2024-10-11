@@ -1,6 +1,7 @@
 package com.cpa.yusin.quiz.member.domain;
 
-import com.cpa.yusin.quiz.global.exception.GlobalException;
+
+import com.cpa.yusin.quiz.global.exception.MemberException;
 import com.cpa.yusin.quiz.member.controller.dto.request.MemberCreateRequest;
 import com.cpa.yusin.quiz.member.controller.dto.request.MemberUpdateRequest;
 import com.cpa.yusin.quiz.member.domain.type.Platform;
@@ -14,7 +15,6 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import java.time.LocalDateTime;
 import java.util.HashMap;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -164,7 +164,7 @@ class MemberTest
 
         // when and then
         assertThatThrownBy(() -> member.validateMember(2L, member))
-                .isInstanceOf(GlobalException.class);
+                .isInstanceOf(MemberException.class);
     }
 
 }

@@ -1,7 +1,7 @@
 package com.cpa.yusin.quiz.member.service;
 
 import com.cpa.yusin.quiz.global.exception.ExceptionMessage;
-import com.cpa.yusin.quiz.global.exception.GlobalException;
+import com.cpa.yusin.quiz.global.exception.MemberException;
 import com.cpa.yusin.quiz.member.controller.dto.request.MemberUpdateRequest;
 import com.cpa.yusin.quiz.member.controller.dto.response.MemberDTO;
 import com.cpa.yusin.quiz.member.controller.mapper.MemberMapper;
@@ -62,7 +62,7 @@ public class MemberServiceImpl implements MemberService
     public Member findById(long id)
     {
         return memberRepository.findById(id)
-                .orElseThrow(() -> new GlobalException(ExceptionMessage.USER_NOT_FOUND));
+                .orElseThrow(() -> new MemberException(ExceptionMessage.USER_NOT_FOUND));
     }
 
     @Transactional

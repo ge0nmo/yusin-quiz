@@ -1,6 +1,8 @@
 package com.cpa.yusin.quiz.subscription.service;
 
 import com.cpa.yusin.quiz.common.service.MerchantIdGenerator;
+import com.cpa.yusin.quiz.global.exception.ExceptionMessage;
+import com.cpa.yusin.quiz.global.exception.SubscriptionException;
 import com.cpa.yusin.quiz.member.domain.Member;
 import com.cpa.yusin.quiz.payment.domain.Payment;
 import com.cpa.yusin.quiz.payment.service.port.PaymentRepository;
@@ -33,7 +35,7 @@ public class SubscriptionServiceImpl implements SubscriptionService
     public SubscriptionCreateResponse initiateSubscription(Member member, long subscriptionPlanId)
     {
         SubscriptionPlan subscriptionPlan = subscriptionPlanRepository.findById(subscriptionPlanId)
-                .orElseThrow();
+                .orElseThrow(() -> new SubscriptionException(ExceptionMessage.SUBSCRIPTION_NOT_FOUND));
 
         String merchantId = merchantIdGenerator.generatePID(member.getId());
         Payment prePayment = Payment.initiate(subscriptionPlan.getPrice(), merchantId);
