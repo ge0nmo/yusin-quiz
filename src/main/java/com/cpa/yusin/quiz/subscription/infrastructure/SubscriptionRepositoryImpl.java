@@ -26,9 +26,10 @@ public class SubscriptionRepositoryImpl implements SubscriptionRepository
     }
 
     @Override
-    public Optional<Subscription> findByMerchantId(String merchantId)
+    public Optional<Subscription> findByMemberId(long memberId)
     {
-        return Optional.empty();
+        return subscriptionJpaRepository.findByMemberId(memberId);
     }
+
 
 }

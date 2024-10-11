@@ -11,8 +11,5 @@ public interface SubscriptionRepository
 
     Optional<Subscription> findById(long id);
 
-    @Query("SELECT s FROM Subscription s " +
-            "JOIN FETCH Payment p ON s.payment.id = p.id " +
-            "JOIN FETCH SubscriptionPlan sp ON sp.id = s.plan.id")
-    Optional<Subscription> findByMerchantId(String merchantId);
+    Optional<Subscription> findByMemberId(long memberId);
 }
