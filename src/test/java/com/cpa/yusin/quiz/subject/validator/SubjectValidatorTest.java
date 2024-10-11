@@ -1,4 +1,4 @@
-package com.cpa.yusin.quiz.subject.repository;
+package com.cpa.yusin.quiz.subject.validator;
 
 import com.cpa.yusin.quiz.config.TestContainer;
 import com.cpa.yusin.quiz.global.exception.SubjectException;
