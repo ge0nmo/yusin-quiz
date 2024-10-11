@@ -30,7 +30,6 @@ public class SubscriptionServiceImpl implements SubscriptionService
     private final SubscriptionPlanRepository subscriptionPlanRepository;
     private final MerchantIdGenerator merchantIdGenerator;
     private final SubscriptionMapper subscriptionMapper;
-    private final PaymentMapper paymentMapper;
 
     @Transactional
     @Override
@@ -46,6 +45,6 @@ public class SubscriptionServiceImpl implements SubscriptionService
         Subscription subscription = Subscription.initiate(member, subscriptionPlan, prePayment);
 
         subscription = subscriptionRepository.save(subscription);
-        return subscriptionMapper.toSubscriptionCreateResponse(subscription, paymentMapper.toPaymentRegisterResponse(prePayment));
+        return subscriptionMapper.toSubscriptionCreateResponse(subscription, prePayment);
     }
 }
