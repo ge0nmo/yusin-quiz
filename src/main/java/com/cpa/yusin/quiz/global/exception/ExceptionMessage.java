@@ -50,6 +50,7 @@ public enum ExceptionMessage
      * subscription
      */
     SUBSCRIPTION_NOT_FOUND("구독 데이터를 찾을 수 없습니다."),
+    SUBSCRIPTION_EXISTS("이미 구독 중입니다."),
     ;
 
     private final String message;

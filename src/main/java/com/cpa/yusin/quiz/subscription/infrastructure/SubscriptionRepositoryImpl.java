@@ -28,7 +28,7 @@ public class SubscriptionRepositoryImpl implements SubscriptionRepository
     @Override
     public Optional<Subscription> findByMemberId(long memberId)
     {
-        return subscriptionJpaRepository.findByMemberId(memberId);
+        return subscriptionJpaRepository.findTopByMemberId(memberId);
     }
 
 

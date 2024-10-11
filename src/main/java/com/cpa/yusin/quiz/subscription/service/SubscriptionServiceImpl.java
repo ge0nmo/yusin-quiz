@@ -12,6 +12,7 @@ import com.cpa.yusin.quiz.subscription.controller.mapper.SubscriptionMapper;
 import com.cpa.yusin.quiz.subscription.controller.port.SubscriptionService;
 import com.cpa.yusin.quiz.subscription.domain.Subscription;
 import com.cpa.yusin.quiz.subscription.service.port.SubscriptionRepository;
+import com.cpa.yusin.quiz.subscription.service.port.SubscriptionValidator;
 import com.cpa.yusin.quiz.subscriptionPlan.domain.SubscriptionPlan;
 import com.cpa.yusin.quiz.subscriptionPlan.service.port.SubscriptionPlanRepository;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +31,7 @@ public class SubscriptionServiceImpl implements SubscriptionService
     private final SubscriptionPlanRepository subscriptionPlanRepository;
     private final MerchantIdGenerator merchantIdGenerator;
     private final SubscriptionMapper subscriptionMapper;
+    private final SubscriptionValidator subscriptionValidator;
 
     @Transactional
     @Override
@@ -37,6 +39,8 @@ public class SubscriptionServiceImpl implements SubscriptionService
     {
         SubscriptionPlan subscriptionPlan = subscriptionPlanRepository.findById(subscriptionPlanId)
                 .orElseThrow(() -> new SubscriptionException(ExceptionMessage.SUBSCRIPTION_NOT_FOUND));
+
+        subscriptionValidator.validateSubscription(member.getId());
 
         String merchantId = merchantIdGenerator.generatePID(member.getId());
         Payment prePayment = Payment.initiate(subscriptionPlan.getPrice(), merchantId);
