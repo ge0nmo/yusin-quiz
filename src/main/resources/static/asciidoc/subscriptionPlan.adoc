@@ -77,13 +77,13 @@ include::{snippets}/getProductById/response-fields.adoc[]
 
 === 구독 플랜 전체 조회
 ==== HTTP Request
-include::{snippets}/getAllProducts/http-request.adoc[]
+include::{snippets}/getAllSubscriptionPlans/http-request.adoc[]
 
 ==== HTTP Response
-include::{snippets}/getAllProducts/http-response.adoc[]
+include::{snippets}/getAllSubscriptionPlans/http-response.adoc[]
 
 ==== Response Fields
-include::{snippets}/getAllProducts/response-fields.adoc[]
+include::{snippets}/getAllSubscriptionPlans/response-fields.adoc[]
 
 
 === 구독 플랜 1개 삭제

@@ -2,6 +2,7 @@ package com.cpa.yusin.quiz.subscriptionPlan.service;
 
 import com.cpa.yusin.quiz.global.exception.ExceptionMessage;
 import com.cpa.yusin.quiz.global.exception.PaymentException;
+import com.cpa.yusin.quiz.global.exception.SubscriptionPlanException;
 import com.cpa.yusin.quiz.subscriptionPlan.controller.dto.request.SubscriptionPlanRegisterRequest;
 import com.cpa.yusin.quiz.subscriptionPlan.controller.dto.request.SubscriptionPlanUpdateRequest;
 import com.cpa.yusin.quiz.subscriptionPlan.controller.dto.response.SubscriptionPlanDTO;
@@ -54,7 +55,7 @@ public class SubscriptionPlanServiceImpl implements SubscriptionPlanService
     public SubscriptionPlan findById(Long id)
     {
         return subscriptionPlanRepository.findById(id)
-                .orElseThrow(() -> new PaymentException(ExceptionMessage.PLAN_NOT_FOUND));
+                .orElseThrow(() -> new SubscriptionPlanException(ExceptionMessage.PLAN_NOT_FOUND));
     }
 
     @Override
