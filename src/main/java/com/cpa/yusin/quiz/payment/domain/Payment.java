@@ -1,13 +1,16 @@
 package com.cpa.yusin.quiz.payment.domain;
 
 import com.cpa.yusin.quiz.common.infrastructure.BaseEntity;
+import com.cpa.yusin.quiz.payment.domain.type.PaymentProvider;
 import com.cpa.yusin.quiz.payment.domain.type.PaymentStatus;
 import com.cpa.yusin.quiz.subscription.domain.Subscription;
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.extern.slf4j.Slf4j;
 
 import java.math.BigDecimal;
 
+@Slf4j
 @ToString
 @Entity
 @AllArgsConstructor
@@ -20,7 +23,7 @@ public class Payment extends BaseEntity
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    @Column(nullable = false, updatable = false)
     private BigDecimal amount;
 
     private BigDecimal paidAmount;
@@ -28,9 +31,14 @@ public class Payment extends BaseEntity
     @Enumerated(EnumType.STRING)
     private PaymentStatus status;
 
+    @Column(unique = true)
     private String portOnePaymentId; // imp_uid // 포트원 거래 고유 번호
 
+    @Column(nullable = false, unique = true, updatable = false)
     private String merchantUid;
+
+    @Enumerated(EnumType.STRING)
+    private PaymentProvider paymentProvider;
 
     private String failureReason;
 
@@ -46,11 +54,12 @@ public class Payment extends BaseEntity
         return payment;
     }
 
-    public void completePayment(PaymentStatus status, String failureReason, String portOnePaymentId, BigDecimal paidAmount)
+    public void completePayment(PaymentStatus status, String failureReason, String portOnePaymentId, BigDecimal paidAmount, String paymentProvider)
     {
         this.status = status;
         this.failureReason = failureReason;
         this.portOnePaymentId = portOnePaymentId;
         this.paidAmount = paidAmount;
+        this.paymentProvider = PaymentProvider.getPaymentProvider(paymentProvider);
     }
 }

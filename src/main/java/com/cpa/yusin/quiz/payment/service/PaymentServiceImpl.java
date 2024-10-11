@@ -61,9 +61,9 @@ public class PaymentServiceImpl implements PaymentService
 
     private IamportResponse<Payment> verificationProcess(IamportResponse<Payment> iamportResponse)
     {
-        String portOnePaymentId = iamportResponse.getResponse().getImpUid();
+        String merchantUid = iamportResponse.getResponse().getMerchantUid();
 
-        com.cpa.yusin.quiz.payment.domain.Payment payment = findByMerchantUid(portOnePaymentId);
+        com.cpa.yusin.quiz.payment.domain.Payment payment = findByMerchantUid(merchantUid);
 
         if(PaymentStatus.COMPLETED.equals(payment.getStatus())){
             return iamportResponse;
@@ -72,15 +72,15 @@ public class PaymentServiceImpl implements PaymentService
         Subscription subscription = payment.getSubscription();
         SubscriptionPlan subscriptionPlan = subscription.getPlan();
 
-        paymentValidator.validatePayment(iamportResponse.getResponse().getStatus(),
-                                         iamportResponse.getResponse().getFailReason(),
-                                         iamportResponse.getResponse().getImpUid(),
-                                         iamportResponse.getResponse().getAmount(),
-                                         payment);
+        paymentValidator.validatePayment(iamportResponse, payment);
 
-        paymentValidator.validatePrice(payment, iamportResponse.getResponse().getAmount(), portOnePaymentId);
+        paymentValidator.validatePrice(payment, iamportResponse);
 
-        payment.completePayment(PaymentStatus.COMPLETED, "", portOnePaymentId, iamportResponse.getResponse().getAmount());
+        payment.completePayment(PaymentStatus.COMPLETED,
+                "",
+                iamportResponse.getResponse().getImpUid(),
+                iamportResponse.getResponse().getAmount(),
+                iamportResponse.getResponse().getPgProvider());
         subscription.activeSubscription(subscriptionPlan.getDurationMonth(), clockHolder.getCurrentDateTime());
 
         return iamportResponse;
