@@ -27,7 +27,7 @@ spring:
 
 server:
   port: 8080
-  address: localhost
+  serverAddress: localhost
 
 serverName: local_server
 
@@ -48,7 +48,7 @@ spring:
 
 server:
   port: 8080
-  address: 13.124.70.40
+  serverAddress: 13.124.70.40
 
 serverName: blue_server
 
@@ -69,7 +69,7 @@ spring:
 
 server:
   port: 8081
-  address: 13.124.70.40
+  serverAddress: 13.124.70.40
 
 serverName: green_server
 
