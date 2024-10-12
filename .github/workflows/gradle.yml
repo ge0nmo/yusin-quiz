@@ -53,7 +53,7 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
-      - name: Set Traget IP
+      - name: Set Target IP
         run: |
           STATUS=$(curl -o /dev/null -w "%{http_code}" "http://${{ secrets.EC2_SERVER_IP }}/env" )
           echo $STATUS
@@ -65,7 +65,8 @@ jobs:
           fi
           
           echo CURRENT_UPSTREAM=$CURRENT_UPSTREAM >> $GITHUB_ENV
-          if [ $CURRENT_UPSTREAM = blue ]; blue
+          
+          if [ $CURRENT_UPSTREAM = blue ]; then
             echo "CURRENT_PORT=8080" >> $GITHUB_ENV
             echo "STOPPED_PORT=8081" >> $GITHUB_ENV
             echo "TARGET_UPSTREAM=green" >> $GITHUB_ENV
