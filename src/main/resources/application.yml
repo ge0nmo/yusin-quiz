@@ -42,13 +42,13 @@ spring:
       client:
         registration:
           google:
-            redirect-uri: ${SERVER_IP}/oauth2/callback/google
+            redirect-uri: 13.124.70.40/oauth2/callback/google
           github:
-            redirect-uri: ${SERVER_IP}/oauth2/callback/github
+            redirect-uri: 13.124.70.40/oauth2/callback/github
 
 server:
   port: 8080
-  address: ${SERVER_IP}
+  address: 13.124.70.40
 
 serverName: blue_server
 
@@ -63,13 +63,13 @@ spring:
       client:
         registration:
           google:
-            redirect-uri: ${SERVER_IP}/oauth2/callback/google
+            redirect-uri: 13.124.70.40/oauth2/callback/google
           github:
-            redirect-uri: ${SERVER_IP}/oauth2/callback/github
+            redirect-uri: 13.124.70.40/oauth2/callback/github
 
 server:
   port: 8081
-  address: ${SERVER_IP}
+  address: 13.124.70.40
 
 serverName: green_server
 
