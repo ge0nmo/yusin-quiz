@@ -76,12 +76,17 @@ jobs:
             echo "TARGET_UPSTREAM=blue" >> $GITHUB_ENV
           fi
 
+      - name: Set SSH Key
+        run: | 
+          echo "${{ secrets.EC2_PEM }} > private_key.pem
+          chmod 600 private_key.pem
+
       - name: Docker compose
         uses: appleboy/ssh-action@master
         with:
           username: ubuntu
           host: ${{ secrets.EC2_SERVER_IP }}
-          key: ${{ secrets.EC2_PEM }}
+          key: private_key.pem
           script_stop: true
           script: |
             sudo docker pull ${{ secrets.DOCKER_USERNAME }}/yusin-quiz:latest
