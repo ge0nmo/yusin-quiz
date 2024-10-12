@@ -49,7 +49,7 @@ jobs:
       run: docker build --platform linux/amd64 -t ${{ secrets.DOCKER_USERNAME}}/yusin-quiz .
 
     - name: Push Docker
-      run: docker push ${{ secrets.DOCKER_USERNAME }}/yusin-quiz:latest
+      run: docker push ${{ secrets.DOCKER_USERNAME }}/yusin-quiz
 
 
   dependency-submission:
