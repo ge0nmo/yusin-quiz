@@ -122,7 +122,6 @@ jobs:
           script: |
             sudo docker stop ${{ env.CURRENT_UPSTREAM }} || true
             sudo docker rm ${{ env.CURRENT_UPSTREAM }} || true
-                      
 
   dependency-submission:
 
