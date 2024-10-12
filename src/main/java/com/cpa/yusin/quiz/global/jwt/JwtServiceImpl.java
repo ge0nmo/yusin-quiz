@@ -20,10 +20,10 @@ public class JwtServiceImpl implements JwtService
 {
     private final SecretKey key;
 
-    @Value("${jwt.token.access-token.expiration}")
+    @Value("${jwt.token.access-token-expiration}")
     private long accessTokenExpiration;
 
-    @Value("${jwt.token.refresh-token.expiration}")
+    @Value("${jwt.token.refresh-token-expiration}")
     private long refreshTokenExpiration;
 
 

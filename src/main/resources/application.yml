@@ -1,0 +1,84 @@
+spring:
+  profiles:
+    active: local
+    group:
+      local: local, common, secret
+      blue: blue, common, secret
+      green: green, common, secret
+
+server:
+  env: blue
+
+---
+
+spring:
+  config:
+    activate:
+      on-profile: local
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            redirect-uri: localhost/oauth2/callback/google
+          github:
+            redirect-uri: localhost/oauth2/callback/github
+
+
+server:
+  port: 8080
+  address: localhost
+
+serverName: local_server
+
+---
+
+spring:
+  config:
+    activate:
+      on-profile: blue
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            redirect-uri: ${SERVER_IP}/oauth2/callback/google
+          github:
+            redirect-uri: ${SERVER_IP}/oauth2/callback/github
+
+server:
+  port: 8080
+  address: ${SERVER_IP}
+
+serverName: blue_server
+
+---
+
+spring:
+  config:
+    activate:
+      on-profile: green
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            redirect-uri: ${SERVER_IP}/oauth2/callback/google
+          github:
+            redirect-uri: ${SERVER_IP}/oauth2/callback/github
+
+server:
+  port: 8081
+  address: ${SERVER_IP}
+
+serverName: green_server
+
+---
+spring:
+  config:
+    activate:
+      on-profile: common
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: update

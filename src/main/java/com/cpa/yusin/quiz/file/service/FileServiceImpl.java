@@ -33,7 +33,7 @@ public class FileServiceImpl implements FileService
     @Value("${cloud.aws.s3.bucket}")
     private String bucket;
 
-    @Value("${cloud.aws.s3.bucket.prefix}")
+    @Value("${cloud.aws.s3.prefix}")
     private String prefix;
 
     @Transactional
