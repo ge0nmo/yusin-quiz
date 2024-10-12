@@ -75,6 +75,7 @@ jobs:
             echo "STOPPED_PORT=8080" >> $GITHUB_ENV
             echo "TARGET_UPSTREAM=blue" >> $GITHUB_ENV
           fi
+        
 
       - name: Set SSH Key
         run: | 
