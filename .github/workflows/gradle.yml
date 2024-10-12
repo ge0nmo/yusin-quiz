@@ -78,7 +78,7 @@ jobs:
 
       - name: Set SSH Key
         run: | 
-          echo "${{ secrets.EC2_PEM }} > private_key.pem
+          echo "${{ secrets.EC2_PEM }}" > private_key.pem
           chmod 600 private_key.pem
 
       - name: Docker compose
