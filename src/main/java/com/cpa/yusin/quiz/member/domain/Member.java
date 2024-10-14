@@ -82,8 +82,8 @@ public class Member extends BaseEntity
         throw new MemberException(ExceptionMessage.NO_AUTHORIZATION);
     }
 
-    public void activeSubscription()
+    public void changeRole(Role role)
     {
-        this.role = Role.SUBSCRIBER;
+        this.role = role;
     }
 }

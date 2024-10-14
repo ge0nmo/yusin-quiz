@@ -19,7 +19,7 @@ public class SubscriptionValidator
 
     public void validateSubscription(long memberId)
     {
-        Optional<Subscription> optionalSubscription = subscriptionRepository.findByMemberId(memberId);
+        Optional<Subscription> optionalSubscription = subscriptionRepository.findTopByMemberId(memberId);
 
         if(optionalSubscription.isEmpty()){
             return;

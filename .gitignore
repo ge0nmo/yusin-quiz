@@ -38,4 +38,6 @@ out/
 
 ### properties ###
 /src/main/resources/application-dev.properties
-/src/test/resources/**
+/src/main/resources/application-secret.yml
+/src/test/resources/application-test.properties
+/src/test/resources/application.properties

@@ -2,6 +2,7 @@ package com.cpa.yusin.quiz.subscription.domain;
 
 import com.cpa.yusin.quiz.common.infrastructure.BaseEntity;
 import com.cpa.yusin.quiz.member.domain.Member;
+import com.cpa.yusin.quiz.member.domain.type.Role;
 import com.cpa.yusin.quiz.payment.domain.Payment;
 import com.cpa.yusin.quiz.subscription.domain.type.SubscriptionStatus;
 import com.cpa.yusin.quiz.subscriptionPlan.domain.SubscriptionPlan;
@@ -61,6 +62,17 @@ public class Subscription extends BaseEntity
         this.startDate = now;
         this.expiredDate = now.plusMonths(durationMonth);
     }
+
+    public void updateSubscriptionStatus(LocalDateTime now)
+    {
+        if(this.startDate != null && this.expiredDate != null){
+            if(this.expiredDate.isBefore(now) && !this.status.equals(SubscriptionStatus.EXPIRED) && !Role.ADMIN.equals(member.getRole())){
+                this.status = SubscriptionStatus.EXPIRED;
+                this.member.changeRole(Role.USER);
+            }
+        }
+    }
+
 
     public void cancel()
     {

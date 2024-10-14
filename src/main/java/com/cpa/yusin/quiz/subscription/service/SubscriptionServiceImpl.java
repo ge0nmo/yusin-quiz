@@ -1,9 +1,11 @@
 package com.cpa.yusin.quiz.subscription.service;
 
+import com.cpa.yusin.quiz.common.service.ClockHolder;
 import com.cpa.yusin.quiz.common.service.MerchantIdGenerator;
 import com.cpa.yusin.quiz.global.exception.ExceptionMessage;
 import com.cpa.yusin.quiz.global.exception.SubscriptionException;
 import com.cpa.yusin.quiz.member.domain.Member;
+import com.cpa.yusin.quiz.member.service.port.MemberRepository;
 import com.cpa.yusin.quiz.payment.domain.Payment;
 import com.cpa.yusin.quiz.payment.service.port.PaymentRepository;
 import com.cpa.yusin.quiz.subscription.controller.dto.response.SubscriptionCreateResponse;
@@ -19,6 +21,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
+
 @Transactional(readOnly = true)
 @Slf4j
 @RequiredArgsConstructor
@@ -31,6 +35,8 @@ public class SubscriptionServiceImpl implements SubscriptionService
     private final MerchantIdGenerator merchantIdGenerator;
     private final SubscriptionMapper subscriptionMapper;
     private final SubscriptionValidator subscriptionValidator;
+    private final ClockHolder clockHolder;
+    private final MemberRepository memberRepository;
 
     @Transactional
     @Override
@@ -49,5 +55,22 @@ public class SubscriptionServiceImpl implements SubscriptionService
 
         subscription = subscriptionRepository.save(subscription);
         return subscriptionMapper.toSubscriptionCreateResponse(subscription, prePayment, subscriptionPlan);
+    }
+
+    @Transactional
+    @Override
+    public void updateSubscriptionStatus(long memberId)
+    {
+        findTopByMemberId(memberId)
+                .ifPresent(subscription -> {
+                    subscription.updateSubscriptionStatus(clockHolder.getCurrentDateTime());
+                    subscriptionRepository.save(subscription);
+                    memberRepository.save(subscription.getMember());
+                });
+    }
+
+
+    private Optional<Subscription> findTopByMemberId(long memberId){
+        return subscriptionRepository.findTopByMemberId(memberId);
     }
 }

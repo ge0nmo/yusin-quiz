@@ -6,4 +6,6 @@ import com.cpa.yusin.quiz.subscription.controller.dto.response.SubscriptionCreat
 public interface SubscriptionService
 {
     SubscriptionCreateResponse initiateSubscription(Member member, long subscriptionPlanId);
+
+    void updateSubscriptionStatus(long memberId);
 }

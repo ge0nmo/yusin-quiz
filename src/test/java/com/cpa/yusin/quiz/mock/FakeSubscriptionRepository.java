@@ -26,6 +26,10 @@ public class FakeSubscriptionRepository implements SubscriptionRepository
                     .plan(subscription.getPlan())
                     .payment(subscription.getPayment())
                     .status(subscription.getStatus())
+                    .member(subscription.getMember())
+                    .startDate(subscription.getStartDate())
+                    .expiredDate(subscription.getExpiredDate())
+                    .cancelledAt(subscription.getCancelledAt())
                     .build();
 
             subscriptionRepository.add(newSubscription);
@@ -46,7 +50,7 @@ public class FakeSubscriptionRepository implements SubscriptionRepository
     }
 
     @Override
-    public Optional<Subscription> findByMemberId(long memberId)
+    public Optional<Subscription> findTopByMemberId(long memberId)
     {
         return subscriptionRepository.stream()
                 .filter(data -> data.getMember().getId().equals(memberId))

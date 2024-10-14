@@ -20,9 +20,9 @@ spring:
       client:
         registration:
           google:
-            redirect-uri: localhost/oauth2/callback/google
+            redirect-uri: http://localhost:8080/oauth2/callback
           github:
-            redirect-uri: localhost/oauth2/callback/github
+            redirect-uri: http://localhost:8080/oauth2/callback
 
 
 server:
