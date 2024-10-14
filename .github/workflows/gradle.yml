@@ -40,7 +40,7 @@ jobs:
 
       - name: Test with Gradle
         run: |
-          echo ${{ secrets.APPLICATION_TEST_PROPERTIES }} | base64 --decode > ./src/test/resources/application-test.properties
+          echo ${{ secrets.TEST_PROPERTIES }} | base64 --decode > ./src/main/resources/application-test.properties
           
           cat ./src/test/resources/application-test.properties
           
