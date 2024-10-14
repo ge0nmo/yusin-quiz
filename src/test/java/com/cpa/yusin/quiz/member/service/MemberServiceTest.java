@@ -76,7 +76,7 @@ class MemberServiceTest
                 .findById(1L);
 
         // then
-        assertThat(result.getEmail()).isEqualTo("test@gmail.comdd");
+        assertThat(result.getEmail()).isEqualTo("test@gmail.com");
         assertThat(result.getRole()).isEqualTo(Role.USER);
         assertThat(result.getPlatform()).isEqualTo(Platform.HOME);
         assertThat(result.getId()).isEqualTo(1L);
