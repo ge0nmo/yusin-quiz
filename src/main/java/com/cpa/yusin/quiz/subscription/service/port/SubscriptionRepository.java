@@ -14,5 +14,5 @@ public interface SubscriptionRepository
 
     Optional<Subscription> findTopByMemberId(long memberId);
 
-    Page<Subscription> findAllByMemberId(long memberId, Pageable pageable);
+    Page<Subscription> findSubscriptionHistoryByMember(long memberId, Pageable pageable);
 }

@@ -22,6 +22,7 @@ public interface SubscriptionJpaRepository extends JpaRepository<Subscription, L
             "JOIN FETCH s.payment p " +
             "JOIN FETCH s.plan sp " +
             "WHERE s.member.id = :memberId " +
+            "AND s.status != 'PENDING'" +
             "ORDER BY s.createdAt ")
     Page<Subscription> findAllByMemberId(@Param("memberId") long memberId, Pageable pageable);
 }

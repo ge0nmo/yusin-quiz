@@ -8,6 +8,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -16,8 +18,8 @@ public class SubscriptionDTO
 {
     private long id;
     private SubscriptionStatus status;
-    private long startDate;
-    private long endDate;
+    private LocalDateTime startDate;
+    private LocalDateTime expiredDate;
     private SubscriptionPlanDTO subscriptionPlan;
     private PaymentDTO paymentDTO;
 }

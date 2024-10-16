@@ -34,9 +34,9 @@ public class SubscriptionRepositoryImpl implements SubscriptionRepository
     }
 
     @Override
-    public Page<Subscription> findAllByMemberId(long memberId, Pageable pageable)
+    public Page<Subscription> findSubscriptionHistoryByMember(long memberId, Pageable pageable)
     {
-        return null;
+        return subscriptionJpaRepository.findAllByMemberId(memberId, pageable);
     }
 
 

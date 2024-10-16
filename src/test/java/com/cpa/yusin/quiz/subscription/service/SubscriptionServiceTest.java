@@ -1,5 +1,6 @@
 package com.cpa.yusin.quiz.subscription.service;
 
+import com.cpa.yusin.quiz.common.controller.dto.response.GlobalResponse;
 import com.cpa.yusin.quiz.config.TestContainer;
 import com.cpa.yusin.quiz.member.domain.Member;
 import com.cpa.yusin.quiz.member.domain.type.Platform;
@@ -8,16 +9,21 @@ import com.cpa.yusin.quiz.payment.controller.dto.response.PaymentRegisterRespons
 import com.cpa.yusin.quiz.payment.domain.Payment;
 import com.cpa.yusin.quiz.payment.domain.type.PaymentStatus;
 import com.cpa.yusin.quiz.subscription.controller.dto.response.SubscriptionCreateResponse;
+import com.cpa.yusin.quiz.subscription.controller.dto.response.SubscriptionDTO;
 import com.cpa.yusin.quiz.subscription.domain.Subscription;
 import com.cpa.yusin.quiz.subscription.domain.type.SubscriptionStatus;
 import com.cpa.yusin.quiz.subscriptionPlan.domain.SubscriptionPlan;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -44,7 +50,7 @@ class SubscriptionServiceTest
                 .build());
 
         subscriber = testContainer.memberRepository.save(Member.builder()
-                .id(2L)
+                .id(1L)
                 .email("subscriber@gmail.com")
                 .password("123123")
                 .role(Role.SUBSCRIBER)
@@ -168,6 +174,63 @@ class SubscriptionServiceTest
 
         subscriber = optionalMember.get();
         assertThat(subscriber.getRole()).isEqualTo(Role.SUBSCRIBER);
+
+    }
+
+    @DisplayName("구독 히스토리를 가져온다")
+    @Test
+    void getSubscriptionHistory()
+    {
+        // given
+        long memberId = member.getId();
+        Pageable pageable = PageRequest.of(0, 10);
+        Payment payment1 = testContainer.paymentRepository.save(Payment.builder()
+                .id(1L)
+                .paidAmount(plan.getPrice())
+                .status(PaymentStatus.COMPLETED)
+                .merchantUid("PID-aaaa")
+                .portOnePaymentId(UUID.randomUUID().toString())
+                .failureReason("")
+                .build());
+
+        Payment payment2 = testContainer.paymentRepository.save(Payment.builder()
+                .id(2L)
+                .paidAmount(plan.getPrice())
+                .status(PaymentStatus.COMPLETED)
+                .merchantUid("PID-bbbb")
+                .portOnePaymentId(UUID.randomUUID().toString())
+                .failureReason("")
+                .build());
+
+        testContainer.subscriptionRepository.save(Subscription.builder()
+                .id(1L)
+                .status(SubscriptionStatus.EXPIRED)
+                .startDate(LocalDateTime.now().minusMonths(2))
+                .member(member)
+                .payment(payment1)
+                .plan(plan)
+                .expiredDate(LocalDateTime.now().minusMonths(1))
+                .build());
+
+        testContainer.subscriptionRepository.save(Subscription.builder()
+                .id(2L)
+                .status(SubscriptionStatus.ACTIVE)
+                .payment(payment2)
+                .member(member)
+                .startDate(LocalDateTime.now().minusMonths(1))
+                .plan(plan)
+                .expiredDate(LocalDateTime.now().minusMonths(2))
+                .build());
+
+        // when
+        GlobalResponse<List<SubscriptionDTO>> response = testContainer.subscriptionService.getSubscriptionHistory(memberId, pageable);
+
+        // then
+        List<SubscriptionDTO> list = response.getData();
+        assertThat(list).hasSize(2);
+
+        assertThat(list.getFirst().getStatus()).isEqualTo(SubscriptionStatus.EXPIRED);
+        assertThat(list.get(1).getStatus()).isEqualTo(SubscriptionStatus.ACTIVE);
 
     }
 }
