@@ -9,6 +9,7 @@ import com.cpa.yusin.quiz.member.service.port.MemberRepository;
 import com.cpa.yusin.quiz.payment.domain.Payment;
 import com.cpa.yusin.quiz.payment.service.port.PaymentRepository;
 import com.cpa.yusin.quiz.subscription.controller.dto.response.SubscriptionCreateResponse;
+import com.cpa.yusin.quiz.subscription.controller.dto.response.SubscriptionDTO;
 import com.cpa.yusin.quiz.subscription.controller.mapper.SubscriptionMapper;
 import com.cpa.yusin.quiz.subscription.controller.port.SubscriptionService;
 import com.cpa.yusin.quiz.subscription.domain.Subscription;
@@ -18,6 +19,8 @@ import com.cpa.yusin.quiz.subscriptionPlan.domain.SubscriptionPlan;
 import com.cpa.yusin.quiz.subscriptionPlan.service.port.SubscriptionPlanRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -67,6 +70,14 @@ public class SubscriptionServiceImpl implements SubscriptionService
                     subscriptionRepository.save(subscription);
                     memberRepository.save(subscription.getMember());
                 });
+    }
+
+    @Override
+    public Page<SubscriptionDTO> getSubscriptionHistory(long memberId, Pageable pageable)
+    {
+        subscriptionRepository.findAllByMemberId(memberId, pageable);
+
+        return null;
     }
 
 

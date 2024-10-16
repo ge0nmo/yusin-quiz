@@ -3,6 +3,8 @@ package com.cpa.yusin.quiz.mock;
 import com.cpa.yusin.quiz.subscription.domain.Subscription;
 import com.cpa.yusin.quiz.subscription.domain.type.SubscriptionStatus;
 import com.cpa.yusin.quiz.subscription.service.port.SubscriptionRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -55,5 +57,11 @@ public class FakeSubscriptionRepository implements SubscriptionRepository
         return subscriptionRepository.stream()
                 .filter(data -> data.getMember().getId().equals(memberId))
                 .findFirst();
+    }
+
+    @Override
+    public Page<Subscription> findAllByMemberId(long memberId, Pageable pageable)
+    {
+        return null;
     }
 }

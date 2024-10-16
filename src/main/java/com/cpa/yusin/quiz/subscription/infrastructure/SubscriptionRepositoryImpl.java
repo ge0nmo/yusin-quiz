@@ -3,6 +3,8 @@ package com.cpa.yusin.quiz.subscription.infrastructure;
 import com.cpa.yusin.quiz.subscription.domain.Subscription;
 import com.cpa.yusin.quiz.subscription.service.port.SubscriptionRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
@@ -29,6 +31,12 @@ public class SubscriptionRepositoryImpl implements SubscriptionRepository
     public Optional<Subscription> findTopByMemberId(long memberId)
     {
         return subscriptionJpaRepository.findTopByMemberId(memberId);
+    }
+
+    @Override
+    public Page<Subscription> findAllByMemberId(long memberId, Pageable pageable)
+    {
+        return null;
     }
 
 

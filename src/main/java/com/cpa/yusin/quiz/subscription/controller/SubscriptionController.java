@@ -18,8 +18,8 @@ public class SubscriptionController
 {
     private final SubscriptionService subscriptionService;
 
-    @PostMapping("/plan/{subscriptionPlanId}")
-    public ResponseEntity<?> subscribe(@PathVariable("subscriptionPlanId") long subscriptionPlanId,
+    @PostMapping
+    public ResponseEntity<?> subscribe(@RequestParam("subscriptionPlanId") long subscriptionPlanId,
                                        @AuthenticationPrincipal MemberDetails memberDetails)
     {
         SubscriptionCreateResponse response = subscriptionService.initiateSubscription(memberDetails.getMember(), subscriptionPlanId);
