@@ -10,7 +10,7 @@ import java.util.Optional;
 public interface SubscriptionJpaRepository extends JpaRepository<Subscription, Long>
 {
     @Query("SELECT s FROM Subscription s " +
-            "JOIN FETCH Member m " +
+            "JOIN FETCH s.member m " +
             "WHERE s.member.id = :memberId " +
             "ORDER BY s.createdAt DESC " +
             "LIMIT 1 ")

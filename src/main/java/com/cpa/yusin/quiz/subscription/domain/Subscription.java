@@ -8,6 +8,8 @@ import com.cpa.yusin.quiz.subscription.domain.type.SubscriptionStatus;
 import com.cpa.yusin.quiz.subscriptionPlan.domain.SubscriptionPlan;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import java.time.LocalDateTime;
 
@@ -24,6 +26,7 @@ public class Subscription extends BaseEntity
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;
 
