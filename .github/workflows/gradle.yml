@@ -157,6 +157,21 @@ jobs:
             sudo docker stop ${{ env.CURRENT_UPSTREAM }} || true
             sudo docker rm ${{ env.CURRENT_UPSTREAM }} || true
 
+      - name: Remove old Docker images
+        if: success()
+        uses: appleboy/ssh-action@master
+        with:
+          username: ubuntu
+          host: ${{ secrets.EC2_SERVER_IP }}
+          key_path: private_key.pem
+          script_stop: true
+          script: |
+            echo "Starting Docker image prune..."
+            sudo docker image prune -f
+            echo "Docker image prune completed..."
+
+
+
   dependency-submission:
 
     runs-on: ubuntu-latest
