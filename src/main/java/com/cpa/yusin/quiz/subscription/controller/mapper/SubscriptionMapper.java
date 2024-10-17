@@ -49,7 +49,7 @@ public class SubscriptionMapper
                 .status(subscription.getStatus())
                 .startDate(subscription.getStartDate())
                 .expiredDate(subscription.getExpiredDate())
-                .paymentDTO(paymentMapper.toPaymentDTO(payment))
+                .payment(paymentMapper.toPaymentDTO(payment))
                 .subscriptionPlan(subscriptionPlanMapper.toPlanDTO(plan))
                 .build();
     }

@@ -35,7 +35,7 @@ public class SubscriptionController
                 .body(response);
     }
 
-    @GetMapping("/check/{memberId}")
+    @PatchMapping("/check/{memberId}")
     public ResponseEntity<?> checkStatus(@PathVariable("memberId") long memberId)
     {
         subscriptionService.updateSubscriptionStatus(memberId);

@@ -69,7 +69,7 @@ public class SubscriptionServiceImpl implements SubscriptionService
     {
         findTopByMemberId(memberId)
                 .ifPresent(subscription -> {
-                    subscription.updateSubscriptionStatus(clockHolder.getCurrentDateTime());
+                    subscription.expireSubscriptionStatus(clockHolder.getCurrentDateTime());
                     subscriptionRepository.save(subscription);
                     memberRepository.save(subscription.getMember());
                 });

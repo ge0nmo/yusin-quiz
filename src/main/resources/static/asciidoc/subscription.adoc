@@ -1,0 +1,23 @@
+= API Documentation
+:doctype: book
+:icons: font
+:toc: left
+:toc-title: 순서
+:sectnums:
+:sectnumlevels: 5
+:source-highlighter: highlightjs
+
+== 구독 API
+
+== 구독 내역 조회
+==== HTTP Request
+include::{snippets}/subscriptionHistory/http-request.adoc[]
+
+==== Query Parameter
+include::{snippets}/subscriptionHistory/query-parameters.adoc[]
+
+==== HTTP Response
+include::{snippets}/subscriptionHistory/http-response.adoc[]
+
+==== Response Fields
+include::{snippets}/subscriptionHistory/response-fields.adoc[]

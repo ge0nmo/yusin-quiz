@@ -21,5 +21,5 @@ public class SubscriptionDTO
     private LocalDateTime startDate;
     private LocalDateTime expiredDate;
     private SubscriptionPlanDTO subscriptionPlan;
-    private PaymentDTO paymentDTO;
+    private PaymentDTO payment;
 }

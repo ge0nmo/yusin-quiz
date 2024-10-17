@@ -87,7 +87,7 @@ class SubscriptionServiceTest
 
     @DisplayName("구독이 만료되었을 경우 유저의 상태를 변경한다")
     @Test
-    void updateSubscriptionStatus_whenExpired()
+    void expiredSubscriptionStatus_whenExpire()
     {
         // given
         LocalDateTime now = LocalDateTime.now();
@@ -135,7 +135,7 @@ class SubscriptionServiceTest
 
     @DisplayName("만료되지 않았거나 ADMIN 유저일 경우 변경하지 않는다")
     @Test
-    void updateSubscriptionStatus_NoChange_whenNotExpired()
+    void expiredSubscriptionStatus_NoChange_whenNotExpire()
     {
         // given
         LocalDateTime now = LocalDateTime.now();
