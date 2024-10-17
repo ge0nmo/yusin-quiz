@@ -38,6 +38,8 @@ import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.docu
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.*;
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.*;
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
+import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
+import static org.springframework.restdocs.request.RequestDocumentation.queryParameters;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -139,7 +141,7 @@ class MemberTest
                                 fieldWithPath("username").description("회원 이름")
                         ),
                         responseFields(
-                                fieldWithPath("data.id").type(JsonFieldType.NUMBER).description("회원 고유 식별자"),
+                                fieldWithPath("data.id").type(JsonFieldType.NUMBER).description("회원 ID"),
                                 fieldWithPath("data.email").type(JsonFieldType.STRING).description("이메일"),
                                 fieldWithPath("data.username").type(JsonFieldType.STRING).description("회원 이름"),
                                 fieldWithPath("data.platform").type(JsonFieldType.STRING).description("가입 경로"),
@@ -259,7 +261,7 @@ class MemberTest
                         ),
 
                         responseFields(
-                                fieldWithPath("data.id").type(JsonFieldType.NUMBER).description("회원 고유 식별자"),
+                                fieldWithPath("data.id").type(JsonFieldType.NUMBER).description("회원 ID"),
                                 fieldWithPath("data.email").type(JsonFieldType.STRING).description("이메일"),
                                 fieldWithPath("data.role").type(JsonFieldType.STRING).description("회원 권한"),
                                 fieldWithPath("data.accessToken").type(JsonFieldType.STRING).description("액세스 토큰"),
@@ -384,7 +386,7 @@ class MemberTest
                         ),
 
                         responseFields(
-                                fieldWithPath("data.id").type(JsonFieldType.NUMBER).description("회원 고유 식별자"),
+                                fieldWithPath("data.id").type(JsonFieldType.NUMBER).description("회원 ID"),
                                 fieldWithPath("data.email").type(JsonFieldType.STRING).description("이메일"),
                                 fieldWithPath("data.username").type(JsonFieldType.STRING).description("유저 이름"),
                                 fieldWithPath("data.platform").type(JsonFieldType.STRING).description("회원가입 경로"),
@@ -423,7 +425,7 @@ class MemberTest
 
 
                         responseFields(
-                                fieldWithPath("data.id").type(JsonFieldType.NUMBER).description("회원 고유 식별자"),
+                                fieldWithPath("data.id").type(JsonFieldType.NUMBER).description("회원 ID"),
                                 fieldWithPath("data.email").type(JsonFieldType.STRING).description("이메일"),
                                 fieldWithPath("data.username").type(JsonFieldType.STRING).description("유저 이름"),
                                 fieldWithPath("data.platform").type(JsonFieldType.STRING).description("회원가입 경로"),
@@ -463,7 +465,7 @@ class MemberTest
 
 
                         responseFields(
-                                fieldWithPath("data[].id").type(JsonFieldType.NUMBER).description("회원 고유 식별자"),
+                                fieldWithPath("data[].id").type(JsonFieldType.NUMBER).description("회원 ID"),
                                 fieldWithPath("data[].email").type(JsonFieldType.STRING).description("이메일"),
                                 fieldWithPath("data[].username").type(JsonFieldType.STRING).description("유저 이름"),
                                 fieldWithPath("data[].platform").type(JsonFieldType.STRING).description("회원가입 경로"),
@@ -489,11 +491,15 @@ class MemberTest
         // given
         MemberDetails memberDetails = new MemberDetails(member, new HashMap<>());
         String keyword = "mike";
+        int page = 1;
+        int size = 10;
 
         // when
         ResultActions resultActions = mvc
                 .perform(get("/api/v1/admin/members")
-                        .param("keyword", keyword)
+                        .queryParam("keyword", keyword)
+                        .queryParam("page", Integer.toString(page))
+                        .queryParam("size", Integer.toString(size))
                         .with(user(memberDetails))
                 );
 
@@ -504,9 +510,15 @@ class MemberTest
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),
 
+                        queryParameters(
+                                parameterWithName("page").description("페이지 번호"),
+                                parameterWithName("size").description("페이지 크기"),
+                                parameterWithName("keyword").description("검색 키워드").optional()
+                        ),
+
 
                         responseFields(
-                                fieldWithPath("data[].id").type(JsonFieldType.NUMBER).description("회원 고유 식별자"),
+                                fieldWithPath("data[].id").type(JsonFieldType.NUMBER).description("회원 ID"),
                                 fieldWithPath("data[].email").type(JsonFieldType.STRING).description("이메일"),
                                 fieldWithPath("data[].username").type(JsonFieldType.STRING).description("유저 이름"),
                                 fieldWithPath("data[].platform").type(JsonFieldType.STRING).description("회원가입 경로"),
