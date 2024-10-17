@@ -174,7 +174,7 @@ public class SubscriptionTest
     {
         // given
         MemberDetails memberDetails = new MemberDetails(member, new HashMap<>());
-        int page = 0;
+        int page = 1;
         int size = 10;
 
         // when
