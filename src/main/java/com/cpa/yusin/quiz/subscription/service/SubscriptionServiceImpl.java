@@ -1,5 +1,7 @@
 package com.cpa.yusin.quiz.subscription.service;
 
+import com.cpa.yusin.quiz.common.controller.dto.response.GlobalResponse;
+import com.cpa.yusin.quiz.common.controller.dto.response.PageInfo;
 import com.cpa.yusin.quiz.common.service.ClockHolder;
 import com.cpa.yusin.quiz.common.service.MerchantIdGenerator;
 import com.cpa.yusin.quiz.global.exception.ExceptionMessage;
@@ -24,6 +26,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 @Transactional(readOnly = true)
@@ -66,18 +69,22 @@ public class SubscriptionServiceImpl implements SubscriptionService
     {
         findTopByMemberId(memberId)
                 .ifPresent(subscription -> {
-                    subscription.updateSubscriptionStatus(clockHolder.getCurrentDateTime());
+                    subscription.expireSubscriptionStatus(clockHolder.getCurrentDateTime());
                     subscriptionRepository.save(subscription);
                     memberRepository.save(subscription.getMember());
                 });
     }
 
     @Override
-    public Page<SubscriptionDTO> getSubscriptionHistory(long memberId, Pageable pageable)
+    public GlobalResponse<List<SubscriptionDTO>> getSubscriptionHistory(long memberId, Pageable pageable)
     {
-        subscriptionRepository.findAllByMemberId(memberId, pageable);
+        Page<Subscription> subscriptions = subscriptionRepository.findSubscriptionHistoryByMember(memberId, pageable);
 
-        return null;
+        List<SubscriptionDTO> subscriptionDTOS = subscriptions.stream()
+                .map(subscriptionMapper::toSubscriptionDTO)
+                .toList();
+
+        return new GlobalResponse<>(subscriptionDTOS, PageInfo.of(subscriptions));
     }
 
 

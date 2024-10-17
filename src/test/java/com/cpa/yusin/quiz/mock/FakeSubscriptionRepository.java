@@ -4,6 +4,7 @@ import com.cpa.yusin.quiz.subscription.domain.Subscription;
 import com.cpa.yusin.quiz.subscription.domain.type.SubscriptionStatus;
 import com.cpa.yusin.quiz.subscription.service.port.SubscriptionRepository;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 
 import java.util.ArrayList;
@@ -60,8 +61,15 @@ public class FakeSubscriptionRepository implements SubscriptionRepository
     }
 
     @Override
-    public Page<Subscription> findAllByMemberId(long memberId, Pageable pageable)
+    public Page<Subscription> findSubscriptionHistoryByMember(long memberId, Pageable pageable)
     {
-        return null;
+        List<Subscription> response = subscriptionRepository.stream()
+                .filter(data -> data.getMember().getId().equals(memberId)
+                        && !SubscriptionStatus.PENDING.equals(data.getStatus()))
+                .limit(pageable.getPageSize())
+                .skip(pageable.getOffset())
+                .toList();
+
+        return new PageImpl<>(response, pageable, response.size());
     }
 }

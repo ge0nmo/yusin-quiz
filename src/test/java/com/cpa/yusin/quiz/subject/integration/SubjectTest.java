@@ -33,6 +33,8 @@ import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.docu
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.*;
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.*;
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
+import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
+import static org.springframework.restdocs.request.RequestDocumentation.queryParameters;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith({RestDocumentationExtension.class, TeardownExtension.class})
@@ -101,7 +103,7 @@ public class SubjectTest
                         ),
 
                         responseFields(
-                                fieldWithPath("data.id").type(JsonFieldType.NUMBER).description("과목 고유 식별자"),
+                                fieldWithPath("data.id").type(JsonFieldType.NUMBER).description("과목 ID"),
                                 fieldWithPath("data.name").type(JsonFieldType.STRING).description("과목 이름")
                         )
                 ));
@@ -179,7 +181,7 @@ public class SubjectTest
                         ),
 
                         responseFields(
-                                fieldWithPath("data.id").type(JsonFieldType.NUMBER).description("과목 고유 식별자"),
+                                fieldWithPath("data.id").type(JsonFieldType.NUMBER).description("과목 ID"),
                                 fieldWithPath("data.name").type(JsonFieldType.STRING).description("과목 이름")
                         )
                 ));
@@ -253,7 +255,7 @@ public class SubjectTest
                         preprocessResponse(prettyPrint()),
 
                         responseFields(
-                                fieldWithPath("data.id").type(JsonFieldType.NUMBER).description("과목 고유 식별자"),
+                                fieldWithPath("data.id").type(JsonFieldType.NUMBER).description("과목 ID"),
                                 fieldWithPath("data.name").type(JsonFieldType.STRING).description("과목 이름")
                         )
                 ));
@@ -269,12 +271,17 @@ public class SubjectTest
         subjectRepository.save(Subject.builder().id(3L).name("세법").build());
         subjectRepository.save(Subject.builder().id(4L).name("경영학").build());
         subjectRepository.save(Subject.builder().id(5L).name("상법").build());
-
+        int page = 1;
+        int size = 10;
 
 
         // when
         ResultActions resultActions = mvc
-                .perform(get("/api/v1/admin/subject"));
+                .perform(get("/api/v1/admin/subject")
+                        .queryParam("page", Integer.toString(page))
+                        .queryParam("size", Integer.toString(size))
+
+                );
 
         // then
         resultActions
@@ -283,8 +290,13 @@ public class SubjectTest
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),
 
+                        queryParameters(
+                                parameterWithName("page").description("페이지 번호"),
+                                parameterWithName("size").description("페이지 크기")
+                        ),
+
                         responseFields(
-                                fieldWithPath("data[].id").type(JsonFieldType.NUMBER).description("과목 고유 식별자"),
+                                fieldWithPath("data[].id").type(JsonFieldType.NUMBER).description("과목 ID"),
                                 fieldWithPath("data[].name").type(JsonFieldType.STRING).description("과목 이름"),
 
                                 fieldWithPath("pageInfo").type(JsonFieldType.OBJECT).description("페이지 정보").optional(),

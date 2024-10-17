@@ -66,7 +66,7 @@ public class Subscription extends BaseEntity
         this.expiredDate = now.plusMonths(durationMonth);
     }
 
-    public void updateSubscriptionStatus(LocalDateTime now)
+    public void expireSubscriptionStatus(LocalDateTime now)
     {
         if(this.startDate != null && this.expiredDate != null){
             if(this.expiredDate.isBefore(now) && !this.status.equals(SubscriptionStatus.EXPIRED) && !Role.ADMIN.equals(member.getRole())){
