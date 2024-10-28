@@ -18,38 +18,27 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/admin/exam")
+@RequestMapping("/api/v1/exam")
 @RestController
-public class AdminExamController
+public class ExamController
 {
     private final ExamService examService;
 
-    @PostMapping
-    public ResponseEntity<GlobalResponse<ExamCreateResponse>> save(@Positive @RequestParam(value = "subjectId") long subjectId,
-                                                                   @Validated @RequestBody ExamCreateRequest request)
+    @GetMapping("/{id}")
+    public ResponseEntity<GlobalResponse<ExamDTO>> getById(@PathVariable("id") long id)
     {
-        ExamCreateResponse response = examService.save(subjectId, request);
-
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(new GlobalResponse<>(response));
-    }
-
-    @PatchMapping("/{id}")
-    public ResponseEntity<GlobalResponse<ExamDTO>> update(@Positive @PathVariable("id") long id,
-                                                          @Validated @RequestBody ExamUpdateRequest request)
-    {
-        examService.update(id, request);
         ExamDTO response = examService.getById(id);
 
         return ResponseEntity.ok(new GlobalResponse<>(response));
     }
 
-    @DeleteMapping
-    public ResponseEntity<GlobalResponse<String>> deleteById(@RequestBody ExamDeleteRequest request)
+    @GetMapping
+    public ResponseEntity<GlobalResponse<List<ExamDTO>>> getAllExamBySubjectIdAndYear(@RequestParam(value = "subjectId") long subjectId,
+                                                                                      @RequestParam(value = "year") int year)
     {
-        examService.deleteById(request.getExamIds());
+        List<ExamDTO> response = examService.getAllBySubjectId(subjectId, year);
 
-        return ResponseEntity.status(HttpStatus.NO_CONTENT)
-                .body(new GlobalResponse<>("삭제가 완료 되었습니다."));
+        return ResponseEntity.ok(new GlobalResponse<>(response));
     }
+
 }
