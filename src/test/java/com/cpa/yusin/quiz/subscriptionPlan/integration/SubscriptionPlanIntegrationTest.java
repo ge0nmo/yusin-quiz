@@ -256,7 +256,7 @@ class SubscriptionPlanIntegrationTest
                         .build());
 
         // when
-        ResultActions resultActions = mvc.perform(get("/api/v1/admin/plan/" + savedSubscriptionPlan.getId())
+        ResultActions resultActions = mvc.perform(get("/api/v1/plan/" + savedSubscriptionPlan.getId())
         );
 
         // then
@@ -288,7 +288,7 @@ class SubscriptionPlanIntegrationTest
 
         // when
         ResultActions resultActions = mvc
-                .perform(get("/api/v1/admin/plan"));
+                .perform(get("/api/v1/plan"));
 
         // then
         resultActions

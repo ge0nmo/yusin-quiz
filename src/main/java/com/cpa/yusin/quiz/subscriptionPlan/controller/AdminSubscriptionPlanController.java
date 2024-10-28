@@ -14,8 +14,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @RequestMapping("/api/v1/admin/plan")
 @RequiredArgsConstructor
 @RestController
@@ -39,22 +37,6 @@ public class AdminSubscriptionPlanController
     {
         subscriptionPlanService.update(id, subscriptionPlanUpdateRequest);
         SubscriptionPlanDTO response = subscriptionPlanService.getById(id);
-
-        return ResponseEntity.ok(new GlobalResponse<>(response));
-    }
-
-    @GetMapping("/{id}")
-    public ResponseEntity<GlobalResponse<SubscriptionPlanDTO>> getById(@Positive @PathVariable("id") Long id)
-    {
-        SubscriptionPlanDTO response = subscriptionPlanService.getById(id);
-
-        return ResponseEntity.ok(new GlobalResponse<>(response));
-    }
-
-    @GetMapping
-    public ResponseEntity<GlobalResponse<List<SubscriptionPlanDTO>>> getAllSubscriptionPlans()
-    {
-        List<SubscriptionPlanDTO> response = subscriptionPlanService.getAll();
 
         return ResponseEntity.ok(new GlobalResponse<>(response));
     }
