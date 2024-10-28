@@ -20,34 +20,26 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/admin/members")
+@RequestMapping("/api/v1/members")
 @RestController
-public class AdminMemberController
+public class MemberController
 {
     private final MemberService memberService;
 
-    @PatchMapping("/{id}")
-    public ResponseEntity<GlobalResponse<MemberDTO>> update(@Positive @PathVariable("id") long id,
-                                                            @RequestBody @Valid MemberUpdateRequest request,
-                                                            @AuthenticationPrincipal MemberDetails memberDetails)
+    @GetMapping("/{id}")
+    public ResponseEntity<GlobalResponse<MemberDTO>> getById(@PathVariable("id") long id)
     {
-        memberService.update(id, request, memberDetails.getMember());
         MemberDTO response = memberService.getById(id);
 
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(new GlobalResponse<>(response));
+        return ResponseEntity.ok(new GlobalResponse<>(response));
     }
 
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<GlobalResponse<Void>> deleteById(@Positive @PathVariable("id") long id,
-                                                           @AuthenticationPrincipal MemberDetails memberDetails)
+    @GetMapping
+    public ResponseEntity<GlobalResponse<List<MemberDTO>>> getMembers(@RequestParam(value = "keyword", required = false) String keyword,
+                                                                      @PageableDefault Pageable pageable)
     {
-        memberService.deleteById(id, memberDetails.getMember());
+        Page<MemberDTO> response = memberService.getAll(keyword, pageable.previousOrFirst());
 
-        return ResponseEntity
-                .status(HttpStatus.NO_CONTENT)
-                .body(new GlobalResponse<>());
+        return ResponseEntity.ok(new GlobalResponse<>(response.getContent(), PageInfo.of(response)));
     }
 }

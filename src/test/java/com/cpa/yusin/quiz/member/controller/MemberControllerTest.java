@@ -19,7 +19,7 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 
 
-class AdminMemberControllerTest
+class MemberControllerTest
 {
     TestContainer testContainer;
     Member member;
@@ -39,46 +39,24 @@ class AdminMemberControllerTest
     }
 
     @Test
-    void update()
-    {
-        // given
-        MemberUpdateRequest request = MemberUpdateRequest.builder()
-                .username("Mike")
-                .build();
-
-        MemberDetails memberDetails = new MemberDetails(member, new HashMap<>());
-
-        // when
-        ResponseEntity<GlobalResponse<MemberDTO>> result = testContainer.adminMemberController.update(1L, request, memberDetails);
-
-        // then
-        assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
-
-        assertThat(result.getBody()).isNotNull();
-        MemberDTO response = result.getBody().getData();
-        assertThat(response).isNotNull();
-
-        assertThat(response.getId()).isEqualTo(1L);
-        assertThat(response.getRole()).isEqualTo(Role.USER);
-        assertThat(response.getPlatform()).isEqualTo(Platform.GOOGLE);
-        assertThat(response.getUsername()).isEqualTo("Mike");
-
-    }
-
-    @Test
-    void deleteById()
+    void getById()
     {
         // given
         long id = 1L;
-        MemberDetails memberDetails = new MemberDetails(member, new HashMap<>());
 
         // when
-        ResponseEntity<GlobalResponse<Void>> result = testContainer.adminMemberController.deleteById(id, memberDetails);
+        ResponseEntity<GlobalResponse<MemberDTO>> result = testContainer.memberController.getById(id);
 
         // then
-        assertThat(result.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
+        assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(result.getBody()).isNotNull();
 
-        Optional<Member> optionalMember = testContainer.memberRepository.findById(id);
-        assertThat(optionalMember).isEmpty();
+        MemberDTO response = result.getBody().getData();
+        assertThat(response).isNotNull();
+        assertThat(response.getId()).isEqualTo(id);
+        assertThat(response.getRole()).isEqualTo(Role.USER);
+        assertThat(response.getPlatform()).isEqualTo(Platform.GOOGLE);
+        assertThat(response.getUsername()).isEqualTo("John Doe");
     }
+
 }
