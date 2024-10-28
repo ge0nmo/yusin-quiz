@@ -37,6 +37,7 @@ import com.cpa.yusin.quiz.problem.controller.mapper.ProblemMapper;
 import com.cpa.yusin.quiz.problem.controller.port.ProblemService;
 import com.cpa.yusin.quiz.problem.service.ProblemServiceImpl;
 import com.cpa.yusin.quiz.problem.service.port.ProblemRepository;
+import com.cpa.yusin.quiz.subject.controller.SubjectController;
 import com.cpa.yusin.quiz.subscription.controller.SubscriptionController;
 import com.cpa.yusin.quiz.subscription.controller.mapper.SubscriptionMapper;
 import com.cpa.yusin.quiz.subscription.controller.port.SubscriptionService;
@@ -86,6 +87,7 @@ public class TestContainer
     public final SubjectService subjectService;
     public final SubjectMapper subjectMapper;
     public final AdminSubjectController adminSubjectController;
+    public final SubjectController subjectController;
 
     /**
      *  exam
@@ -171,6 +173,8 @@ public class TestContainer
         this.subjectMapper = new SubjectMapper();
         this.subjectService = new SubjectServiceImpl(this.subjectRepository, this.subjectMapper, this.subjectValidator, this.cascadeDeleteService);
         this.adminSubjectController = new AdminSubjectController(this.subjectService);
+        this.subjectController = new SubjectController(subjectService);
+
 
         this.examMapper = new ExamMapper();
         this.examValidator = new ExamValidatorImpl(this.examRepository);

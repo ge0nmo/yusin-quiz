@@ -9,15 +9,9 @@ import com.cpa.yusin.quiz.subject.controller.port.SubjectService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
-import java.util.Objects;
 
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/admin/subject")
@@ -47,21 +41,6 @@ public class AdminSubjectController
                 .ok(new GlobalResponse<>(response));
     }
 
-
-    @GetMapping("/{id}")
-    public ResponseEntity<GlobalResponse<SubjectDTO>> getById(@Positive @PathVariable("id") long id)
-    {
-        return ResponseEntity
-                .ok(new GlobalResponse<>(subjectService.getById(id)));
-    }
-
-
-    @GetMapping
-    public ResponseEntity<GlobalResponse<List<SubjectDTO>>> getAll(@PageableDefault Pageable pageable)
-    {
-        return ResponseEntity
-                .ok(subjectService.getAll(pageable.previousOrFirst()));
-    }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Object> deleteById(@Positive @PathVariable("id") long id)
