@@ -49,7 +49,6 @@ public class SecurityConfig
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .formLogin(AbstractHttpConfigurer::disable)
                 .csrf(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .headers((headers) ->
@@ -64,12 +63,18 @@ public class SecurityConfig
                                 "/api/v1/payment/**",
                                 "/hc",
                                 "/env",
-                                "/api/v1/login").permitAll()
+                                "/api/v1/login",
+                                "/admin/login",
+                                "/css/**",
+                                "/img/**",
+                                "/js/**"
+                        ).permitAll()
 
                         .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated());
 
         http
+                .formLogin(login -> login.loginPage("/admin/login"))
                 .oauth2Login(oauth2 -> oauth2
                         .authorizationEndpoint(endpoint -> endpoint
                                 .baseUri("/api/v1/oauth2/*")
