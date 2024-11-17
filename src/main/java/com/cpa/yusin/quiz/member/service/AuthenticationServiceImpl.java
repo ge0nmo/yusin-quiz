@@ -36,9 +36,20 @@ public class AuthenticationServiceImpl implements AuthenticationService
     @Override
     public LoginResponse login(LoginRequest request)
     {
-        authenticationProvider.authenticate(new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
+        return processLogin(request.getEmail(), request.getPassword());
+    }
 
-        MemberDetails memberDetails = memberDetailsService.loadUserByUsername(request.getEmail());
+    @Override
+    public LoginResponse login(String email, String password)
+    {
+        return processLogin(email, password);
+    }
+
+    private LoginResponse processLogin(String email, String password)
+    {
+        authenticationProvider.authenticate(new UsernamePasswordAuthenticationToken(email, password));
+
+        MemberDetails memberDetails = memberDetailsService.loadUserByUsername(email);
 
         Member member = memberDetails.getMember();
 
@@ -46,6 +57,7 @@ public class AuthenticationServiceImpl implements AuthenticationService
 
         return LoginResponse.from(member.getId(), member.getEmail(), member.getRole(), accessToken);
     }
+
 
     @Override
     public MemberCreateResponse signUp(MemberCreateRequest request)

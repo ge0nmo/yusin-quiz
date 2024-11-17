@@ -67,14 +67,31 @@ public class SecurityConfig
                                 "/admin/login",
                                 "/css/**",
                                 "/img/**",
-                                "/js/**"
+                                "/js/**",
+                                "/dist/**",
+                                "/less/**",
+                                "/pages/**",
+                                "/scss/**",
+                                "/vendor/**"
                         ).permitAll()
 
-                        .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
+                        .requestMatchers(
+                                "/api/v1/admin/**",
+                                "/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated());
 
         http
-                .formLogin(login -> login.loginPage("/admin/login"))
+                .formLogin(login ->
+                        login
+                                .loginPage("/admin/login")
+                                .successForwardUrl("/admin/home")
+                                .defaultSuccessUrl("/admin/home", true)
+                                .permitAll()
+                )
+                .logout(logout ->
+                        logout
+                                .logoutSuccessUrl("/admin/login"))
+
                 .oauth2Login(oauth2 -> oauth2
                         .authorizationEndpoint(endpoint -> endpoint
                                 .baseUri("/api/v1/oauth2/*")

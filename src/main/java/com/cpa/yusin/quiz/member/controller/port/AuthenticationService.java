@@ -10,4 +10,6 @@ public interface AuthenticationService
     MemberCreateResponse signUp(MemberCreateRequest request);
 
     LoginResponse login(LoginRequest loginRequest);
+
+    LoginResponse login(String email, String password);
 }
