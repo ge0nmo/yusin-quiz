@@ -52,10 +52,11 @@ public class SecurityConfig
         return new SecurityFilter(memberDetailsService, jwtService);
     }
 
-    @Order(2)
+    @Order(1)
     @Bean
     public SecurityFilterChain restApiSecurityFilter(HttpSecurity http) throws Exception {
         http
+                .securityMatcher("/api/v1/**")
                 .csrf(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .headers((headers) ->
@@ -93,10 +94,11 @@ public class SecurityConfig
     }
 
 
-    @Order(1)
+    @Order(2)
     @Bean("formLoginSecurityFilterChain")
     public SecurityFilterChain formLoginSecurityFilterChain(HttpSecurity http) throws Exception {
         http
+                .securityMatcher("/admin/**")
                 .csrf(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .headers((headers) ->
