@@ -1,5 +1,6 @@
 package com.cpa.yusin.quiz.web.controller;
 
+import com.cpa.yusin.quiz.global.annotation.CurrentUser;
 import com.cpa.yusin.quiz.global.details.MemberDetails;
 import com.cpa.yusin.quiz.member.controller.dto.response.LoginResponse;
 import com.cpa.yusin.quiz.member.controller.port.AuthenticationService;
@@ -10,12 +11,15 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.security.Principal;
 import java.util.Map;
 
 @RequiredArgsConstructor
@@ -30,37 +34,15 @@ public class HomeController
     @GetMapping("/login")
     public String login()
     {
-        return "/login";
+        return "login";
     }
 
-/*    @PostMapping("/login")
-    @ResponseBody
-    public String loginProcess(@RequestParam(value = "email") String email,
-                                          @RequestParam(value = "password") String password,
-                                          HttpServletResponse response)
-    {
-        try {
-            LoginResponse loginResponse = authenticationService.login(email, password);
-            Cookie cookie = new Cookie("JWT_TOKEN", loginResponse.getAccessToken());
-            cookie.setHttpOnly(true);
-            cookie.setPath("/");
-            cookie.setMaxAge(3600);
-            response.addCookie(cookie);
-            log.info("token = {}", loginResponse.getAccessToken());
-
-            return "redirect:/home";
-        } catch (Exception e) {
-            return "redirect:/login?error";
-        }
-    }*/
 
     @GetMapping("/home")
-    public String home(Model model, @AuthenticationPrincipal MemberDetails memberDetails)
+    public String home(Model model)
     {
-        if(memberDetails != null)
-            model.addAttribute("username", memberDetails.getMember().getUsername());
 
-        return "/home";
+        return "home";
     }
 
 }
