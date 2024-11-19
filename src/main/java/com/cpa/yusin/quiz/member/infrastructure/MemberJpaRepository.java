@@ -23,4 +23,12 @@ public interface MemberJpaRepository extends JpaRepository<Member, Long>
             "LOWER(m.username) LIKE LOWER(CONCAT('%', :keyword, '%'))) " +
             "ORDER BY m.createdAt")
     Page<Member> findAllByKeyword(@Param("keyword") String keyword, Pageable pageable);
+
+    @Query("SELECT m FROM Member m " +
+            "WHERE m.role != 'ADMIN' " +
+            "AND (:keyword IS NULL OR " +
+            "LOWER(m.email) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+            "LOWER(m.username) LIKE LOWER(CONCAT('%', :keyword, '%'))) " +
+            "ORDER BY m.createdAt")
+    Page<Member> findAllByKeywordAndAdminNot(@Param("keyword") String keyword, Pageable pageable);
 }

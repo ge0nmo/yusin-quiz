@@ -5,15 +5,32 @@
     <meta name="viewport"
           content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Subject</title>
+    <title>Home</title>
 
     <!-- Custom styles for this template-->
     <link th:href="@{/css/sb-admin-2.min.css}" rel="stylesheet">
 </head>
 <body>
 
-<header th:replace="~{fragments/header.html :: header}"></header>
-<div th:replace="~{fragments/side.html :: side}"></div>
+<div id="wrapper">
+    <div th:replace="~{fragments/side.html :: side}"></div>
+    <div id="content-wrapper" class="d-flex flex-column">
+        <!-- Main Content-->
+        <div id="content">
+            <header th:replace="~{fragments/header.html :: header}"></header>
+            <div class="container-fluid">
+
+                <!--    Main Content from here         -->
+
+
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
 
 
 <script th:src="@{/vendor/jquery/jquery.min.js}"></script>

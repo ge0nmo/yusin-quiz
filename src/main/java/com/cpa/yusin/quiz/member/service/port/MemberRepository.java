@@ -12,6 +12,8 @@ public interface MemberRepository
 
     Page<Member> findAllByKeyword(String keyword, Pageable pageable);
 
+    Page<Member>findAllByKeywordAndAdminNot(String keyword, Pageable pageable);
+
     boolean existsByEmail(String email);
 
     Member save(Member member);

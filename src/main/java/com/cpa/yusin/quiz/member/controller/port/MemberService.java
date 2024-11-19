@@ -14,6 +14,8 @@ public interface MemberService
 
     Page<MemberDTO> getAll(String keyword, Pageable pageable);
 
+    Page<Member> getAllAdminNot(String keyword, Pageable pageable);
+
     Member findById(long id);
 
     void deleteById(long id, Member loggedInMember);

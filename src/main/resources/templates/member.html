@@ -5,15 +5,75 @@
     <meta name="viewport"
           content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>유저 관리</title>
+    <title>Home</title>
 
     <!-- Custom styles for this template-->
     <link th:href="@{/css/sb-admin-2.min.css}" rel="stylesheet">
 </head>
 <body>
 
-<header th:replace="~{fragments/header.html :: header}"></header>
-<div th:replace="~{fragments/side.html :: side}"></div>
+<div id="wrapper">
+    <div th:replace="~{fragments/side.html :: side}"></div>
+    <div id="content-wrapper" class="d-flex flex-column">
+        <!-- Main Content-->
+        <div id="content">
+            <header th:replace="~{fragments/header.html :: header}"></header>
+
+
+            <!--    Main Content from here         -->
+
+            <div class="container-fluid">
+                <div class="col-12">
+                    <div class="card shadow mb-4">
+                        <div class="card-header bg-white border-0 pl-3 pt-3 pb-0">
+                            <h6 class="m-0 font-weight-bold text-primary">
+                                유저 관리
+                            </h6>
+
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table id="load-user" class="table table-bordered" th:width="100" th:cellspacing="0">
+                                    <thead>
+                                    <tr>
+                                        <th scope="col">번호</th>
+                                        <th scope="col">이메일</th>
+                                        <th scope="col">이름</th>
+                                        <th scope="col">가입경로</th>
+                                        <th scope="col">구독 정보</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <tr th:each="member, iterStat: ${members.content}">
+                                        <td th:text="${member.id}"></td>
+                                        <td th:text="${member.email}"></td>
+                                        <td th:text="${member.username}"></td>
+                                        <td th:text="${member.platform}"></td>
+                                        <td th:text="${member.role}"></td>
+                                    </tr>
+
+                                    </tbody>
+                                </table>
+
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+
+
+
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
 
 
 <script th:src="@{/vendor/jquery/jquery.min.js}"></script>
@@ -31,5 +91,8 @@
 <!-- Page level custom scripts -->
 <script th:src="@{/js/demo/chart-area-demo.js}"></script>
 <script th:src="@{/js/demo/chart-pie-demo.js}"></script>
+
+
+
 </body>
 </html>

@@ -12,8 +12,25 @@
 </head>
 <body>
 
-<header th:replace="~{fragments/header.html :: header}"></header>
-<div th:replace="~{fragments/side.html :: side}"></div>
+<div id="wrapper">
+    <div th:replace="~{fragments/side.html :: side}"></div>
+    <div id="content-wrapper" class="d-flex flex-column">
+            <!-- Main Content-->
+        <div id="content">
+            <header th:replace="~{fragments/header.html :: header}"></header>
+            <div class="container-fluid">
+
+                <!--    Main Content from here         -->
+
+
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
 
 
 <script th:src="@{/vendor/jquery/jquery.min.js}"></script>
