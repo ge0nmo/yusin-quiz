@@ -44,7 +44,7 @@
                                     </tr>
                                     </thead>
                                     <tbody>
-                                    <tr th:each="member, iterStat: ${members.content}">
+                                    <tr th:each="member, iStat: ${members.content}">
                                         <td th:text="${member.id}"></td>
                                         <td th:text="${member.email}"></td>
                                         <td th:text="${member.username}"></td>
@@ -54,6 +54,42 @@
 
                                     </tbody>
                                 </table>
+                                <div th:if="${members.totalPages > 0}" class="pagination">
+                                    <!-- First Page Button -->
+                                    <a th:href="@{/member(size=${members.size}, page=1)}"
+                                       th:classappend="${members.number + 1 == 1} ? 'disabled'"
+                                       aria-label="First">
+                                        << First
+                                    </a>
+
+                                    <!-- Previous Page Button -->
+                                    <a th:href="@{/member(size=${members.size}, page=${members.number})}"
+                                       th:classappend="${members.number + 1 == 1} ? 'disabled'"
+                                       aria-label="Previous">
+                                        < Previous
+                                    </a>
+
+                                    <!-- Page Numbers -->
+                                    <span th:each="pageNumber : ${pageNumbers}">
+                                        <a th:href="@{/member(size=${members.size}, page=${pageNumber})}" th:text="${pageNumber}"
+                                       th:classappend="${pageNumber == members.number + 1} ? 'active'"></a>
+                                    </span>
+
+                                    <!-- Next Page Button -->
+                                    <a th:href="@{/member(size=${members.size}, page=${members.number + 2})}"
+                                       th:classappend="${members.number + 1 == members.totalPages} ? 'disabled'"
+                                       aria-label="Next">
+                                        Next >
+                                    </a>
+
+                                    <!-- Last Page Button -->
+                                    <a th:href="@{/member(size=${members.size}, page=${members.totalPages})}"
+                                       th:classappend="${members.number + 1 == members.totalPages} ? 'disabled'"
+                                       aria-label="Last">
+                                        Last >>
+                                    </a>
+                                </div>
+
 
                             </div>
                         </div>
