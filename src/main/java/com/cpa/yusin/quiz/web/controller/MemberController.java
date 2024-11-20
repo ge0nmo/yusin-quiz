@@ -25,6 +25,8 @@ public class MemberController
     @GetMapping("/member")
     public String member(Model model, @ModelAttribute("params") DataTableRequest request)
     {
+        model.addAttribute("activePage", "member");
+
         Pageable pageable = PageRequest.of(request.getPage(), request.getSize());
         Page<Member> response = memberService.getAllAdminNot(null, pageable);
         model.addAttribute("response", response);

@@ -7,6 +7,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
+
 public interface SubjectJpaRepository extends JpaRepository<Subject, Long>
 {
     @Query("SELECT CASE WHEN COUNT(s) > 0 THEN TRUE ELSE FALSE END " +
@@ -20,4 +22,9 @@ public interface SubjectJpaRepository extends JpaRepository<Subject, Long>
 
     @Query("SELECT s FROM Subject s ORDER BY s.name ASC ")
     Page<Subject> findAllOrderByNameAsc(Pageable pageable);
+
+    @Query("SELECT s FROM Subject s " +
+            "WHERE s.name LIKE CONCAT('%', :name, '%') " +
+            "ORDER BY s.name ")
+    List<Subject> findAllByName(@Param("name") String name);
 }

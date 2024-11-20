@@ -51,6 +51,14 @@ public class FakeSubjectRepository implements SubjectRepository
     }
 
     @Override
+    public List<Subject> findByName(String name)
+    {
+        return data.stream()
+                .filter(data -> data.getName().contains(name))
+                .toList();
+    }
+
+    @Override
     public boolean existsById(long id)
     {
         return data.stream()

@@ -62,6 +62,12 @@ public class SubjectServiceImpl implements SubjectService
                 .orElseThrow(() -> new SubjectException(ExceptionMessage.SUBJECT_NOT_FOUND));
     }
 
+    @Override
+    public List<Subject> findAllByName(String name)
+    {
+        return subjectRepository.findByName(name);
+    }
+
 
     @Override
     public SubjectDTO getById(long id)
@@ -70,12 +76,11 @@ public class SubjectServiceImpl implements SubjectService
     }
 
     @Override
-    public GlobalResponse<List<SubjectDTO>> getAll(Pageable pageable)
+    public Page<SubjectDTO> getAll(Pageable pageable)
     {
         Page<Subject> result = subjectRepository.findAllOrderByName(pageable);
-        List<SubjectDTO> response = subjectMapper.toSubjectDTOs(result.getContent());
 
-        return new GlobalResponse<>(response, PageInfo.of(result));
+        return result.map(subjectMapper::toSubjectDTO);
     }
 
     @Override

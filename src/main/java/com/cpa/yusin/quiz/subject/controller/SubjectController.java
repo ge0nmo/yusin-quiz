@@ -1,10 +1,12 @@
 package com.cpa.yusin.quiz.subject.controller;
 
 import com.cpa.yusin.quiz.common.controller.dto.response.GlobalResponse;
+import com.cpa.yusin.quiz.common.controller.dto.response.PageInfo;
 import com.cpa.yusin.quiz.subject.controller.dto.response.SubjectDTO;
 import com.cpa.yusin.quiz.subject.controller.port.SubjectService;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
@@ -33,8 +35,9 @@ public class SubjectController
     @GetMapping
     public ResponseEntity<GlobalResponse<List<SubjectDTO>>> getAll(@PageableDefault Pageable pageable)
     {
-        return ResponseEntity
-                .ok(subjectService.getAll(pageable.previousOrFirst()));
+        Page<SubjectDTO> response = subjectService.getAll(pageable.previousOrFirst());
+
+        return ResponseEntity.ok(new GlobalResponse<>(response.getContent(), PageInfo.of(response)));
     }
 
 }
