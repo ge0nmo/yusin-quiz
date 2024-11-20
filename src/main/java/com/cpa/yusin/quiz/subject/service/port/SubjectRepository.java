@@ -15,6 +15,8 @@ public interface SubjectRepository
 
     Page<Subject> findAll(Pageable pageable);
 
+    List<Subject> findByName(String name);
+
     boolean existsById(long id);
 
     void deleteById(long id);

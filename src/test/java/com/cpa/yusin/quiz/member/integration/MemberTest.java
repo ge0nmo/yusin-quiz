@@ -412,7 +412,7 @@ class MemberTest
 
         // when
         ResultActions resultActions = mvc
-                .perform(get("/api/v1/admin/members/" + 1)
+                .perform(get("/api/v1/members/" + 1)
                         .with(user(memberDetails))
                 );
 
@@ -452,7 +452,7 @@ class MemberTest
 
         // when
         ResultActions resultActions = mvc
-                .perform(get("/api/v1/admin/members")
+                .perform(get("/api/v1/members")
                         .with(user(memberDetails))
                 );
 
@@ -496,7 +496,7 @@ class MemberTest
 
         // when
         ResultActions resultActions = mvc
-                .perform(get("/api/v1/admin/members")
+                .perform(get("/api/v1/members")
                         .queryParam("keyword", keyword)
                         .queryParam("page", Integer.toString(page))
                         .queryParam("size", Integer.toString(size))

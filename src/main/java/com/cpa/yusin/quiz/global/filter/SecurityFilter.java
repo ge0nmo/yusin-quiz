@@ -3,8 +3,10 @@ package com.cpa.yusin.quiz.global.filter;
 import com.cpa.yusin.quiz.global.details.MemberDetails;
 import com.cpa.yusin.quiz.global.details.MemberDetailsService;
 import com.cpa.yusin.quiz.global.jwt.JwtService;
+import com.cpa.yusin.quiz.global.utils.ApplicationConstants;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.NonNull;
@@ -17,6 +19,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 
@@ -32,14 +35,13 @@ public class SecurityFilter extends OncePerRequestFilter
                                     @NonNull HttpServletResponse response,
                                     @NonNull FilterChain filterChain) throws ServletException, IOException
     {
-        final String header = getAuthorizationHeader(request);
+        String token = getAuthorizationHeaderOrCookie(request);
 
-        if(!isValidHeader(header)){
+        if(token == null){
             filterChain.doFilter(request, response);
             return;
         }
 
-        String token = header.substring(7);
         String email = jwtService.extractSubject(token);
 
         if(!StringUtils.hasText(email) || SecurityContextHolder.getContext().getAuthentication() != null){
@@ -52,13 +54,9 @@ public class SecurityFilter extends OncePerRequestFilter
             filterChain.doFilter(request, response);
         }
 
-        log.info("===validation passed===");
-
         SecurityContext context = SecurityContextHolder.createEmptyContext();
         UsernamePasswordAuthenticationToken authenticationToken
                 = new UsernamePasswordAuthenticationToken(memberDetails, null, memberDetails.getAuthorities());
-
-        log.info("member details = {}", memberDetails);
 
         context.setAuthentication(authenticationToken);
         SecurityContextHolder.setContext(context);
@@ -70,8 +68,22 @@ public class SecurityFilter extends OncePerRequestFilter
         return StringUtils.hasText(header) && header.startsWith("Bearer ");
     }
 
-    private String getAuthorizationHeader(HttpServletRequest request)
+    private String getAuthorizationHeaderOrCookie(HttpServletRequest request)
     {
-        return request.getHeader(AUTHORIZATION);
+        String headerToken = request.getHeader(AUTHORIZATION);
+        if(isValidHeader(headerToken)){
+            return headerToken.substring(7);
+        }
+        Cookie[] cookies = request.getCookies();
+
+        if(cookies != null){
+            for(Cookie cookie : cookies){
+                if("JWT_TOKEN".equals(cookie.getName())){
+                    return cookie.getValue();
+                }
+            }
+        }
+
+        return null;
     }
 }

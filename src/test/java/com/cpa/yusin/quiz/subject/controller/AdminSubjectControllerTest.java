@@ -72,52 +72,7 @@ class AdminSubjectControllerTest
 
     }
 
-    @Test
-    void getById()
-    {
-        // given
-        testContainer.subjectRepository.save(Subject.builder().id(1L).name("English").build());
 
-        // when
-        ResponseEntity<GlobalResponse<SubjectDTO>> result = testContainer.adminSubjectController.getById(1L);
-
-        // then
-        assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(result.getBody()).isNotNull();
-
-        SubjectDTO response = result.getBody().getData();
-        assertThat(response.getId()).isEqualTo(1L);
-        assertThat(response.getName()).isEqualTo("English");
-    }
-
-    @Test
-    void getAll()
-    {
-        // given
-        testContainer.subjectRepository.save(Subject.builder().id(1L).name("Chemistry").build());
-        testContainer.subjectRepository.save(Subject.builder().id(2L).name("Physics").build());
-        testContainer.subjectRepository.save(Subject.builder().id(3L).name("Biology").build());
-        int page = 1;
-        int size = 10;
-        Pageable pageable = PageRequest.of(page, size);
-
-        // when
-        ResponseEntity<GlobalResponse<List<SubjectDTO>>> result = testContainer.adminSubjectController.getAll(pageable);
-
-        // then
-        assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(result.getBody()).isNotNull();
-
-        List<SubjectDTO> response = result.getBody().getData();
-
-        assertThat(response)
-                .isNotEmpty()
-                .hasSize(3);
-
-        assertThat(response.getFirst().getName()).isEqualTo("Biology");
-        assertThat(response.get(1).getName()).isEqualTo("Chemistry");
-        assertThat(response.get(2).getName()).isEqualTo("Physics");
-    }
 
     @Test
     void deleteById()

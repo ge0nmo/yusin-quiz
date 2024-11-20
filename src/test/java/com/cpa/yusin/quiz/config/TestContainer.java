@@ -10,6 +10,7 @@ import com.cpa.yusin.quiz.common.service.CascadeDeleteService;
 import com.cpa.yusin.quiz.common.service.ClockHolder;
 import com.cpa.yusin.quiz.common.service.MerchantIdGenerator;
 import com.cpa.yusin.quiz.exam.controller.AdminExamController;
+import com.cpa.yusin.quiz.exam.controller.ExamController;
 import com.cpa.yusin.quiz.exam.controller.mapper.ExamMapper;
 import com.cpa.yusin.quiz.exam.controller.port.ExamService;
 import com.cpa.yusin.quiz.exam.infrastructure.ExamValidatorImpl;
@@ -21,6 +22,7 @@ import com.cpa.yusin.quiz.global.jwt.JwtService;
 import com.cpa.yusin.quiz.global.jwt.JwtServiceImpl;
 import com.cpa.yusin.quiz.global.security.CustomAuthenticationProvider;
 import com.cpa.yusin.quiz.member.controller.AdminMemberController;
+import com.cpa.yusin.quiz.member.controller.MemberController;
 import com.cpa.yusin.quiz.member.controller.mapper.MemberMapper;
 import com.cpa.yusin.quiz.member.controller.port.AuthenticationService;
 import com.cpa.yusin.quiz.member.controller.port.MemberService;
@@ -37,6 +39,7 @@ import com.cpa.yusin.quiz.problem.controller.mapper.ProblemMapper;
 import com.cpa.yusin.quiz.problem.controller.port.ProblemService;
 import com.cpa.yusin.quiz.problem.service.ProblemServiceImpl;
 import com.cpa.yusin.quiz.problem.service.port.ProblemRepository;
+import com.cpa.yusin.quiz.subject.controller.SubjectController;
 import com.cpa.yusin.quiz.subscription.controller.SubscriptionController;
 import com.cpa.yusin.quiz.subscription.controller.mapper.SubscriptionMapper;
 import com.cpa.yusin.quiz.subscription.controller.port.SubscriptionService;
@@ -77,6 +80,7 @@ public class TestContainer
     public final MemberMapper memberMapper;
     public final AdminMemberController adminMemberController;
     public final MemberValidator memberValidator;
+    public final MemberController memberController;
 
     /**
      *  subject
@@ -86,6 +90,7 @@ public class TestContainer
     public final SubjectService subjectService;
     public final SubjectMapper subjectMapper;
     public final AdminSubjectController adminSubjectController;
+    public final SubjectController subjectController;
 
     /**
      *  exam
@@ -95,6 +100,7 @@ public class TestContainer
     public final ExamService examService;
     public final AdminExamController adminExamController;
     public final ExamValidator examValidator;
+    public final ExamController examController;
 
     /**
      *  choice
@@ -164,6 +170,7 @@ public class TestContainer
         this.authenticationService = new AuthenticationServiceImpl(this.passwordEncoder, this.jwtService,
                 this.memberRepository, this.authenticationProvider, this.memberDetailsService, this.memberMapper, this.memberValidator);
         this.adminMemberController = new AdminMemberController(this.memberService);
+        this.memberController = new MemberController(this.memberService);
 
 
 
@@ -171,11 +178,14 @@ public class TestContainer
         this.subjectMapper = new SubjectMapper();
         this.subjectService = new SubjectServiceImpl(this.subjectRepository, this.subjectMapper, this.subjectValidator, this.cascadeDeleteService);
         this.adminSubjectController = new AdminSubjectController(this.subjectService);
+        this.subjectController = new SubjectController(subjectService);
+
 
         this.examMapper = new ExamMapper();
         this.examValidator = new ExamValidatorImpl(this.examRepository);
         this.examService = new ExamServiceImpl(this.examRepository, this.examMapper, this.subjectService, this.cascadeDeleteService, this.examValidator);
         this.adminExamController = new AdminExamController(this.examService);
+        this.examController = new ExamController(examService);
 
         this.choiceMapper = new ChoiceMapperImpl();
         this.choiceService = new ChoiceServiceImpl(this.choiceRepository, this.choiceMapper);

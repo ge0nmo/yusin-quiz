@@ -127,7 +127,7 @@ class SubjectServiceTest
         Pageable pageable = PageRequest.of(page, size);
 
         // when
-        List<SubjectDTO> result = testContainer.subjectService.getAll(pageable.previousOrFirst()).getData();
+        List<SubjectDTO> result = testContainer.subjectService.getAll(pageable.previousOrFirst()).getContent();
 
         // then
         assertThat(result).isNotEmpty();

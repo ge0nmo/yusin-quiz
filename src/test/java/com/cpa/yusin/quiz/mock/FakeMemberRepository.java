@@ -1,6 +1,7 @@
 package com.cpa.yusin.quiz.mock;
 
 import com.cpa.yusin.quiz.member.domain.Member;
+import com.cpa.yusin.quiz.member.domain.type.Role;
 import com.cpa.yusin.quiz.member.service.port.MemberRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -31,6 +32,22 @@ public class FakeMemberRepository implements MemberRepository
                 .filter(member -> !StringUtils.hasLength(keyword) ||
                         member.getEmail().toLowerCase().contains(keyword) ||
                         member.getUsername().toLowerCase().contains(keyword))
+                .sorted(Comparator.comparing(Member::getCreatedAt, Comparator.nullsLast(Comparator.naturalOrder())))
+                .limit(pageable.getPageSize())
+                .skip(pageable.getOffset())
+                .toList();
+
+        return new PageImpl<>(result, pageable, result.size());
+    }
+
+    @Override
+    public Page<Member> findAllByKeywordAndAdminNot(String keyword, Pageable pageable)
+    {
+        List<Member> result = data.stream()
+                .filter(member -> (!StringUtils.hasLength(keyword) ||
+                        member.getEmail().toLowerCase().contains(keyword) ||
+                        member.getUsername().toLowerCase().contains(keyword)) &&
+                        !member.getRole().equals(Role.ADMIN))
                 .sorted(Comparator.comparing(Member::getCreatedAt, Comparator.nullsLast(Comparator.naturalOrder())))
                 .limit(pageable.getPageSize())
                 .skip(pageable.getOffset())

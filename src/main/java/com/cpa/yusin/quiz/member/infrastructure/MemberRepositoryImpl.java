@@ -28,6 +28,12 @@ public class MemberRepositoryImpl implements MemberRepository
     }
 
     @Override
+    public Page<Member> findAllByKeywordAndAdminNot(String keyword, Pageable pageable)
+    {
+        return memberJpaRepository.findAllByKeywordAndAdminNot(keyword, pageable);
+    }
+
+    @Override
     public boolean existsByEmail(String email)
     {
         return memberJpaRepository.existsByEmail(email);

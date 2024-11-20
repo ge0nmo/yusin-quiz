@@ -59,6 +59,15 @@ public class MemberServiceImpl implements MemberService
     }
 
     @Override
+    public Page<Member> getAllAdminNot(String keyword, Pageable pageable)
+    {
+        if(StringUtils.hasLength(keyword))
+            keyword = keyword.toLowerCase();
+
+        return memberRepository.findAllByKeywordAndAdminNot(keyword, pageable);
+    }
+
+    @Override
     public Member findById(long id)
     {
         return memberRepository.findById(id)

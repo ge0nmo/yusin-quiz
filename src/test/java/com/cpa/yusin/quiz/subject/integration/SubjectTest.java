@@ -245,7 +245,7 @@ public class SubjectTest
 
         // when
         ResultActions resultActions = mvc
-                .perform(get("/api/v1/admin/subject/" + subject.getId()));
+                .perform(get("/api/v1/subject/" + subject.getId()));
 
         // then
         resultActions
@@ -277,7 +277,7 @@ public class SubjectTest
 
         // when
         ResultActions resultActions = mvc
-                .perform(get("/api/v1/admin/subject")
+                .perform(get("/api/v1/subject")
                         .queryParam("page", Integer.toString(page))
                         .queryParam("size", Integer.toString(size))
 

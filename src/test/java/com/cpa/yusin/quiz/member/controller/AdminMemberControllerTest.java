@@ -66,27 +66,6 @@ class AdminMemberControllerTest
     }
 
     @Test
-    void getById()
-    {
-        // given
-        long id = 1L;
-
-        // when
-        ResponseEntity<GlobalResponse<MemberDTO>> result = testContainer.adminMemberController.getById(id);
-
-        // then
-        assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(result.getBody()).isNotNull();
-
-        MemberDTO response = result.getBody().getData();
-        assertThat(response).isNotNull();
-        assertThat(response.getId()).isEqualTo(id);
-        assertThat(response.getRole()).isEqualTo(Role.USER);
-        assertThat(response.getPlatform()).isEqualTo(Platform.GOOGLE);
-        assertThat(response.getUsername()).isEqualTo("John Doe");
-    }
-
-    @Test
     void deleteById()
     {
         // given

@@ -35,6 +35,12 @@ public class SubjectRepositoryImpl implements SubjectRepository
     }
 
     @Override
+    public List<Subject> findByName(String name)
+    {
+        return subjectJpaRepository.findAllByName(name);
+    }
+
+    @Override
     public boolean existsById(long id)
     {
         return subjectJpaRepository.existsById(id);

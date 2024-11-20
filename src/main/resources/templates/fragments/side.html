@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en" xmlns:th="https://www.thymeleaf.org/">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>관리자 페이지</title>
+
+    <link th:href="@{/css/sb-admin-2.min.css}" rel="stylesheet">
+    <link th:href="@{/css/custom.css}" rel="stylesheet">
+
+</head>
+<body>
+<div th:fragment="side">
+    <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
+
+        <!-- Sidebar - Brand -->
+        <a class="sidebar-brand d-flex align-items-center justify-content-center" href="#">
+            <div class="sidebar-brand-icon rotate-n-15">
+                <i class="fas fa-laugh-wink"></i>
+            </div>
+            <div class="sidebar-brand-text mx-3">관리자 페이지</div>
+        </a>
+
+        <!-- Divider -->
+        <hr class="sidebar-divider my-0">
+
+        <!-- Nav Item - Dashboard -->
+        <li class="nav-item" th:classappend="${activePage == 'home'} ? 'active'">
+            <a class="nav-link" th:href="@{/admin/home}">
+                <i class="fas fa-fw fa-tachometer-alt"></i>
+                <span>Dashboard</span></a>
+        </li>
+
+        <!-- Divider -->
+        <hr class="sidebar-divider">
+
+        <!-- Nav Item - Pages Collapse Menu -->
+        <li class="nav-item" th:classappend="${activePage == 'member'} ? 'active'">
+            <a class="nav-link" th:href="@{/admin/member}">
+                <span>유저 관리</span>
+            </a>
+        </li>
+
+        <li class="nav-item" th:classappend="${activePage == 'subject'} ? 'active'">
+            <a class="nav-link" th:href="@{/admin/subject}">
+                <span>과목 관리</span>
+            </a>
+        </li>
+
+        <li class="nav-item" th:classappend="${activePage == 'exam'} ? 'active'">
+            <a class="nav-link" th:href="@{/admin/exam}">
+                <span>시험 관리</span>
+            </a>
+        </li>
+
+        <li class="nav-item" th:classappend="${activePage == 'problem'} ? 'active'">
+            <a class="nav-link" th:href="@{/admin/problem}">
+                <span>문제 관리</span>
+            </a>
+        </li>
+
+
+
+
+
+
+    </ul>
+
+</div>
+
+</body>
+</html>
+
+
+

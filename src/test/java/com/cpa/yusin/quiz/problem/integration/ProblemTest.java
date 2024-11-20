@@ -206,7 +206,7 @@ public class ProblemTest
 
         // when
         ResultActions resultActions = mvc
-                .perform(get("/api/v1/admin/problem/" + problem.getId()));
+                .perform(get("/api/v1/problem/" + problem.getId()));
 
         // then
         resultActions
@@ -281,7 +281,7 @@ public class ProblemTest
 
         // when
         ResultActions resultActions = mvc
-                .perform(get("/api/v1/admin/problem")
+                .perform(get("/api/v1/problem")
                         .queryParam("examId", exam.getId().toString())
                 );
 

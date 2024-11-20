@@ -40,24 +40,6 @@ public class AdminMemberController
     }
 
 
-    @GetMapping("/{id}")
-    public ResponseEntity<GlobalResponse<MemberDTO>> getById(@PathVariable("id") long id)
-    {
-        MemberDTO response = memberService.getById(id);
-
-        return ResponseEntity.ok(new GlobalResponse<>(response));
-    }
-
-    @GetMapping
-    public ResponseEntity<GlobalResponse<List<MemberDTO>>> getMembers(@RequestParam(value = "keyword", required = false) String keyword,
-                                                                      @PageableDefault Pageable pageable)
-    {
-        Page<MemberDTO> response = memberService.getAll(keyword, pageable.previousOrFirst());
-
-        return ResponseEntity.ok(new GlobalResponse<>(response.getContent(), PageInfo.of(response)));
-    }
-
-
     @DeleteMapping("/{id}")
     public ResponseEntity<GlobalResponse<Void>> deleteById(@Positive @PathVariable("id") long id,
                                                            @AuthenticationPrincipal MemberDetails memberDetails)
