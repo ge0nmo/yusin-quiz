@@ -26,7 +26,7 @@
                 <div class="col-12">
                     <div class="card shadow mb-4">
                         <div class="card-header bg-white border-0 pl-3 pt-3 pb-0">
-                            <h6 class="m-0 font-weight-bold text-primary">
+                            <h6 class="m-0 font-weight-bold text-primary mb-3">
                                 유저 관리
                             </h6>
 
@@ -34,7 +34,7 @@
                         <div class="card-body">
                             <div class="table-responsive">
                                 <table id="load-user" class="table table-bordered" th:width="100" th:cellspacing="0">
-                                    <thead>
+                                    <thead class="thead-light">
                                     <tr>
                                         <th scope="col">번호</th>
                                         <th scope="col">이메일</th>
@@ -43,66 +43,23 @@
                                         <th scope="col">구독 정보</th>
                                     </tr>
                                     </thead>
-                                    <tbody>
-                                    <tr th:each="member, iStat: ${members.content}">
-                                        <td th:text="${member.id}"></td>
-                                        <td th:text="${member.email}"></td>
-                                        <td th:text="${member.username}"></td>
-                                        <td th:text="${member.platform}"></td>
-                                        <td th:text="${member.role}"></td>
-                                    </tr>
 
-                                    </tbody>
+                                    <!-- member list rendering-->
+                                    <tbody id="memberList"></tbody>
                                 </table>
-                                <div th:if="${members.totalPages > 0}" class="pagination">
-                                    <!-- First Page Button -->
-                                    <a th:href="@{/member(size=${members.size}, page=1)}"
-                                       th:classappend="${members.number + 1 == 1} ? 'disabled'"
-                                       aria-label="First">
-                                        << First
-                                    </a>
 
-                                    <!-- Previous Page Button -->
-                                    <a th:href="@{/member(size=${members.size}, page=${members.number})}"
-                                       th:classappend="${members.number + 1 == 1} ? 'disabled'"
-                                       aria-label="Previous">
-                                        < Previous
-                                    </a>
+                                <!--Pagination rendering-->
+                                <div class="paging pagination">
 
-                                    <!-- Page Numbers -->
-                                    <span th:each="pageNumber : ${pageNumbers}">
-                                        <a th:href="@{/member(size=${members.size}, page=${pageNumber})}" th:text="${pageNumber}"
-                                       th:classappend="${pageNumber == members.number + 1} ? 'active'"></a>
-                                    </span>
-
-                                    <!-- Next Page Button -->
-                                    <a th:href="@{/member(size=${members.size}, page=${members.number + 2})}"
-                                       th:classappend="${members.number + 1 == members.totalPages} ? 'disabled'"
-                                       aria-label="Next">
-                                        Next >
-                                    </a>
-
-                                    <!-- Last Page Button -->
-                                    <a th:href="@{/member(size=${members.size}, page=${members.totalPages})}"
-                                       th:classappend="${members.number + 1 == members.totalPages} ? 'disabled'"
-                                       aria-label="Last">
-                                        Last >>
-                                    </a>
                                 </div>
 
-
                             </div>
+
                         </div>
 
                     </div>
 
                 </div>
-
-
-
-
-
-
             </div>
 
         </div>
@@ -128,6 +85,108 @@
 <script th:src="@{/js/demo/chart-area-demo.js}"></script>
 <script th:src="@{/js/demo/chart-pie-demo.js}"></script>
 
+<script th:inline="javascript">
+    window.onload = function () {
+        loadMember();
+    }
+
+    function loadMember(){
+        const response = /*[[ ${response} ]]*/[];
+        const params = /*[[ ${params} ]]*/ {};
+        const { content, ...pagination } = response;
+
+        console.log(content);
+        console.log(params);
+
+        drawList(content);
+
+        console.log(pagination);
+
+        drawPage(pagination, params);
+    }
+
+    function drawList(list){
+        let html = '';
+
+        list.forEach(row => {
+            html += `
+                <tr>
+                    <td>${row.id}</td>
+                    <td>${row.email}</td>
+                    <td>${row.username}</td>
+                    <td>${row.platform}</td>
+                    <td>${row.role}</td>
+                </tr>
+            `;
+        });
+
+        document.getElementById('memberList').innerHTML = html;
+    }
+
+    function drawPage(pagination, params) {
+
+        if (!pagination || !params) {
+            document.querySelector('.paging').innerHTML = '';
+            return;
+        }
+
+        let html = '<ul class="pagination">';
+
+        const currentPage = pagination.pageable.pageNumber;
+        const totalPages = pagination.totalPages;
+
+        // 첫페이지
+        if (currentPage > 0) {
+            html += `
+                <li class="page-item">
+                    <a class="page-link" href="javascript:void(0);" onclick="movePage(0)">첫 페이지</a>
+                </li>
+            `;
+        }
+
+        const startPage = Math.max(0, currentPage - 2);
+        const endPage = Math.min(totalPages - 1, currentPage + 2);
+
+        for(let i = startPage; i <= endPage; i++){
+            if(i === currentPage){
+                html += `
+                            <li class="page-item active">
+                                <a class="page-link">${i + 1} <span class="sr-only">(current)</span> </a>
+                            </li>
+                        `;
+            } else{
+                html += `
+                    <li class="page-item">
+                        <a class="page-link" href="javascript:void(0);" onclick="movePage(${i})">${i + 1}</a>
+                    </li>
+                `;
+            }
+        }
+
+        if(currentPage < totalPages - 1){
+            html += `
+                <li class="page-item">
+                    <a class="page-link" href="javascript:void(0);" onclick="movePage(${totalPages - 1})">마지막 페이지</a>
+                </li>
+            `;
+        }
+
+        html += `</ul>`;
+
+        document.querySelector('.paging').innerHTML = html;
+    }
+
+    function movePage(page){
+        const params = {
+            page: (page) ? page : 0,
+            size: 10,
+        }
+
+        location.href = location.pathname + '?' + new URLSearchParams(params).toString();
+    }
+
+
+</script>
 
 
 </body>
