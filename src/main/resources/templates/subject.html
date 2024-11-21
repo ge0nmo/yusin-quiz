@@ -14,67 +14,95 @@
 
 <div id="wrapper">
     <div th:replace="~{fragments/side.html :: side}"></div>
-    <div id="content-wrapper" class="d-flex flex-column">
+    <div id="content-wrapper" class="d-flex flex-column bg-light">
         <!-- Main Content-->
         <div id="content">
             <header th:replace="~{fragments/header.html :: header}"></header>
             <div class="container-fluid">
-
-                <!--    Main Content from here         -->
-                <div class="container-fluid">
-                    <div class="col-12">
-                        <div class="card shadow mb-4">
-                            <div class="card-header bg-white border-0 pl-3 pt-3 pb-0">
-                                <h6 class="m-0 font-weight-bold text-primary mb-3">
-                                    과목 관리
-                                </h6>
-
-                                <div class="datatable-button-section float-right">
-                                    <button class="btn btn-light" data-toggle="modal" data-target="#add-template-modal" >
-                                        <img class="ml-2" th:src="@{/img/add_icon.png}" alt="">과목 추가
-                                    </button>
-                                </div>
-
-                            </div>
-
-
-                            <div class="card-body">
-                                <div class="table-responsive">
-                                    <table id="load-data" class="table table-bordered" th:width="100" th:cellspacing="0">
-                                        <thead class="thead-light">
-                                        <tr>
-                                            <th scope="col">번호</th>
-                                            <th scope="col">과목 이름</th>
-                                        </tr>
-                                        </thead>
-
-                                        <!-- subject list rendering-->
-                                        <tbody id="subjectList"></tbody>
-                                    </table>
-
-                                    <!--Pagination rendering-->
-                                    <div class="paging pagination">
-
-                                    </div>
-
-                                </div>
+                <div class="col-12">
+                    <div class="card shadow mb-4">
+                        <div class="card-header bg-white border-0 pl-3 pt-3 pb-0">
+                            <h6 class="m-0 font-weight-bold text-primary mb-3">
+                                과목 관리
+                            </h6>
+                            <div class="float-right">
+                                <button class="btn btn-light" data-toggle="modal" data-target="#add-subject-modal" >
+                                    <img class="ml-2" th:src="@{/img/add_icon.png}" alt="">과목 추가
+                                </button>
                             </div>
 
                         </div>
 
+
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table id="load-data" class="table table-bordered" th:width="100" th:cellspacing="0">
+                                    <thead class="thead-light">
+                                    <tr>
+                                        <th scope="col">번호</th>
+                                        <th scope="col">과목 이름</th>
+                                    </tr>
+                                    </thead>
+
+                                    <!-- subject list rendering-->
+                                    <tbody id="subjectList"></tbody>
+                                </table>
+
+                                <!--Pagination rendering-->
+                                <div class="paging pagination">
+
+                                </div>
+
+                            </div>
+                        </div>
+
                     </div>
+
                 </div>
-
-
-
 
             </div>
 
         </div>
-
     </div>
 
+    <div class="modal fade" id="add-subject-modal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="card-heading">새로운 과목 추가</h4>
+                    <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <form id="subject-form" class="form upload-form">
+                    <div class="modal-body">
+                        <div>
+                            <input type="hidden" name="id" id="id">
+                            <div class="form-group">
+                                <label>과목 이름</label>
+                                <input type="text" required class="form-control" name="newSubjectName" id="newSubjectName"
+                                       title="Required and no space allowed">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">취소</button>
+                        <button type="button" value="" name="save" class="btn btn-primary" th:onclick="saveSubject()">
+                            <img class="loading-save" style="display:none;" th:src="@{/img/loading.gif}" width=30 height=30>
+                            저장
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+
 </div>
+
+
 
 
 <script th:src="@{/vendor/jquery/jquery.min.js}"></script>
@@ -101,9 +129,6 @@
         const response = /*[[ ${response} ]]*/[];
         const params = /*[[ ${params} ]]*/ {};
         const { content, ...pagination } = response;
-
-        console.log(content);
-        console.log(params);
 
         drawList(content);
 
@@ -206,17 +231,47 @@
             url: '/admin/subject/' + id,
             success: function (data){
                 // 삭제 후 re-rendering
-                const params = {
-                    page: currentPage,
-                    size: 10,
-                }
-
-                location.href = location.pathname + '?' + new URLSearchParams(params).toString();
+                reloadPage();
             }
 
         })
     }
 
+    function saveSubject(){
+        const name = document.querySelector('#newSubjectName').value;
+
+        const subjectCreateRequest = {
+            name: name,
+        }
+
+        fetch('/admin/subject', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(subjectCreateRequest)
+        })
+            .then(response => response.json())
+            .then(() => {
+                reloadPage();
+                hideModal();
+            })
+            .catch(error => {
+                console.log(error);
+            })
+    }
+
+    function hideModal(){
+        $('#add-subject-modal').modal('hide');
+    }
+
+    function reloadPage(){
+        const params = {
+            page: currentPage,
+            size: 10,
+        }
+        location.href = location.pathname + '?' + new URLSearchParams(params).toString();
+    }
 
 </script>
 
