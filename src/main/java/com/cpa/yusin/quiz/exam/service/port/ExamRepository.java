@@ -13,6 +13,8 @@ public interface ExamRepository
 
     List<Exam> findAllBySubjectId(long subjectId, int year);
 
+    List<Exam> findAllBySubjectId(long subjectId);
+
     void deleteById(long id);
 
     void deleteAllBySubjectId(long subjectId);

@@ -1,13 +1,12 @@
 package com.cpa.yusin.quiz.web.controller;
 
-import com.cpa.yusin.quiz.common.controller.dto.request.DataTableRequest;
 import com.cpa.yusin.quiz.exam.controller.port.ExamService;
+import com.cpa.yusin.quiz.exam.domain.Exam;
 import com.cpa.yusin.quiz.subject.controller.port.SubjectService;
 import com.cpa.yusin.quiz.subject.domain.Subject;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -22,12 +21,28 @@ public class ExamController
     private final ExamService examService;
 
     @GetMapping("/exam")
-    public String member(Model model, @ModelAttribute("params") DataTableRequest request)
+    public String member()
     {
-
-
         return "exam";
     }
+
+    @ResponseBody
+    @GetMapping("/subject/{subjectId}/exam")
+    public List<Exam> getExamList(@PathVariable("subjectId") long subjectId)
+    {
+        log.info("subject id = {}", subjectId);
+        List<Exam> response = examService.getAllBySubjectId(subjectId);
+        log.info("response = {}", response);
+        return response;
+    }
+
+    @ResponseBody
+    @DeleteMapping("/exam/{id}")
+    public void deleteExam(@PathVariable("id") long examId)
+    {
+        examService.deleteById(examId);
+    }
+
 
     @ResponseBody
     @GetMapping("/subject/dropdown")

@@ -29,25 +29,28 @@
                                     시험 관리
                                 </h6>
 
-                                <div class="filter-item float-left">
-                                    <button class="btn btn-secondary dropdown-toggle"
-                                            type="button"
-                                            id="dropdownMenuButton1"
-                                            data-bs-toggle="dropdown"
-                                            aria-expanded="false">
-                                        과목 선택
+                                <div class="btn-group">
+                                    <button id="subjectSearchBar" type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        과목 검색
                                     </button>
-                                    <ul class="dropdown-menu pt-0" aria-labelledby="dropdownMenuButton1">
-                                        <input type="text"
-                                               class="form-control border-0 border-bottom shadow-none mb-2"
-                                               placeholder="Search..."
-                                               oninput="handleInput()">
-                                    </ul>
+                                    <div class="dropdown-menu">
+                                        <div class="input-group-text">
+                                            <input type="text" class="form-control" placeholder="Search..." onChange="handleInput()"
+                                                   aria-label="Recipient's username" aria-describedby="button-addon2">
+                                        </div>
+                                        <div class="dropdown-divider"></div>
+                                        <ul id="search-result" class="list-group"></ul>
+                                    </div>
+
+                                    <div id="selectedSubject" class="ml-4 bg-light">
+
+                                    </div>
                                 </div>
+
 
                                 <div class="datatable-button-section float-right">
                                     <button class="btn btn-light" data-toggle="modal" data-target="#add-template-modal" >
-                                        <img class="ml-2" th:src="@{/img/add_icon.png}" alt="">과목 추가
+                                        <img class="ml-2" th:src="@{/img/add_icon.png}" alt="">시험 추가
                                     </button>
                                 </div>
 
@@ -108,28 +111,80 @@
 <script th:src="@{/js/demo/chart-area-demo.js}"></script>
 <script th:src="@{/js/demo/chart-pie-demo.js}"></script>
 <script th:inline="javascript">
-    let currentPage = 0;
-    let size = 10;
-    let subject;
+    let selectSubjectId;
+    let selectedSubjectName;
 
+    function handleInput(){
+        // 검색 결과를 넣을 창 선택
+        const parentElement = document.querySelector('#search-result');
+        // 검색 한 단어 선택
+        const searchedWord = document.querySelector('.form-control').value;
 
-    window.onload = function () {
-        loadData();
+        // 기존에 검색 결과 지우기
+        parentElement.innerHTML = '';
+
+        // 검색한 단어의 길이가 0(검색을 안한 경우) 그대로 반환
+        if(searchedWord.length === 0){
+            return;
+        }
+
+        // api 검색
+        $.ajax({
+            url: '/admin/subject/dropdown',
+            type: 'GET',
+            data: {
+                name: searchedWord,
+            },
+            success: function(subjects){
+                if(subjects.length > 0){
+                    subjects.forEach((subject) => {
+                        const listGroup = document.createElement('li');
+                        listGroup.className = 'list-group-item';
+                        listGroup.textContent = subject.name;
+                        parentElement.appendChild(listGroup);
+                        listGroup.addEventListener('click', () => selectSubject(subject.id, subject.name));
+
+                        console.log(`id = ${subject.id}`);
+                        console.log(`name = ${subject.name}`);
+                    });
+                } else{
+                    const listGroup = document.createElement('li');
+                    listGroup.className = 'list-group-item';
+                    listGroup.textContent = '검색 결과가 없습니다';
+                    parentElement.appendChild(listGroup);
+                }
+            },
+
+        })
+
     }
 
-    function loadData(){
-        const response = /*[[ ${response} ]]*/[];
-        const params = /*[[ ${params} ]]*/ {};
-        const { content, ...pagination } = response;
+    function selectSubject(subjectId, subjectName){
+        selectSubjectId = subjectId;
+        selectedSubjectName = subjectName;
 
-        console.log(content);
-        console.log(params);
+        $.ajax({
+            url: `/admin/subject/${subjectId}/exam`,
+            type: 'GET',
+            success: function(examList){
+                loadData(examList);
 
-        drawList(content);
+                console.log('선택한 과목 = ' + subjectName);
+                changeButtonName(subjectName);
+            }
+        })
+    }
 
-        console.log(pagination);
-
-        drawPage(pagination, params);
+    function loadData(examList){
+        if(!examList || examList.length === 0){
+            document.getElementById('examList').innerHTML = `
+                <tr>
+                    <td colspan="2" class="text-center">등록된 시험이 없습니다.</td>
+                </tr>
+            `
+        } else{
+            drawList(examList);
+        }
     }
 
     function drawList(list){
@@ -142,8 +197,8 @@
                     <td>
                     <div class="d-flex justify-content-between">
                         ${row.name}
-                        <button onclick="removeSubject(${row.id})" class="btn btn-default" type="button">
-                            <img class="" alt="remove" src="/img/trash.svg">
+                        <button onclick="removeExam(${row.id})" class="btn btn-default" type="button">
+                            <img class="" alt="remove" src="/img/trash.svg" >
                         </button>
                     </div>
                     </td>
@@ -154,126 +209,26 @@
         document.getElementById('examList').innerHTML = html;
     }
 
-    function drawPage(pagination, params) {
 
-        if (!pagination || !params) {
-            document.querySelector('.paging').innerHTML = '';
-            return;
-        }
-
-        let html = '<ul class="pagination">';
-
-        currentPage = pagination.pageable.pageNumber;
-        const totalPages = pagination.totalPages;
-
-        // 첫페이지
-        if (currentPage > 0) {
-            html += `
-                <li class="page-item">
-                    <a class="page-link" href="javascript:void(0);" onclick="movePage(0)">첫 페이지</a>
-                </li>
-            `;
-        }
-
-        const startPage = Math.max(0, currentPage - 2);
-        const endPage = Math.min(totalPages - 1, currentPage + 2);
-
-        for(let i = startPage; i <= endPage; i++){
-            if(i === currentPage){
-                html += `
-                            <li class="page-item active">
-                                <a class="page-link">${i + 1} <span class="sr-only">(current)</span> </a>
-                            </li>
-                        `;
-            } else{
-                html += `
-                    <li class="page-item">
-                        <a class="page-link" href="javascript:void(0);" onclick="movePage(${i})">${i + 1}</a>
-                    </li>
-                `;
-            }
-        }
-
-        if(currentPage < totalPages - 1){
-            html += `
-                <li class="page-item">
-                    <a class="page-link" href="javascript:void(0);" onclick="movePage(${totalPages - 1})">마지막 페이지</a>
-                </li>
-            `;
-        }
-
-        html += `</ul>`;
-
-        document.querySelector('.paging').innerHTML = html;
-    }
-
-    function movePage(page){
-        const params = {
-            page: (page) ? page : 0,
-            size: 10,
-        }
-
-        location.href = location.pathname + '?' + new URLSearchParams(params).toString();
-    }
-
-    function removeSubject(id){
+    function removeExam(examId){
         if(!confirm('정말 삭제하시겠습니까?')){
             return;
         }
-
         $.ajax({
             type: "DELETE",
-            url: '/admin/subject/' + id,
-            success: function (data){
-                // 삭제 후 re-rendering
-                const params = {
-                    page: currentPage,
-                    size: 10,
-                }
-
-                location.href = location.pathname + '?' + new URLSearchParams(params).toString();
+            url: '/admin/exam/' + examId,
+            success: function (){
+                selectSubject(selectSubjectId, selectedSubjectName);
             }
 
         })
     }
 
-    function handleInput(){
-        const subjectName = document.getElementById('searchSubject').value;
-        const parentElement = document.querySelector('.dropdown-menu');
-
-        if(!subjectName){
-            document.getElementById('subjectDropdown').innerHTML = '';
-            return;
-        }
-
-        $.ajax({
-            url: '/admin/subject/dropdown',
-            type: 'GET',
-            data: {
-                name: subjectName
-            },
-            success: function(subjects){
-                if(subjects.length > 0){
-                    subjects.forEach((subject) => {
-                        const listItem = document.createElement('li');
-                        const link = document.createElement('a');
-                        link.classList.add("dropdown-item");
-                        link.href = "#";
-                        link.textContent = subject.name;
-                        listItem.appendChild(link);
-                        parentElement.appendChild(listItem);
-                    });
-                }
-            },
-
-        }, 1000)
-
+    function changeButtonName(subjectName){
+        document.querySelector('#subjectSearchBar').textContent = subjectName;
+        document.querySelector('.form-control').value = '';
+        document.querySelector('#search-result').innerHTML = '';
     }
-
-    function selectSubject(subjectId){
-
-    }
-
 
 </script>
 
