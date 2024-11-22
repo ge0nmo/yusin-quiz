@@ -30,7 +30,7 @@
                             </h6>
 
                             <div class="btn-group">
-                                <button id="subjectSearchBar" type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <button id="subjectSearchBar" type="button" class="btn btn-outline-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                     과목 검색
                                 </button>
                                 <div class="dropdown-menu">
@@ -47,9 +47,20 @@
                                 </div>
                             </div>
 
+                            <div class="btn-group">
+                                <label for="selectedYear"></label>
+                                <input id="selectedYear" class="btn btn-outline-secondary" type="number" onchange="inputYearHandle()" />
+                            </div>
+
+                            <div class="btn-group">
+                                <button class="btn btn-outline-secondary" onclick="handleSearchClick()">
+                                    <img src="/img/search.svg" alt="search">
+                                </button>
+                            </div>
+
 
                             <div class="float-right">
-                                <button class="btn btn-light" data-toggle="modal" data-target="#add-exam-modal" >
+                                <button class="btn btn-light" data-toggle="modal" data-target="#add-exam-modal" onclick="prepareExamForm()">
                                     <img class="ml-2" th:src="@{/img/add_icon.png}" alt="">과목 추가
                                 </button>
                             </div>
@@ -60,7 +71,7 @@
                                 <table id="load-user" class="table table-bordered" th:width="100" th:cellspacing="0">
                                     <thead class="thead-light">
                                     <tr>
-                                        <th scope="col">번호</th>
+                                        <th scope="col">연도</th>
                                         <th scope="col">시험 이름</th>
                                     </tr>
                                     </thead>
@@ -100,20 +111,103 @@
                 <form id="exam-form" class="form upload-form">
                     <div class="modal-body">
                         <div>
-                            <input type="hidden" name="id" id="id">
                             <div class="form-group">
-                                <label>과목 이름</label>
-                                <input id="newExamName" type="text" required class="form-control" name="newSubjectName"
+                                <label>과목명</label>
+                                <input type="text" required class="form-control selectedSubjectName" disabled
+                                       title="Required and no space allowed">
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="form-group">
+                                <label>시험 이름(정보)</label>
+                                <input id="examName" type="text" required class="form-control"
+                                       title="Required and no space allowed">
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="form-group">
+                                <label>연도</label>
+                                <input id="examYear" type="number" required class="form-control"
+                                       title="Required and no space allowed">
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="form-group">
+                                <label>문제 수</label>
+                                <input id="maxProblemCount" type="number" required class="form-control"
                                        title="Required and no space allowed">
                             </div>
                         </div>
                     </div>
 
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">취소</button>
                         <button type="button" value="" name="save" class="btn btn-primary" th:onclick="saveExam()">
                             <img class="loading-save" alt="save"  style="display:none;" th:src="@{/img/loading.gif}" width=30 height=30>
                             저장
+                        </button>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">취소</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- update modal -->
+    <div class="modal fade" id="update-exam-modal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="card-heading">시험 정보 수정</h4>
+                    <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <form id="update-exam-form" class="form upload-form">
+                    <div class="modal-body">
+                        <div>
+                            <div class="form-group">
+                                <label>과목명</label>
+                                <input type="text" required class="form-control selectedSubjectName" disabled
+                                       title="Required and no space allowed">
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="form-group">
+                                <label>시험 이름(정보)</label>
+                                <input id="newExamName" type="text" required class="form-control"
+                                       title="Required and no space allowed">
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="form-group">
+                                <label>연도</label>
+                                <input id="newExamYear" type="number" required class="form-control"
+                                       title="Required and no space allowed">
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="form-group">
+                                <label>문제 수</label>
+                                <input id="newMaxProblemCount" type="number" required class="form-control"
+                                       title="Required and no space allowed">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" value="" name="save" class="btn btn-primary" th:onclick="updateExam()">
+                            <img class="loading-save" alt="save"  style="display:none;" th:src="@{/img/loading.gif}" width=30 height=30>
+                            저장
+                        </button>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                            취소
                         </button>
                     </div>
                 </form>
@@ -143,24 +237,23 @@
 <script th:inline="javascript">
     let selectedSubjectId;
     let selectedSubjectName;
+    let selectedYear;
 
     window.onload = function(){
         selectedSubjectId = sessionStorage.getItem("subjectId");
         selectedSubjectName = sessionStorage.getItem("subjectName");
+        selectedYear = new Date().getFullYear();
+        document.querySelector('#selectedYear').value = selectedYear;
 
         if(selectedSubjectId && selectedSubjectName){
             sessionStorage.removeItem("subjectId");
             sessionStorage.removeItem("subjectName");
 
-            $.ajax({
-               url: `/admin/subject/${selectedSubjectId}/exam`,
-                type: 'GET',
-                success: function(examList){
-                   loadData(examList);
-                   changeButtonName(selectedSubjectName)
-                }
-
-            });
+            getExamList(selectedSubjectId, selectedYear)
+                .then(examList => {
+                    loadData(examList)
+                    changeButtonName(selectedSubjectName);
+                })
 
         }
     }
@@ -194,9 +287,6 @@
                         listGroup.textContent = subject.name;
                         parentElement.appendChild(listGroup);
                         listGroup.addEventListener('click', () => selectSubject(subject.id, subject.name));
-
-                        console.log(`id = ${subject.id}`);
-                        console.log(`name = ${subject.name}`);
                     });
                 } else{
                     const listGroup = document.createElement('li');
@@ -214,16 +304,31 @@
         selectedSubjectId = subjectId;
         selectedSubjectName = subjectName;
 
-        $.ajax({
-            url: `/admin/subject/${subjectId}/exam`,
-            type: 'GET',
-            success: function(examList){
-                loadData(examList);
+        document.querySelector('#subjectSearchBar').textContent = selectedSubjectName;
+    }
 
-                console.log('선택한 과목 = ' + subjectName);
-                changeButtonName(subjectName);
-            }
-        })
+    function inputYearHandle(){
+        selectedYear = document.querySelector('#selectedYear').value;
+    }
+
+    function handleSearchClick(){
+        getExamList(selectedSubjectId, selectedYear)
+            .then(examList => {
+                loadData(examList)
+                changeButtonName(selectedSubjectName);
+            })
+    }
+
+    function prepareExamForm(){
+        document.querySelector('.selectedSubjectName').value = selectedSubjectName;
+    }
+
+    function prepareUpdateExamForm(exam){
+        console.log('selected subject name = ', selectedSubjectName);
+        document.querySelector('.selectedSubjectName').value = selectedSubjectName;
+        document.querySelector('#newExamName').value = exam.name;
+        document.querySelector('#newExamYear').value = exam.year;
+        document.querySelector('#newMaxProblemCount').value = exam.maxProblemCount;
     }
 
     function loadData(examList){
@@ -241,16 +346,21 @@
     function drawList(list){
         let html = '';
 
-        list.forEach((row) => {
+        list.forEach((exam) => {
             html += `
                 <tr>
-                    <td>${row.id}</td>
+                    <td>${exam.year}</td>
                     <td>
                     <div class="d-flex justify-content-between">
-                        ${row.name}
-                        <button onclick="removeExam(${row.id})" class="btn btn-default" type="button">
-                            <img class="" alt="remove" src="/img/trash.svg" >
-                        </button>
+                        ${exam.name}
+                        <div class="d-flex justify-content-end">
+                            <button onclick='prepareUpdateExamForm(${JSON.stringify(exam)})' data-toggle="modal" data-target="#update-exam-modal" class="btn btn-default" type="button">
+                                <img class="" alt="update" src="/img/edit.svg" >
+                            </button>
+                            <button onclick="removeExam(${exam.id})" class="btn btn-default" type="button">
+                                <img class="" alt="remove" src="/img/trash.svg" >
+                            </button>
+                        </div>
                     </div>
                     </td>
                 </tr>
@@ -275,6 +385,10 @@
         })
     }
 
+    function updateExam(examId){
+
+    }
+
     function changeButtonName(subjectName){
         document.querySelector('#subjectSearchBar').textContent = subjectName;
         document.querySelector('.form-control').value = '';
@@ -282,13 +396,59 @@
     }
 
     function saveExam(){
-        const name = document.querySelector('#newExamName').value;
+        const name = document.querySelector('#examName').value;
+        const year = document.querySelector('#examYear').value;
+        const maxProblemCount = document.querySelector('#maxProblemCount').value;
 
 
+        const examCreateRequest = {
+            name: name,
+            year: Number(year),
+            maxProblemCount: Number(maxProblemCount),
+        }
+
+        fetch(`/admin/exam?subjectId=${selectedSubjectId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(examCreateRequest),
+        })
+            .then(response => response.json())
+            .then(() => {
+                getExamList(selectedSubjectId, selectedYear)
+                    .then(examList => {
+                        hideModal();
+
+                        loadData(examList);
+                        changeButtonName(selectedSubjectName)
+                    })
+            })
+            .catch(error => {
+                console.log(error);
+            })
     }
 
+
     function hideModal(){
-        $('#add-subject-modal').modal('hide');
+        $('#add-exam-modal').modal('hide');
+    }
+
+    function getExamList(subjectId, year) {
+        if(!subjectId) return;
+
+        return new Promise((resolve, reject) => {
+            $.ajax({
+                url: `/admin/subject/${subjectId}/exam?year=${year}`,
+                type: 'GET',
+                success: function(examList) {
+                    resolve(examList);
+                },
+                error: function(error) {
+                    reject(error);
+                }
+            });
+        });
     }
 
 
