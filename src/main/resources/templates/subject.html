@@ -65,6 +65,7 @@
         </div>
     </div>
 
+    <!-- Save Modal -->
     <div class="modal fade" id="add-subject-modal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content">
@@ -120,7 +121,6 @@
     let currentPage = 0;
     let size = 10;
 
-
     window.onload = function () {
         loadData();
     }
@@ -145,12 +145,12 @@
                 <tr>
                     <td>${row.id}</td>
                     <td>
-                    <div class="d-flex justify-content-between">
-                        ${row.name}
-                        <button onclick="removeSubject(${row.id})" class="btn btn-default" type="button">
-                            <img class="" alt="remove" src="/img/trash.svg">
-                        </button>
-                    </div>
+                        <div class="d-flex justify-content-between">
+                            <span style="cursor: pointer" onclick="redirectToExam(${row.id}, '${row.name}')">${row.name}</span>
+                            <button onclick="removeSubject(${row.id})" class="btn btn-default" type="button">
+                                <img class="" alt="remove" src="/img/trash.svg">
+                            </button>
+                        </div>
                     </td>
                 </tr>
             `;
@@ -271,6 +271,15 @@
             size: 10,
         }
         location.href = location.pathname + '?' + new URLSearchParams(params).toString();
+    }
+
+    function redirectToExam(subjectId, subjectName){
+        sessionStorage.setItem("subjectId", subjectId);
+        sessionStorage.setItem("subjectName", subjectName);
+
+        const baseUrl = window.location.origin;
+
+        window.location.href= `${baseUrl}/admin/exam`;
     }
 
 </script>

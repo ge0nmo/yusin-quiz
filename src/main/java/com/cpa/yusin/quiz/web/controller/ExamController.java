@@ -21,7 +21,7 @@ public class ExamController
     private final ExamService examService;
 
     @GetMapping("/exam")
-    public String member()
+    public String exam()
     {
         return "exam";
     }

@@ -48,9 +48,9 @@
                             </div>
 
 
-                            <div class="datatable-button-section float-right">
-                                <button class="btn btn-light" data-toggle="modal" data-target="#add-template-modal" >
-                                    <img class="ml-2" th:src="@{/img/add_icon.png}" alt="">시험 추가
+                            <div class="float-right">
+                                <button class="btn btn-light" data-toggle="modal" data-target="#add-exam-modal" >
+                                    <img class="ml-2" th:src="@{/img/add_icon.png}" alt="">과목 추가
                                 </button>
                             </div>
 
@@ -87,6 +87,41 @@
 
     </div>
 
+    <!-- Save modal -->
+    <div class="modal fade" id="add-exam-modal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="card-heading">새로운 시험 추가</h4>
+                    <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <form id="exam-form" class="form upload-form">
+                    <div class="modal-body">
+                        <div>
+                            <input type="hidden" name="id" id="id">
+                            <div class="form-group">
+                                <label>과목 이름</label>
+                                <input id="newExamName" type="text" required class="form-control" name="newSubjectName"
+                                       title="Required and no space allowed">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">취소</button>
+                        <button type="button" value="" name="save" class="btn btn-primary" th:onclick="saveExam()">
+                            <img class="loading-save" alt="save"  style="display:none;" th:src="@{/img/loading.gif}" width=30 height=30>
+                            저장
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
 </div>
 
 
@@ -106,8 +141,29 @@
 <script th:src="@{/js/demo/chart-area-demo.js}"></script>
 <script th:src="@{/js/demo/chart-pie-demo.js}"></script>
 <script th:inline="javascript">
-    let selectSubjectId;
+    let selectedSubjectId;
     let selectedSubjectName;
+
+    window.onload = function(){
+        selectedSubjectId = sessionStorage.getItem("subjectId");
+        selectedSubjectName = sessionStorage.getItem("subjectName");
+
+        if(selectedSubjectId && selectedSubjectName){
+            sessionStorage.removeItem("subjectId");
+            sessionStorage.removeItem("subjectName");
+
+            $.ajax({
+               url: `/admin/subject/${selectedSubjectId}/exam`,
+                type: 'GET',
+                success: function(examList){
+                   loadData(examList);
+                   changeButtonName(selectedSubjectName)
+                }
+
+            });
+
+        }
+    }
 
     function handleInput(){
         // 검색 결과를 넣을 창 선택
@@ -155,7 +211,7 @@
     }
 
     function selectSubject(subjectId, subjectName){
-        selectSubjectId = subjectId;
+        selectedSubjectId = subjectId;
         selectedSubjectName = subjectName;
 
         $.ajax({
@@ -213,7 +269,7 @@
             type: "DELETE",
             url: '/admin/exam/' + examId,
             success: function (){
-                selectSubject(selectSubjectId, selectedSubjectName);
+                selectSubject(selectedSubjectId, selectedSubjectName);
             }
 
         })
@@ -224,6 +280,18 @@
         document.querySelector('.form-control').value = '';
         document.querySelector('#search-result').innerHTML = '';
     }
+
+    function saveExam(){
+        const name = document.querySelector('#newExamName').value;
+
+
+    }
+
+    function hideModal(){
+        $('#add-subject-modal').modal('hide');
+    }
+
+
 
 </script>
 
