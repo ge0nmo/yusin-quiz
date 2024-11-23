@@ -92,6 +92,12 @@ public class ExamServiceImpl implements ExamService
                 .toList();
     }
 
+    @Override
+    public List<Exam> getAllBySubjectId(long subjectId)
+    {
+        return examRepository.findAllBySubjectId(subjectId);
+    }
+
     @Transactional
     @Override
     public void deleteById(List<Long> ids)
@@ -100,6 +106,13 @@ public class ExamServiceImpl implements ExamService
             findById(id);
             cascadeDeleteService.deleteExamByExamId(id);
         });
+    }
+
+    @Transactional
+    @Override
+    public void deleteById(long id)
+    {
+        cascadeDeleteService.deleteExamByExamId(id);
     }
 
 

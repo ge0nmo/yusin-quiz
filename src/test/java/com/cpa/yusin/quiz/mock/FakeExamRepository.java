@@ -48,6 +48,14 @@ public class FakeExamRepository implements ExamRepository
     }
 
     @Override
+    public List<Exam> findAllBySubjectId(long subjectId)
+    {
+        return data.stream()
+                .filter(item -> item.getSubjectId().equals(subjectId))
+                .toList();
+    }
+
+    @Override
     public void deleteById(long id)
     {
         data.removeIf(item -> item.getId().equals(id));

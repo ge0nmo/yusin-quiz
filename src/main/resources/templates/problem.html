@@ -18,36 +18,32 @@
         <!-- Main Content-->
         <div id="content">
             <header th:replace="~{fragments/header.html :: header}"></header>
+
             <div class="container-fluid">
+                <div class="col-12">
+                    <div class="card shadow mb-4">
+                        <div class="card-header bg-white border-0 pl-3 pt-3 pb-0">
+                            <h6 class="m-0 font-weight-bold text-primary mb-3">
+                                문제 관리
+                            </h6>
 
-                <!--    Main Content from here         -->
-                <div class="container-fluid">
-                    <div class="col-12">
-                        <div class="card shadow mb-4">
-                            <div class="card-header bg-white border-0 pl-3 pt-3 pb-0">
-                                <h6 class="m-0 font-weight-bold text-primary mb-3">
-                                    문제 관리
-                                </h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table id="load-user" class="table table-bordered" th:width="100" th:cellspacing="0">
+                                    <thead class="thead-light">
+                                    <tr>
+                                        <th scope="col">번호</th>
 
-                            </div>
-                            <div class="card-body">
-                                <div class="table-responsive">
-                                    <table id="load-user" class="table table-bordered" th:width="100" th:cellspacing="0">
-                                        <thead class="thead-light">
-                                        <tr>
-                                            <th scope="col">번호</th>
+                                    </tr>
+                                    </thead>
 
-                                        </tr>
-                                        </thead>
+                                    <!-- member list rendering-->
+                                    <tbody id="subject"></tbody>
+                                </table>
 
-                                        <!-- member list rendering-->
-                                        <tbody id="subject"></tbody>
-                                    </table>
-
-                                    <!--Pagination rendering-->
-                                    <div class="paging pagination">
-
-                                    </div>
+                                <!--Pagination rendering-->
+                                <div class="paging pagination">
 
                                 </div>
 
@@ -56,11 +52,8 @@
                         </div>
 
                     </div>
+
                 </div>
-
-
-
-
             </div>
 
         </div>

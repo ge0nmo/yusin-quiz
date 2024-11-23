@@ -16,6 +16,11 @@ public interface ExamJpaRepository extends JpaRepository<Exam, Long>
             "AND e.year = :year")
     List<Exam> findAllBySubjectId(@Param("subjectId") long subjectId, @Param("year") int year);
 
+    @Query("SELECT e " +
+            "FROM Exam e " +
+            "WHERE e.subjectId = :subjectId")
+    List<Exam> findAllBySubjectId(@Param("subjectId") long subjectId);
+
     @Modifying
     @Query("DELETE FROM Exam e WHERE e.subjectId = :subjectId")
     void deleteAllBySubjectId(@Param("subjectId") long subjectId);

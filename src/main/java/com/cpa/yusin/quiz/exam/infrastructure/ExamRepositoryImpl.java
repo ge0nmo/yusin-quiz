@@ -33,6 +33,12 @@ public class ExamRepositoryImpl implements ExamRepository
     }
 
     @Override
+    public List<Exam> findAllBySubjectId(long subjectId)
+    {
+        return examJpaRepository.findAllBySubjectId(subjectId);
+    }
+
+    @Override
     public void deleteById(long id)
     {
         examJpaRepository.deleteById(id);

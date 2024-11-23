@@ -15,61 +15,73 @@
 <div id="wrapper">
     <div th:replace="~{fragments/side.html :: side}"></div>
     <div id="content-wrapper" class="d-flex flex-column">
-        <!-- Main Content-->
+        <!-- Header -->
         <div id="content">
             <header th:replace="~{fragments/header.html :: header}"></header>
+
+            <!--Main Content -->
+
             <div class="container-fluid">
+                <div class="col-12">
+                    <div class="card shadow mb-4">
+                        <div class="card-header bg-white border-0 pl-3 pt-3 pb-0">
+                            <h6 class="m-0 font-weight-bold text-primary mb-3">
+                                시험 관리
+                            </h6>
 
-                <!--    Main Content from here         -->
-                <div class="container-fluid">
-                    <div class="col-12">
-                        <div class="card shadow mb-4">
-                            <div class="card-header bg-white border-0 pl-3 pt-3 pb-0">
-                                <h6 class="m-0 font-weight-bold text-primary mb-3">
-                                    시험 관리
-                                </h6>
-
-                                <div class="filter-item float-left">
-                                    <button class="btn btn-secondary dropdown-toggle"
-                                            type="button"
-                                            id="dropdownMenuButton1"
-                                            data-bs-toggle="dropdown"
-                                            aria-expanded="false">
-                                        과목 선택
-                                    </button>
-                                    <ul class="dropdown-menu pt-0" aria-labelledby="dropdownMenuButton1">
-                                        <input type="text"
-                                               class="form-control border-0 border-bottom shadow-none mb-2"
-                                               placeholder="Search..."
-                                               oninput="handleInput()">
-                                    </ul>
-                                </div>
-
-                                <div class="datatable-button-section float-right">
-                                    <button class="btn btn-light" data-toggle="modal" data-target="#add-template-modal" >
-                                        <img class="ml-2" th:src="@{/img/add_icon.png}" alt="">과목 추가
-                                    </button>
-                                </div>
-
-                            </div>
-                            <div class="card-body">
-                                <div class="table-responsive">
-                                    <table id="load-user" class="table table-bordered" th:width="100" th:cellspacing="0">
-                                        <thead class="thead-light">
-                                        <tr>
-                                            <th scope="col">번호</th>
-                                            <th scope="col">시험 이름</th>
-                                        </tr>
-                                        </thead>
-
-                                        <!-- member list rendering-->
-                                        <tbody id="examList"></tbody>
-                                    </table>
-
-                                    <!--Pagination rendering-->
-                                    <div class="paging pagination">
-
+                            <div class="btn-group">
+                                <button id="subjectSearchBar" type="button" class="btn btn-outline-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    과목 검색
+                                </button>
+                                <div class="dropdown-menu">
+                                    <div class="input-group-text">
+                                        <input type="text" class="form-control" placeholder="Search..." onChange="handleInput()"
+                                               aria-label="Recipient's username" aria-describedby="button-addon2">
                                     </div>
+                                    <div class="dropdown-divider"></div>
+                                    <ul id="search-result" class="list-group"></ul>
+                                </div>
+
+                                <div id="selectedSubject" class="ml-4 bg-light">
+
+                                </div>
+                            </div>
+
+                            <div class="btn-group">
+                                <label for="selectedYear"></label>
+                                <input id="selectedYear" class="btn btn-outline-secondary" type="number" onchange="inputYearHandle()" />
+                            </div>
+
+                            <div class="btn-group">
+                                <button class="btn btn-outline-secondary" onclick="handleSearchClick()">
+                                    <img src="/img/search.svg" alt="search">
+                                </button>
+                            </div>
+
+
+                            <div class="float-right">
+                                <button class="btn btn-light" data-toggle="modal" data-target="#add-exam-modal" onclick="prepareExamForm()">
+                                    <img class="ml-2" th:src="@{/img/add_icon.png}" alt="">과목 추가
+                                </button>
+                            </div>
+
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table id="load-user" class="table table-bordered" th:width="100" th:cellspacing="0">
+                                    <thead class="thead-light">
+                                    <tr>
+                                        <th scope="col">연도</th>
+                                        <th scope="col">시험 이름</th>
+                                    </tr>
+                                    </thead>
+
+                                    <!-- member list rendering-->
+                                    <tbody id="examList"></tbody>
+                                </table>
+
+                                <!--Pagination rendering-->
+                                <div class="paging pagination">
 
                                 </div>
 
@@ -78,16 +90,131 @@
                         </div>
 
                     </div>
+
                 </div>
-
-
-
-
             </div>
 
         </div>
 
     </div>
+
+    <!-- Save modal -->
+    <div class="modal fade" id="add-exam-modal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="card-heading">새로운 시험 추가</h4>
+                    <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <form id="exam-form" class="form upload-form">
+                    <div class="modal-body">
+                        <div>
+                            <div class="form-group">
+                                <label>과목명</label>
+                                <input type="text" required class="form-control selectedSubjectName" disabled
+                                       title="Required and no space allowed">
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="form-group">
+                                <label>시험 이름(정보)</label>
+                                <input id="examName" type="text" required class="form-control"
+                                       title="Required and no space allowed">
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="form-group">
+                                <label>연도</label>
+                                <input id="examYear" type="number" required class="form-control"
+                                       title="Required and no space allowed">
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="form-group">
+                                <label>문제 수</label>
+                                <input id="maxProblemCount" type="number" required class="form-control"
+                                       title="Required and no space allowed">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" value="" name="save" class="btn btn-primary" th:onclick="saveExam()">
+                            <img class="loading-save" alt="save"  style="display:none;" th:src="@{/img/loading.gif}" width=30 height=30>
+                            저장
+                        </button>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">취소</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- update modal -->
+    <div class="modal fade" id="update-exam-modal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="card-heading">시험 정보 수정</h4>
+                    <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <form id="update-exam-form" class="form upload-form">
+                    <div class="modal-body">
+                        <div>
+                            <div class="form-group">
+                                <label>과목명</label>
+                                <input type="text" required class="form-control selectedSubjectName" disabled
+                                       title="Required and no space allowed">
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="form-group">
+                                <label>시험 이름(정보)</label>
+                                <input id="newExamName" type="text" required class="form-control"
+                                       title="Required and no space allowed">
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="form-group">
+                                <label>연도</label>
+                                <input id="newExamYear" type="number" required class="form-control"
+                                       title="Required and no space allowed">
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="form-group">
+                                <label>문제 수</label>
+                                <input id="newMaxProblemCount" type="number" required class="form-control"
+                                       title="Required and no space allowed">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" value="" name="save" class="btn btn-primary" th:onclick="updateExam()">
+                            <img class="loading-save" alt="save"  style="display:none;" th:src="@{/img/loading.gif}" width=30 height=30>
+                            저장
+                        </button>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                            취소
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
 
 </div>
 
@@ -108,43 +235,132 @@
 <script th:src="@{/js/demo/chart-area-demo.js}"></script>
 <script th:src="@{/js/demo/chart-pie-demo.js}"></script>
 <script th:inline="javascript">
-    let currentPage = 0;
-    let size = 10;
-    let subject;
+    let selectedSubjectId;
+    let selectedSubjectName;
+    let selectedYear;
 
+    window.onload = function(){
+        selectedSubjectId = sessionStorage.getItem("subjectId");
+        selectedSubjectName = sessionStorage.getItem("subjectName");
+        selectedYear = new Date().getFullYear();
+        document.querySelector('#selectedYear').value = selectedYear;
 
-    window.onload = function () {
-        loadData();
+        if(selectedSubjectId && selectedSubjectName){
+            sessionStorage.removeItem("subjectId");
+            sessionStorage.removeItem("subjectName");
+
+            getExamList(selectedSubjectId, selectedYear)
+                .then(examList => {
+                    loadData(examList)
+                    changeButtonName(selectedSubjectName);
+                })
+
+        }
     }
 
-    function loadData(){
-        const response = /*[[ ${response} ]]*/[];
-        const params = /*[[ ${params} ]]*/ {};
-        const { content, ...pagination } = response;
+    function handleInput(){
+        // 검색 결과를 넣을 창 선택
+        const parentElement = document.querySelector('#search-result');
+        // 검색 한 단어 선택
+        const searchedWord = document.querySelector('.form-control').value;
 
-        console.log(content);
-        console.log(params);
+        // 기존에 검색 결과 지우기
+        parentElement.innerHTML = '';
 
-        drawList(content);
+        // 검색한 단어의 길이가 0(검색을 안한 경우) 그대로 반환
+        if(searchedWord.length === 0){
+            return;
+        }
 
-        console.log(pagination);
+        // api 검색
+        $.ajax({
+            url: '/admin/subject/dropdown',
+            type: 'GET',
+            data: {
+                name: searchedWord,
+            },
+            success: function(subjects){
+                if(subjects.length > 0){
+                    subjects.forEach((subject) => {
+                        const listGroup = document.createElement('li');
+                        listGroup.className = 'list-group-item';
+                        listGroup.textContent = subject.name;
+                        parentElement.appendChild(listGroup);
+                        listGroup.addEventListener('click', () => selectSubject(subject.id, subject.name));
+                    });
+                } else{
+                    const listGroup = document.createElement('li');
+                    listGroup.className = 'list-group-item';
+                    listGroup.textContent = '검색 결과가 없습니다';
+                    parentElement.appendChild(listGroup);
+                }
+            },
 
-        drawPage(pagination, params);
+        })
+
+    }
+
+    function selectSubject(subjectId, subjectName){
+        selectedSubjectId = subjectId;
+        selectedSubjectName = subjectName;
+
+        document.querySelector('#subjectSearchBar').textContent = selectedSubjectName;
+    }
+
+    function inputYearHandle(){
+        selectedYear = document.querySelector('#selectedYear').value;
+    }
+
+    function handleSearchClick(){
+        getExamList(selectedSubjectId, selectedYear)
+            .then(examList => {
+                loadData(examList)
+                changeButtonName(selectedSubjectName);
+            })
+    }
+
+    function prepareExamForm(){
+        document.querySelector('.selectedSubjectName').value = selectedSubjectName;
+    }
+
+    function prepareUpdateExamForm(exam){
+        console.log('selected subject name = ', selectedSubjectName);
+        document.querySelector('.selectedSubjectName').value = selectedSubjectName;
+        document.querySelector('#newExamName').value = exam.name;
+        document.querySelector('#newExamYear').value = exam.year;
+        document.querySelector('#newMaxProblemCount').value = exam.maxProblemCount;
+    }
+
+    function loadData(examList){
+        if(!examList || examList.length === 0){
+            document.getElementById('examList').innerHTML = `
+                <tr>
+                    <td colspan="2" class="text-center">등록된 시험이 없습니다.</td>
+                </tr>
+            `
+        } else{
+            drawList(examList);
+        }
     }
 
     function drawList(list){
         let html = '';
 
-        list.forEach((row) => {
+        list.forEach((exam) => {
             html += `
                 <tr>
-                    <td>${row.id}</td>
+                    <td>${exam.year}</td>
                     <td>
                     <div class="d-flex justify-content-between">
-                        ${row.name}
-                        <button onclick="removeSubject(${row.id})" class="btn btn-default" type="button">
-                            <img class="" alt="remove" src="/img/trash.svg">
-                        </button>
+                        ${exam.name}
+                        <div class="d-flex justify-content-end">
+                            <button onclick='prepareUpdateExamForm(${JSON.stringify(exam)})' data-toggle="modal" data-target="#update-exam-modal" class="btn btn-default" type="button">
+                                <img class="" alt="update" src="/img/edit.svg" >
+                            </button>
+                            <button onclick="removeExam(${exam.id})" class="btn btn-default" type="button">
+                                <img class="" alt="remove" src="/img/trash.svg" >
+                            </button>
+                        </div>
                     </div>
                     </td>
                 </tr>
@@ -154,125 +370,87 @@
         document.getElementById('examList').innerHTML = html;
     }
 
-    function drawPage(pagination, params) {
 
-        if (!pagination || !params) {
-            document.querySelector('.paging').innerHTML = '';
-            return;
-        }
-
-        let html = '<ul class="pagination">';
-
-        currentPage = pagination.pageable.pageNumber;
-        const totalPages = pagination.totalPages;
-
-        // 첫페이지
-        if (currentPage > 0) {
-            html += `
-                <li class="page-item">
-                    <a class="page-link" href="javascript:void(0);" onclick="movePage(0)">첫 페이지</a>
-                </li>
-            `;
-        }
-
-        const startPage = Math.max(0, currentPage - 2);
-        const endPage = Math.min(totalPages - 1, currentPage + 2);
-
-        for(let i = startPage; i <= endPage; i++){
-            if(i === currentPage){
-                html += `
-                            <li class="page-item active">
-                                <a class="page-link">${i + 1} <span class="sr-only">(current)</span> </a>
-                            </li>
-                        `;
-            } else{
-                html += `
-                    <li class="page-item">
-                        <a class="page-link" href="javascript:void(0);" onclick="movePage(${i})">${i + 1}</a>
-                    </li>
-                `;
-            }
-        }
-
-        if(currentPage < totalPages - 1){
-            html += `
-                <li class="page-item">
-                    <a class="page-link" href="javascript:void(0);" onclick="movePage(${totalPages - 1})">마지막 페이지</a>
-                </li>
-            `;
-        }
-
-        html += `</ul>`;
-
-        document.querySelector('.paging').innerHTML = html;
-    }
-
-    function movePage(page){
-        const params = {
-            page: (page) ? page : 0,
-            size: 10,
-        }
-
-        location.href = location.pathname + '?' + new URLSearchParams(params).toString();
-    }
-
-    function removeSubject(id){
+    function removeExam(examId){
         if(!confirm('정말 삭제하시겠습니까?')){
             return;
         }
-
         $.ajax({
             type: "DELETE",
-            url: '/admin/subject/' + id,
-            success: function (data){
-                // 삭제 후 re-rendering
-                const params = {
-                    page: currentPage,
-                    size: 10,
-                }
-
-                location.href = location.pathname + '?' + new URLSearchParams(params).toString();
+            url: '/admin/exam/' + examId,
+            success: function (){
+                selectSubject(selectedSubjectId, selectedSubjectName);
             }
 
         })
     }
 
-    function handleInput(){
-        const subjectName = document.getElementById('searchSubject').value;
-        const parentElement = document.querySelector('.dropdown-menu');
+    function updateExam(examId){
 
-        if(!subjectName){
-            document.getElementById('subjectDropdown').innerHTML = '';
-            return;
+    }
+
+    function changeButtonName(subjectName){
+        document.querySelector('#subjectSearchBar').textContent = subjectName;
+        document.querySelector('.form-control').value = '';
+        document.querySelector('#search-result').innerHTML = '';
+    }
+
+    function saveExam(){
+        const name = document.querySelector('#examName').value;
+        const year = document.querySelector('#examYear').value;
+        const maxProblemCount = document.querySelector('#maxProblemCount').value;
+
+
+        const examCreateRequest = {
+            name: name,
+            year: Number(year),
+            maxProblemCount: Number(maxProblemCount),
         }
 
-        $.ajax({
-            url: '/admin/subject/dropdown',
-            type: 'GET',
-            data: {
-                name: subjectName
+        fetch(`/admin/exam?subjectId=${selectedSubjectId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
             },
-            success: function(subjects){
-                if(subjects.length > 0){
-                    subjects.forEach((subject) => {
-                        const listItem = document.createElement('li');
-                        const link = document.createElement('a');
-                        link.classList.add("dropdown-item");
-                        link.href = "#";
-                        link.textContent = subject.name;
-                        listItem.appendChild(link);
-                        parentElement.appendChild(listItem);
-                    });
+            body: JSON.stringify(examCreateRequest),
+        })
+            .then(response => response.json())
+            .then(() => {
+                getExamList(selectedSubjectId, selectedYear)
+                    .then(examList => {
+                        hideModal();
+
+                        loadData(examList);
+                        changeButtonName(selectedSubjectName)
+                    })
+            })
+            .catch(error => {
+                console.log(error);
+            })
+    }
+
+
+    function hideModal(){
+        $('#add-exam-modal').modal('hide');
+    }
+
+    function getExamList(subjectId, year) {
+        if(!subjectId) return;
+
+        return new Promise((resolve, reject) => {
+            $.ajax({
+                url: `/admin/subject/${subjectId}/exam?year=${year}`,
+                type: 'GET',
+                success: function(examList) {
+                    resolve(examList);
+                },
+                error: function(error) {
+                    reject(error);
                 }
-            },
-
-        }, 1000)
-
+            });
+        });
     }
 
-    function selectSubject(subjectId){
-
-    }
 
 
 </script>

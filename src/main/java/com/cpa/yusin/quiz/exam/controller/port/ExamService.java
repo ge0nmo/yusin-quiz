@@ -20,5 +20,9 @@ public interface ExamService
 
     List<ExamDTO> getAllBySubjectId(long subjectId, int year);
 
+    List<Exam> getAllBySubjectId(long subjectId);
+
     void deleteById(List<Long> ids);
+
+    void deleteById(long id);
 }
