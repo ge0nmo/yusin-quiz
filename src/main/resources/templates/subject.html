@@ -40,7 +40,7 @@
                                     <thead class="thead-light">
                                     <tr>
                                         <th scope="col">번호</th>
-                                        <th scope="col">과목 이름</th>
+                                        <th scope="col">과목명</th>
                                     </tr>
                                     </thead>
 
@@ -81,7 +81,7 @@
                             <input type="hidden" name="id" id="id">
                             <div class="form-group">
                                 <label>과목 이름</label>
-                                <input type="text" required class="form-control" name="newSubjectName" id="newSubjectName"
+                                <input type="text" required class="form-control" name="newSubjectName" id="subjectName"
                                        title="Required and no space allowed">
                             </div>
                         </div>
@@ -92,6 +92,43 @@
                         <button type="button" value="" name="save" class="btn btn-primary" th:onclick="saveSubject()">
                             <img class="loading-save" style="display:none;" th:src="@{/img/loading.gif}" width=30 height=30>
                             저장
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- update modal -->
+    <div class="modal fade" id="update-subject-modal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="card-heading">과목 정보 수정</h4>
+                    <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                        <span>×</span>
+                    </button>
+                </div>
+                <form id="update-subject-form" class="form upload-form">
+                    <div class="modal-body">
+                        <div>
+                            <div class="form-group">
+                                <label>과목명</label>
+                                <input id="newSubjectName" type="text" required class="form-control"
+                                       title="Required and no space allowed">
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" value="" name="save" class="btn btn-primary" th:onclick="updateSubject()">
+                            <img class="loading-save" alt="save"  style="display:none;" th:src="@{/img/loading.gif}" width=30 height=30>
+                            저장
+                        </button>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                            취소
                         </button>
                     </div>
                 </form>
@@ -120,6 +157,7 @@
 <script th:inline="javascript">
     let currentPage = 0;
     let size = 10;
+    let selectedSubjectId;
 
     window.onload = function () {
         loadData();
@@ -140,16 +178,24 @@
     function drawList(list){
         let html = '';
 
-        list.forEach((row) => {
+        list.forEach((subject) => {
             html += `
                 <tr>
-                    <td>${row.id}</td>
+                    <td>${subject.id}</td>
                     <td>
                         <div class="d-flex justify-content-between">
-                            <span style="cursor: pointer" onclick="redirectToExam(${row.id}, '${row.name}')">${row.name}</span>
-                            <button onclick="removeSubject(${row.id})" class="btn btn-default" type="button">
-                                <img class="" alt="remove" src="/img/trash.svg">
-                            </button>
+                            <span style="cursor: pointer" onclick="redirectToExam(${subject.id}, '${subject.name}')">
+                                ${subject.name}
+                            </span>
+                            <div class="d-flex justify-content-end">
+                                <button class="btn btn-default" type="button">
+                                    <img onclick="prepareUpdateSubjectForm(${subject.id}, '${subject.name}')" data-toggle="modal" data-target="#update-subject-modal"
+                                    alt="update" src="/img/edit.svg">
+                                </button>
+                                <button onclick="removeSubject(${subject.id})" class="btn btn-default" type="button">
+                                    <img alt="remove" src="/img/trash.svg">
+                                </button>
+                            </div>
                         </div>
                     </td>
                 </tr>
@@ -237,8 +283,13 @@
         })
     }
 
+    function prepareUpdateSubjectForm(subjectId, subjectName){
+        document.querySelector('#newSubjectName').value = subjectName;
+        selectedSubjectId = subjectId;
+    }
+
     function saveSubject(){
-        const name = document.querySelector('#newSubjectName').value;
+        const name = document.querySelector('#subjectName').value;
 
         const subjectCreateRequest = {
             name: name,
@@ -261,10 +312,40 @@
             })
     }
 
-    function hideModal(){
-        $('#add-subject-modal').modal('hide');
+    function updateSubject(){
+        const newSubjectName = document.querySelector('#newSubjectName').value;
+
+        const subjectUpdateRequest = {
+            name: newSubjectName,
+        }
+
+        fetch(`/admin/subject/${selectedSubjectId}`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(subjectUpdateRequest)
+        })
+            .then((res) => {
+                if(!res.ok){
+                    throw new Error(`수정에 실패했습니다.`);
+                }
+            })
+            .then(() => {
+                reloadPage();
+                hideModal();
+            })
+            .catch((error) => {
+                console.log(error);
+            })
     }
 
+    function hideModal(){
+        $('#add-subject-modal').modal('hide');
+        $('#update-subject-modal').modal('hide');
+    }
+
+    //
     function reloadPage(){
         const params = {
             page: currentPage,

@@ -3,10 +3,12 @@ package com.cpa.yusin.quiz.web.controller;
 import com.cpa.yusin.quiz.common.controller.dto.request.DataTableRequest;
 import com.cpa.yusin.quiz.common.controller.dto.response.GlobalResponse;
 import com.cpa.yusin.quiz.subject.controller.dto.request.SubjectCreateRequest;
+import com.cpa.yusin.quiz.subject.controller.dto.request.SubjectUpdateRequest;
 import com.cpa.yusin.quiz.subject.controller.dto.response.SubjectCreateResponse;
 import com.cpa.yusin.quiz.subject.controller.dto.response.SubjectDTO;
 import com.cpa.yusin.quiz.subject.controller.port.SubjectService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -42,6 +44,13 @@ public class SubjectController
     {
         log.info("name = {}", request.getName());
         return subjectService.save(request);
+    }
+
+    @ResponseBody
+    @PatchMapping("/{subjectId}")
+    public void update(@Positive @PathVariable("subjectId") long subjectId, @Valid @RequestBody SubjectUpdateRequest request)
+    {
+        subjectService.update(subjectId, request);
     }
 
     @ResponseBody
