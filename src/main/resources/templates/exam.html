@@ -105,7 +105,7 @@
                 <div class="modal-header">
                     <h4 class="card-heading">새로운 시험 추가</h4>
                     <button class="close" type="button" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">×</span>
+                        <span>×</span>
                     </button>
                 </div>
                 <form id="exam-form" class="form upload-form">
@@ -163,7 +163,7 @@
                 <div class="modal-header">
                     <h4 class="card-heading">시험 정보 수정</h4>
                     <button class="close" type="button" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">×</span>
+                        <span>×</span>
                     </button>
                 </div>
                 <form id="update-exam-form" class="form upload-form">
@@ -238,6 +238,7 @@
     let selectedSubjectId;
     let selectedSubjectName;
     let selectedYear;
+    let selectedExamId;
 
     window.onload = function(){
         selectedSubjectId = sessionStorage.getItem("subjectId");
@@ -320,15 +321,27 @@
     }
 
     function prepareExamForm(){
-        document.querySelector('.selectedSubjectName').value = selectedSubjectName;
+        //document.querySelector('.selectedSubjectName').value = selectedSubjectName;
+        document.querySelectorAll('.selectedSubjectName').forEach((input) => {
+            input.value = selectedSubjectName;
+        })
+
+        document.querySelector('#examName').value = '';
+        document.querySelector('#examYear').value = '';
+        document.querySelector('#maxProblemCount').value = '';
     }
 
     function prepareUpdateExamForm(exam){
         console.log('selected subject name = ', selectedSubjectName);
-        document.querySelector('.selectedSubjectName').value = selectedSubjectName;
+        document.querySelectorAll('.selectedSubjectName').forEach((input) => {
+            input.value = selectedSubjectName;
+        })
+
         document.querySelector('#newExamName').value = exam.name;
         document.querySelector('#newExamYear').value = exam.year;
         document.querySelector('#newMaxProblemCount').value = exam.maxProblemCount;
+
+        selectedExamId = exam.id;
     }
 
     function loadData(examList){
@@ -375,17 +388,49 @@
         if(!confirm('정말 삭제하시겠습니까?')){
             return;
         }
-        $.ajax({
-            type: "DELETE",
-            url: '/admin/exam/' + examId,
-            success: function (){
-                selectSubject(selectedSubjectId, selectedSubjectName);
-            }
-
+        fetch(`/admin/exam/${examId}`, {
+            method: 'DELETE',
         })
+            .then((res) => {
+                if(!res.ok){
+                    throw new Error('삭제에 실패했습니다');
+                }
+                return getExamList(selectedSubjectId, selectedYear);
+            })
+            .then(examList => {
+                loadData(examList);
+                changeButtonName(selectedSubjectName);
+            })
     }
 
-    function updateExam(examId){
+
+    function updateExam(){
+        const examName = document.querySelector('#newExamName').value
+        const examYear = document.querySelector('#newExamYear').value
+        const maxProblemCount = document.querySelector('#newMaxProblemCount').value
+
+        const examUpdateRequest = {
+            name: examName,
+            year: examYear,
+            maxProblemCount: maxProblemCount
+        }
+
+        fetch(`/admin/exam/${selectedExamId}`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(examUpdateRequest),
+        })
+            .then(response => response.json())
+            .then(() => {
+                getExamList(selectedSubjectId, selectedYear)
+                    .then(examList => {
+                        $('#update-exam-modal').modal('hide');
+                        loadData(examList);
+                        changeButtonName(selectedSubjectName);
+                    })
+            })
 
     }
 

@@ -2,6 +2,7 @@ package com.cpa.yusin.quiz.web.controller;
 
 import com.cpa.yusin.quiz.common.controller.dto.response.GlobalResponse;
 import com.cpa.yusin.quiz.exam.controller.dto.request.ExamCreateRequest;
+import com.cpa.yusin.quiz.exam.controller.dto.request.ExamUpdateRequest;
 import com.cpa.yusin.quiz.exam.controller.dto.response.ExamCreateResponse;
 import com.cpa.yusin.quiz.exam.controller.dto.response.ExamDTO;
 import com.cpa.yusin.quiz.exam.controller.port.ExamService;
@@ -44,6 +45,7 @@ public class ExamController
         return response;
     }
 
+    @ResponseBody
     @PostMapping("/exam")
     public long save(@Positive @RequestParam(value = "subjectId") long subjectId,
                      @Validated @RequestBody ExamCreateRequest request)
@@ -54,8 +56,17 @@ public class ExamController
     }
 
     @ResponseBody
-    @DeleteMapping("/exam/{id}")
-    public void deleteExam(@PathVariable("id") long examId)
+    @PatchMapping("/exam/{id}")
+    public ExamDTO update(@Positive @PathVariable("id") long examId, @RequestBody ExamUpdateRequest request)
+    {
+        examService.update(examId, request);
+
+        return examService.getById(examId);
+    }
+
+    @ResponseBody
+    @DeleteMapping("/exam/{examId}")
+    public void deleteExam(@PathVariable("examId") long examId)
     {
         examService.deleteById(examId);
     }
