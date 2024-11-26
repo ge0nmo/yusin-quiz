@@ -1,5 +1,6 @@
 package com.cpa.yusin.quiz.choice.controller.mapper;
 
+import com.cpa.yusin.quiz.choice.controller.dto.request.ChoiceCreateRequest;
 import com.cpa.yusin.quiz.choice.controller.dto.request.ChoiceRequest;
 import com.cpa.yusin.quiz.choice.controller.dto.response.ChoiceCreateResponse;
 import com.cpa.yusin.quiz.choice.controller.dto.response.ChoiceResponse;
@@ -11,6 +12,8 @@ import java.util.List;
 public interface ChoiceMapper
 {
     Choice fromCreateRequestToDomain(ChoiceRequest request, Problem problem);
+
+    Choice fromCreateRequestToDomain(ChoiceCreateRequest request, Problem problem);
 
     ChoiceCreateResponse toCreateResponse(Choice domain);
 

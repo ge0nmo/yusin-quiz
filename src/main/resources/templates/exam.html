@@ -46,6 +46,7 @@
                             </div>
 
                             <div class="btn-group">
+                                <label for="yearList"></label>
                                 <select id="yearList" name="yearList" class="form-control bg-custom-light" onchange="inputYearHandle()">
                                     <option value="">연도 선택</option>
                                     <option id="selectedYear" th:each="year : ${examYearList}" th:value="${year}" th:text="${year}" th:selected="${year == examYearList}">

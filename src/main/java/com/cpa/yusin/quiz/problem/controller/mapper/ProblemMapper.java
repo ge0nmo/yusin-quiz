@@ -3,6 +3,7 @@ package com.cpa.yusin.quiz.problem.controller.mapper;
 import com.cpa.yusin.quiz.choice.controller.dto.response.ChoiceCreateResponse;
 import com.cpa.yusin.quiz.choice.controller.dto.response.ChoiceResponse;
 import com.cpa.yusin.quiz.exam.domain.Exam;
+import com.cpa.yusin.quiz.problem.controller.dto.request.ProblemCreateRequest;
 import com.cpa.yusin.quiz.problem.controller.dto.request.ProblemRequest;
 import com.cpa.yusin.quiz.problem.controller.dto.response.ProblemCreateResponse;
 import com.cpa.yusin.quiz.problem.controller.dto.response.ProblemDTO;
@@ -17,6 +18,18 @@ import java.util.List;
 public class ProblemMapper
 {
     public Problem toProblemEntity(ProblemRequest request, Exam exam)
+    {
+        if(request == null || exam == null)
+            return null;
+
+        return Problem.builder()
+                .content(request.getContent())
+                .number(request.getNumber())
+                .exam(exam)
+                .build();
+    }
+
+    public Problem toProblemEntity(ProblemCreateRequest request, Exam exam)
     {
         if(request == null || exam == null)
             return null;

@@ -1,5 +1,6 @@
 package com.cpa.yusin.quiz.choice.controller.mapper;
 
+import com.cpa.yusin.quiz.choice.controller.dto.request.ChoiceCreateRequest;
 import com.cpa.yusin.quiz.choice.controller.dto.request.ChoiceRequest;
 import com.cpa.yusin.quiz.choice.controller.dto.response.ChoiceCreateResponse;
 import com.cpa.yusin.quiz.choice.controller.dto.response.ChoiceResponse;
@@ -15,6 +16,20 @@ public class ChoiceMapperImpl implements ChoiceMapper
 {
     @Override
     public Choice fromCreateRequestToDomain(ChoiceRequest request, Problem problem)
+    {
+        if(request == null || problem == null)
+            return null;
+
+        return Choice.builder()
+                .number(request.getNumber())
+                .content(request.getContent())
+                .isAnswer(request.getIsAnswer())
+                .problem(problem)
+                .build();
+    }
+
+    @Override
+    public Choice fromCreateRequestToDomain(ChoiceCreateRequest request, Problem problem)
     {
         if(request == null || problem == null)
             return null;

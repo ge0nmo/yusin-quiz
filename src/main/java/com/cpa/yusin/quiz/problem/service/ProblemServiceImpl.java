@@ -7,6 +7,7 @@ import com.cpa.yusin.quiz.exam.controller.port.ExamService;
 import com.cpa.yusin.quiz.exam.domain.Exam;
 import com.cpa.yusin.quiz.global.exception.ExceptionMessage;
 import com.cpa.yusin.quiz.global.exception.ProblemException;
+import com.cpa.yusin.quiz.problem.controller.dto.request.ProblemCreateRequest;
 import com.cpa.yusin.quiz.problem.controller.dto.request.ProblemRequest;
 import com.cpa.yusin.quiz.problem.controller.dto.response.ProblemDTO;
 import com.cpa.yusin.quiz.problem.controller.dto.response.ProblemResponse;
@@ -36,16 +37,28 @@ public class ProblemServiceImpl implements ProblemService
     private final ChoiceService choiceService;
 
     @Transactional
+    public void save(long examId, ProblemCreateRequest request)
+    {
+        Exam exam = examService.findById(examId);
+
+        Problem problem = problemMapper.toProblemEntity(request, exam);
+
+        problem = problemRepository.save(problem);
+        choiceService.save(problem, request.getChoices());
+    }
+
+
+    @Transactional
     @Override
     public void saveOrUpdateProblem(long examId, List<ProblemRequest> requests)
     {
-        Exam exam = examService.findById(examId);
+        /*Exam exam = examService.findById(examId);
         List<Long> problemIdsToDelete = new ArrayList<>();
         Map<Problem, List<ChoiceRequest>> choiceUpdateMap = new HashMap<>();
 
         for(ProblemRequest request : requests)
         {
-            if(request.isDeleted() && !request.isNew()){
+            if(request.getIsDeleted() && !request.isNew()){
                 problemIdsToDelete.add(request.getId());
             } else{
                 Problem problem;
@@ -61,7 +74,7 @@ public class ProblemServiceImpl implements ProblemService
         }
 
         deleteProcess(problemIdsToDelete);
-        choiceService.saveOrUpdate(choiceUpdateMap);
+        choiceService.saveOrUpdate(choiceUpdateMap);*/
     }
 
     private void deleteProcess(List<Long> problemIds)

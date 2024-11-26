@@ -24,6 +24,6 @@ public class ChoiceRequest
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     public boolean isNew()
     {
-        return id == null;
+        return id == null || id < 0;
     }
 }

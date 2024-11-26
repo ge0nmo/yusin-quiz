@@ -27,6 +27,8 @@ public class Problem
     @Column(nullable = false)
     private int number;
 
+    private String explanation;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "exam_id", nullable = false)
     private Exam exam;

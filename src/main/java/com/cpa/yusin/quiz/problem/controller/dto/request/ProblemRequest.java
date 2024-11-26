@@ -16,12 +16,12 @@ public class ProblemRequest
     private Long id;
     private String content;
     private int number;
-    private boolean deleted;
+    private Boolean isDeleted;
     private List<ChoiceRequest> choices;
 
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     public boolean isNew()
     {
-        return id == null;
+        return id == null || id <= 0;
     }
 }

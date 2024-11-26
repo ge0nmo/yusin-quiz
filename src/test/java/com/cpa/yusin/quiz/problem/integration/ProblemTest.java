@@ -132,8 +132,8 @@ public class ProblemTest
         );
 
         List<ProblemRequest> request = List.of(
-                ProblemRequest.builder().id(null).number(1).choices(choiceRequests1).content(content1).deleted(false).build(),
-                ProblemRequest.builder().id(null).number(2).choices(choiceRequests2).content(content2).deleted(false).build()
+                ProblemRequest.builder().id(null).number(1).choices(choiceRequests1).content(content1).isDeleted(false).build(),
+                ProblemRequest.builder().id(null).number(2).choices(choiceRequests2).content(content2).isDeleted(false).build()
         );
 
         // when
