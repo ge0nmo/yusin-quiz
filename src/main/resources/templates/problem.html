@@ -60,8 +60,7 @@
 
                             <div class="btn-group">
                                 <label for="examList"></label>
-                                <select id="examList" name="examList" class="form-control bg-custom-light"
-                                        onchange="clickExamListHandle()">
+                                <select id="examList" name="examList" class="form-control bg-custom-light">
 
                                     <option value="">시험 선택</option>
                                 </select>
@@ -185,10 +184,7 @@
         }
     }
 
-    function clickExamListHandle() {
-        console.log(`selected subject = ${selectedSubjectId}`)
-        console.log(`selected year = ${selectedYear}`)
-    }
+
 
     async function loadExamList() {
         const parentElement = document.getElementById('examList');
@@ -231,10 +227,11 @@
         }
     }
 
-    function handleExamClick(examId){
-        selectedExamId = examId;
-        console.log(selectedExamId);
-    }
+    document.getElementById('examList').addEventListener('change', function(){
+        const selectedValue = this.value;
+        selectedExamId = selectedValue || null;
+        console.log(`selected exam id = ${selectedExamId}`);
+    })
 
     function handleInput() {
         // 검색 결과를 넣을 창 선택
@@ -280,6 +277,7 @@
 
 
     function handleSearchClick() {
+
 
     }
 
