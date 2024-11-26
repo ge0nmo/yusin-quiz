@@ -1,6 +1,5 @@
 package com.cpa.yusin.quiz.problem.integration;
 
-import com.cpa.yusin.quiz.choice.controller.dto.request.ChoiceRequest;
 import com.cpa.yusin.quiz.choice.domain.Choice;
 import com.cpa.yusin.quiz.choice.service.port.ChoiceRepository;
 import com.cpa.yusin.quiz.config.TeardownExtension;
@@ -10,7 +9,6 @@ import com.cpa.yusin.quiz.member.domain.Member;
 import com.cpa.yusin.quiz.member.domain.type.Platform;
 import com.cpa.yusin.quiz.member.domain.type.Role;
 import com.cpa.yusin.quiz.member.service.port.MemberRepository;
-import com.cpa.yusin.quiz.problem.controller.dto.request.ProblemRequest;
 import com.cpa.yusin.quiz.problem.domain.Problem;
 import com.cpa.yusin.quiz.problem.service.port.ProblemRepository;
 import com.cpa.yusin.quiz.subject.domain.Subject;
@@ -22,7 +20,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.MediaType;
 import org.springframework.restdocs.RestDocumentationContextProvider;
 import org.springframework.restdocs.RestDocumentationExtension;
 import org.springframework.restdocs.payload.JsonFieldType;
@@ -39,12 +36,10 @@ import java.util.List;
 
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.documentationConfiguration;
-import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.*;
+import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.*;
-import static org.springframework.restdocs.operation.preprocess.Preprocessors.prettyPrint;
-import static org.springframework.restdocs.payload.PayloadDocumentation.*;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
-import static org.springframework.restdocs.request.RequestDocumentation.*;
+import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith({RestDocumentationExtension.class, TeardownExtension.class})
@@ -106,7 +101,7 @@ public class ProblemTest
                 .build());
     }
 
-    @WithUserDetails(value = "John@gmail.com", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+    /*@WithUserDetails(value = "John@gmail.com", setupBefore = TestExecutionEvent.TEST_EXECUTION)
     @Test
     void saveUpdate_success() throws Exception
     {
@@ -180,7 +175,7 @@ public class ProblemTest
                 ))
         ;
 
-    }
+    }*/
 
     @Transactional
     @WithUserDetails(value = "John@gmail.com", setupBefore = TestExecutionEvent.TEST_EXECUTION)

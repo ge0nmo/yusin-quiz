@@ -63,7 +63,7 @@
                                 <select id="examList" name="examList" class="form-control bg-custom-light"
                                         onchange="clickExamListHandle()">
 
-                                    <!--<option value="">1회</option>-->
+                                    <option value="">시험 선택</option>
                                 </select>
                             </div>
 
@@ -193,21 +193,23 @@
     async function loadExamList() {
         const parentElement = document.getElementById('examList');
         try {
-            // Wait for the fetchExamList to resolve
+
             const exams = await fetchExamList();
 
-            // Clear any existing options
             parentElement.innerHTML = '';
+            const defaultOption = document.createElement('option');
+            defaultOption.value = "";
+            defaultOption.textContent = "시험 선택";
+            parentElement.appendChild(defaultOption);
 
-            // Generate the new options based on the fetched exams
             exams.forEach((exam) => {
                 const option = document.createElement('option');
-                option.value = exam.id; // Use the exam ID as the value
-                option.textContent = exam.name; // Set the name as the option text
+                option.value = exam.id;
+                option.textContent = exam.name;
+                option.addEventListener('change', () => handleExamClick(exam.id));
                 parentElement.appendChild(option);
             });
 
-            console.log('Exam list loaded successfully.');
         } catch (error) {
             console.error('Error loading exam list:', error);
         }
@@ -229,10 +231,15 @@
         }
     }
 
+    function handleExamClick(examId){
+        selectedExamId = examId;
+        console.log(selectedExamId);
+    }
+
     function handleInput() {
         // 검색 결과를 넣을 창 선택
         const parentElement = document.querySelector('#search-result');
-        // 검색 한 단어 선택90
+        // 검색 한 단어 선택
         const searchedWord = document.querySelector('.form-control').value;
 
         // 기존에 검색 결과 지우기
