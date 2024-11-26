@@ -41,15 +41,16 @@
                                     <div class="dropdown-divider"></div>
                                     <ul id="search-result" class="list-group"></ul>
                                 </div>
-
-                                <div id="selectedSubject" class="ml-4 bg-light">
-
+                                <div id="selectedSubject" class="bg-light">
                                 </div>
                             </div>
 
                             <div class="btn-group">
-                                <label for="selectedYear"></label>
-                                <input id="selectedYear" class="btn btn-outline-secondary" type="number" onchange="inputYearHandle()" />
+                                <select id="yearList" name="yearList" class="form-control bg-custom-light" onchange="inputYearHandle()">
+                                    <option value="">연도 선택</option>
+                                    <option id="selectedYear" th:each="year : ${examYearList}" th:value="${year}" th:text="${year}" th:selected="${year == examYearList}">
+                                    </option>
+                                </select>
                             </div>
 
                             <div class="btn-group">
@@ -244,7 +245,8 @@
         selectedSubjectId = sessionStorage.getItem("subjectId");
         selectedSubjectName = sessionStorage.getItem("subjectName");
         selectedYear = new Date().getFullYear();
-        document.querySelector('#selectedYear').value = selectedYear;
+        document.getElementById('yearList').value = selectedYear;
+        /*document.querySelector('#selectedYear').value = selectedYear;*/
 
         if(selectedSubjectId && selectedSubjectName){
             sessionStorage.removeItem("subjectId");
@@ -255,7 +257,6 @@
                     loadData(examList)
                     changeButtonName(selectedSubjectName);
                 })
-
         }
     }
 
@@ -309,10 +310,14 @@
     }
 
     function inputYearHandle(){
-        selectedYear = document.querySelector('#selectedYear').value;
+        selectedYear = document.getElementById('yearList').value;
     }
 
     function handleSearchClick(){
+        if(selectedYear === undefined){
+            return;
+        }
+
         getExamList(selectedSubjectId, selectedYear)
             .then(examList => {
                 loadData(examList)
