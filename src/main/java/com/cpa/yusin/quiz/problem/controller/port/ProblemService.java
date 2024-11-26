@@ -1,5 +1,6 @@
 package com.cpa.yusin.quiz.problem.controller.port;
 
+import com.cpa.yusin.quiz.problem.controller.dto.request.ProblemCreateRequest;
 import com.cpa.yusin.quiz.problem.controller.dto.request.ProblemRequest;
 import com.cpa.yusin.quiz.problem.controller.dto.response.ProblemDTO;
 import com.cpa.yusin.quiz.problem.controller.dto.response.ProblemResponse;
@@ -9,6 +10,8 @@ import java.util.List;
 
 public interface ProblemService
 {
+    void save(long examId, ProblemCreateRequest request);
+
     void saveOrUpdateProblem(long examId, List<ProblemRequest> requests);
 
     List<ProblemResponse> getAllByExamId(long examId);

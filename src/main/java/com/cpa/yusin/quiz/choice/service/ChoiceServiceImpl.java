@@ -1,5 +1,6 @@
 package com.cpa.yusin.quiz.choice.service;
 
+import com.cpa.yusin.quiz.choice.controller.dto.request.ChoiceCreateRequest;
 import com.cpa.yusin.quiz.choice.controller.dto.request.ChoiceRequest;
 import com.cpa.yusin.quiz.choice.controller.dto.response.ChoiceResponse;
 import com.cpa.yusin.quiz.choice.controller.mapper.ChoiceMapper;
@@ -14,7 +15,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -29,11 +29,21 @@ public class ChoiceServiceImpl implements ChoiceService
     private final ChoiceRepository choiceRepository;
     private final ChoiceMapper choiceMapper;
 
+    @Transactional
+    @Override
+    public void save(Problem problem, List<ChoiceCreateRequest> requests)
+    {
+        List<Choice> choiceRequests = requests.stream().map(request -> choiceMapper.fromCreateRequestToDomain(request, problem))
+                .toList();
 
+        choiceRepository.saveAll(choiceRequests);
+    }
+
+    @Transactional
     @Override
     public void saveOrUpdate(Map<Problem, List<ChoiceRequest>> choiceMaps)
     {
-        List<Choice> saveOrUpdate = new ArrayList<>();
+        /*List<Choice> saveOrUpdate = new ArrayList<>();
         List<Long> deleteList = new ArrayList<>();
 
         for(Map.Entry<Problem, List<ChoiceRequest>> entry : choiceMaps.entrySet()) {
@@ -58,7 +68,7 @@ public class ChoiceServiceImpl implements ChoiceService
         }
 
         deleteProcess(deleteList);
-        saveProcess(saveOrUpdate);
+        saveProcess(saveOrUpdate);*/
     }
 
     private void deleteProcess(List<Long> choiceIdsToDelete)

@@ -15,10 +15,11 @@
 <div id="wrapper">
     <div th:replace="~{fragments/side.html :: side}"></div>
     <div id="content-wrapper" class="d-flex flex-column">
-        <!-- Main Content-->
+        <!-- Header -->
         <div id="content">
             <header th:replace="~{fragments/header.html :: header}"></header>
 
+            <!--Main Content -->
             <div class="container-fluid">
                 <div class="col-12">
                     <div class="card shadow mb-4">
@@ -27,29 +28,113 @@
                                 문제 관리
                             </h6>
 
+                            <div class="btn-group">
+                                <button id="subjectSearchBar" type="button"
+                                        class="btn btn-outline-secondary dropdown-toggle" data-toggle="dropdown"
+                                        aria-haspopup="true" aria-expanded="false">
+                                    과목 검색
+                                </button>
+                                <div class="dropdown-menu">
+                                    <div class="input-group-text">
+                                        <input type="text" class="form-control" placeholder="Search..."
+                                               onChange="handleInput()"
+                                               aria-label="Recipient's username" aria-describedby="button-addon2">
+                                    </div>
+                                    <div class="dropdown-divider"></div>
+                                    <ul id="search-result" class="list-group"></ul>
+                                </div>
+                                <div id="selectedSubject" class="bg-light">
+                                </div>
+                            </div>
+
+                            <div class="btn-group">
+                                <label for="yearList"></label>
+                                <select id="yearList" name="yearList" class="form-control bg-custom-light"
+                                        onchange="inputYearHandle()">
+                                    <option value="">연도 선택</option>
+                                    <option id="selectedYear" th:each="year : ${examYearList}" th:value="${year}"
+                                            th:text="${year}" th:selected="${year == examYearList}">
+                                    </option>
+                                </select>
+                            </div>
+
+                            <div class="btn-group">
+                                <label for="examList"></label>
+                                <select id="examList" name="examList" class="form-control bg-custom-light"
+                                        onchange="clickExamListHandle()">
+
+                                    <option value="">시험 선택</option>
+                                </select>
+                            </div>
+
+
+                            <div class="btn-group">
+                                <button class="btn btn-outline-secondary" onclick="handleSearchClick()">
+                                    <img src="/img/search.svg" alt="search">
+                                </button>
+                            </div>
+
+
+                            <div class="float-right">
+                                <button class="btn btn-light" data-toggle="modal" data-target="#add-problem-modal"
+                                        onclick="prepareExamForm()">
+                                    <img class="ml-2" th:src="@{/img/add_icon.png}" alt="">문제 추가
+                                </button>
+                            </div>
                         </div>
+
                         <div class="card-body">
+                            <div class="card shadow-sm mb-4">
+                                <div class="card-header bg-primary text-white">
+                                    <h5 class="mb-0">Question 1</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="mb-3">
+                                        <h6 class="fw-bold">다음중 옳은것을 고르시오</h6>
+                                    </div>
+                                    <div class="choices list-group">
+                                        <button class="list-group-item list-group-item-action">
+                                            1. 가나다라
+                                        </button>
+                                        <button class="list-group-item list-group-item-action">
+                                            2. 마바사아
+                                        </button>
+                                        <button class="list-group-item list-group-item-action">
+                                            3. 자카타파하
+                                        </button>
+                                        <button class="list-group-item list-group-item-action">
+                                            4. 에이비씨
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+
+                        </div>
+
+
+                        <!--<div class="card-body">
                             <div class="table-responsive">
                                 <table id="load-user" class="table table-bordered" th:width="100" th:cellspacing="0">
                                     <thead class="thead-light">
                                     <tr>
                                         <th scope="col">번호</th>
-
+                                        <th scope="col">시험 이름</th>
                                     </tr>
                                     </thead>
 
-                                    <!-- member list rendering-->
-                                    <tbody id="subject"></tbody>
+                                    &lt;!&ndash; member list rendering&ndash;&gt;
+                                    <tbody id="examList"></tbody>
                                 </table>
 
-                                <!--Pagination rendering-->
+                                &lt;!&ndash;Pagination rendering&ndash;&gt;
                                 <div class="paging pagination">
 
                                 </div>
 
                             </div>
 
-                        </div>
+                        </div>-->
 
                     </div>
 
@@ -78,5 +163,128 @@
 <!-- Page level custom scripts -->
 <script th:src="@{/js/demo/chart-area-demo.js}"></script>
 <script th:src="@{/js/demo/chart-pie-demo.js}"></script>
+
+<script>
+    let selectedSubjectId;
+    let selectedSubjectName;
+    let selectedYear;
+    let selectedExamId;
+
+    function selectSubject(subjectId, subjectName) {
+        selectedSubjectId = subjectId;
+        selectedSubjectName = subjectName;
+
+        document.querySelector('#subjectSearchBar').textContent = selectedSubjectName;
+    }
+
+    async function inputYearHandle() {
+        selectedYear = document.getElementById('yearList').value;
+
+        if(selectedSubjectId && selectedYear){
+            await loadExamList();
+        }
+    }
+
+    function clickExamListHandle() {
+        console.log(`selected subject = ${selectedSubjectId}`)
+        console.log(`selected year = ${selectedYear}`)
+    }
+
+    async function loadExamList() {
+        const parentElement = document.getElementById('examList');
+        try {
+
+            const exams = await fetchExamList();
+
+            parentElement.innerHTML = '';
+            const defaultOption = document.createElement('option');
+            defaultOption.value = "";
+            defaultOption.textContent = "시험 선택";
+            parentElement.appendChild(defaultOption);
+
+            exams.forEach((exam) => {
+                const option = document.createElement('option');
+                option.value = exam.id;
+                option.textContent = exam.name;
+                option.addEventListener('change', () => handleExamClick(exam.id));
+                parentElement.appendChild(option);
+            });
+
+        } catch (error) {
+            console.error('Error loading exam list:', error);
+        }
+    }
+
+
+    async function fetchExamList() {
+        try {
+            const response = await fetch(`/admin/subject/${selectedSubjectId}/exam?year=${selectedYear}`);
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            const examList = await response.json(); // Parse the JSON response
+            console.log(`Fetched exam data =`, examList);
+            return examList;
+        } catch (error) {
+            console.error(`Error fetching exam list:`, error);
+            return [];
+        }
+    }
+
+    function handleExamClick(examId){
+        selectedExamId = examId;
+        console.log(selectedExamId);
+    }
+
+    function handleInput() {
+        // 검색 결과를 넣을 창 선택
+        const parentElement = document.querySelector('#search-result');
+        // 검색 한 단어 선택
+        const searchedWord = document.querySelector('.form-control').value;
+
+        // 기존에 검색 결과 지우기
+        parentElement.innerHTML = '';
+
+        // 검색한 단어의 길이가 0(검색을 안한 경우) 그대로 반환
+        if (searchedWord.length === 0) {
+            return;
+        }
+
+        // api 검색
+        $.ajax({
+            url: '/admin/subject/dropdown',
+            type: 'GET',
+            data: {
+                name: searchedWord,
+            },
+            success: function (subjects) {
+                if (subjects.length > 0) {
+                    subjects.forEach((subject) => {
+                        const listGroup = document.createElement('li');
+                        listGroup.className = 'list-group-item';
+                        listGroup.textContent = subject.name;
+                        parentElement.appendChild(listGroup);
+                        listGroup.addEventListener('click', () => selectSubject(subject.id, subject.name));
+                    });
+                } else {
+                    const listGroup = document.createElement('li');
+                    listGroup.className = 'list-group-item';
+                    listGroup.textContent = '검색 결과가 없습니다';
+                    parentElement.appendChild(listGroup);
+                }
+            },
+
+        })
+
+    }
+
+
+    function handleSearchClick() {
+
+    }
+
+
+</script>
+
 </body>
 </html>

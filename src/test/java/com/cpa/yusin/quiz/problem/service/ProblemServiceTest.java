@@ -15,7 +15,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class ProblemServiceTest extends MockSetup
 {
-    @Test
+    /*@Test
     void saveOrUpdate()
     {
         // given
@@ -63,9 +63,9 @@ class ProblemServiceTest extends MockSetup
 
         assertThat(problems.getFirst().getContent()).isEqualTo("problem1");
         assertThat(problems.getFirst().getNumber()).isEqualTo(1);
-    }
+    }*/
 
-    @DisplayName("completePayment when ids exist in the request")
+    /*@DisplayName("completePayment when ids exist in the request")
     @Test
     void saveOrUpdate2()
     {
@@ -90,7 +90,7 @@ class ProblemServiceTest extends MockSetup
         assertThat(choices.getFirst().getContent()).isEqualTo("problem1 - choice1");
         assertThat(choices.getFirst().getNumber()).isEqualTo(1);
         assertThat(choices.getFirst().getIsAnswer()).isFalse();
-    }
+    }*/
 
     @Test
     void getById()

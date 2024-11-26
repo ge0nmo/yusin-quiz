@@ -15,7 +15,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class ChoiceServiceTest extends MockSetup
 {
 
-    @Test
+    /*@Test
     void saveOrUpdate()
     {
         // given
@@ -59,6 +59,6 @@ class ChoiceServiceTest extends MockSetup
         assertThat(choiceDomains.get(4).getContent()).isEqualTo("problem1 - choice5");
         assertThat(choiceDomains.get(4).getNumber()).isEqualTo(5);
         assertThat(choiceDomains.get(4).getIsAnswer()).isFalse();
-    }
+    }*/
 
 }

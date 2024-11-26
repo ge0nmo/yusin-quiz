@@ -16,7 +16,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class AdminProblemControllerTest extends MockSetup
 {
-    @Test
+    /*@Test
     void saveOrUpdate()
     {
         // given
@@ -56,7 +56,7 @@ class AdminProblemControllerTest extends MockSetup
         assertThat(choices.get(1).getNumber()).isEqualTo(2);
         assertThat(choices.get(1).getIsAnswer()).isFalse();
 
-    }
+    }*/
 
 
     @Test

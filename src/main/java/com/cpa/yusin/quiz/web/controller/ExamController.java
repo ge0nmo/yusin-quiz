@@ -1,20 +1,18 @@
 package com.cpa.yusin.quiz.web.controller;
 
-import com.cpa.yusin.quiz.common.controller.dto.response.GlobalResponse;
 import com.cpa.yusin.quiz.exam.controller.dto.request.ExamCreateRequest;
 import com.cpa.yusin.quiz.exam.controller.dto.request.ExamUpdateRequest;
 import com.cpa.yusin.quiz.exam.controller.dto.response.ExamCreateResponse;
 import com.cpa.yusin.quiz.exam.controller.dto.response.ExamDTO;
 import com.cpa.yusin.quiz.exam.controller.port.ExamService;
-import com.cpa.yusin.quiz.exam.domain.Exam;
+import com.cpa.yusin.quiz.global.utils.DateUtils;
 import com.cpa.yusin.quiz.subject.controller.port.SubjectService;
 import com.cpa.yusin.quiz.subject.domain.Subject;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,21 +26,23 @@ public class ExamController
 {
     private final SubjectService subjectService;
     private final ExamService examService;
+    private final DateUtils dateUtils;
 
     @GetMapping("/exam")
-    public String exam()
+    public String exam(Model model)
     {
+        List<Integer> examYearList = dateUtils.getExamYearList();
+        model.addAttribute("examYearList", examYearList);
+
         return "exam";
     }
+
 
     @ResponseBody
     @GetMapping("/subject/{subjectId}/exam")
     public List<ExamDTO> getExamList(@PathVariable("subjectId") long subjectId, @RequestParam("year") int year)
     {
-        log.info("subject id = {}", subjectId);
-        List<ExamDTO> response = examService.getAllBySubjectId(subjectId, year);
-        log.info("response = {}", response);
-        return response;
+        return examService.getAllBySubjectId(subjectId, year);
     }
 
     @ResponseBody
