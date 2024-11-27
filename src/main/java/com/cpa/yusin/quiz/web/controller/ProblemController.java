@@ -3,7 +3,6 @@ package com.cpa.yusin.quiz.web.controller;
 
 import com.cpa.yusin.quiz.global.utils.DateUtils;
 import com.cpa.yusin.quiz.problem.controller.dto.request.ProblemCreateRequest;
-import com.cpa.yusin.quiz.problem.controller.dto.response.ProblemDTO;
 import com.cpa.yusin.quiz.problem.controller.dto.response.ProblemResponse;
 import com.cpa.yusin.quiz.problem.controller.port.ProblemService;
 import lombok.RequiredArgsConstructor;
@@ -35,7 +34,7 @@ public class ProblemController
 
     @ResponseBody
     @GetMapping("/problem/list")
-    public List<ProblemResponse> get(@RequestParam("subjectId") long examId)
+    public List<ProblemResponse> get(@RequestParam("examId") long examId)
     {
         return problemService.getAllByExamId(examId);
     }
@@ -45,5 +44,12 @@ public class ProblemController
     public void save(@RequestParam("examId") long examId, @Validated @RequestBody ProblemCreateRequest request)
     {
         problemService.save(examId, request);
+    }
+
+    @ResponseBody
+    @PatchMapping("/problem/{problemId}")
+    public void update(@PathVariable("problemId") long problemId)
+    {
+
     }
 }

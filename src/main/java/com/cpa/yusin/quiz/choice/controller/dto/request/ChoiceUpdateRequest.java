@@ -6,16 +6,22 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Builder
 @Data
-@NoArgsConstructor
+@Builder
 @AllArgsConstructor
-public class ChoiceCreateRequest
+@NoArgsConstructor
+public class ChoiceUpdateRequest
 {
+    private long id;
+
     @NotNull
     private Integer number;
+
     @NotNull
     private String content;
+
     @NotNull
     private Boolean isAnswer;
+
+    private Boolean isDeleted;
 }
