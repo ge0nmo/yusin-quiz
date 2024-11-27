@@ -301,7 +301,7 @@
                             <h5 class="mb-0">
                                 문제<span class="ml-2 problem-number">${problem.number}</span>
                             </h5>
-                            <button class="btn btn-outline-light" onclick="handleUpdateClick(${problemId})">
+                            <button class="editBtn btn btn-outline-light" onclick="handleUpdateClick(${problemId})">
                                 <img src="/img/edit.svg" alt="">
                             </button>
                         </div>
@@ -346,15 +346,64 @@
 
         problemNumber.contentEditable = true;
         problemContent.contentEditable = true;
-        problemNumber.classList.add('border', 'border-danger');
-        problemContent.classList.add('border', 'border-danger');
-
         const choices = parentElement.querySelectorAll('.choice-item');
 
-        for(const choice of choices) {
+        choices.forEach((choice) => {
             console.log(`id = ${choice.dataset.choiceId}`);
-        }
+            const choiceNumber = choice.querySelector('.choice-number');
+            const choiceContent = choice.querySelector('.choice-content');
 
+            console.log(choice);
+            console.log(`번호 = ${choiceNumber.textContent}`);
+            console.log(`내용 = ${choiceContent.textContent}`);
+            choiceNumber.contentEditable = true;
+            choiceContent.contentEditable = true;
+
+        })
+
+        const editImg = parentElement.querySelector('img');
+        editImg.src = `/img/save.svg`;
+
+        const btn = parentElement.querySelector('.editBtn');
+        btn.onclick = () => clickUpdate(problemId);
+    }
+
+    function clickUpdate(problemId){
+        const parentElement = document.getElementById(`problem-${problemId}`);
+
+        // 문제 번호
+        const problemNumber = parentElement.querySelector('.problem-number');
+
+        // 문제 내용
+        const problemContent = parentElement.querySelector('.problem-content');
+
+        console.log(`새로운 내용 = `, problemContent.textContent);
+        problemNumber.contentEditable = false;
+        problemContent.contentEditable = false;
+        const choices = parentElement.querySelectorAll('.choice-item');
+
+        const choiceList = [];
+
+        choices.forEach((choice) => {
+            const choiceNumber = choice.querySelector('.choice-number');
+            const choiceContent = choice.querySelector('.choice-content');
+
+            choiceNumber.contentEditable = false;
+            choiceContent.contentEditable = false;
+
+            choiceList.push({
+                id: choice.dataset.choiceId,
+                number: Number(choiceNumber.textContent),
+                content: JSON.stringify(choiceContent.textContent),
+            })
+
+        })
+
+        /*
+         * TODO
+         *  삭제, 정답체크 아이콘
+         */
+        console.log(choiceList);
     }
 
 
