@@ -1,6 +1,6 @@
 package com.cpa.yusin.quiz.problem.controller.dto.request;
 
-import com.cpa.yusin.quiz.choice.controller.dto.request.ChoiceCreateRequest;
+import com.cpa.yusin.quiz.choice.controller.dto.request.ChoiceUpdateRequest;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -9,12 +9,12 @@ import lombok.NoArgsConstructor;
 import java.util.List;
 
 @Builder
-@Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ProblemCreateRequest
+@Data
+public class ProblemUpdateRequest
 {
     private String content;
     private int number;
-    private List<ChoiceCreateRequest> choices;
+    private List<ChoiceUpdateRequest> choices;
 }

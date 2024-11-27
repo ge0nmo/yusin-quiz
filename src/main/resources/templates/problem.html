@@ -82,58 +82,34 @@
                             </div>
                         </div>
 
-                        <div class="card-body">
-                            <div class="card shadow-sm mb-4">
-                                <div class="card-header bg-primary text-white">
-                                    <h5 class="mb-0">Question 1</h5>
-                                </div>
-                                <div class="card-body">
-                                    <div class="mb-3">
-                                        <h6 class="fw-bold">다음중 옳은것을 고르시오</h6>
-                                    </div>
-                                    <div class="choices list-group">
-                                        <button class="list-group-item list-group-item-action">
-                                            1. 가나다라
-                                        </button>
-                                        <button class="list-group-item list-group-item-action">
-                                            2. 마바사아
-                                        </button>
-                                        <button class="list-group-item list-group-item-action">
-                                            3. 자카타파하
-                                        </button>
-                                        <button class="list-group-item list-group-item-action">
-                                            4. 에이비씨
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
+                        <!-- 문제 데이터 -->
+                        <div id="examTable" class="card-body"></div>
 
-
+                        <!--<div className="card shadow-sm mb-4">
+                        <div className="card-header bg-primary text-white">
+                            <h5 className="mb-0">Question 1</h5>
                         </div>
-
-
-                        <!--<div class="card-body">
-                            <div class="table-responsive">
-                                <table id="load-user" class="table table-bordered" th:width="100" th:cellspacing="0">
-                                    <thead class="thead-light">
-                                    <tr>
-                                        <th scope="col">번호</th>
-                                        <th scope="col">시험 이름</th>
-                                    </tr>
-                                    </thead>
-
-                                    &lt;!&ndash; member list rendering&ndash;&gt;
-                                    <tbody id="examList"></tbody>
-                                </table>
-
-                                &lt;!&ndash;Pagination rendering&ndash;&gt;
-                                <div class="paging pagination">
-
-                                </div>
-
+                        <div className="card-body">
+                            <div className="mb-3">
+                                <h6 className="fw-bold">다음중 옳은것을 고르시오</h6>
                             </div>
-
+                            <div className="choices list-group">
+                                <button className="list-group-item list-group-item-action">
+                                    1. 가나다라
+                                </button>
+                                <button className="list-group-item list-group-item-action">
+                                    2. 마바사아
+                                </button>
+                                <button className="list-group-item list-group-item-action">
+                                    3. 자카타파하
+                                </button>
+                                <button className="list-group-item list-group-item-action">
+                                    4. 에이비씨
+                                </button>
+                            </div>
+                        </div>
                         </div>-->
+
 
                     </div>
 
@@ -168,70 +144,6 @@
     let selectedSubjectName;
     let selectedYear;
     let selectedExamId;
-
-    function selectSubject(subjectId, subjectName) {
-        selectedSubjectId = subjectId;
-        selectedSubjectName = subjectName;
-
-        document.querySelector('#subjectSearchBar').textContent = selectedSubjectName;
-    }
-
-    async function inputYearHandle() {
-        selectedYear = document.getElementById('yearList').value;
-
-        if(selectedSubjectId && selectedYear){
-            await loadExamList();
-        }
-    }
-
-
-
-    async function loadExamList() {
-        const parentElement = document.getElementById('examList');
-        try {
-
-            const exams = await fetchExamList();
-
-            parentElement.innerHTML = '';
-            const defaultOption = document.createElement('option');
-            defaultOption.value = "";
-            defaultOption.textContent = "시험 선택";
-            parentElement.appendChild(defaultOption);
-
-            exams.forEach((exam) => {
-                const option = document.createElement('option');
-                option.value = exam.id;
-                option.textContent = exam.name;
-                option.addEventListener('change', () => handleExamClick(exam.id));
-                parentElement.appendChild(option);
-            });
-
-        } catch (error) {
-            console.error('Error loading exam list:', error);
-        }
-    }
-
-
-    async function fetchExamList() {
-        try {
-            const response = await fetch(`/admin/subject/${selectedSubjectId}/exam?year=${selectedYear}`);
-            if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
-            }
-            const examList = await response.json(); // Parse the JSON response
-            console.log(`Fetched exam data =`, examList);
-            return examList;
-        } catch (error) {
-            console.error(`Error fetching exam list:`, error);
-            return [];
-        }
-    }
-
-    document.getElementById('examList').addEventListener('change', function(){
-        const selectedValue = this.value;
-        selectedExamId = selectedValue || null;
-        console.log(`selected exam id = ${selectedExamId}`);
-    })
 
     function handleInput() {
         // 검색 결과를 넣을 창 선택
@@ -275,9 +187,173 @@
 
     }
 
+    function selectSubject(subjectId, subjectName) {
+        selectedSubjectId = subjectId;
+        selectedSubjectName = subjectName;
+        document.querySelector('#subjectSearchBar').textContent = selectedSubjectName;
 
-    function handleSearchClick() {
+        clearYearDropdown();
+        clearExamDropdown();
+    }
+    function clearYearDropdown(){
 
+        const yearList = document.getElementById('yearList');
+        yearList.value = '';
+        selectedYear = null;
+    }
+
+    function clearExamDropdown(){
+        const examList = document.getElementById('examList');
+        examList.innerHTML = '';
+        const defaultOption = document.createElement('option');
+        defaultOption.value = '';
+        defaultOption.textContent = '시험 선택';
+        examList.appendChild(defaultOption);
+        selectedExamId = null;
+    }
+
+    async function inputYearHandle() {
+        selectedYear = document.getElementById('yearList').value;
+
+        if (selectedSubjectId && selectedYear) {
+            await loadExamList();
+        }
+    }
+
+    async function loadExamList() {
+        const parentElement = document.getElementById('examList');
+        try {
+
+            const exams = await fetchExamList();
+
+            parentElement.innerHTML = '';
+            const defaultOption = document.createElement('option');
+            defaultOption.value = "";
+            defaultOption.textContent = "시험 선택";
+            parentElement.appendChild(defaultOption);
+
+            exams.forEach((exam) => {
+                const option = document.createElement('option');
+                option.value = exam.id;
+                option.textContent = exam.name;
+                parentElement.appendChild(option);
+            });
+
+        } catch (error) {
+            console.error('Error loading exam list:', error);
+        }
+    }
+
+
+    async function fetchExamList() {
+        try {
+            const response = await fetch(`/admin/subject/${selectedSubjectId}/exam?year=${selectedYear}`);
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            const examList = await response.json(); // Parse the JSON response
+            console.log(`Fetched exam data =`, examList);
+            return examList;
+        } catch (error) {
+            console.error(`Error fetching exam list:`, error);
+            return [];
+        }
+    }
+
+    document.getElementById('examList').addEventListener('change', function () {
+        const selectedValue = this.value;
+        selectedExamId = selectedValue || null;
+        console.log(`selected exam id = ${selectedExamId}`);
+    })
+
+
+    async function handleSearchClick() {
+        try {
+            const response = await fetch(`/admin/problem/list?examId=${selectedExamId}`);
+            if (!response.ok) {
+                throw new Error(`error ${response.status}`);
+            }
+
+            const problems = await response.json();
+            console.log(problems);
+            loadProblemData(problems);
+
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+
+    function loadProblemData(problemList) {
+        const examTable = document.getElementById('examTable');
+        examTable.innerHTML = '';
+        let html = '';
+
+        problemList.forEach((problem) => {
+            const choiceList = problem.choices;
+            const choiceHTML = loadChoiceData(choiceList);
+            const problemId = problem.id;
+
+            html += `
+                <div id="problem-${problemId}" class="card shadow-sm mb-4" data-problem-id="${problemId}">
+                    <div class="card-header bg-primary text-white">
+                        <div class="d-flex justify-content-between">
+                            <h5 class="mb-0">
+                                문제<span class="ml-2 problem-number">${problem.number}</span>
+                            </h5>
+                            <button class="btn btn-outline-light" onclick="handleUpdateClick(${problemId})">
+                                <img src="/img/edit.svg" alt="">
+                            </button>
+                        </div>
+
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <h6 class="problem-content font-weight-bold">${problem.content}</h6>
+                        </div>
+
+                        <div class="choices list-group">${choiceHTML}</div>
+                    </div>
+                </div>
+            `
+        })
+
+        examTable.innerHTML = html;
+    }
+
+    function loadChoiceData(choiceList){
+        let html = ``;
+        choiceList.forEach((choice) => {
+            html += `
+                <button class="list-group-item list-group-item-action d-flex choice-item" data-choice-id="${choice.id}">
+                    <span class="choice-number mr-2">${choice.number}</span>
+                    <span class="choice-content flex-grow-1">${choice.content}</span>
+                </button>
+            `
+        });
+
+        return html;
+    }
+
+    function handleUpdateClick(problemId){
+        const parentElement = document.getElementById(`problem-${problemId}`);
+
+        // 문제 번호
+        const problemNumber = parentElement.querySelector('.problem-number');
+
+        // 문제 내용
+        const problemContent = parentElement.querySelector('.problem-content');
+
+        problemNumber.contentEditable = true;
+        problemContent.contentEditable = true;
+        problemNumber.classList.add('border', 'border-danger');
+        problemContent.classList.add('border', 'border-danger');
+
+        const choices = parentElement.querySelectorAll('.choice-item');
+
+        for(const choice of choices) {
+            console.log(`id = ${choice.dataset.choiceId}`);
+        }
 
     }
 

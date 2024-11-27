@@ -9,6 +9,7 @@ import com.cpa.yusin.quiz.global.exception.ExceptionMessage;
 import com.cpa.yusin.quiz.global.exception.ProblemException;
 import com.cpa.yusin.quiz.problem.controller.dto.request.ProblemCreateRequest;
 import com.cpa.yusin.quiz.problem.controller.dto.request.ProblemRequest;
+import com.cpa.yusin.quiz.problem.controller.dto.request.ProblemUpdateRequest;
 import com.cpa.yusin.quiz.problem.controller.dto.response.ProblemDTO;
 import com.cpa.yusin.quiz.problem.controller.dto.response.ProblemResponse;
 import com.cpa.yusin.quiz.problem.controller.mapper.ProblemMapper;
@@ -45,6 +46,16 @@ public class ProblemServiceImpl implements ProblemService
 
         problem = problemRepository.save(problem);
         choiceService.save(problem, request.getChoices());
+    }
+
+    @Override
+    public void update(long problemId, ProblemUpdateRequest request)
+    {
+        Problem problem = findById(problemId);
+
+
+        problem.update(request.getContent(), request.getNumber());
+        choiceService.update(request.getChoices());
     }
 
 

@@ -28,4 +28,5 @@ public class AdminProblemController
         return ResponseEntity
                 .ok(new GlobalResponse<>(response));
     }
+
 }

@@ -34,12 +34,10 @@ public class Problem
     private Exam exam;
 
 
-    public void update(long examId, ProblemRequest request)
+    public void update(String content, int number)
     {
-        validateExamId(examId);
-
-        this.content = request.getContent();
-        this.number = request.getNumber();
+        this.content = content;
+        this.number = number;
     }
 
     private void validateExamId(long examId)

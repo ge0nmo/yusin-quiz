@@ -39,13 +39,11 @@ public class Choice extends BaseEntity
     private Problem problem;
 
 
-    public void update(long problemId, ChoiceRequest request)
+    public void update(int number, String content, boolean isAnswer)
     {
-        validateProblemId(problemId);
-
-        this.number = request.getNumber();
-        this.content = request.getContent();
-        this.isAnswer = request.getIsAnswer();
+        this.number = number;
+        this.content = content;
+        this.isAnswer = isAnswer;
     }
 
     public void validateProblemId(long problemId)

@@ -2,6 +2,7 @@ package com.cpa.yusin.quiz.choice.service;
 
 import com.cpa.yusin.quiz.choice.controller.dto.request.ChoiceCreateRequest;
 import com.cpa.yusin.quiz.choice.controller.dto.request.ChoiceRequest;
+import com.cpa.yusin.quiz.choice.controller.dto.request.ChoiceUpdateRequest;
 import com.cpa.yusin.quiz.choice.controller.dto.response.ChoiceResponse;
 import com.cpa.yusin.quiz.choice.controller.mapper.ChoiceMapper;
 import com.cpa.yusin.quiz.choice.controller.port.ChoiceService;
@@ -37,6 +38,22 @@ public class ChoiceServiceImpl implements ChoiceService
                 .toList();
 
         choiceRepository.saveAll(choiceRequests);
+    }
+
+    @Transactional
+    @Override
+    public void update(List<ChoiceUpdateRequest> requests)
+    {
+        for(ChoiceUpdateRequest request : requests)
+        {
+            Choice choice = findById(request.getId());
+            if(request.getIsDeleted()){
+                choiceRepository.deleteById(choice.getId());
+            }else{
+                choice.update(request.getNumber(), request.getContent(), request.getIsAnswer());
+                choiceRepository.save(choice);
+            }
+        }
     }
 
     @Transactional
