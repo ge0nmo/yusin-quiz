@@ -48,11 +48,11 @@ public class ProblemServiceImpl implements ProblemService
         choiceService.save(problem, request.getChoices());
     }
 
+    @Transactional
     @Override
     public void update(long problemId, ProblemUpdateRequest request)
     {
         Problem problem = findById(problemId);
-
 
         problem.update(request.getContent(), request.getNumber());
         choiceService.update(request.getChoices());

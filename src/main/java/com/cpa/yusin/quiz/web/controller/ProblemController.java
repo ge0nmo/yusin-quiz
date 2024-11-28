@@ -3,6 +3,7 @@ package com.cpa.yusin.quiz.web.controller;
 
 import com.cpa.yusin.quiz.global.utils.DateUtils;
 import com.cpa.yusin.quiz.problem.controller.dto.request.ProblemCreateRequest;
+import com.cpa.yusin.quiz.problem.controller.dto.request.ProblemUpdateRequest;
 import com.cpa.yusin.quiz.problem.controller.dto.response.ProblemResponse;
 import com.cpa.yusin.quiz.problem.controller.port.ProblemService;
 import lombok.RequiredArgsConstructor;
@@ -48,8 +49,8 @@ public class ProblemController
 
     @ResponseBody
     @PatchMapping("/problem/{problemId}")
-    public void update(@PathVariable("problemId") long problemId)
+    public void update(@PathVariable("problemId") long problemId, @Validated @RequestBody ProblemUpdateRequest request)
     {
-
+        problemService.update(problemId, request);
     }
 }

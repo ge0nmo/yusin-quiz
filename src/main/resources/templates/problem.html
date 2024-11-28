@@ -269,15 +269,20 @@
 
     async function handleSearchClick() {
         try {
-            const response = await fetch(`/admin/problem/list?examId=${selectedExamId}`);
+            const problemList = await getProblemData(selectedExamId);
+            loadProblemData(problemList);
+        } catch (error) {
+            console.error('Error fetching problem data:', error);
+        }
+    }
+
+    async function getProblemData(examId){
+        try{
+            const response = await fetch(`/admin/problem/list?examId=${examId}`);
             if (!response.ok) {
                 throw new Error(`error ${response.status}`);
             }
-
-            const problems = await response.json();
-            console.log(problems);
-            loadProblemData(problems);
-
+            return response.json();
         } catch (error) {
             console.log(error);
         }
@@ -302,7 +307,7 @@
                                 문제<span class="ml-2 problem-number">${problem.number}</span>
                             </h5>
                             <button class="editBtn btn btn-outline-light" onclick="handleUpdateClick(${problemId})">
-                                <img src="/img/edit.svg" alt="">
+                                <img class="editImg" src="/img/edit.svg" alt="">
                             </button>
                         </div>
 
@@ -324,10 +329,24 @@
     function loadChoiceData(choiceList){
         let html = ``;
         choiceList.forEach((choice) => {
+            const choiceId = choice.id;
             html += `
-                <button class="list-group-item list-group-item-action d-flex choice-item" data-choice-id="${choice.id}">
-                    <span class="choice-number mr-2">${choice.number}</span>
-                    <span class="choice-content flex-grow-1">${choice.content}</span>
+                <button class="list-group-item list-group-item-action d-flex choice-item" data-choice-id="${choiceId}">
+                  <div class="choice-number mr-2">${choice.number}</div>
+                  <div class="choice-content flex-grow-1">${choice.content}</div>
+
+                  <div class="d-flex align-items-center">
+                      <div class="form-check">
+                        <input class="form-check-input" type="checkbox" value="" id='checkBox=${choiceId}'>
+                        <label class="form-check-label" for='checkBox=${choiceId}'>
+                        </label>
+                      </div>
+
+                      <div class="btn btn-sm">
+                        <img src="/img/trash.svg" alt="">
+                      </div>
+                  </div>
+
                 </button>
             `
         });
@@ -353,22 +372,23 @@
             const choiceNumber = choice.querySelector('.choice-number');
             const choiceContent = choice.querySelector('.choice-content');
 
-            console.log(choice);
-            console.log(`번호 = ${choiceNumber.textContent}`);
-            console.log(`내용 = ${choiceContent.textContent}`);
             choiceNumber.contentEditable = true;
             choiceContent.contentEditable = true;
 
         })
 
-        const editImg = parentElement.querySelector('img');
+        const editImg = parentElement.querySelector('.editImg');
         editImg.src = `/img/save.svg`;
 
         const btn = parentElement.querySelector('.editBtn');
-        btn.onclick = () => clickUpdate(problemId);
+        btn.onclick = () => completeUpdate(problemId);
+
+
     }
 
-    function clickUpdate(problemId){
+    function completeUpdate(problemId){
+        problemId = Number(problemId);
+
         const parentElement = document.getElementById(`problem-${problemId}`);
 
         // 문제 번호
@@ -392,19 +412,55 @@
             choiceContent.contentEditable = false;
 
             choiceList.push({
-                id: choice.dataset.choiceId,
+                id: Number(choice.dataset.choiceId),
                 number: Number(choiceNumber.textContent),
-                content: JSON.stringify(choiceContent.textContent),
+                content: choiceContent.textContent,
+                isDeleted: false,
+                isAnswer: true
             })
 
         })
 
-        /*
-         * TODO
-         *  삭제, 정답체크 아이콘
-         */
+        const problemUpdateRequest = {
+            number: problemNumber.textContent,
+            content: problemContent.textContent,
+            choices: choiceList
+        }
+
+        updateProblem(problemId, problemUpdateRequest);
+
+        const editImg = parentElement.querySelector('img');
+        editImg.src = `/img/edit.svg`;
+
+        const btn = parentElement.querySelector('.editBtn');
+        btn.onclick = () => handleUpdateClick(problemId);
+
         console.log(choiceList);
     }
+
+    async function updateProblem(problemId, problemUpdateRequest){
+        try{
+            const response = await fetch(`/admin/problem/${problemId}`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(problemUpdateRequest),
+            });
+
+            if(!response.ok){
+                throw new Error('');
+            }
+
+            const problemList = await getProblemData(selectedExamId);
+            loadProblemData(problemList);
+
+        } catch(error){
+            console.log(error);
+        }
+    }
+
+
 
 
 </script>
