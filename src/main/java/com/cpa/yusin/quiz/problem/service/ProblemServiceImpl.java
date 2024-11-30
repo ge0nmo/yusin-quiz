@@ -1,6 +1,5 @@
 package com.cpa.yusin.quiz.problem.service;
 
-import com.cpa.yusin.quiz.choice.controller.dto.request.ChoiceRequest;
 import com.cpa.yusin.quiz.choice.controller.dto.response.ChoiceResponse;
 import com.cpa.yusin.quiz.choice.controller.port.ChoiceService;
 import com.cpa.yusin.quiz.exam.controller.port.ExamService;
@@ -8,7 +7,6 @@ import com.cpa.yusin.quiz.exam.domain.Exam;
 import com.cpa.yusin.quiz.global.exception.ExceptionMessage;
 import com.cpa.yusin.quiz.global.exception.ProblemException;
 import com.cpa.yusin.quiz.problem.controller.dto.request.ProblemCreateRequest;
-import com.cpa.yusin.quiz.problem.controller.dto.request.ProblemRequest;
 import com.cpa.yusin.quiz.problem.controller.dto.request.ProblemUpdateRequest;
 import com.cpa.yusin.quiz.problem.controller.dto.response.ProblemDTO;
 import com.cpa.yusin.quiz.problem.controller.dto.response.ProblemResponse;
@@ -21,8 +19,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -38,6 +34,7 @@ public class ProblemServiceImpl implements ProblemService
     private final ChoiceService choiceService;
 
     @Transactional
+    @Override
     public void save(long examId, ProblemCreateRequest request)
     {
         Exam exam = examService.findById(examId);
@@ -58,44 +55,13 @@ public class ProblemServiceImpl implements ProblemService
         choiceService.update(request.getChoices());
     }
 
-
     @Transactional
     @Override
-    public void saveOrUpdateProblem(long examId, List<ProblemRequest> requests)
+    public void deleteProblem(long problemId)
     {
-        /*Exam exam = examService.findById(examId);
-        List<Long> problemIdsToDelete = new ArrayList<>();
-        Map<Problem, List<ChoiceRequest>> choiceUpdateMap = new HashMap<>();
-
-        for(ProblemRequest request : requests)
-        {
-            if(request.getIsDeleted() && !request.isNew()){
-                problemIdsToDelete.add(request.getId());
-            } else{
-                Problem problem;
-                if(request.isNew()){
-                    problem = problemMapper.toProblemEntity(request, exam);
-                } else{
-                    problem = findById(request.getId());
-                    problem.update(examId, request);
-                }
-                problem = problemRepository.save(problem);
-                choiceUpdateMap.put(problem, request.getChoices());
-            }
-        }
-
-        deleteProcess(problemIdsToDelete);
-        choiceService.saveOrUpdate(choiceUpdateMap);*/
+        choiceService.deleteAllByProblemId(problemId);
+        problemRepository.deleteById(problemId);
     }
-
-    private void deleteProcess(List<Long> problemIds)
-    {
-        if(!problemIds.isEmpty()){
-            choiceService.deleteAllByProblemIds(problemIds);
-            problemRepository.deleteAllByIdInBatch(problemIds);
-        }
-    }
-
 
     @Override
     public List<ProblemResponse> getAllByExamId(long examId)

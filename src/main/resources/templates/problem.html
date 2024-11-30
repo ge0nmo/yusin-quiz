@@ -75,8 +75,8 @@
 
 
                             <div class="float-right">
-                                <button class="btn btn-light" data-toggle="modal" data-target="#add-problem-modal"
-                                        onclick="prepareExamForm()">
+                                <button class="btn btn-light" data-toggle="modal" data-target="#add-problem-modal" onclick="prepareProblemForm()">
+
                                     <img class="ml-2" th:src="@{/img/add_icon.png}" alt="">문제 추가
                                 </button>
                             </div>
@@ -120,6 +120,80 @@
 
     </div>
 
+
+
+    <!-- Save modal -->
+    <div class="modal fade" id="add-problem-modal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">새로운 문제 추가</h4>
+                    <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                        <span>×</span>
+                    </button>
+                </div>
+                <form id="problem-form" class="form upload-form">
+                    <div class="modal-body">
+                        <!-- Existing Exam Details Fields -->
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="subjectTitle">과목</label>
+                                    <input id="subjectTitle" type="text" class="form-control selectedSubjectName" disabled>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="examName">시험 이름</label>
+                                    <input id="examName" type="text" required class="form-control" disabled>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="examYear">연도</label>
+                                    <input id="examYear" type="number" required class="form-control" disabled>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Problem Details -->
+                        <div class="form-group">
+                            <label for="problemNumber">문제 번호</label>
+                            <input id="problemNumber" type="number" required class="form-control" min="1">
+                        </div>
+
+
+                        <div class="form-group">
+                            <label for="problemContent">문제 내용</label>
+                            <textarea id="problemContent" required class="form-control" rows="3"></textarea>
+                        </div>
+
+                        <!-- Choices Section -->
+                        <div class="form-group">
+                            <label>선택지</label>
+                            <div id="choicesContainer">
+
+                            </div>
+
+                            <!-- Add Choice Button -->
+                            <button type="button" class="btn btn-outline-secondary mt-2" id="addChoiceBtn">
+                                <i class="fas fa-plus"></i> 선택지 추가
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" value="" name="save" class="btn btn-primary" th:onclick="handleSaveClick()">
+                            <img class="loading-save" alt="save"  style="display:none;" th:src="@{/img/loading.gif}" width=30 height=30>
+                            저장
+                        </button>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">취소</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
 </div>
 
 
@@ -144,6 +218,37 @@
     let selectedSubjectName;
     let selectedYear;
     let selectedExamId;
+    let selectedExamName;
+
+    window.onload = function() {
+        const choicesContainer = document.getElementById('choicesContainer');
+        const addChoiceBtn = document.getElementById('addChoiceBtn');
+
+        addChoiceBtn.addEventListener('click', function() {
+            const choiceRow = document.createElement('div');
+            choiceRow.className = 'choice-row input-group mb-2';
+
+
+            choiceRow.innerHTML = `
+            <input type="text" class="form-control choiceContent" required>
+            <div class="input-group-append">
+                <div class="input-group-text">
+                    <input type="checkbox" class="isAnswer" aria-label="정답 체크">
+                </div>
+                <button class="btn btn-outline-danger remove-choice-btn" type="button">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+        `;
+
+            const removeBtn = choiceRow.querySelector('.remove-choice-btn');
+            removeBtn.addEventListener('click', () => choiceRow.remove());
+
+            choicesContainer.appendChild(choiceRow);
+        });
+
+
+    };
 
     function handleInput() {
         // 검색 결과를 넣을 창 선택
@@ -262,8 +367,11 @@
 
     document.getElementById('examList').addEventListener('change', function () {
         const selectedValue = this.value;
+
         selectedExamId = selectedValue || null;
-        console.log(`selected exam id = ${selectedExamId}`);
+        selectedExamName = this.selectedOptions[0].textContent || null;
+
+        console.log('시험 이름 = ', selectedExamName);
     })
 
 
@@ -306,9 +414,14 @@
                             <h5 class="mb-0">
                                 문제<span class="ml-2 problem-number">${problem.number}</span>
                             </h5>
-                            <button class="editBtn btn btn-outline-light" onclick="handleUpdateClick(${problemId})">
-                                <img class="editImg" src="/img/edit.svg" alt="">
-                            </button>
+                            <div class="d-flex justify-content-end">
+                                <button class="editBtn btn btn-outline-light" onclick="handleUpdateClick(${problemId})">
+                                    <img class="editImg" src="/img/edit.svg" alt="">
+                                </button>
+                                <button class="removeBtn btn btn-outline-light" onclick="handleRemoveProblem(${problemId})">
+                                    <img src="/img/trash.svg" alt="">
+                                </button>
+                            </div>
                         </div>
 
                     </div>
@@ -330,29 +443,93 @@
         let html = ``;
         choiceList.forEach((choice) => {
             const choiceId = choice.id;
+            const border = choice.isAnswer ? 'border border-danger' : '';
             html += `
-                <button class="list-group-item list-group-item-action d-flex choice-item" data-choice-id="${choiceId}">
-                  <div class="choice-number mr-2">${choice.number}</div>
-                  <div class="choice-content flex-grow-1">${choice.content}</div>
+                <div class="list-group-item list-group-item-action d-flex align-items-center choice-item ${border}" data-choice-id="${choiceId}">
+                    <div class="choice-number mr-2">${choice.number}</div>
+                    <div class="choice-content flex-grow-1">${choice.content}</div>
 
-                  <div class="d-flex align-items-center">
-                      <div class="form-check">
-                        <input class="form-check-input" type="checkbox" value="" id='checkBox=${choiceId}'>
-                        <label class="form-check-label" for='checkBox=${choiceId}'>
-                        </label>
-                      </div>
+                    <div class="d-none align-items-center answer-remove-form">
+                        <div class="form-check mr-2">
+                            <input class="form-check-input isAnswer" type="checkbox" value="" id='checkBox=${choiceId}' ${choice.isAnswer ? 'checked' : ''}>
+                            <label class="form-check-label" for='checkBox=${choiceId}'>정답</label>
+                        </div>
+                        <button class="btn btn-sm btn-outline-secondary p-1 isRemove" onclick="handleRemoveChoiceClick(${choiceId})">
+                            <img src="/img/trash.svg" alt="" class="m-1">
+                        </button>
+                    </div>
 
-                      <div class="btn btn-sm">
-                        <img src="/img/trash.svg" alt="">
-                      </div>
-                  </div>
-
-                </button>
+                </div>
             `
         });
 
         return html;
     }
+
+    function handleRemoveChoiceClick(){
+
+    }
+
+    async function handleSaveClick(){
+        try{
+            const problemNumber = Number(document.getElementById('problemNumber').value);
+            console.log(`문제 번호=`, problemNumber)
+
+            const problemContent = document.getElementById('problemContent').value;
+            console.log(`문제 내용 = ${problemContent}`)
+
+            const choiceContainer = document.getElementById('choicesContainer');
+            const choiceRows = choiceContainer.querySelectorAll('.choice-row');
+            const choiceCreateRequest = [];
+            let choiceNumber = 1;
+            choiceRows.forEach((choiceRow) => {
+                const isAnswer = choiceRow.querySelector('.isAnswer').checked;
+                const choiceContent = choiceRow.querySelector('.choiceContent').value;
+                const choice = {
+                    number: choiceNumber,
+                    content: choiceContent,
+                    isAnswer: isAnswer,
+                };
+                choiceCreateRequest.push(choice);
+                choiceNumber++;
+            });
+
+            const problemCreateRequest = {
+                number: problemNumber,
+                content: problemContent,
+                choices: choiceCreateRequest
+            };
+
+            console.log(`문제 데이터 = `, problemCreateRequest);
+
+            await saveProblem(problemCreateRequest);
+            console.log(`시험 번호 = ${selectedExamId}`);
+            const problemList = await getProblemData(selectedExamId);
+            loadProblemData(problemList);
+        } catch (error){
+            throw new error('');
+        }
+    }
+
+    async function saveProblem(problemCreateRequest){
+        try{
+            await fetch(`/admin/problem?examId=${selectedExamId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(problemCreateRequest),
+            });
+
+            $('#add-problem-modal').modal('hide');
+        } catch (error){
+            throw new error('');
+        }
+
+
+
+    }
+
 
     function handleUpdateClick(problemId){
         const parentElement = document.getElementById(`problem-${problemId}`);
@@ -377,13 +554,17 @@
 
         })
 
+        const answerRemoveForm = parentElement.querySelectorAll('.answer-remove-form');
+        answerRemoveForm.forEach((form) => {
+            form.classList.remove('d-none');
+            form.classList.add('d-flex');
+        })
+
         const editImg = parentElement.querySelector('.editImg');
         editImg.src = `/img/save.svg`;
 
         const btn = parentElement.querySelector('.editBtn');
         btn.onclick = () => completeUpdate(problemId);
-
-
     }
 
     function completeUpdate(problemId){
@@ -400,11 +581,23 @@
         console.log(`새로운 내용 = `, problemContent.textContent);
         problemNumber.contentEditable = false;
         problemContent.contentEditable = false;
+        const answerRemoveForm = parentElement.querySelectorAll('.answer-remove-form');
+        answerRemoveForm.forEach((form) => {
+            form.classList.remove('d-flex');
+            form.classList.add('d-none');
+        })
+
         const choices = parentElement.querySelectorAll('.choice-item');
 
         const choiceList = [];
 
         choices.forEach((choice) => {
+            const checkBox = choice.querySelector('.answer-remove-form');
+            const isAnswer = checkBox.querySelector('.isAnswer').checked;
+            const isRemove = checkBox.querySelector('.isRemove');
+            console.log(`삭제 = `, isRemove);
+
+
             const choiceNumber = choice.querySelector('.choice-number');
             const choiceContent = choice.querySelector('.choice-content');
 
@@ -415,8 +608,9 @@
                 id: Number(choice.dataset.choiceId),
                 number: Number(choiceNumber.textContent),
                 content: choiceContent.textContent,
-                isDeleted: false,
-                isAnswer: true
+                isAnswer: isAnswer,
+                isDeleted: false
+
             })
 
         })
@@ -461,6 +655,32 @@
     }
 
 
+    async function handleRemoveProblem(problemId){
+        try{
+            if(!confirm('정말 삭제하시겠습니까?')){
+                return;
+            }
+
+            await fetch(`/admin/problem/${problemId}`, {
+                method: 'DELETE',
+            });
+
+            const problemList = await getProblemData(selectedExamId);
+            loadProblemData(problemList);
+        } catch(error){
+            throw new Error('');
+        }
+    }
+
+    function prepareProblemForm(){
+        const subjectTitle = document.getElementById('subjectTitle');
+        const examName = document.getElementById('examName');
+        const examYear = document.getElementById('examYear');
+
+        subjectTitle.value = selectedSubjectName;
+        examYear.value = selectedYear;
+        examName.value = selectedExamName;
+    }
 
 
 </script>

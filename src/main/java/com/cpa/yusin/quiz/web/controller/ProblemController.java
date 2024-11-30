@@ -53,4 +53,11 @@ public class ProblemController
     {
         problemService.update(problemId, request);
     }
+
+    @ResponseBody
+    @DeleteMapping("/problem/{problemId}")
+    public void delete(@PathVariable("problemId") long problemId)
+    {
+        problemService.deleteProblem(problemId);
+    }
 }
