@@ -14,9 +14,8 @@ public interface ChoiceService
 {
     void save(Problem problem, List<ChoiceCreateRequest> requests);
 
-    void update(List<ChoiceUpdateRequest> requests);
+    void update(List<ChoiceUpdateRequest> requests, Problem problem);
 
-    void saveOrUpdate(Map<Problem, List<ChoiceRequest>> choiceMaps);
 
     Choice findById(long id);
 

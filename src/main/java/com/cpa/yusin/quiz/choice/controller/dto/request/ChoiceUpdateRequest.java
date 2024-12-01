@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ChoiceUpdateRequest
 {
-    private long id;
+    private Long id;
 
     @NotNull
     private Integer number;

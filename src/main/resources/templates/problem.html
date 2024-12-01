@@ -431,6 +431,15 @@
                         </div>
 
                         <div class="choices list-group">${choiceHTML}</div>
+
+
+                         <!-- <div class="add-choice d-none list-group-item list-group-item-action justify-content-center">
+                            <button class="btn btn-outline-secondary" onclick="handleAddMoreChoice()">
+                                <span>문항 추가</span>
+                                <img src="/img/add_icon.png" alt="">
+                            </button>
+                        </div> -->
+
                     </div>
                 </div>
             `
@@ -458,7 +467,6 @@
                             <img src="/img/trash.svg" alt="" class="m-1">
                         </button>
                     </div>
-
                 </div>
             `
         });
@@ -466,17 +474,24 @@
         return html;
     }
 
-    function handleRemoveChoiceClick(){
+    function handleAddMoreChoice() {
 
+    }
+
+    function handleRemoveChoiceClick(choiceId){
+        const choiceItem = document.querySelector(`.choice-item[data-choice-id="${choiceId}"]`);
+
+        if(choiceItem){
+            choiceItem.classList.remove('d-flex');
+            choiceItem.classList.add('deleted', 'd-none');
+        }
     }
 
     async function handleSaveClick(){
         try{
             const problemNumber = Number(document.getElementById('problemNumber').value);
-            console.log(`문제 번호=`, problemNumber)
 
             const problemContent = document.getElementById('problemContent').value;
-            console.log(`문제 내용 = ${problemContent}`)
 
             const choiceContainer = document.getElementById('choicesContainer');
             const choiceRows = choiceContainer.querySelectorAll('.choice-row');
@@ -485,6 +500,7 @@
             choiceRows.forEach((choiceRow) => {
                 const isAnswer = choiceRow.querySelector('.isAnswer').checked;
                 const choiceContent = choiceRow.querySelector('.choiceContent').value;
+
                 const choice = {
                     number: choiceNumber,
                     content: choiceContent,
@@ -500,10 +516,8 @@
                 choices: choiceCreateRequest
             };
 
-            console.log(`문제 데이터 = `, problemCreateRequest);
-
             await saveProblem(problemCreateRequest);
-            console.log(`시험 번호 = ${selectedExamId}`);
+
             const problemList = await getProblemData(selectedExamId);
             loadProblemData(problemList);
         } catch (error){
@@ -525,8 +539,6 @@
         } catch (error){
             throw new error('');
         }
-
-
 
     }
 
@@ -565,6 +577,11 @@
 
         const btn = parentElement.querySelector('.editBtn');
         btn.onclick = () => completeUpdate(problemId);
+
+        const addChoiceBtn = parentElement.querySelector('.add-choice');
+        console.log(`버튼 = `, addChoiceBtn);
+        addChoiceBtn.classList.remove('d-none');
+        addChoiceBtn.classList.add('d-flex');
     }
 
     function completeUpdate(problemId){
@@ -578,7 +595,6 @@
         // 문제 내용
         const problemContent = parentElement.querySelector('.problem-content');
 
-        console.log(`새로운 내용 = `, problemContent.textContent);
         problemNumber.contentEditable = false;
         problemContent.contentEditable = false;
         const answerRemoveForm = parentElement.querySelectorAll('.answer-remove-form');
@@ -592,11 +608,9 @@
         const choiceList = [];
 
         choices.forEach((choice) => {
+
             const checkBox = choice.querySelector('.answer-remove-form');
             const isAnswer = checkBox.querySelector('.isAnswer').checked;
-            const isRemove = checkBox.querySelector('.isRemove');
-            console.log(`삭제 = `, isRemove);
-
 
             const choiceNumber = choice.querySelector('.choice-number');
             const choiceContent = choice.querySelector('.choice-content');
@@ -604,12 +618,13 @@
             choiceNumber.contentEditable = false;
             choiceContent.contentEditable = false;
 
+            console.log(`class list = ${choice.classList}`);
             choiceList.push({
                 id: Number(choice.dataset.choiceId),
                 number: Number(choiceNumber.textContent),
                 content: choiceContent.textContent,
                 isAnswer: isAnswer,
-                isDeleted: false
+                isDeleted: choice.classList.contains('deleted'),
 
             })
 
@@ -629,7 +644,9 @@
         const btn = parentElement.querySelector('.editBtn');
         btn.onclick = () => handleUpdateClick(problemId);
 
-        console.log(choiceList);
+        const addChoiceBtn = parentElement.querySelector('.add-choice');
+        addChoiceBtn.classList.remove('d-flex');
+        addChoiceBtn.classList.add('d-none');
     }
 
     async function updateProblem(problemId, problemUpdateRequest){
@@ -673,6 +690,12 @@
     }
 
     function prepareProblemForm(){
+        if(!selectedSubjectName || !selectedYear || !selectedExamName){
+            alert("시험을 선택해주세요");
+
+            return false;
+        }
+
         const subjectTitle = document.getElementById('subjectTitle');
         const examName = document.getElementById('examName');
         const examYear = document.getElementById('examYear');
