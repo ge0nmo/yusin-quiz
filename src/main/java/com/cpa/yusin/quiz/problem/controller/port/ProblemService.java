@@ -15,7 +15,7 @@ public interface ProblemService
 
     void update(long problemId, ProblemUpdateRequest request);
 
-    void saveOrUpdateProblem(long examId, List<ProblemRequest> requests);
+    void deleteProblem(long problemId);
 
     List<ProblemResponse> getAllByExamId(long examId);
 

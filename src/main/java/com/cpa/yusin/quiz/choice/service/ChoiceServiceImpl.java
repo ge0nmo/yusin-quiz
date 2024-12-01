@@ -34,7 +34,7 @@ public class ChoiceServiceImpl implements ChoiceService
     @Override
     public void save(Problem problem, List<ChoiceCreateRequest> requests)
     {
-        List<Choice> choiceRequests = requests.stream().map(request -> choiceMapper.fromCreateRequestToDomain(request, problem))
+        List<Choice> choiceRequests = requests.stream().map(request -> choiceMapper.fromCreateRequestToChoice(request, problem))
                 .toList();
 
         choiceRepository.saveAll(choiceRequests);
@@ -42,63 +42,22 @@ public class ChoiceServiceImpl implements ChoiceService
 
     @Transactional
     @Override
-    public void update(List<ChoiceUpdateRequest> requests)
+    public void update(List<ChoiceUpdateRequest> requests, Problem problem)
     {
         for(ChoiceUpdateRequest request : requests)
         {
-            Choice choice = findById(request.getId());
-            if(request.getIsDeleted()){
-                choiceRepository.deleteById(choice.getId());
-            }else{
-                choice.update(request.getNumber(), request.getContent(), request.getIsAnswer());
+            if(request.getId() == null){
+                Choice choice = choiceMapper.fromUpdateRequestToChoice(request, problem);
                 choiceRepository.save(choice);
-            }
-        }
-    }
-
-    @Transactional
-    @Override
-    public void saveOrUpdate(Map<Problem, List<ChoiceRequest>> choiceMaps)
-    {
-        /*List<Choice> saveOrUpdate = new ArrayList<>();
-        List<Long> deleteList = new ArrayList<>();
-
-        for(Map.Entry<Problem, List<ChoiceRequest>> entry : choiceMaps.entrySet()) {
-            Problem problem = entry.getKey();
-            List<ChoiceRequest> requests = entry.getValue();
-
-            for(ChoiceRequest request : requests) {
-                if(Boolean.TRUE.equals(request.getIsDeleted()) && !request.isNew()){
-                    deleteList.add(request.getId());
-                } else{
-                    Choice choice;
-                    if(request.isNew()) {
-                        choice = choiceMapper.fromCreateRequestToDomain(request, problem);
-                    } else{
-                        choice = findById(request.getId());
-                        log.info("request = {}", request.toString());
-                        choice.update(problem.getId(), request);
-                    }
-                    saveOrUpdate.add(choice);
+            } else{
+                Choice choice = findById(request.getId());
+                if(request.getIsDeleted()){
+                    choiceRepository.deleteById(choice.getId());
+                }else{
+                    choice.update(request.getNumber(), request.getContent(), request.getIsAnswer());
+                    choiceRepository.save(choice);
                 }
             }
-        }
-
-        deleteProcess(deleteList);
-        saveProcess(saveOrUpdate);*/
-    }
-
-    private void deleteProcess(List<Long> choiceIdsToDelete)
-    {
-        if(!choiceIdsToDelete.isEmpty()){
-            choiceRepository.deleteAllByIdInBatch(choiceIdsToDelete);
-        }
-    }
-
-    private void saveProcess(List<Choice> domains)
-    {
-        if(!domains.isEmpty()){
-            choiceRepository.saveAll(domains);
         }
     }
 

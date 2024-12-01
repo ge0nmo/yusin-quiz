@@ -34,12 +34,18 @@ import com.cpa.yusin.quiz.member.service.port.MemberValidator;
 import com.cpa.yusin.quiz.mock.*;
 import com.cpa.yusin.quiz.payment.controller.mapper.PaymentMapper;
 import com.cpa.yusin.quiz.payment.service.port.PaymentRepository;
-import com.cpa.yusin.quiz.problem.controller.AdminProblemController;
 import com.cpa.yusin.quiz.problem.controller.mapper.ProblemMapper;
 import com.cpa.yusin.quiz.problem.controller.port.ProblemService;
 import com.cpa.yusin.quiz.problem.service.ProblemServiceImpl;
 import com.cpa.yusin.quiz.problem.service.port.ProblemRepository;
+import com.cpa.yusin.quiz.subject.controller.AdminSubjectController;
 import com.cpa.yusin.quiz.subject.controller.SubjectController;
+import com.cpa.yusin.quiz.subject.controller.mapper.SubjectMapper;
+import com.cpa.yusin.quiz.subject.controller.port.SubjectService;
+import com.cpa.yusin.quiz.subject.infrastructure.SubjectValidatorImpl;
+import com.cpa.yusin.quiz.subject.service.SubjectServiceImpl;
+import com.cpa.yusin.quiz.subject.service.port.SubjectRepository;
+import com.cpa.yusin.quiz.subject.service.port.SubjectValidator;
 import com.cpa.yusin.quiz.subscription.controller.SubscriptionController;
 import com.cpa.yusin.quiz.subscription.controller.mapper.SubscriptionMapper;
 import com.cpa.yusin.quiz.subscription.controller.port.SubscriptionService;
@@ -53,13 +59,6 @@ import com.cpa.yusin.quiz.subscriptionPlan.infrastructure.SubscriptionPlanValida
 import com.cpa.yusin.quiz.subscriptionPlan.service.SubscriptionPlanServiceImpl;
 import com.cpa.yusin.quiz.subscriptionPlan.service.port.SubscriptionPlanRepository;
 import com.cpa.yusin.quiz.subscriptionPlan.service.port.SubscriptionPlanValidator;
-import com.cpa.yusin.quiz.subject.controller.AdminSubjectController;
-import com.cpa.yusin.quiz.subject.controller.mapper.SubjectMapper;
-import com.cpa.yusin.quiz.subject.controller.port.SubjectService;
-import com.cpa.yusin.quiz.subject.infrastructure.SubjectValidatorImpl;
-import com.cpa.yusin.quiz.subject.service.SubjectServiceImpl;
-import com.cpa.yusin.quiz.subject.service.port.SubjectRepository;
-import com.cpa.yusin.quiz.subject.service.port.SubjectValidator;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -115,7 +114,6 @@ public class TestContainer
     public final ProblemMapper problemMapper;
     public final ProblemRepository problemRepository;
     public final ProblemService problemService;
-    public final AdminProblemController adminProblemController;
 
 
     /**
@@ -193,7 +191,6 @@ public class TestContainer
         this.problemMapper = new ProblemMapper();
         this.problemService = new ProblemServiceImpl(this.problemRepository, this.problemMapper,
                 this.examService, this.choiceService);
-        this.adminProblemController = new AdminProblemController(this.problemService);
 
         this.subscriptionPlanRepository = new FakeSubscriptionPlanRepository();
         this.subscriptionPlanMapper = new SubscriptionPlanMapper();

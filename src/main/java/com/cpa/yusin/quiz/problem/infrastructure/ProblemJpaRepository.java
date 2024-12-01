@@ -10,7 +10,7 @@ import java.util.List;
 
 public interface ProblemJpaRepository extends JpaRepository<Problem, Long>
 {
-    @Query("SELECT p FROM Problem p WHERE p.exam.id = :examId")
+    @Query("SELECT p FROM Problem p WHERE p.exam.id = :examId ORDER BY p.number ASC")
     List<Problem> findAllByExamId(@Param("examId") long examId);
 
     @Modifying
