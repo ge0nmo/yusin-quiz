@@ -16,6 +16,8 @@ public interface ChoiceService
 
     void update(List<ChoiceUpdateRequest> requests, Problem problem);
 
+    void update(long choiceId, ChoiceUpdateRequest request);
+
 
     Choice findById(long id);
 

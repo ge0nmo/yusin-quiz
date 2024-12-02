@@ -46,10 +46,5 @@ public class Choice extends BaseEntity
         this.isAnswer = isAnswer;
     }
 
-    public void validateProblemId(long problemId)
-    {
-        if(!this.problem.getId().equals(problemId)){
-            throw new ProblemException(ExceptionMessage.PROBLEM_NOT_FOUND);
-        }
-    }
+
 }

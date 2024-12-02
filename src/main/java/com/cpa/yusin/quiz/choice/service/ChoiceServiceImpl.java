@@ -61,6 +61,17 @@ public class ChoiceServiceImpl implements ChoiceService
         }
     }
 
+    @Transactional
+    @Override
+    public void update(long choiceId, ChoiceUpdateRequest request)
+    {
+        Choice choice = findById(choiceId);
+
+        choice.update(request.getNumber(), request.getContent(), request.getIsAnswer());
+
+        choiceRepository.save(choice);
+    }
+
     @Override
     public Choice findById(long id)
     {
