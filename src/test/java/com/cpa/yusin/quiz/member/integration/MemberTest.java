@@ -368,7 +368,7 @@ class MemberTest
 
         // when
         ResultActions resultActions = mvc
-                .perform(patch("/api/v1/admin/members/" + member.getId())
+                .perform(patch("/api/v1/members/" + member.getId())
                         .content(requestBody)
                         .contentType(MediaType.APPLICATION_JSON)
                         .with(user(memberDetails))
@@ -547,7 +547,7 @@ class MemberTest
 
         // when
         ResultActions resultActions = mvc
-                .perform(delete("/api/v1/admin/members/" + 2)
+                .perform(delete("/api/v1/members/" + 2)
                 );
 
         // then
@@ -571,7 +571,7 @@ class MemberTest
 
         // when
         ResultActions resultActions = mvc
-                .perform(delete("/api/v1/admin/members/" + 20)
+                .perform(delete("/api/v1/members/" + 20)
                         .with(user(memberDetails))
                 );
 

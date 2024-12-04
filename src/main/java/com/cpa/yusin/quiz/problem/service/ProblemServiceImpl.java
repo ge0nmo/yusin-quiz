@@ -52,7 +52,7 @@ public class ProblemServiceImpl implements ProblemService
         Problem problem = findById(problemId);
 
         problem.update(request.getContent(), request.getNumber());
-        choiceService.update(request.getChoices(), problem);
+        problemRepository.save(problem);
     }
 
     @Transactional

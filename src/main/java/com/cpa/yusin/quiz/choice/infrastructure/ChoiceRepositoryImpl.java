@@ -45,6 +45,12 @@ public class ChoiceRepositoryImpl implements ChoiceRepository
     }
 
     @Override
+    public boolean existsById(long id)
+    {
+        return choiceJpaRepository.existsById(id);
+    }
+
+    @Override
     public Optional<Choice> findById(long id)
     {
         return choiceJpaRepository.findById(id);

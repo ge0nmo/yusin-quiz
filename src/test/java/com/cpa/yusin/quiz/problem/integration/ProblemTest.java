@@ -96,86 +96,10 @@ public class ProblemTest
                 .id(1L)
                 .year(2024)
                 .name("1차")
-                .maxProblemCount(40)
                 .subjectId(english.getId())
                 .build());
     }
 
-    /*@WithUserDetails(value = "John@gmail.com", setupBefore = TestExecutionEvent.TEST_EXECUTION)
-    @Test
-    void saveUpdate_success() throws Exception
-    {
-        // given
-        String content1
-                = "If ____ of the items on your order are out of stock, you will be notified by email and the rest of your order will be delivered";
-        String content2 = "A small lever on the underside of TEAM 7's coffee table allows you to adjust ____ height smoothly";
-
-        Long examId = exam.getId();
-
-        List<ChoiceRequest> choiceRequests1 = List.of(
-                ChoiceRequest.builder().id(null).number(1).content("some").isAnswer(true).isDeleted(false).build(),
-                ChoiceRequest.builder().id(null).number(2).content("any").isAnswer(false).isDeleted(false).build(),
-                ChoiceRequest.builder().id(null).number(3).content("each").isAnswer(false).isDeleted(false).build(),
-                ChoiceRequest.builder().id(null).number(4).content("every").isAnswer(false).isDeleted(false).build()
-        );
-
-        List<ChoiceRequest> choiceRequests2 = List.of(
-                ChoiceRequest.builder().id(null).number(1).content("those").isAnswer(false).isDeleted(false).build(),
-                ChoiceRequest.builder().id(null).number(2).content("which").isAnswer(false).isDeleted(false).build(),
-                ChoiceRequest.builder().id(null).number(3).content("tis").isAnswer(true).isDeleted(false).build(),
-                ChoiceRequest.builder().id(null).number(4).content("theirs").isAnswer(false).isDeleted(false).build()
-        );
-
-        List<ProblemRequest> request = List.of(
-                ProblemRequest.builder().id(null).number(1).choices(choiceRequests1).content(content1).isDeleted(false).build(),
-                ProblemRequest.builder().id(null).number(2).choices(choiceRequests2).content(content2).isDeleted(false).build()
-        );
-
-        // when
-        ResultActions resultActions = mvc
-                .perform(post("/api/v1/admin/problem")
-                        .content(mapper.writeValueAsString(request))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .queryParam("examId", examId.toString())
-                );
-
-        // then
-        resultActions
-                .andExpect(status().isOk())
-                .andDo(document("problemSaveUpdateSuccess",
-                        preprocessRequest(prettyPrint()),
-                        preprocessResponse(prettyPrint()),
-                        queryParameters(
-                                parameterWithName("examId").description("시험 고유 식별자")
-                        ),
-
-                        requestFields(
-                                fieldWithPath("[].id").description("문제 고유 식별자 (신규 생성시 null)").optional(),
-                                fieldWithPath("[].content").description("문제 내용"),
-                                fieldWithPath("[].number").description("문제 번호"),
-                                fieldWithPath("[].deleted").description("삭제 여부"),
-                                fieldWithPath("[].choices").description("선택지 목록"),
-                                fieldWithPath("[].choices[].id").description("선택지 고유 식별자 (신규 생성시 null)").optional(),
-                                fieldWithPath("[].choices[].number").description("선택지 번호"),
-                                fieldWithPath("[].choices[].content").description("선택지 내용"),
-                                fieldWithPath("[].choices[].isAnswer").description("정답 여부"),
-                                fieldWithPath("[].choices[].isDeleted").description("선택지 삭제 여부")
-                        ),
-
-                        responseFields(
-                                fieldWithPath("data[].id").description("문제 고유 식별자").type(JsonFieldType.NUMBER).optional(),
-                                fieldWithPath("data[].content").description("문제 내용").type(JsonFieldType.STRING),
-                                fieldWithPath("data[].number").description("문제 번호").type(JsonFieldType.NUMBER),
-                                fieldWithPath("data[].choices").description("선택지 목록").type(JsonFieldType.ARRAY),
-                                fieldWithPath("data[].choices[].id").description("선택지 식별자").type(JsonFieldType.NUMBER),
-                                fieldWithPath("data[].choices[].number").description("선택지 번호").type(JsonFieldType.NUMBER),
-                                fieldWithPath("data[].choices[].content").description("선택지 내용").type(JsonFieldType.STRING),
-                                fieldWithPath("data[].choices[].isAnswer").description("정답 여부").type(JsonFieldType.BOOLEAN)
-                        )
-                ))
-        ;
-
-    }*/
 
     @Transactional
     @WithUserDetails(value = "John@gmail.com", setupBefore = TestExecutionEvent.TEST_EXECUTION)

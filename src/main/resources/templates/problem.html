@@ -370,8 +370,6 @@
 
         selectedExamId = selectedValue || null;
         selectedExamName = this.selectedOptions[0].textContent || null;
-
-        console.log('시험 이름 = ', selectedExamName);
     })
 
 
@@ -402,6 +400,8 @@
         examTable.innerHTML = '';
         let html = '';
 
+        console.log('문제 = ', problemList);
+
         problemList.forEach((problem) => {
             const choiceList = problem.choices;
             const choiceHTML = loadChoiceData(choiceList);
@@ -412,10 +412,10 @@
                     <div class="card-header bg-primary text-white">
                         <div class="d-flex justify-content-between">
                             <h5 class="mb-0">
-                                문제<span class="ml-2 problem-number">${problem.number}</span>
+                                문제<input class="ml-2 problemNumber" value="${problem.number}" style="width: 50px">
                             </h5>
                             <div class="d-flex justify-content-end">
-                                <button class="editBtn btn btn-outline-light" onclick="handleUpdateChoiceClick(${problemId})">
+                                <button class="problemEditBtn btn btn-outline-light" onclick="handleUpdateProblemClick(${problemId})">
                                     <img class="editImg" src="/img/save.svg" alt="">
                                 </button>
                                 <button class="removeBtn btn btn-outline-light" onclick="handleRemoveProblem(${problemId})">
@@ -427,7 +427,7 @@
                     </div>
                     <div class="card-body">
                         <div class="mb-3">
-                            <h6 class="problem-content font-weight-bold">${problem.content}</h6>
+                            <textarea class="problemContent form-control font-weight-bold">${problem.content}</textarea>
                         </div>
 
                         <div class="choices list-group">${choiceHTML}</div>
@@ -454,13 +454,13 @@
             const choiceId = choice.id;
             html += `
                 <div id="choice-${choiceId}" class="list-group-item list-group-item-action d-flex align-items-center choice-item " data-choice-id="${choiceId}">
-                    <input type="number" class="choice-number mr-2 col-1" value="${choice.number}" placeholder="번호">
+                    <input type="number" class="choice-number mr-2 col-1" value="${choice.number}" placeholder="번호" style="width: 50px">
                     <input type="text" class="choice-content flex-grow-1" value="${choice.content}">
 
                     <input class="form-check-input isAnswer" type="checkbox" value="" id='checkBox=${choiceId}' ${choice.isAnswer ? 'checked' : ''}>
 
                     <div class="choice-btn ml-2">
-                        <button class="btn btn-sm btn-outline-secondary p-1" onclick="handleUpdateChoiceClick(${choiceId})">
+                        <button class="choiceEditBtn btn btn-sm btn-outline-secondary p-1" onclick="handleUpdateChoiceClick(${choiceId})">
                             <img src="/img/save.svg" alt="" class="m-1">
                         </button>
                         <button class="btn btn-sm btn-outline-secondary p-1 isRemove" onclick="handleRemoveChoiceClick(${choiceId})">
@@ -474,11 +474,6 @@
 
         return html;
     }
-
-    function handleAddMoreChoice() {
-
-    }
-
 
 
     async function handleSaveClick(){
@@ -536,28 +531,59 @@
 
     }
 
-    function handleUpdateChoiceClick(choiceId){
-        updateChoice(choiceId);
+    async function handleUpdateProblemClick(problemId){
+        try{
+            const problemForm = document.getElementById(`problem-${problemId}`);
 
-        const problemList = getProblemData(selectedExamId);
-        loadProblemData(problemList);
+            const num = Number(problemForm.querySelector('.problemNumber').value);
+            const content = problemForm.querySelector('.problemContent').value;
 
+            console.log(`num = ${num}`);
+            console.log(`content = ${content}`);
+
+            const problemUpdateRequest = {
+                number: num,
+                content: content,
+            }
+
+            const response = await fetch(`/admin/problem/${problemId}`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(problemUpdateRequest),
+            })
+
+            if(!response.ok){
+                throw new Error('수정 실패');
+            }
+
+            const problemList = await getProblemData(selectedExamId);
+            loadProblemData(problemList);
+        } catch (error){
+            console.log(error);
+            alert('문제 수정 중 오류가 발생했습니다.');
+        }
     }
 
-    function handleRemoveChoiceClick(choiceId){
-        const choiceItem = document.querySelector(`.choice-item[data-choice-id="${choiceId}"]`);
 
-        if(choiceItem){
-            choiceItem.classList.remove('d-flex');
-            choiceItem.classList.add('deleted', 'd-none');
+    async function handleUpdateChoiceClick(choiceId){
+        try{
+            await updateChoice(choiceId);
+            const problemList = await getProblemData(selectedExamId);
+            loadProblemData(problemList);
+        } catch (error){
+            throw new error('');
         }
+
     }
 
     async function updateChoice(choiceId){
         try{
             const choiceForm = document.getElementById(`choice-${choiceId}`);
-            const choiceNumber = Number(choiceForm.querySelector('.choice-number').textContent);
-            const choiceContent = choiceForm.querySelector('.choice-content').textContent;
+
+            const choiceNumber = Number(choiceForm.querySelector('.choice-number').value);
+            const choiceContent = choiceForm.querySelector('.choice-content').value;
             const isAnswer = choiceForm.querySelector('.isAnswer').checked;
 
             const choiceUpdateRequest = {
@@ -582,15 +608,30 @@
         }
     }
 
+    async function handleRemoveChoiceClick(choiceId){
+        try{
+            if(!confirm("정말 삭제하시겠습니까?")){
+                return;
+            }
 
-    function completeUpdate(problemId){
-        problemId = Number(problemId);
+            const choiceItem = document.querySelector(`.choice-item[data-choice-id="${choiceId}"]`);
 
+            const response = await fetch(`/admin/choice/${choiceId}`, {
+                method: 'DELETE',
+            });
 
-    }
+            if(!response.ok){
+                throw new Error('삭제 실패')
+            }
 
-    async function updateProblem(problemId, problemUpdateRequest){
+            if(choiceItem){
+                choiceItem.classList.remove('d-flex');
+                choiceItem.classList.add('deleted', 'd-none');
+            }
 
+        } catch (error){
+            console.log(error);
+        }
     }
 
 

@@ -62,6 +62,12 @@ public class FakeChoiceRepository implements ChoiceRepository
     }
 
     @Override
+    public boolean existsById(long id)
+    {
+        return data.stream().anyMatch(item -> Objects.equals(item.getId(), id));
+    }
+
+    @Override
     public Optional<Choice> findById(long id) {
         return data.stream()
                 .filter(item -> item.getId() == id)

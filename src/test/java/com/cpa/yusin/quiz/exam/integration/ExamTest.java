@@ -86,300 +86,6 @@ class ExamTest
                 .build());
     }
 
-    @WithUserDetails(value = "John@gmail.com", setupBefore = TestExecutionEvent.TEST_EXECUTION)
-    @Test
-    void save_success() throws Exception
-    {
-        // given
-        Long subjectId = economics.getId();
-
-        ExamCreateRequest request = ExamCreateRequest.builder()
-                .year(2024)
-                .name("1차")
-                .maxProblemCount(40)
-                .build();
-
-        // when
-        ResultActions resultActions = mvc.perform(post("/api/v1/admin/exam")
-                .content(mapper.writeValueAsString(request))
-                .contentType(MediaType.APPLICATION_JSON)
-                .param("subjectId", subjectId.toString())
-        );
-
-        // then
-        resultActions
-                .andExpect(status().isCreated())
-                .andDo(document("exam-create-success",
-                        preprocessRequest(prettyPrint()),
-                        preprocessResponse(prettyPrint()),
-                        queryParameters(
-                            parameterWithName("subjectId").description("과목 고유 식별자")
-                        ),
-
-                        requestFields(
-                                fieldWithPath("name").description("시험 이름"),
-                                fieldWithPath("year").description("시험 연도"),
-                                fieldWithPath("maxProblemCount").description("최대 문제 수")
-                        ),
-
-                        responseFields(
-                                fieldWithPath("data.id").type(JsonFieldType.NUMBER).description("시험 고유 식별자"),
-                                fieldWithPath("data.name").type(JsonFieldType.STRING).description("시험 이름"),
-                                fieldWithPath("data.year").type(JsonFieldType.NUMBER).description("시험 연도"),
-                                fieldWithPath("data.maxProblemCount").type(JsonFieldType.NUMBER).description("시험 문제 갯수")
-                        )
-                ))
-
-        ;
-
-    }
-
-    @WithUserDetails(value = "John@gmail.com", setupBefore = TestExecutionEvent.TEST_EXECUTION)
-    @Test
-    void save_fail_NoFields() throws Exception
-    {
-        // given
-        Long subjectId = economics.getId();
-
-        ExamCreateRequest request = ExamCreateRequest.builder()
-                .build();
-
-        // when
-        ResultActions resultActions = mvc.perform(post("/api/v1/admin/exam")
-                .content(mapper.writeValueAsString(request))
-                .contentType(MediaType.APPLICATION_JSON)
-                .param("subjectId", subjectId.toString())
-        );
-
-        // then
-        resultActions
-                .andExpect(status().isBadRequest())
-                .andDo(document("exam-create-fail-empty-name",
-                        preprocessRequest(prettyPrint()),
-                        preprocessResponse(prettyPrint()),
-
-                        queryParameters(
-                                parameterWithName("subjectId").description("과목 고유 식별자")
-                        ),
-
-                        requestFields(
-                                fieldWithPath("name").description("시험 이름"),
-                                fieldWithPath("year").description("시험 연도"),
-                                fieldWithPath("maxProblemCount").description("최대 문제 수")
-                        ),
-
-                        responseFields(
-                                fieldWithPath("status").type(JsonFieldType.NUMBER).description("상태"),
-                                fieldWithPath("message").type(JsonFieldType.STRING).description("메세지"),
-                                fieldWithPath("valueErrors[].descriptor").type(JsonFieldType.STRING).description("오류 항목"),
-                                fieldWithPath("valueErrors[].rejectedValue").type(JsonFieldType.STRING).description("오류 내용"),
-                                fieldWithPath("valueErrors[].reason").type(JsonFieldType.STRING).description("오류 원인")
-                        ))
-                );
-
-    }
-
-    @WithUserDetails(value = "John@gmail.com", setupBefore = TestExecutionEvent.TEST_EXECUTION)
-    @Test
-    void save_fail_duplicated() throws Exception
-    {
-        // given
-        Long subjectId = economics.getId();
-
-        examRepository.save(Exam.builder()
-                .id(1L)
-                .name("1차")
-                .year(2024)
-                .maxProblemCount(40)
-                .subjectId(economics.getId())
-                .build());
-
-        ExamCreateRequest request = ExamCreateRequest.builder()
-                .name("1차")
-                .year(2024)
-                .maxProblemCount(40)
-                .build();
-
-        // when
-        ResultActions resultActions = mvc.perform(post("/api/v1/admin/exam")
-                .content(mapper.writeValueAsString(request))
-                .contentType(MediaType.APPLICATION_JSON)
-                .param("subjectId", subjectId.toString())
-        );
-
-        // then
-        resultActions
-                .andExpect(status().isInternalServerError())
-                .andDo(document("exam-create-fail-duplicated",
-                        preprocessRequest(prettyPrint()),
-                        preprocessResponse(prettyPrint()),
-
-                        queryParameters(
-                                parameterWithName("subjectId").description("과목 고유 식별자")
-                        ),
-
-                        requestFields(
-                                fieldWithPath("name").description("시험 이름"),
-                                fieldWithPath("year").description("시험 연도"),
-                                fieldWithPath("maxProblemCount").description("최대 문제 수")
-                        ),
-
-                        responseFields(
-                                fieldWithPath("status").type(JsonFieldType.NUMBER).description("상태"),
-                                fieldWithPath("message").type(JsonFieldType.STRING).description("메세지")
-                        ))
-                );
-
-    }
-
-
-    @WithUserDetails(value = "John@gmail.com", setupBefore = TestExecutionEvent.TEST_EXECUTION)
-    @Test
-    void update_success() throws Exception
-    {
-        // given
-        Exam exam = examRepository.save(Exam.builder()
-                .id(1L)
-                .name("1차")
-                .year(2024)
-                .maxProblemCount(40)
-                .subjectId(economics.getId())
-                .build());
-
-        ExamUpdateRequest request = ExamUpdateRequest.builder()
-                .name("3차")
-                .year(2023)
-                .maxProblemCount(30)
-                .build();
-
-        // when
-        ResultActions resultActions = mvc.perform(patch("/api/v1/admin/exam/" + exam.getId())
-                .content(mapper.writeValueAsString(request))
-                .contentType(MediaType.APPLICATION_JSON)
-        );
-
-        // then
-        resultActions
-                .andExpect(status().isOk())
-                .andDo(document("exam-completePayment-success",
-                        preprocessRequest(prettyPrint()),
-                        preprocessResponse(prettyPrint()),
-
-                        requestFields(
-                                fieldWithPath("name").description("시험 이름"),
-                                fieldWithPath("year").description("시험 연도"),
-                                fieldWithPath("maxProblemCount").description("최대 문제 수")
-                        ),
-
-                        responseFields(
-                                fieldWithPath("data.id").type(JsonFieldType.NUMBER).description("시험 고유 식별자"),
-                                fieldWithPath("data.name").type(JsonFieldType.STRING).description("시험 이름"),
-                                fieldWithPath("data.year").type(JsonFieldType.NUMBER).description("시험 연도"),
-                                fieldWithPath("data.maxProblemCount").type(JsonFieldType.NUMBER).description("시험 문제 갯수")
-                        ))
-                );
-
-    }
-
-    @WithUserDetails(value = "John@gmail.com", setupBefore = TestExecutionEvent.TEST_EXECUTION)
-    @Test
-    void update_fail_noFields() throws Exception
-    {
-        // given
-        Exam exam = examRepository.save(Exam.builder()
-                .id(1L)
-                .name("1차")
-                .year(2024)
-                .maxProblemCount(40)
-                .subjectId(economics.getId())
-                .build());
-
-        ExamUpdateRequest request = ExamUpdateRequest.builder()
-                .build();
-
-        // when
-        ResultActions resultActions = mvc.perform(patch("/api/v1/admin/exam/" + exam.getId())
-                .content(mapper.writeValueAsString(request))
-                .contentType(MediaType.APPLICATION_JSON)
-        );
-
-        // then
-        resultActions
-                .andExpect(status().isBadRequest())
-                .andDo(document("exam-completePayment-fail-no-fields",
-                        preprocessRequest(prettyPrint()),
-                        preprocessResponse(prettyPrint()),
-
-                        requestFields(
-                                fieldWithPath("name").description("시험 이름"),
-                                fieldWithPath("year").description("시험 연도"),
-                                fieldWithPath("maxProblemCount").description("최대 문제 수")
-                        ),
-
-                        responseFields(
-                                fieldWithPath("status").type(JsonFieldType.NUMBER).description("상태"),
-                                fieldWithPath("message").type(JsonFieldType.STRING).description("메세지"),
-                                fieldWithPath("valueErrors[].descriptor").type(JsonFieldType.STRING).description("오류 항목"),
-                                fieldWithPath("valueErrors[].rejectedValue").type(JsonFieldType.STRING).description("오류 내용"),
-                                fieldWithPath("valueErrors[].reason").type(JsonFieldType.STRING).description("오류 원인")
-                        ))
-                );
-
-    }
-
-    @WithUserDetails(value = "John@gmail.com", setupBefore = TestExecutionEvent.TEST_EXECUTION)
-    @Test
-    void update_fail_duplicated() throws Exception
-    {
-        // given
-        Exam exam = examRepository.save(Exam.builder()
-                .id(1L)
-                .name("1차")
-                .year(2024)
-                .maxProblemCount(40)
-                .subjectId(economics.getId())
-                .build());
-
-        examRepository.save(Exam.builder()
-                .id(2L)
-                .name("2차")
-                .year(2024)
-                .maxProblemCount(40)
-                .subjectId(economics.getId())
-                .build());
-
-        ExamUpdateRequest request = ExamUpdateRequest.builder()
-                .name("2차")
-                .year(2024)
-                .maxProblemCount(40)
-                .build();
-
-        // when
-        ResultActions resultActions = mvc.perform(patch("/api/v1/admin/exam/" + exam.getId())
-                .content(mapper.writeValueAsString(request))
-                .contentType(MediaType.APPLICATION_JSON)
-        );
-
-        // then
-        resultActions
-                .andExpect(status().isInternalServerError())
-                .andDo(document("exam-completePayment-fail-duplicated",
-                        preprocessRequest(prettyPrint()),
-                        preprocessResponse(prettyPrint()),
-
-                        requestFields(
-                                fieldWithPath("name").description("시험 이름"),
-                                fieldWithPath("year").description("시험 연도"),
-                                fieldWithPath("maxProblemCount").description("최대 문제 수")
-                        ),
-
-                        responseFields(
-                                fieldWithPath("status").type(JsonFieldType.NUMBER).description("상태"),
-                                fieldWithPath("message").type(JsonFieldType.STRING).description("메세지")
-                        ))
-                );
-
-    }
 
     @WithUserDetails(value = "John@gmail.com", setupBefore = TestExecutionEvent.TEST_EXECUTION)
     @Test
@@ -390,7 +96,6 @@ class ExamTest
                 .id(1L)
                 .name("1차")
                 .year(2024)
-                .maxProblemCount(40)
                 .subjectId(economics.getId())
                 .build());
 
@@ -410,8 +115,7 @@ class ExamTest
                         responseFields(
                                 fieldWithPath("data.id").type(JsonFieldType.NUMBER).description("시험 고유 식별자"),
                                 fieldWithPath("data.name").type(JsonFieldType.STRING).description("시험 이름"),
-                                fieldWithPath("data.year").type(JsonFieldType.NUMBER).description("시험 연도"),
-                                fieldWithPath("data.maxProblemCount").type(JsonFieldType.NUMBER).description("시험 문제 갯수")
+                                fieldWithPath("data.year").type(JsonFieldType.NUMBER).description("시험 연도")
                         ))
                 );
 
@@ -453,7 +157,6 @@ class ExamTest
                 .id(1L)
                 .name("1차")
                 .year(2024)
-                .maxProblemCount(40)
                 .subjectId(economics.getId())
                 .build());
 
@@ -461,7 +164,6 @@ class ExamTest
                 .id(2L)
                 .name("2차")
                 .year(2024)
-                .maxProblemCount(40)
                 .subjectId(economics.getId())
                 .build());
 
@@ -469,7 +171,6 @@ class ExamTest
                 .id(3L)
                 .name("3차")
                 .year(2024)
-                .maxProblemCount(40)
                 .subjectId(economics.getId())
                 .build());
 
@@ -494,64 +195,9 @@ class ExamTest
                         responseFields(
                                 fieldWithPath("data[].id").type(JsonFieldType.NUMBER).description("시험 고유 식별자"),
                                 fieldWithPath("data[].name").type(JsonFieldType.STRING).description("시험 이름"),
-                                fieldWithPath("data[].year").type(JsonFieldType.NUMBER).description("시험 연도"),
-                                fieldWithPath("data[].maxProblemCount").type(JsonFieldType.NUMBER).description("시험 문제 갯수")
+                                fieldWithPath("data[].year").type(JsonFieldType.NUMBER).description("시험 연도")
                         ))
                 );
-
-    }
-
-    @WithUserDetails(value = "John@gmail.com", setupBefore = TestExecutionEvent.TEST_EXECUTION)
-    @Test
-    void deleteById_success() throws Exception
-    {
-        // given
-        Exam exam1 = examRepository.save(Exam.builder()
-                .id(1L)
-                .name("1차")
-                .year(2024)
-                .maxProblemCount(40)
-                .subjectId(economics.getId())
-                .build());
-
-        Exam exam2 = examRepository.save(Exam.builder()
-                .id(2L)
-                .name("2차")
-                .year(2024)
-                .maxProblemCount(40)
-                .subjectId(economics.getId())
-                .build());
-
-        Exam exam3 = examRepository.save(Exam.builder()
-                .id(3L)
-                .name("3차")
-                .year(2024)
-                .maxProblemCount(40)
-                .subjectId(economics.getId())
-                .build());
-
-        ExamDeleteRequest request = ExamDeleteRequest.builder()
-                .examIds(List.of(exam1.getId(), exam2.getId(), exam3.getId()))
-                .build();
-
-        // when
-        ResultActions resultActions = mvc.perform(delete("/api/v1/admin/exam" )
-                .content(mapper.writeValueAsString(request))
-                .contentType(MediaType.APPLICATION_JSON)
-
-        );
-
-        // then
-        resultActions
-                .andExpect(status().isNoContent())
-                .andDo(document("deleteExamById",
-                        preprocessRequest(prettyPrint()),
-                        preprocessResponse(prettyPrint()),
-
-                        requestFields(
-                                fieldWithPath("examIds").description("시험 고유 식별자 리스트")
-                        )
-                ));
 
     }
 

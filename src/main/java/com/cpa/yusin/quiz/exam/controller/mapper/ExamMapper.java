@@ -20,7 +20,6 @@ public class ExamMapper
                 .id(domain.getId())
                 .name(domain.getName())
                 .year(domain.getYear())
-                .maxProblemCount(domain.getMaxProblemCount())
                 .build();
     }
 
@@ -33,7 +32,6 @@ public class ExamMapper
                 .id(domain.getId())
                 .name(domain.getName())
                 .year(domain.getYear())
-                .maxProblemCount(domain.getMaxProblemCount())
                 .build();
     }
 

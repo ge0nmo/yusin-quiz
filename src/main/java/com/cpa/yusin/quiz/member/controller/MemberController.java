@@ -26,6 +26,20 @@ public class MemberController
 {
     private final MemberService memberService;
 
+    @PatchMapping("/{id}")
+    public ResponseEntity<GlobalResponse<MemberDTO>> update(@Positive @PathVariable("id") long id,
+                                                            @RequestBody @Valid MemberUpdateRequest request,
+                                                            @AuthenticationPrincipal MemberDetails memberDetails)
+    {
+        memberService.update(id, request, memberDetails.getMember());
+        MemberDTO response = memberService.getById(id);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(new GlobalResponse<>(response));
+    }
+
+
     @GetMapping("/{id}")
     public ResponseEntity<GlobalResponse<MemberDTO>> getById(@PathVariable("id") long id)
     {
@@ -41,5 +55,16 @@ public class MemberController
         Page<MemberDTO> response = memberService.getAll(keyword, pageable.previousOrFirst());
 
         return ResponseEntity.ok(new GlobalResponse<>(response.getContent(), PageInfo.of(response)));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<GlobalResponse<Void>> deleteById(@Positive @PathVariable("id") long id,
+                                                           @AuthenticationPrincipal MemberDetails memberDetails)
+    {
+        memberService.deleteById(id, memberDetails.getMember());
+
+        return ResponseEntity
+                .status(HttpStatus.NO_CONTENT)
+                .body(new GlobalResponse<>());
     }
 }
