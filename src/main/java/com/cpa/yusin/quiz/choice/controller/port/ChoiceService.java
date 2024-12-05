@@ -13,6 +13,8 @@ public interface ChoiceService
 {
     void save(Problem problem, List<ChoiceCreateRequest> requests);
 
+    long save(Choice choice);
+
     void update(List<ChoiceUpdateRequest> requests, Problem problem);
 
     void update(long choiceId, ChoiceUpdateRequest request);

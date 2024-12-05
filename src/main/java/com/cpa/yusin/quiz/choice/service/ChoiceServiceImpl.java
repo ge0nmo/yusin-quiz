@@ -41,6 +41,13 @@ public class ChoiceServiceImpl implements ChoiceService
 
     @Transactional
     @Override
+    public long save(Choice choice)
+    {
+        return choiceRepository.save(choice).getId();
+    }
+
+    @Transactional
+    @Override
     public void update(List<ChoiceUpdateRequest> requests, Problem problem)
     {
         for(ChoiceUpdateRequest request : requests)
