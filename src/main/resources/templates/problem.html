@@ -9,6 +9,7 @@
 
     <!-- Custom styles for this template-->
     <link th:href="@{/css/sb-admin-2.min.css}" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css" rel="stylesheet" />
 </head>
 <body>
 
@@ -163,9 +164,9 @@
                         </div>
 
 
-                        <div class="form-group">
-                            <label for="problemContent">문제 내용</label>
-                            <textarea id="problemContent" required class="form-control" rows="3"></textarea>
+                        <div class="form-group" id="problemContent">
+                            <!--<label for="problemContent">문제 내용</label>
+                            <textarea id="problemContent" required class="form-control" rows="3"></textarea>-->
                         </div>
 
                         <!-- Choices Section -->
@@ -213,12 +214,18 @@
 <script th:src="@{/js/demo/chart-area-demo.js}"></script>
 <script th:src="@{/js/demo/chart-pie-demo.js}"></script>
 
+
+<!-- Include the Quill library -->
+<script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.js"></script>
+
 <script>
     let selectedSubjectId;
     let selectedSubjectName;
     let selectedYear;
     let selectedExamId;
     let selectedExamName;
+    let problemContentQuill;
+    let quillInstances = {};
 
     window.onload = function() {
         const choicesContainer = document.getElementById('choicesContainer');
@@ -247,7 +254,10 @@
             choicesContainer.appendChild(choiceRow);
         });
 
+        problemContentQuill = new Quill('#problemContent', {
+            theme: 'snow',
 
+        });
     };
 
     function handleInput() {
@@ -414,6 +424,7 @@
                             <h5 class="mb-0">
                                 문제<input class="ml-2 problemNumber" value="${problem.number}" style="width: 50px">
                             </h5>
+
                             <div class="d-flex justify-content-end">
                                 <button class="problemEditBtn btn btn-outline-light" onclick="handleUpdateProblemClick(${problemId})">
                                     <img class="editImg" src="/img/save.svg" alt="">
@@ -426,7 +437,7 @@
                     </div>
                     <div class="card-body">
                         <div class="mb-3">
-                            <textarea class="problemContent form-control font-weight-bold">${problem.content}</textarea>
+                             <div id="problemContent-${problemId}" class="problemContent form-control"></div>
                         </div>
 
                         <div class="choices list-group">${choiceHTML}</div>
@@ -437,12 +448,27 @@
                                 <img src="/img/add_icon.png" alt="" >
                             </button>
                         </div>
+                        <div class="list-group-item list-group-item-action justify-content-center">
+                            <label class="form-label" for="formFile-${problemId}">설명 추가</label>
+                            <input type="file" class="form-control" id="formFile-${problemId}" />
+                        </div>
+
                     </div>
                 </div>
             `
         })
 
         examTable.innerHTML = html;
+
+        problemList.forEach((problem) => {
+            const quillContainer = document.getElementById(`problemContent-${problem.id}`);
+            const quill = new Quill(quillContainer, {
+                theme: 'snow',
+            });
+
+            quill.root.innerHTML = problem.content;
+            quillInstances[problem.id] = quill;
+        });
     }
 
 
@@ -550,7 +576,8 @@
         try{
             const problemNumber = Number(document.getElementById('problemNumber').value);
 
-            const problemContent = document.getElementById('problemContent').value;
+            const problemContent = problemContentQuill.root.innerHTML;
+            console.log(`문제 내용 = ${problemContent}`);
 
             const choiceContainer = document.getElementById('choicesContainer');
             const choiceRows = choiceContainer.querySelectorAll('.choice-row');
@@ -606,10 +633,8 @@
             const problemForm = document.getElementById(`problem-${problemId}`);
 
             const num = Number(problemForm.querySelector('.problemNumber').value);
-            const content = problemForm.querySelector('.problemContent').value;
-
-            console.log(`num = ${num}`);
-            console.log(`content = ${content}`);
+            const content = quillInstances[problemId].root.innerHTML;
+            console.log("업데이트 문제 내용", content);
 
             const problemUpdateRequest = {
                 number: num,
