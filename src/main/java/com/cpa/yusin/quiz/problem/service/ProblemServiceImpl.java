@@ -51,7 +51,7 @@ public class ProblemServiceImpl implements ProblemService
     {
         Problem problem = findById(problemId);
 
-        problem.update(request.getContent(), request.getNumber());
+        problem.update(request.getContent(), request.getNumber(), request.getExplanation());
         problemRepository.save(problem);
     }
 

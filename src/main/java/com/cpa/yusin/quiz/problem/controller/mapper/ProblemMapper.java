@@ -37,6 +37,7 @@ public class ProblemMapper
         return Problem.builder()
                 .content(request.getContent())
                 .number(request.getNumber())
+                .explanation(request.getExplanation())
                 .exam(exam)
                 .build();
     }
@@ -63,6 +64,7 @@ public class ProblemMapper
                 .id(problem.getId())
                 .content(problem.getContent())
                 .number(problem.getNumber())
+                .explanation(problem.getExplanation())
                 .choices(choices)
                 .build();
     }
@@ -79,6 +81,7 @@ public class ProblemMapper
                 .id(problem.getId())
                 .content(problem.getContent())
                 .number(problem.getNumber())
+                .explanation(problem.getExplanation())
                 .choices(choices)
                 .build();
     }

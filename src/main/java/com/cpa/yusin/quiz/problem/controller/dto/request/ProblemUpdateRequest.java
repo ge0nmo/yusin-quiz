@@ -13,4 +13,5 @@ public class ProblemUpdateRequest
 {
     private int number;
     private String content;
+    private String explanation;
 }

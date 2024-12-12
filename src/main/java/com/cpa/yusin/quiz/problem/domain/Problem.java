@@ -34,10 +34,11 @@ public class Problem
     private Exam exam;
 
 
-    public void update(String content, int number)
+    public void update(String content, int number, String explanation)
     {
         this.content = content;
         this.number = number;
+        this.explanation = explanation;
     }
 
     private void validateExamId(long examId)
