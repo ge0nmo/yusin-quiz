@@ -16,5 +16,6 @@ public class ProblemCreateRequest
 {
     private String content;
     private int number;
+    private String explanation;
     private List<ChoiceCreateRequest> choices;
 }

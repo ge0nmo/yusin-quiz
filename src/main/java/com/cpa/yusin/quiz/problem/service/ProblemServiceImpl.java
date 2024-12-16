@@ -51,8 +51,8 @@ public class ProblemServiceImpl implements ProblemService
     {
         Problem problem = findById(problemId);
 
-        problem.update(request.getContent(), request.getNumber());
-        choiceService.update(request.getChoices(), problem);
+        problem.update(request.getContent(), request.getNumber(), request.getExplanation());
+        problemRepository.save(problem);
     }
 
     @Transactional

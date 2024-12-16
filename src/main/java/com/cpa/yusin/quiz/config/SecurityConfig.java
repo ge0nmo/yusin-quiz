@@ -66,12 +66,9 @@ public class SecurityConfig
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(API_ENDPOINT_WHITELIST
-                        ).permitAll()
-
-                        .requestMatchers(
-                                "/api/v1/admin/**").hasRole("ADMIN")
-                        .anyRequest().authenticated());
+                        /*.requestMatchers(API_ENDPOINT_WHITELIST
+                        ).permitAll()*/
+                        .anyRequest().permitAll());
 
         http
 

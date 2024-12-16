@@ -10,32 +10,6 @@
 
 == 구독 플랜 API
 
-=== 구독 플랜 등록 성공
-==== HTTP Request
-include::{snippets}/saveProductSuccess/http-request.adoc[]
-
-==== Request Fields
-include::{snippets}/saveProductSuccess/request-fields.adoc[]
-
-==== HTTP Response
-include::{snippets}/saveProductSuccess/http-response.adoc[]
-
-==== Response Fields
-include::{snippets}/saveProductSuccess/response-fields.adoc[]
-
-
-=== 구독 플랜 등록 실패 - 필드 누락
-==== HTTP Request
-include::{snippets}/saveProductNullValue/http-request.adoc[]
-
-==== Request Fields
-include::{snippets}/saveProductNullValue/request-fields.adoc[]
-
-==== HTTP Response
-include::{snippets}/saveProductNullValue/http-response.adoc[]
-
-==== Response Fields
-include::{snippets}/saveProductNullValue/response-fields.adoc[]
 
 === 구독 플랜 수정 성공
 ==== HTTP Request
@@ -50,30 +24,6 @@ include::{snippets}/updateProductSuccess/http-response.adoc[]
 ==== Response Fields
 include::{snippets}/updateProductSuccess/response-fields.adoc[]
 
-=== 구독 플랜 수정 실패 - 필드 누락
-==== HTTP Request
-include::{snippets}/updateProductNullValue/http-request.adoc[]
-
-==== Request Fields
-include::{snippets}/updateProductNullValue/request-fields.adoc[]
-
-==== HTTP Response
-include::{snippets}/updateProductNullValue/http-response.adoc[]
-
-==== Response Fields
-include::{snippets}/updateProductNullValue/response-fields.adoc[]
-
-
-=== 구독 플랜 1개 조회
-==== HTTP Request
-include::{snippets}/getProductById/http-request.adoc[]
-
-==== HTTP Response
-include::{snippets}/getProductById/http-response.adoc[]
-
-==== Response Fields
-include::{snippets}/getProductById/response-fields.adoc[]
-
 
 === 구독 플랜 전체 조회
 ==== HTTP Request
@@ -84,11 +34,3 @@ include::{snippets}/getAllSubscriptionPlans/http-response.adoc[]
 
 ==== Response Fields
 include::{snippets}/getAllSubscriptionPlans/response-fields.adoc[]
-
-
-=== 구독 플랜 1개 삭제
-==== HTTP Request
-include::{snippets}/deleteProductById/http-request.adoc[]
-
-==== HTTP Response
-include::{snippets}/deleteProductById/http-response.adoc[]

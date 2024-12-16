@@ -136,13 +136,6 @@
                             </div>
                         </div>
 
-                        <div>
-                            <div class="form-group">
-                                <label>문제 수</label>
-                                <input id="maxProblemCount" type="number" required class="form-control"
-                                       title="Required and no space allowed">
-                            </div>
-                        </div>
                     </div>
 
                     <div class="modal-footer">
@@ -190,14 +183,6 @@
                             <div class="form-group">
                                 <label>연도</label>
                                 <input id="newExamYear" type="number" required class="form-control"
-                                       title="Required and no space allowed">
-                            </div>
-                        </div>
-
-                        <div>
-                            <div class="form-group">
-                                <label>문제 수</label>
-                                <input id="newMaxProblemCount" type="number" required class="form-control"
                                        title="Required and no space allowed">
                             </div>
                         </div>
@@ -327,14 +312,12 @@
     }
 
     function prepareExamForm(){
-        //document.querySelector('.selectedSubjectName').value = selectedSubjectName;
         document.querySelectorAll('.selectedSubjectName').forEach((input) => {
             input.value = selectedSubjectName;
         })
 
         document.querySelector('#examName').value = '';
-        document.querySelector('#examYear').value = '';
-        document.querySelector('#maxProblemCount').value = '';
+        document.querySelector('#examYear').value = selectedYear;
     }
 
     function prepareUpdateExamForm(exam){
@@ -413,12 +396,10 @@
     function updateExam(){
         const examName = document.querySelector('#newExamName').value
         const examYear = document.querySelector('#newExamYear').value
-        const maxProblemCount = document.querySelector('#newMaxProblemCount').value
 
         const examUpdateRequest = {
             name: examName,
             year: examYear,
-            maxProblemCount: maxProblemCount
         }
 
         fetch(`/admin/exam/${selectedExamId}`, {
@@ -449,13 +430,11 @@
     function saveExam(){
         const name = document.querySelector('#examName').value;
         const year = document.querySelector('#examYear').value;
-        const maxProblemCount = document.querySelector('#maxProblemCount').value;
 
 
         const examCreateRequest = {
             name: name,
             year: Number(year),
-            maxProblemCount: Number(maxProblemCount),
         }
 
         fetch(`/admin/exam?subjectId=${selectedSubjectId}`, {

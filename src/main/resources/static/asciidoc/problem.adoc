@@ -9,22 +9,6 @@
 
 == 문제 & 선택지 API
 
-== 문제 등록
-==== HTTP Request
-include::{snippets}/problemSaveUpdateSuccess/http-request.adoc[]
-
-==== Query Parameters
-include::{snippets}/problemSaveUpdateSuccess/query-parameters.adoc[]
-
-==== Request Fields
-include::{snippets}/problemSaveUpdateSuccess/request-fields.adoc[]
-
-==== HTTP Response
-include::{snippets}/problemSaveUpdateSuccess/http-response.adoc[]
-
-==== Response Fields
-include::{snippets}/problemSaveUpdateSuccess/response-fields.adoc[]
-
 
 == 문제 1개 조회
 ==== HTTP Request

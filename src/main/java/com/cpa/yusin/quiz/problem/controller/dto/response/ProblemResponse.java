@@ -13,6 +13,7 @@ public class ProblemResponse
     private final long id;
     private final String content;
     private final int number;
+    private final String explanation;
 
     private final List<ChoiceResponse> choices;
 }

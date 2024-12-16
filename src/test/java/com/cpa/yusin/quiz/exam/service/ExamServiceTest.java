@@ -40,7 +40,6 @@ class ExamServiceTest
         ExamCreateRequest request = ExamCreateRequest.builder()
                 .name("2024 3차")
                 .year(2024)
-                .maxProblemCount(40)
                 .build();
 
         // when
@@ -55,12 +54,11 @@ class ExamServiceTest
     void update()
     {
         // given
-        testContainer.examService.save(1L, ExamCreateRequest.builder().name("1차").year(2024).maxProblemCount(40).build());
+        testContainer.examService.save(1L, ExamCreateRequest.builder().name("1차").year(2024).build());
 
         ExamUpdateRequest request = ExamUpdateRequest.builder()
                 .name("completePayment exam")
                 .year(2020)
-                .maxProblemCount(40)
                 .build();
 
         // when

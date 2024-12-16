@@ -17,6 +17,8 @@ public interface ChoiceRepository
 
     List<Choice> findAllByExamId(long examId);
 
+    boolean existsById(long id);
+
     Optional<Choice> findById(long id);
 
     void deleteById(long id);

@@ -41,7 +41,6 @@ class ExamControllerTest
         ExamCreateResponse savedExam = testContainer.examService.save(1L, ExamCreateRequest.builder()
                 .name("1차")
                 .year(2024)
-                .maxProblemCount(40)
                 .build());
 
         // when
@@ -60,11 +59,11 @@ class ExamControllerTest
     void getAllExamBySubjectId()
     {
         // given
-        testContainer.examService.save(1L, ExamCreateRequest.builder().name("1차").year(2024).maxProblemCount(40).build());
-        testContainer.examService.save(1L, ExamCreateRequest.builder().name("2차").year(2024).maxProblemCount(40).build());
-        testContainer.examService.save(1L, ExamCreateRequest.builder().name("3차").year(2024).maxProblemCount(40).build());
-        testContainer.examService.save(1L, ExamCreateRequest.builder().name("1차").year(2025).maxProblemCount(40).build());
-        testContainer.examService.save(1L, ExamCreateRequest.builder().name("2차").year(2025).maxProblemCount(40).build());
+        testContainer.examService.save(1L, ExamCreateRequest.builder().name("1차").year(2024).build());
+        testContainer.examService.save(1L, ExamCreateRequest.builder().name("2차").year(2024).build());
+        testContainer.examService.save(1L, ExamCreateRequest.builder().name("3차").year(2024).build());
+        testContainer.examService.save(1L, ExamCreateRequest.builder().name("1차").year(2025).build());
+        testContainer.examService.save(1L, ExamCreateRequest.builder().name("2차").year(2025).build());
 
         // when
         ResponseEntity<GlobalResponse<List<ExamDTO>>> result = testContainer.examController.getAllExamBySubjectIdAndYear(1L, 2024);

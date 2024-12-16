@@ -1,7 +1,6 @@
 package com.cpa.yusin.quiz.choice.service;
 
 import com.cpa.yusin.quiz.choice.controller.dto.request.ChoiceCreateRequest;
-import com.cpa.yusin.quiz.choice.controller.dto.request.ChoiceRequest;
 import com.cpa.yusin.quiz.choice.controller.dto.request.ChoiceUpdateRequest;
 import com.cpa.yusin.quiz.choice.controller.dto.response.ChoiceResponse;
 import com.cpa.yusin.quiz.choice.controller.mapper.ChoiceMapper;
@@ -42,6 +41,13 @@ public class ChoiceServiceImpl implements ChoiceService
 
     @Transactional
     @Override
+    public long save(Choice choice)
+    {
+        return choiceRepository.save(choice).getId();
+    }
+
+    @Transactional
+    @Override
     public void update(List<ChoiceUpdateRequest> requests, Problem problem)
     {
         for(ChoiceUpdateRequest request : requests)
@@ -59,6 +65,27 @@ public class ChoiceServiceImpl implements ChoiceService
                 }
             }
         }
+    }
+
+    @Transactional
+    @Override
+    public void update(long choiceId, ChoiceUpdateRequest request)
+    {
+        Choice choice = findById(choiceId);
+
+        choice.update(request.getNumber(), request.getContent(), request.getIsAnswer());
+
+        choiceRepository.save(choice);
+    }
+
+    @Transactional
+    @Override
+    public void deleteById(long choiceId)
+    {
+        Choice choice = findById(choiceId);
+        log.info("Delete choice with id {}", choiceId);
+
+        choiceRepository.deleteById(choice.getId());
     }
 
     @Override

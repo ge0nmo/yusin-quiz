@@ -26,9 +26,6 @@ public class Exam extends BaseEntity
     @Column(nullable = false)
     private int year;
 
-    @Column(nullable = false)
-    private int maxProblemCount;
-
     @Column(nullable = false, updatable = false)
     private Long subjectId;
 
@@ -37,7 +34,6 @@ public class Exam extends BaseEntity
         return Exam.builder()
                 .name(request.getName())
                 .year(request.getYear())
-                .maxProblemCount(request.getMaxProblemCount())
                 .subjectId(subjectId)
                 .build();
     }
@@ -46,6 +42,5 @@ public class Exam extends BaseEntity
     {
         this.name = request.getName();
         this.year = request.getYear();
-        this.maxProblemCount = request.getMaxProblemCount();
     }
 }
