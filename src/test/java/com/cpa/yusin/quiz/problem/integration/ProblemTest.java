@@ -111,6 +111,7 @@ public class ProblemTest
         Problem problem = problemRepository.save(Problem.builder()
                 .id(1L)
                 .content(content)
+                .explanation("문제 해설")
                 .number(1)
                 .exam(exam)
                 .build());
@@ -138,6 +139,7 @@ public class ProblemTest
                                 fieldWithPath("data.id").description("문제 고유 식별자").type(JsonFieldType.NUMBER).optional(),
                                 fieldWithPath("data.content").description("문제 내용").type(JsonFieldType.STRING),
                                 fieldWithPath("data.number").description("문제 번호").type(JsonFieldType.NUMBER),
+                                fieldWithPath("data.explanation").description("문제 해설").type(JsonFieldType.STRING),
                                 fieldWithPath("data.choices").description("선택지 목록").type(JsonFieldType.ARRAY),
                                 fieldWithPath("data.choices[].id").description("선택지 식별자").type(JsonFieldType.NUMBER),
                                 fieldWithPath("data.choices[].number").description("선택지 번호").type(JsonFieldType.NUMBER),
@@ -160,6 +162,7 @@ public class ProblemTest
                 .id(1L)
                 .content(content)
                 .number(1)
+                .explanation("설명")
                 .exam(exam)
                 .build());
 
@@ -181,6 +184,7 @@ public class ProblemTest
                 .id(2L)
                 .content(content)
                 .number(2)
+                .explanation("문제 해설2")
                 .exam(exam)
                 .build());
 
@@ -215,6 +219,7 @@ public class ProblemTest
                                 fieldWithPath("data[].id").description("문제 고유 식별자").type(JsonFieldType.NUMBER).optional(),
                                 fieldWithPath("data[].content").description("문제 내용").type(JsonFieldType.STRING),
                                 fieldWithPath("data[].number").description("문제 번호").type(JsonFieldType.NUMBER),
+                                fieldWithPath("data[].explanation").description("문제 해설").type(JsonFieldType.STRING),
                                 fieldWithPath("data[].choices").description("선택지 목록").type(JsonFieldType.ARRAY),
                                 fieldWithPath("data[].choices[].id").description("선택지 식별자").type(JsonFieldType.NUMBER),
                                 fieldWithPath("data[].choices[].number").description("선택지 번호").type(JsonFieldType.NUMBER),
