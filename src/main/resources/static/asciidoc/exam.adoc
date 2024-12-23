@@ -9,22 +9,6 @@
 
 == 시험 API
 
-== 시험 등록 실패 - 중복
-==== HTTP Request
-include::{snippets}/exam-create-fail-duplicated/http-request.adoc[]
-
-==== Query Parameters
-include::{snippets}/exam-create-fail-duplicated/query-parameters.adoc[]
-
-==== Request Fields
-include::{snippets}/exam-create-fail-duplicated/request-fields.adoc[]
-
-==== HTTP Response
-include::{snippets}/exam-create-fail-duplicated/http-response.adoc[]
-
-==== Response Fields
-include::{snippets}/exam-create-fail-duplicated/response-fields.adoc[]
-
 == 시험 1개 조회
 ==== HTTP Request
 include::{snippets}/getExamById/http-request.adoc[]
