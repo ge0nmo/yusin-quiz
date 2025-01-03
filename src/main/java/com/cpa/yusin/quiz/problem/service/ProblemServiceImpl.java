@@ -67,6 +67,8 @@ public class ProblemServiceImpl implements ProblemService
     public List<ProblemResponse> getAllByExamId(long examId)
     {
         List<Problem> problems = problemRepository.findAllByExamId(examId);
+        log.info("examId={}", examId);
+        log.info("문제 개수 = {}", problems.size());
         Map<Long, List<ChoiceResponse>> choiceMap = choiceService.findAllByExamId(examId);
 
         return problems.stream()
