@@ -41,4 +41,12 @@ public class ExamController
         return ResponseEntity.ok(new GlobalResponse<>(response));
     }
 
+    @GetMapping("/year")
+    public ResponseEntity<?> getYear(@RequestParam(value = "subjectId") long subjectId)
+    {
+        List<Integer> response = examService.getAllYearsBySubjectId(subjectId);
+
+        return ResponseEntity.ok(new GlobalResponse<>(response));
+    }
+
 }

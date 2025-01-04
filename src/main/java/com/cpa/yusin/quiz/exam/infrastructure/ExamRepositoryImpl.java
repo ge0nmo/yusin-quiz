@@ -68,4 +68,9 @@ public class ExamRepositoryImpl implements ExamRepository
         return examJpaRepository.existsByIdNotSubjectIdAndNameAndYear(examId, subjectId, name, year);
     }
 
+    @Override
+    public List<Integer> getYearsBySubjectId(long subjectId)
+    {
+        return examJpaRepository.getYearsBySubjectId(subjectId);
+    }
 }

@@ -201,5 +201,51 @@ class ExamTest
 
     }
 
+    @Test
+    void getYears() throws Exception
+    {
+        // given
+        examRepository.save(Exam.builder()
+                .id(1L)
+                .name("1차")
+                .year(2024)
+                .subjectId(economics.getId())
+                .build());
 
+        examRepository.save(Exam.builder()
+                .id(2L)
+                .name("1차")
+                .year(2023)
+                .subjectId(economics.getId())
+                .build());
+
+        examRepository.save(Exam.builder()
+                .id(3L)
+                .name("1차")
+                .year(2022)
+                .subjectId(economics.getId())
+                .build());
+
+        // when
+        ResultActions resultActions = mvc.perform(get("/api/v1/exam/year")
+                .param("subjectId", economics.getId().toString())
+        );
+
+        // then
+        resultActions
+                .andExpect(status().isOk())
+                .andDo(document("getYearBySubjectId",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+
+                        queryParameters(
+                                parameterWithName("subjectId").description("과목 고유 식별자")
+                        ),
+
+                        responseFields(
+                                fieldWithPath("data[]").type(JsonFieldType.ARRAY).description("시험 연도 정보")
+                        ))
+                );
+
+    }
 }

@@ -25,4 +25,6 @@ public interface ExamService
     void deleteById(List<Long> ids);
 
     void deleteById(long id);
+
+    List<Integer> getAllYearsBySubjectId(long subjectId);
 }

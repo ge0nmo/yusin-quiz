@@ -93,6 +93,12 @@ public class ExamServiceImpl implements ExamService
     }
 
     @Override
+    public List<Integer> getAllYearsBySubjectId(long subjectId)
+    {
+        return examRepository.getYearsBySubjectId(subjectId);
+    }
+
+    @Override
     public List<Exam> getAllBySubjectId(long subjectId)
     {
         return examRepository.findAllBySubjectId(subjectId);
@@ -114,6 +120,5 @@ public class ExamServiceImpl implements ExamService
     {
         cascadeDeleteService.deleteExamByExamId(id);
     }
-
 
 }

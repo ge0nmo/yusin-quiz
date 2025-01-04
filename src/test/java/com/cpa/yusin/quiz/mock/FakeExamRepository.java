@@ -94,4 +94,13 @@ public class FakeExamRepository implements ExamRepository
                                 && item.getName().equals(name)
                                 && item.getYear() == year);
     }
+
+    @Override
+    public List<Integer> getYearsBySubjectId(long subjectId)
+    {
+        return data.stream()
+                .filter(item -> item.getSubjectId().equals(subjectId))
+                .map(Exam::getYear)
+                .toList();
+    }
 }
