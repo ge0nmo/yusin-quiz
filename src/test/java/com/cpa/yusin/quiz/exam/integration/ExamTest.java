@@ -201,6 +201,58 @@ class ExamTest
 
     }
 
+    @WithUserDetails(value = "John@gmail.com", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+    @Test
+    void getBySubjectIdAndYear_withoutYear() throws Exception
+    {
+        // given
+        examRepository.save(Exam.builder()
+                .id(1L)
+                .name("1차")
+                .year(2024)
+                .subjectId(economics.getId())
+                .build());
+
+        examRepository.save(Exam.builder()
+                .id(2L)
+                .name("2차")
+                .year(2024)
+                .subjectId(economics.getId())
+                .build());
+
+        examRepository.save(Exam.builder()
+                .id(3L)
+                .name("1차")
+                .year(2023)
+                .subjectId(economics.getId())
+                .build());
+
+        // when
+        ResultActions resultActions = mvc.perform(get("/api/v1/exam")
+                .param("subjectId", economics.getId().toString())
+        );
+
+        // then
+        resultActions
+                .andExpect(status().isOk())
+                .andDo(document("getExamsBySubjectIdWithoutYear",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+
+                        queryParameters(
+                                parameterWithName("subjectId").description("과목 고유 식별자"),
+                                parameterWithName("year").description("시험 연도").optional()
+                        ),
+
+                        responseFields(
+                                fieldWithPath("data[].id").type(JsonFieldType.NUMBER).description("시험 고유 식별자"),
+                                fieldWithPath("data[].name").type(JsonFieldType.STRING).description("시험 이름"),
+                                fieldWithPath("data[].year").type(JsonFieldType.NUMBER).description("시험 연도")
+                        ))
+                );
+
+    }
+
     @Test
     void getYears() throws Exception
     {

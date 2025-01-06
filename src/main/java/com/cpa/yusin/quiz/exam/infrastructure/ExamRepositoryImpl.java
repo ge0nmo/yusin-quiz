@@ -27,7 +27,7 @@ public class ExamRepositoryImpl implements ExamRepository
     }
 
     @Override
-    public List<Exam> findAllBySubjectId(long subjectId, int year)
+    public List<Exam> findAllBySubjectId(long subjectId, Integer year)
     {
         return examJpaRepository.findAllBySubjectId(subjectId, year);
     }

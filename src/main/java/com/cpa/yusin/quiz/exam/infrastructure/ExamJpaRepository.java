@@ -13,8 +13,8 @@ public interface ExamJpaRepository extends JpaRepository<Exam, Long>
     @Query("SELECT e " +
             "FROM Exam e " +
             "WHERE e.subjectId = :subjectId " +
-            "AND e.year = :year")
-    List<Exam> findAllBySubjectId(@Param("subjectId") long subjectId, @Param("year") int year);
+            "AND (:year IS NULL OR e.year = :year) ")
+    List<Exam> findAllBySubjectId(@Param("subjectId") long subjectId, @Param("year") Integer year);
 
     @Query("SELECT e " +
             "FROM Exam e " +

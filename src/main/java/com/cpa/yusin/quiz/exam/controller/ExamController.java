@@ -34,7 +34,7 @@ public class ExamController
 
     @GetMapping
     public ResponseEntity<GlobalResponse<List<ExamDTO>>> getAllExamBySubjectIdAndYear(@RequestParam(value = "subjectId") long subjectId,
-                                                                                      @RequestParam(value = "year") int year)
+                                                                                      @RequestParam(value = "year", required = false) Integer year)
     {
         List<ExamDTO> response = examService.getAllBySubjectId(subjectId, year);
 

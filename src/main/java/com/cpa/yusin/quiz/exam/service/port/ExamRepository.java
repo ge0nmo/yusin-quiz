@@ -11,7 +11,7 @@ public interface ExamRepository
 
     Optional<Exam> findById(long id);
 
-    List<Exam> findAllBySubjectId(long subjectId, int year);
+    List<Exam> findAllBySubjectId(long subjectId, Integer year);
 
     List<Exam> findAllBySubjectId(long subjectId);
 

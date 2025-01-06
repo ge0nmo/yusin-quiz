@@ -76,7 +76,7 @@ public class ExamServiceImpl implements ExamService
     }
 
     @Override
-    public List<ExamDTO> getAllBySubjectId(long subjectId, int year)
+    public List<ExamDTO> getAllBySubjectId(long subjectId, Integer year)
     {
         subjectService.findById(subjectId);
 

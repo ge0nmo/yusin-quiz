@@ -18,7 +18,7 @@ public interface ExamService
 
     ExamDTO getById(long id);
 
-    List<ExamDTO> getAllBySubjectId(long subjectId, int year);
+    List<ExamDTO> getAllBySubjectId(long subjectId, Integer year);
 
     List<Exam> getAllBySubjectId(long subjectId);
 

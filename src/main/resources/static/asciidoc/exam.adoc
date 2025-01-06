@@ -45,3 +45,18 @@ include::{snippets}/getExamsBySubjectIdAndYear/http-response.adoc[]
 
 ==== Response Fields
 include::{snippets}/getExamsBySubjectIdAndYear/response-fields.adoc[]
+
+
+
+== 과목별 시험 조회(연도 없음)
+==== HTTP Request
+include::{snippets}/getExamsBySubjectIdWithoutYear/http-request.adoc[]
+
+==== Query Parameters
+include::{snippets}/getExamsBySubjectIdWithoutYear/query-parameters.adoc[]
+
+==== HTTP Response
+include::{snippets}/getExamsBySubjectIdWithoutYear/http-response.adoc[]
+
+==== Response Fields
+include::{snippets}/getExamsBySubjectIdWithoutYear/response-fields.adoc[]
