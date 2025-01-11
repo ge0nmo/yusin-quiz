@@ -422,7 +422,9 @@ async function handleSaveClick(){
     try{
         const saveModal = document.getElementById('add-problem-modal');
 
-        const problemNumber = Number(document.getElementById('problemNumber').value);
+        const numElement = document.getElementById('problemNumber');
+
+        const problemNumber = Number(numElement.value);
         const problemContent = problemContentQuill.root.innerHTML;
         const explanationUrl = await uploadImage(saveModal);
 
@@ -459,10 +461,22 @@ async function handleSaveClick(){
 
 
         loadProblemData(problemList);
+
+
+        resetProblemContainer(numElement, choiceContainer);
+
+
+
     } catch (error){
         console.log(error);
         alert('문제 저장 실패');
     }
+}
+
+function resetProblemContainer(numElement, choiceContainer){
+    numElement.value = '';
+    problemContentQuill.root.innerHTML = '';
+    choiceContainer.innerHTML = '';
 }
 
 async function saveProblem(problemCreateRequest){
@@ -489,10 +503,7 @@ async function handleUpdateProblemClick(problemId){
         const num = Number(problemForm.querySelector('.problemNumber').value);
         const content = quillInstances[problemId].root.innerHTML;
 
-        console.log('문제 ', content);
-
         const fileUrl = await uploadImage(problemForm);
-        console.log(`파일 url=`, fileUrl);
 
         const problemUpdateRequest = {
             number: num,
