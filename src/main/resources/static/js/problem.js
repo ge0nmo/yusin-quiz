@@ -6,6 +6,22 @@ let selectedExamName;
 let problemContentQuill;
 let quillInstances = {};
 
+const toolbarOptions = [
+    ['bold', 'italic', 'underline', 'strike'],
+    [{ 'header': 1 }, { 'header': 2 }],
+    [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+
+    [{ 'color': [] }, { 'background': [] }],
+    ['image', 'link'],
+]
+
+const quillOption = {
+    modules: {
+        toolbar: toolbarOptions
+    },
+    theme: 'snow'
+};
+
 window.onload = function() {
     const choicesContainer = document.getElementById('choicesContainer');
     const addChoiceBtn = document.getElementById('addChoiceBtn');
@@ -33,11 +49,58 @@ window.onload = function() {
         choicesContainer.appendChild(choiceRow);
     });
 
-    problemContentQuill = new Quill('#problemContent', {
-        theme: 'snow',
+    problemContentQuill = new Quill('#problemContent', quillOption);
 
-    });
+    problemContentQuill.getModule('toolbar').addHandler('image', selectLocalImage);
 };
+
+function selectLocalImage() {
+    const input = document.createElement('input');
+    input.setAttribute('type', 'file');
+    input.setAttribute('accept', 'image/*');
+    input.click();
+
+    input.onchange = async () => {
+        const file = input.files[0];
+
+        // Validate file
+        if (!file.type.includes('image/')) {
+            alert('Please select an image file');
+            return;
+        }
+
+        if (file.size > 20 * 1024 * 1024) {
+            alert('Image size should not exceed 20MB');
+            return;
+        }
+
+        try {
+            const formData = new FormData();
+            formData.append('file', file);
+
+            // Upload image using your API
+            const response = await fetch('/admin/file', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (!response.ok) {
+                throw new Error('Image upload failed');
+            }
+
+            const imageUrl = await response.text();
+
+            // Insert image URL into editor
+            const range = this.quill.getSelection(true);
+            this.quill.insertEmbed(range.index, 'image', imageUrl);
+            this.quill.setSelection(range.index + 1);
+
+        } catch (error) {
+            console.error('Error uploading image:', error);
+            alert('Failed to upload image');
+        }
+    };
+}
 
 function handleInput() {
     // 검색 결과를 넣을 창 선택
@@ -245,9 +308,9 @@ function loadProblemData(problemList) {
 
     problemList.forEach((problem) => {
         const quillContainer = document.getElementById(`problemContent-${problem.id}`);
-        const quill = new Quill(quillContainer, {
-            theme: 'snow',
-        });
+        const quill = new Quill(quillContainer, quillOption);
+        quill.getModule('toolbar').addHandler('image', selectLocalImage);
+
 
         quill.root.innerHTML = problem.content;
         quillInstances[problem.id] = quill;
@@ -425,6 +488,8 @@ async function handleUpdateProblemClick(problemId){
 
         const num = Number(problemForm.querySelector('.problemNumber').value);
         const content = quillInstances[problemId].root.innerHTML;
+
+        console.log('문제 ', content);
 
         const fileUrl = await uploadImage(problemForm);
         console.log(`파일 url=`, fileUrl);
