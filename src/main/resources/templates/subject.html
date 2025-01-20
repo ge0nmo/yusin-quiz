@@ -154,7 +154,9 @@
 <!-- Page level custom scripts -->
 <script th:src="@{/js/demo/chart-area-demo.js}"></script>
 <script th:src="@{/js/demo/chart-pie-demo.js}"></script>
-<script th:inline="javascript">
+
+<script type="module" th:src="@{/js/subject/controller/subjectController.js}"></script>
+<!--<script th:inline="javascript">
     let currentPage = 0;
     let size = 10;
     let selectedSubjectId;
@@ -363,7 +365,7 @@
         window.location.href= `${baseUrl}/admin/exam`;
     }
 
-</script>
+</script>-->
 
 
 </body>

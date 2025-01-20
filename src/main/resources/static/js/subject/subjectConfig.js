@@ -1,0 +1,1 @@
+export const SUBJECT_URL = "http://localhost:8080/admin/subject/all";
