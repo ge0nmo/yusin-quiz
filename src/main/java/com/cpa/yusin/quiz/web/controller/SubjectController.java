@@ -19,6 +19,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RequiredArgsConstructor
 @Slf4j
 @RequestMapping("/admin/subject")
@@ -37,6 +39,14 @@ public class SubjectController
 
         return "subject";
     }
+
+    @ResponseBody
+    @GetMapping("/list")
+    public List<SubjectDTO> getSubject()
+    {
+        return subjectService.getAll();
+    }
+
 
     @ResponseBody
     @PostMapping

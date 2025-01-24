@@ -49,5 +49,5 @@ public interface ExamJpaRepository extends JpaRepository<Exam, Long>
     @Query("SELECT DISTINCT e.year FROM Exam e " +
             "WHERE e.subjectId = :subjectId " +
             "ORDER BY e.year DESC ")
-    List<Integer> getYearsBySubjectId(long subjectId);
+    List<Integer> getYearsBySubjectId(@Param("subjectId") long subjectId);
 }

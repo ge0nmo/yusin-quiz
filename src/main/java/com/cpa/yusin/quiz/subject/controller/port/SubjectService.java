@@ -24,5 +24,7 @@ public interface SubjectService
 
     Page<SubjectDTO> getAll(Pageable pageable);
 
+    List<SubjectDTO> getAll();
+
     boolean deleteById(long id);
 }

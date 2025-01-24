@@ -78,4 +78,12 @@ public class ExamController
     {
         return subjectService.findAllByName(name);
     }
+
+    @ResponseBody
+    @GetMapping("/exam/year")
+    public List<Integer> getYear(@RequestParam(value = "subjectId") long subjectId)
+    {
+        log.info("subjectId: {}", subjectId);
+        return examService.getAllYearsBySubjectId(subjectId);
+    }
 }

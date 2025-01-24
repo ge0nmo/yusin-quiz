@@ -8,6 +8,7 @@ import org.springframework.data.domain.Pageable;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
 
 public class FakeSubjectRepository implements SubjectRepository
 {
@@ -37,6 +38,12 @@ public class FakeSubjectRepository implements SubjectRepository
         return data.stream()
                 .filter(item -> item.getId().equals(id))
                 .findAny();
+    }
+
+    @Override
+    public List<Subject> findAll()
+    {
+        return data;
     }
 
     @Override

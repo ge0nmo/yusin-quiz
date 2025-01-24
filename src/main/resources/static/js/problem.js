@@ -4,7 +4,11 @@ let selectedYear;
 let selectedExamId;
 let selectedExamName;
 let problemContentQuill;
-let quillInstances = {};
+let problemContentQuillInstances = {};
+let problemExplanationQuillInstances = {};
+
+let problemExplanationQuill;
+
 
 const toolbarOptions = [
     ['bold', 'italic', 'underline', 'strike'],
@@ -22,7 +26,22 @@ const quillOption = {
     theme: 'snow'
 };
 
-window.onload = function() {
+window.onload = async function() {
+    addHandlerChoiceButton();
+    await addHandlerSubjectDropdown();
+
+    problemContentQuill = new Quill('#problemContent', quillOption);
+    problemExplanationQuill = new Quill('#problemExplanation', quillOption);
+
+    problemContentQuill.getModule('toolbar').addHandler('image', selectLocalImage);
+    problemExplanationQuill.getModule('toolbar').addHandler('image', selectLocalImage);
+
+    document.querySelector('.search-click').addEventListener('click', () => addHandlerSearchClick());
+    document.querySelector('.add-problem-button').addEventListener('click', () => prepareProblemForm());
+    document.querySelector('.problem-save-button').addEventListener('click', () => addHandlerProblemSaveClick());
+};
+
+function addHandlerChoiceButton(){
     const choicesContainer = document.getElementById('choicesContainer');
     const addChoiceBtn = document.getElementById('addChoiceBtn');
 
@@ -48,11 +67,7 @@ window.onload = function() {
 
         choicesContainer.appendChild(choiceRow);
     });
-
-    problemContentQuill = new Quill('#problemContent', quillOption);
-
-    problemContentQuill.getModule('toolbar').addHandler('image', selectLocalImage);
-};
+}
 
 function selectLocalImage() {
     const input = document.createElement('input');
@@ -102,60 +117,54 @@ function selectLocalImage() {
     };
 }
 
-function handleInput() {
-    // 검색 결과를 넣을 창 선택
-    const parentElement = document.querySelector('#search-result');
-    // 검색 한 단어 선택
-    const searchedWord = document.querySelector('.form-control').value;
+async function addHandlerSubjectDropdown(){
+    const dropdown = document.querySelector('#subject-dropdown-content');
 
-    // 기존에 검색 결과 지우기
-    parentElement.innerHTML = '';
+    const data = await getJSON("/admin/subject/list");
 
-    // 검색한 단어의 길이가 0(검색을 안한 경우) 그대로 반환
-    if (searchedWord.length === 0) {
-        return;
-    }
-
-    // api 검색
-    $.ajax({
-        url: '/admin/subject/dropdown',
-        type: 'GET',
-        data: {
-            name: searchedWord,
-        },
-        success: function (subjects) {
-            if (subjects.length > 0) {
-                subjects.forEach((subject) => {
-                    const listGroup = document.createElement('li');
-                    listGroup.className = 'list-group-item';
-                    listGroup.textContent = subject.name;
-                    parentElement.appendChild(listGroup);
-                    listGroup.addEventListener('click', () => selectSubject(subject.id, subject.name));
-                });
-            } else {
-                const listGroup = document.createElement('li');
-                listGroup.className = 'list-group-item';
-                listGroup.textContent = '검색 결과가 없습니다';
-                parentElement.appendChild(listGroup);
-            }
-        },
-
-    })
-
+    data.forEach((subject) => {
+        const listGroup = document.createElement('button');
+        listGroup.className = 'list-group-item dropdown-item';
+        listGroup.textContent = subject.name;
+        dropdown.appendChild(listGroup);
+        listGroup.addEventListener('click', () => addHandlerSelectSubject(subject.id, subject.name));
+    });
 }
 
-function selectSubject(subjectId, subjectName) {
-    selectedSubjectId = subjectId;
-    selectedSubjectName = subjectName;
-    document.querySelector('#subjectSearchBar').textContent = selectedSubjectName;
-
+async function addHandlerSelectSubject(subjectId, subjectName) {
     clearYearDropdown();
     clearExamDropdown();
-}
-function clearYearDropdown(){
 
-    const yearList = document.getElementById('yearList');
-    yearList.value = '';
+    selectedSubjectId = subjectId;
+    console.log('선택한 과목 id = ', selectedSubjectId);
+    selectedSubjectName = subjectName;
+    const subjectDropdown = document.querySelector('#subject-dropdown');
+
+    subjectDropdown.textContent = selectedSubjectName;
+
+    await addHandlerYearDropdown();
+}
+
+async function addHandlerYearDropdown(){
+    console.log('addHandlerYearDropdown');
+    const subjectId = selectedSubjectId;
+    const dropdown = document.querySelector('#year-content');
+
+    const data = await getJSON(`/admin/exam/year?subjectId=${subjectId}`);
+
+    for(const year of data){
+        const listGroup = document.createElement('button');
+        listGroup.className = 'list-group-item dropdown-item';
+        listGroup.textContent = year;
+        dropdown.appendChild(listGroup);
+        listGroup.addEventListener('click', () => addHandlerSelectYear(year));
+    }
+
+}
+
+function clearYearDropdown(){
+    document.querySelector('#year-dropdown').textContent = '연도 선택';
+    document.querySelector('#year-content').innerHTML = '';
     selectedYear = null;
 }
 
@@ -169,8 +178,9 @@ function clearExamDropdown(){
     selectedExamId = null;
 }
 
-async function inputYearHandle() {
-    selectedYear = document.getElementById('yearList').value;
+async function addHandlerSelectYear(year) {
+    selectedYear = year;
+    document.querySelector('#year-dropdown').textContent = selectedYear;
 
     if (selectedSubjectId && selectedYear) {
         await loadExamList();
@@ -179,43 +189,22 @@ async function inputYearHandle() {
 
 async function loadExamList() {
     const parentElement = document.getElementById('examList');
-    try {
+    const exams = await getJSON(`/admin/subject/${selectedSubjectId}/exam?year=${selectedYear}`);
 
-        const exams = await fetchExamList();
+    parentElement.innerHTML = '';
+    const defaultOption = document.createElement('option');
+    defaultOption.value = "";
+    defaultOption.textContent = "시험 선택";
+    parentElement.appendChild(defaultOption);
 
-        parentElement.innerHTML = '';
-        const defaultOption = document.createElement('option');
-        defaultOption.value = "";
-        defaultOption.textContent = "시험 선택";
-        parentElement.appendChild(defaultOption);
-
-        exams.forEach((exam) => {
-            const option = document.createElement('option');
-            option.value = exam.id;
-            option.textContent = exam.name;
-            parentElement.appendChild(option);
-        });
-
-    } catch (error) {
-        console.error('Error loading exam list:', error);
-    }
+    exams.forEach((exam) => {
+        const option = document.createElement('option');
+        option.value = exam.id;
+        option.textContent = exam.name;
+        parentElement.appendChild(option);
+    });
 }
 
-
-async function fetchExamList() {
-    try {
-        const response = await fetch(`/admin/subject/${selectedSubjectId}/exam?year=${selectedYear}`);
-        if (!response.ok) {
-            throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-        const examList = await response.json(); // Parse the JSON response
-        console.log(`Fetched exam data =`, examList);
-        return examList;
-    } catch (error) {
-        console.error(`Error fetching exam list:`, error);
-        return [];
-    }
-}
 
 document.getElementById('examList').addEventListener('change', function () {
     const selectedValue = this.value;
@@ -225,25 +214,13 @@ document.getElementById('examList').addEventListener('change', function () {
 })
 
 
-async function handleSearchClick() {
-    try {
-        const problemList = await getProblemData(selectedExamId);
-        loadProblemData(problemList);
-    } catch (error) {
-        console.error('Error fetching problem data:', error);
+async function addHandlerSearchClick() {
+    if(!selectedExamId){
+        alert('시험을 선택해주세요')
     }
-}
 
-async function getProblemData(examId){
-    try{
-        const response = await fetch(`/admin/problem/list?examId=${examId}`);
-        if (!response.ok) {
-            throw new Error(`error ${response.status}`);
-        }
-        return response.json();
-    } catch (error) {
-        console.log(error);
-    }
+    const problemList = await getJSON(`/admin/problem/list?examId=${selectedExamId}`);
+    loadProblemData(problemList);
 }
 
 
@@ -256,7 +233,6 @@ function loadProblemData(problemList) {
 
     problemList.forEach((problem) => {
         const choiceList = problem.choices;
-        const imageHtml = problem.explanation ? `<img src="${problem.explanation}" alt="" class="explanation">` : "";
         const choiceHTML = loadChoiceData(choiceList);
         const problemId = problem.id;
 
@@ -291,12 +267,12 @@ function loadProblemData(problemList) {
                                 <img src="/img/add_icon.png" alt="" >
                             </button>
                         </div>
-                        <div class="text-center card-img">
-                            ${imageHtml}
-                        </div>
-                        <div class="list-group-item list-group-item-action d-flex">
-                                                                                                 
-                            <input type="file" class="form-control formFile" onchange="previewImage(this)"/>                           
+
+                        <div class="list-group-item list-group-item-action problem-explanation-container">
+                            <span>문제 해설</span>                        
+                            <div id="problemExplanation-${problemId}" class="problemExplanation form-control">
+                            
+                            </div>                                                                                                                                           
                         </div>
 
                     </div>
@@ -307,15 +283,22 @@ function loadProblemData(problemList) {
     examTable.innerHTML = html;
 
     problemList.forEach((problem) => {
-        const quillContainer = document.getElementById(`problemContent-${problem.id}`);
-        const quill = new Quill(quillContainer, quillOption);
-        quill.getModule('toolbar').addHandler('image', selectLocalImage);
+        const problemContentQuillContainer = document.getElementById(`problemContent-${problem.id}`);
+        const contentQuill = new Quill(problemContentQuillContainer, quillOption);
+        contentQuill.getModule('toolbar').addHandler('image', selectLocalImage);
+        contentQuill.root.innerHTML = problem.content;
+        problemContentQuillInstances[problem.id] = contentQuill;
 
 
-        quill.root.innerHTML = problem.content;
-        quillInstances[problem.id] = quill;
+        const problemExplanationQuillContainer = document.getElementById(`problemExplanation-${problem.id}`);
+        const explanationQuill = new Quill(problemExplanationQuillContainer, quillOption);
+        explanationQuill.getModule('toolbar').addHandler('image', selectLocalImage);
+        explanationQuill.root.innerHTML = problem.explanation;
+        problemExplanationQuillInstances[problem.id] = explanationQuill;
     });
 }
+
+
 
 function loadChoiceData(choiceList){
     let html = ``;
@@ -418,7 +401,7 @@ async function addNewChoice(problemId, buttonElement){
 
 }
 
-async function handleSaveClick(){
+async function addHandlerProblemSaveClick(){
     try{
         const saveModal = document.getElementById('add-problem-modal');
 
@@ -426,7 +409,7 @@ async function handleSaveClick(){
 
         const problemNumber = Number(numElement.value);
         const problemContent = problemContentQuill.root.innerHTML;
-        const explanationUrl = await uploadImage(saveModal);
+        const explanation = problemExplanationQuill.root.innerHTML;
 
 
         console.log(`문제 내용 = ${problemContent}`);
@@ -451,22 +434,17 @@ async function handleSaveClick(){
         const problemCreateRequest = {
             number: problemNumber,
             content: problemContent,
-            explanation: explanationUrl,
+            explanation: explanation,
             choices: choiceCreateRequest
         };
 
         await saveProblem(problemCreateRequest);
 
-        const problemList = await getProblemData(selectedExamId);
+        const problemList = await getJSON(`/admin/problem/list?examId=${selectedExamId}`);
 
 
         loadProblemData(problemList);
-
-
         resetProblemContainer(numElement, choiceContainer);
-
-
-
     } catch (error){
         console.log(error);
         alert('문제 저장 실패');
@@ -501,14 +479,15 @@ async function handleUpdateProblemClick(problemId){
         const problemForm = document.getElementById(`problem-${problemId}`);
 
         const num = Number(problemForm.querySelector('.problemNumber').value);
-        const content = quillInstances[problemId].root.innerHTML;
+        const content = problemContentQuillInstances[problemId].root.innerHTML;
+        const explanation = problemExplanationQuillInstances[problemId].root.innerHTML;
 
-        const fileUrl = await uploadImage(problemForm);
+
 
         const problemUpdateRequest = {
             number: num,
             content: content,
-            explanation: fileUrl,
+            explanation: explanation,
         }
 
         const response = await fetch(`/admin/problem/${problemId}`, {
@@ -523,7 +502,7 @@ async function handleUpdateProblemClick(problemId){
             throw new Error('수정 실패');
         }
 
-        const problemList = await getProblemData(selectedExamId);
+        const problemList = await getJSON(`/admin/problem/list?examId=${selectedExamId}`);
         loadProblemData(problemList);
     } catch (error){
         console.log(error);
@@ -535,7 +514,7 @@ async function handleUpdateProblemClick(problemId){
 async function handleUpdateChoiceClick(choiceId){
     try{
         await updateChoice(choiceId);
-        const problemList = await getProblemData(selectedExamId);
+        const problemList = await getJSON(`/admin/problem/list?examId=${selectedExamId}`);
         loadProblemData(problemList);
     } catch (error){
         throw error();
@@ -543,38 +522,6 @@ async function handleUpdateChoiceClick(choiceId){
 
 }
 
-async function uploadImage(problemForm){
-    console.log(`문제 폼2 = ${problemForm}`);
-    const fileInput = problemForm.querySelector('.formFile');
-    const existingImageUrl = problemForm.querySelector(".explanation")?.getAttribute('src');
-
-    if(!fileInput.files.length){
-        return existingImageUrl;
-    }
-
-    const formData = new FormData();
-    formData.append('file', fileInput.files[0]);
-
-    try{
-        const response = await fetch(`/admin/file`, {
-            method: 'POST',
-            body: formData
-        });
-
-        if(!response.ok){
-            console.log("파일 업로드 실패");
-        }
-        console.log("리스폰스 = ", response);
-
-        const url = await response.text();
-        console.log(url);
-        return url;
-
-    } catch (error){
-        console.log(error);
-        throw error();
-    }
-}
 
 async function updateChoice(choiceId){
     try{
@@ -635,6 +582,7 @@ async function handleRemoveChoiceClick(choiceId){
 
 async function handleRemoveProblem(problemId){
     try{
+        console.log('삭제 클릭');
         if(!confirm('정말 삭제하시겠습니까?')){
             return;
         }
@@ -643,7 +591,7 @@ async function handleRemoveProblem(problemId){
             method: 'DELETE',
         });
 
-        const problemList = await getProblemData(selectedExamId);
+        const problemList = await getJSON(`/admin/problem/list?examId=${selectedExamId}`);
         loadProblemData(problemList);
         resetAddProblemModal();
     } catch(error){
@@ -667,29 +615,6 @@ function prepareProblemForm(){
     examName.value = selectedExamName;
 }
 
-function previewImage(input){
-    const file = input.files[0];
-    if(file){
-        const reader = new FileReader();
-        const previewContainer = input.closest('.card-body').querySelector('.card-img');
-
-        reader.onload = function(e){
-            const exitingImg = previewContainer.querySelector('.explanation');
-            if(exitingImg){
-                exitingImg.remove();
-            }
-
-            const img = document.createElement('img');
-            img.src = e.target.result;
-            img.classList.add('explanation', 'img-fluid');
-            previewContainer.appendChild(img);
-        }
-
-        reader.readAsDataURL(file);
-    }
-
-}
-
 function resetAddProblemModal() {
     // Reset problem number
     document.getElementById('problemNumber').value = '';
@@ -699,19 +624,26 @@ function resetAddProblemModal() {
         problemContentQuill.root.innerHTML = '';
     }
 
+    // Reset explanation quill container
+    if(problemExplanationQuill){
+        problemExplanationQuill.root.innerHTML = '';
+    }
+
     // Clear choices container
     const choiceContainer = document.getElementById('choicesContainer');
     choiceContainer.innerHTML = '';
+}
 
-    // Reset file input
-    const fileInput = document.querySelector('#add-problem-modal .formFile');
-    if (fileInput) {
-        fileInput.value = '';
-    }
+const getJSON  = async function(url){
+    try{
+        const res = await fetch(url);
+        const data = await res.json();
 
-    // Remove any preview images
-    const cardImg = document.querySelector('#add-problem-modal .card-img');
-    if (cardImg) {
-        cardImg.innerHTML = '';
+        if (!res.ok) {
+            throw new Error(`${data.message} (${res.status})`);
+        }
+        return data;
+    } catch (err){
+        throw err
     }
 }

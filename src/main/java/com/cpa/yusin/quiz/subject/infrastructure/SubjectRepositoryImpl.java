@@ -29,6 +29,12 @@ public class SubjectRepositoryImpl implements SubjectRepository
     }
 
     @Override
+    public List<Subject> findAll()
+    {
+        return subjectJpaRepository.findAll();
+    }
+
+    @Override
     public Page<Subject> findAll(Pageable pageable)
     {
         return subjectJpaRepository.findAll(pageable);

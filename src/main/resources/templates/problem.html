@@ -30,54 +30,44 @@
                             </h6>
 
                             <div class="btn-group">
-                                <button id="subjectSearchBar" type="button"
-                                        class="btn btn-outline-secondary dropdown-toggle" data-toggle="dropdown"
-                                        aria-haspopup="true" aria-expanded="false">
-                                    과목 검색
-                                </button>
-                                <div class="dropdown-menu">
-                                    <div class="input-group-text">
-                                        <input type="text" class="form-control" placeholder="Search..."
-                                               onChange="handleInput()"
-                                               aria-label="Recipient's username" aria-describedby="button-addon2">
-                                    </div>
-                                    <div class="dropdown-divider"></div>
-                                    <ul id="search-result" class="list-group"></ul>
-                                </div>
-                                <div id="selectedSubject" class="bg-light">
+                                <div class="dropdown show">
+                                    <button id="subject-dropdown" class="form-control bg-custom-light dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        과목
+                                    </button>
+                                    <div id="subject-dropdown-content" class="dropdown-menu" aria-labelledby="subject-dropdown">
+                                        <!--subject content-->
+                                   </div>
                                 </div>
                             </div>
 
                             <div class="btn-group">
-                                <label for="yearList"></label>
-                                <select id="yearList" name="yearList" class="form-control bg-custom-light"
-                                        onchange="inputYearHandle()">
-                                    <option value="">연도 선택</option>
-                                    <option id="selectedYear" th:each="year : ${examYearList}" th:value="${year}"
-                                            th:text="${year}" th:selected="${year == examYearList}">
-                                    </option>
-                                </select>
+                                <div class="dropdown show">
+                                    <button id="year-dropdown" class="form-control bg-custom-light dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        연도
+                                    </button>
+                                    <div id="year-content" class="dropdown-menu" aria-labelledby="year-dropdown">
+                                        <!--year content-->
+                                    </div>
+                                </div>
                             </div>
 
                             <div class="btn-group">
                                 <label for="examList"></label>
-                                <select id="examList" name="examList" class="form-control bg-custom-light">
-
+                                <select id="examList" class="form-control bg-custom-light">
                                     <option value="">시험 선택</option>
                                 </select>
                             </div>
 
 
                             <div class="btn-group">
-                                <button class="btn btn-outline-secondary" onclick="handleSearchClick()">
+                                <button class="btn btn-outline-secondary search-click">
                                     <img src="/img/search.svg" alt="search">
                                 </button>
                             </div>
 
 
                             <div class="float-right">
-                                <button class="btn btn-light" data-toggle="modal" data-target="#add-problem-modal" onclick="prepareProblemForm()">
-
+                                <button class="btn btn-light add-problem-button" data-toggle="modal" data-target="#add-problem-modal">
                                     <img class="ml-2" th:src="@{/img/add_icon.png}" alt="">문제 추가
                                 </button>
                             </div>
@@ -85,32 +75,6 @@
 
                         <!-- 문제 데이터 -->
                         <div id="examTable" class="card-body"></div>
-
-                        <!--<div className="card shadow-sm mb-4">
-                        <div className="card-header bg-primary text-white">
-                            <h5 className="mb-0">Question 1</h5>
-                        </div>
-                        <div className="card-body">
-                            <div className="mb-3">
-                                <h6 className="fw-bold">다음중 옳은것을 고르시오</h6>
-                            </div>
-                            <div className="choices list-group">
-                                <button className="list-group-item list-group-item-action">
-                                    1. 가나다라
-                                </button>
-                                <button className="list-group-item list-group-item-action">
-                                    2. 마바사아
-                                </button>
-                                <button className="list-group-item list-group-item-action">
-                                    3. 자카타파하
-                                </button>
-                                <button className="list-group-item list-group-item-action">
-                                    4. 에이비씨
-                                </button>
-                            </div>
-                        </div>
-                        </div>-->
-
 
                     </div>
 
@@ -164,7 +128,7 @@
                         </div>
 
 
-                        <div class="form-group" id="problemContent">
+                        <div id="problemContent" class="form-group" >
                             <!--<label for="problemContent">문제 내용</label>
                             <textarea id="problemContent" required class="form-control" rows="3"></textarea>-->
                         </div>
@@ -182,14 +146,17 @@
                             </button>
                         </div>
 
-                        <div class="form-group">
-                            <input type="file" class="formFile">
+                        <div class="explanation-container">
+                            <span>문제 해설</span>
+                            <div id="problemExplanation" class="form-group">
+
+                            </div>
                         </div>
 
                     </div>
 
                     <div class="modal-footer">
-                        <button type="button" value="" name="save" class="btn btn-primary" th:onclick="handleSaveClick()">
+                        <button type="button" value="" class="btn btn-primary problem-save-button">
                             <img class="loading-save" alt="save"  style="display:none;" th:src="@{/img/loading.gif}" width=30 height=30>
                             저장
                         </button>
@@ -205,13 +172,12 @@
 
 <script th:src="@{/vendor/jquery/jquery.min.js}"></script>
 <script th:src="@{/vendor/bootstrap/js/bootstrap.bundle.min.js}"></script>
-
+<script src="/js/problem.js"></script>
 
 
 <!-- Include the Quill library -->
 <script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.js"></script>
 
-<script th:src="@{/js/problem.js}"></script>
 
 
 </body>

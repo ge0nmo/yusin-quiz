@@ -13,6 +13,8 @@ public interface SubjectRepository
 
     Optional<Subject> findById(long id);
 
+    List<Subject> findAll();
+
     Page<Subject> findAll(Pageable pageable);
 
     List<Subject> findByName(String name);
