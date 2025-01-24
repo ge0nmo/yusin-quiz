@@ -84,6 +84,14 @@ public class SubjectServiceImpl implements SubjectService
     }
 
     @Override
+    public List<SubjectDTO> getAll()
+    {
+        return subjectRepository.findAll().stream()
+                .map(subjectMapper::toSubjectDTO)
+                .toList();
+    }
+
+    @Override
     @Transactional
     public boolean deleteById(long id)
     {
