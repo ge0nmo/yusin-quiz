@@ -1,0 +1,32 @@
+= API Documentation
+:doctype: book
+:icons: font
+:toc: left
+:toc-title: 순서
+:sectnums:
+:sectnumlevels: 5
+:source-highlighter: highlightjs
+
+== 문제 & 선택지 API
+
+
+== 질문 등록
+==== HTTP Request
+include::{snippets}/saveQuestion/http-request.adoc[]
+
+==== HTTP Response
+include::{snippets}/saveQuestion/http-response.adoc[]
+
+==== Response Fields
+include::{snippets}/saveQuestion/response-fields.adoc[]
+
+
+== 질문 수정
+==== HTTP Request
+include::{snippets}/updateQuestion/http-request.adoc[]
+
+==== HTTP Response
+include::{snippets}/updateQuestion/http-response.adoc[]
+
+==== Response Fields
+include::{snippets}/updateQuestion/response-fields.adoc[]

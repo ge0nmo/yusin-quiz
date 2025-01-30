@@ -29,6 +29,11 @@ public enum ExceptionMessage
 
     INVALID_DATA("유효하지 않은 데이터입니다."),
 
+    QUESTION_NOT_FOUND("해당 질문 정보를 찾을 수 없습니다."),
+
+    ANSWER_NOT_FOUND("해당 답변 정보를 찾을 수 없습니다."),
+
+
     /**
      * subscription plan
      */

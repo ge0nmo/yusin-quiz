@@ -36,6 +36,10 @@ import com.cpa.yusin.quiz.problem.controller.mapper.ProblemMapper;
 import com.cpa.yusin.quiz.problem.controller.port.ProblemService;
 import com.cpa.yusin.quiz.problem.service.ProblemServiceImpl;
 import com.cpa.yusin.quiz.problem.service.port.ProblemRepository;
+import com.cpa.yusin.quiz.question.controller.mapper.QuestionMapper;
+import com.cpa.yusin.quiz.question.controller.port.QuestionService;
+import com.cpa.yusin.quiz.question.service.QuestionServiceImpl;
+import com.cpa.yusin.quiz.question.service.port.QuestionRepository;
 import com.cpa.yusin.quiz.subject.controller.SubjectController;
 import com.cpa.yusin.quiz.subject.controller.mapper.SubjectMapper;
 import com.cpa.yusin.quiz.subject.controller.port.SubjectService;
@@ -136,6 +140,12 @@ public class TestContainer
     public final PaymentRepository paymentRepository;
     public final PaymentMapper paymentMapper;
 
+    /**
+     * question
+     */
+    public final QuestionRepository questionRepository;
+    public final QuestionMapper questionMapper;
+    public final QuestionService questionService;
 
     public final CascadeDeleteService cascadeDeleteService;
 
@@ -198,6 +208,11 @@ public class TestContainer
         this.subscriptionService = new SubscriptionServiceImpl(this.subscriptionRepository,
                 paymentRepository, subscriptionPlanRepository, merchantIdGenerator, subscriptionMapper, subscriptionValidator, clockHolder, memberRepository);
         this.subscriptionController = new SubscriptionController(this.subscriptionService);
+
+        this.questionRepository = new FakeQuestionRepository();
+        this.questionMapper = new QuestionMapper();
+        this.questionService = new QuestionServiceImpl(questionRepository, problemService, questionMapper);
+
     }
 
 }

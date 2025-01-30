@@ -1,0 +1,16 @@
+package com.cpa.yusin.quiz.question.controller.dto.response;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+
+@Builder
+@AllArgsConstructor
+@Data
+public class QuestionDTO
+{
+    private final long id;
+    private final String title;
+    private final String content;
+
+}
