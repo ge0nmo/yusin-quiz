@@ -4,6 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 
+import java.time.LocalDateTime;
+
 @Builder
 @AllArgsConstructor
 @Data
@@ -12,5 +14,5 @@ public class QuestionDTO
     private final long id;
     private final String title;
     private final String content;
-
+    private final LocalDateTime createdAt;
 }

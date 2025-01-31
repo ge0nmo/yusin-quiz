@@ -180,7 +180,9 @@ class QuestionTest
                         responseFields(
                                 fieldWithPath("data.id").type(JsonFieldType.NUMBER).description("질문 고유 식별자"),
                                 fieldWithPath("data.title").type(JsonFieldType.STRING).description("질문 제목"),
-                                fieldWithPath("data.content").type(JsonFieldType.STRING).description("질문 내용")
+                                fieldWithPath("data.content").type(JsonFieldType.STRING).description("질문 내용"),
+                                fieldWithPath("data.createdAt").type(JsonFieldType.STRING).description("질문 등록 시간")
+
                         )
 
                 ))
@@ -189,25 +191,74 @@ class QuestionTest
     }
 
     @Test
-    void getQuestion()
+    void getQuestion() throws Exception
     {
+        // given
+        long questionId = 1L;
+
+        // when
+        ResultActions resultActions = mvc
+                .perform(get("/api/v1/question/{questionId}", questionId));
+
+        // then
+        resultActions
+                .andExpect(status().isOk())
+                .andDo(document("getQuestion",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+
+                        responseFields(
+                                fieldWithPath("data.id").type(JsonFieldType.NUMBER).description("질문 고유 식별자"),
+                                fieldWithPath("data.title").type(JsonFieldType.STRING).description("질문 제목"),
+                                fieldWithPath("data.content").type(JsonFieldType.STRING).description("질문 내용"),
+                                fieldWithPath("data.createdAt").type(JsonFieldType.STRING).description("질문 등록 시간")
+                        )
+
+                ));
     }
 
     @Test
     void getAllByProblemId() throws Exception
     {
         // given
+        questionRepository.save(Question.builder().id(2L).title("2번은 왜 정답이 아니죠?").content("2번은 왜 정답이 아니죠?").password("123123").problem(problem).build());
+        questionRepository.save(Question.builder().id(3L).title("3번은 왜 정답이 아니죠?").content("3번은 왜 정답이 아니죠?").password("123123").problem(problem).build());
+        questionRepository.save(Question.builder().id(4L).title("4번은 왜 정답이 아니죠?").content("4번은 왜 정답이 아니죠?").password("123123").problem(problem).build());
+        questionRepository.save(Question.builder().id(5L).title("5번은 왜 정답이 아니죠?").content("5번은 왜 정답이 아니죠?").password("123123").problem(problem).build());
+        questionRepository.save(Question.builder().id(6L).title("6번은 왜 정답이 아니죠?").content("6번은 왜 정답이 아니죠?").password("123123").problem(problem).build());
+        questionRepository.save(Question.builder().id(7L).title("7번은 왜 정답이 아니죠?").content("7번은 왜 정답이 아니죠?").password("123123").problem(problem).build());
+        questionRepository.save(Question.builder().id(8L).title("8번은 왜 정답이 아니죠?").content("8번은 왜 정답이 아니죠?").password("123123").problem(problem).build());
+
+
 
         // when
         ResultActions resultActions = mvc
-                .perform(get("/api/v1/")
-
+                .perform(get("/api/v1/problem/{problemId}/question", problem.getId())
                 );
 
         // then
         resultActions
                 .andExpect(status().isOk())
-                ;
+                .andDo(document("getQuestions",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+
+                        responseFields(
+                                fieldWithPath("data[].id").type(JsonFieldType.NUMBER).description("질문 고유 식별자"),
+                                fieldWithPath("data[].title").type(JsonFieldType.STRING).description("질문 제목"),
+                                fieldWithPath("data[].content").type(JsonFieldType.STRING).description("질문 내용"),
+                                fieldWithPath("data[].createdAt").type(JsonFieldType.STRING).description("질문 등록 시간"),
+
+
+                                fieldWithPath("pageInfo.totalElements").type(JsonFieldType.NUMBER).description("총 데이터 수"),
+                                fieldWithPath("pageInfo.totalPages").type(JsonFieldType.NUMBER).description("총 페이지 수"),
+                                fieldWithPath("pageInfo.currentPage").type(JsonFieldType.NUMBER).description("현재 페이지"),
+                                fieldWithPath("pageInfo.pageSize").type(JsonFieldType.NUMBER).description("페이지 크기")
+                        )
+
+                ));
+
+
 
     }
 }

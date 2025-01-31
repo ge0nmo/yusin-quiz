@@ -30,3 +30,26 @@ include::{snippets}/updateQuestion/http-response.adoc[]
 
 ==== Response Fields
 include::{snippets}/updateQuestion/response-fields.adoc[]
+
+
+
+== 질문 1개 조회
+==== HTTP Request
+include::{snippets}/getQuestion/http-request.adoc[]
+
+==== HTTP Response
+include::{snippets}/getQuestion/http-response.adoc[]
+
+==== Response Fields
+include::{snippets}/getQuestion/response-fields.adoc[]
+
+
+== 해당 문제의 모든 질문 조회
+==== HTTP Request
+include::{snippets}/getQuestions/http-request.adoc[]
+
+==== HTTP Response
+include::{snippets}/getQuestions/http-response.adoc[]
+
+==== Response Fields
+include::{snippets}/getQuestions/response-fields.adoc[]
