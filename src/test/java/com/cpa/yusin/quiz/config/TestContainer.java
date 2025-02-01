@@ -1,5 +1,9 @@
 package com.cpa.yusin.quiz.config;
 
+import com.cpa.yusin.quiz.answer.controller.mapper.AnswerMapper;
+import com.cpa.yusin.quiz.answer.controller.port.AnswerService;
+import com.cpa.yusin.quiz.answer.service.AnswerServiceImpl;
+import com.cpa.yusin.quiz.answer.service.port.AnswerRepository;
 import com.cpa.yusin.quiz.choice.controller.mapper.ChoiceMapper;
 import com.cpa.yusin.quiz.choice.controller.mapper.ChoiceMapperImpl;
 import com.cpa.yusin.quiz.choice.controller.port.ChoiceService;
@@ -149,6 +153,13 @@ public class TestContainer
 
     public final CascadeDeleteService cascadeDeleteService;
 
+    /**
+     * answer
+     */
+    public final AnswerRepository answerRepository;
+    public final AnswerMapper answerMapper;
+    public final AnswerService answerService;
+
     public TestContainer()
     {
         this.clockHolder = new FakeClockHolder();
@@ -213,6 +224,9 @@ public class TestContainer
         this.questionMapper = new QuestionMapper();
         this.questionService = new QuestionServiceImpl(questionRepository, problemService, questionMapper);
 
+        this.answerRepository = new FakeAnswerRepository();
+        this.answerMapper = new AnswerMapper();
+        this.answerService = new AnswerServiceImpl(this.answerRepository, this.answerMapper);
     }
 
 }

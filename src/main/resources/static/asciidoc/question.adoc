@@ -7,7 +7,7 @@
 :sectnumlevels: 5
 :source-highlighter: highlightjs
 
-== 문제 & 선택지 API
+== 질문 API
 
 
 == 질문 등록

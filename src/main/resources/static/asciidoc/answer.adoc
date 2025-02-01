@@ -1,0 +1,33 @@
+= API Documentation
+:doctype: book
+:icons: font
+:toc: left
+:toc-title: 순서
+:sectnums:
+:sectnumlevels: 5
+:source-highlighter: highlightjs
+
+== 답변 API
+
+
+
+== 답변 1개 조회
+==== HTTP Request
+include::{snippets}/getAnswer/http-request.adoc[]
+
+==== HTTP Response
+include::{snippets}/getAnswer/http-response.adoc[]
+
+==== Response Fields
+include::{snippets}/getAnswer/response-fields.adoc[]
+
+
+== 해당 질문의 모든 답변 조회
+==== HTTP Request
+include::{snippets}/getAnswers/http-request.adoc[]
+
+==== HTTP Response
+include::{snippets}/getAnswers/http-response.adoc[]
+
+==== Response Fields
+include::{snippets}/getAnswers/response-fields.adoc[]

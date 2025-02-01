@@ -18,6 +18,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.restdocs.RestDocumentationContextProvider;
 import org.springframework.restdocs.RestDocumentationExtension;
@@ -229,11 +231,15 @@ class QuestionTest
         questionRepository.save(Question.builder().id(7L).title("7번은 왜 정답이 아니죠?").content("7번은 왜 정답이 아니죠?").password("123123").problem(problem).build());
         questionRepository.save(Question.builder().id(8L).title("8번은 왜 정답이 아니죠?").content("8번은 왜 정답이 아니죠?").password("123123").problem(problem).build());
 
+        int pageSize = 10;
+        int pageNumber = 0;
 
 
         // when
         ResultActions resultActions = mvc
                 .perform(get("/api/v1/problem/{problemId}/question", problem.getId())
+                        .queryParam("page", Integer.toString(pageNumber))
+                        .queryParam("size", Integer.toString(pageSize))
                 );
 
         // then
