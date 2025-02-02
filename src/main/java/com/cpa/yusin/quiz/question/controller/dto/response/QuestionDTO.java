@@ -14,5 +14,6 @@ public class QuestionDTO
     private final long id;
     private final String title;
     private final String content;
+    private final Boolean isAnswered;
     private final LocalDateTime createdAt;
 }

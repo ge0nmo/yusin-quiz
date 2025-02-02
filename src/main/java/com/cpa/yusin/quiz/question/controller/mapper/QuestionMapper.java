@@ -16,6 +16,7 @@ public class QuestionMapper
                 .title(request.getTitle())
                 .content(request.getContent())
                 .problem(problem)
+                .isAnswered(false)
                 .build();
     }
 
@@ -26,6 +27,7 @@ public class QuestionMapper
                 .title(question.getTitle())
                 .content(question.getContent())
                 .createdAt(question.getCreatedAt())
+                .isAnswered(question.isAnswered())
                 .build();
     }
 }

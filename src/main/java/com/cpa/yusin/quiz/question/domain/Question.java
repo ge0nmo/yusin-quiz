@@ -24,6 +24,8 @@ public class Question extends BaseEntity
 
     private String content;
 
+    private boolean isAnswered;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "problem_id", nullable = false)
     private Problem problem;
