@@ -455,6 +455,7 @@ function resetProblemContainer(numElement, choiceContainer){
     numElement.value = '';
     problemContentQuill.root.innerHTML = '';
     choiceContainer.innerHTML = '';
+    problemExplanationQuill.root.innerHTML = '';
 }
 
 async function saveProblem(problemCreateRequest){

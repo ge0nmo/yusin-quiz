@@ -27,6 +27,7 @@ public class Problem
     @Column(nullable = false)
     private int number;
 
+    @Column(columnDefinition = "LONGTEXT")
     private String explanation;
 
     @ManyToOne(fetch = FetchType.LAZY)
