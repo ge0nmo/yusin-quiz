@@ -199,6 +199,8 @@ function saveExam(){
         year: Number(year),
     }
 
+    selectedYear = year;
+
     fetch(`/admin/exam?subjectId=${selectedSubjectId}`, {
         method: 'POST',
         headers: {
