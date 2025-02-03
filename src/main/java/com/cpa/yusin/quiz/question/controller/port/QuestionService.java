@@ -18,4 +18,6 @@ public interface QuestionService
     QuestionDTO getById(long id);
 
     Page<QuestionDTO> getAllByProblemId(Pageable pageable, long problemId);
+
+    void verifyPassword(long questionId, String password);
 }

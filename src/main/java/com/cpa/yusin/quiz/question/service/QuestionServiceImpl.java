@@ -70,4 +70,11 @@ public class QuestionServiceImpl implements QuestionService
         return questionRepository.findAllByProblemId(problemId, pageable)
                 .map(questionMapper::toQuestionDTO);
     }
+
+    @Override
+    public void verifyPassword(long questionId, String password)
+    {
+        Question question = findById(questionId);
+        question.verify(password);
+    }
 }

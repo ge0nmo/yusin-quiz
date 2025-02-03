@@ -12,6 +12,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -57,5 +58,14 @@ public class QuestionController
         Page<QuestionDTO> response = questionService.getAllByProblemId(pageable, problemId);
 
         return ResponseEntity.ok(new GlobalResponse<>(response.getContent(), PageInfo.of(response)));
+    }
+
+    @GetMapping("/question/{questionId}/verification")
+    public ResponseEntity<?> verifyQuestionPassword(@PathVariable("questionId") long questionId,
+                                                    @RequestParam String password)
+    {
+        questionService.verifyPassword(questionId, password);
+
+        return ResponseEntity.ok(new GlobalResponse<>(true));
     }
 }

@@ -1,6 +1,8 @@
 package com.cpa.yusin.quiz.question.domain;
 
 import com.cpa.yusin.quiz.common.infrastructure.BaseEntity;
+import com.cpa.yusin.quiz.global.exception.ExceptionMessage;
+import com.cpa.yusin.quiz.global.exception.QuestionException;
 import com.cpa.yusin.quiz.problem.domain.Problem;
 import jakarta.persistence.*;
 import lombok.*;
@@ -35,5 +37,12 @@ public class Question extends BaseEntity
     {
         this.title = title;
         this.content = content;
+    }
+
+    public void verify(String inputPassword)
+    {
+        if(!this.password.equals(inputPassword)){
+            throw new QuestionException(ExceptionMessage.INVALID_QUESTION_PASSWORD);
+        }
     }
 }
