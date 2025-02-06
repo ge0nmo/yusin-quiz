@@ -11,6 +11,8 @@ import lombok.NoArgsConstructor;
 @Data
 public class QuestionRegisterRequest
 {
+    private String username;
+
     private String password;
 
     private String title;

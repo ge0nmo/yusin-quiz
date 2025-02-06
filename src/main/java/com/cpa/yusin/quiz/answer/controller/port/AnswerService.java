@@ -17,4 +17,6 @@ public interface AnswerService
 
     AnswerDTO getAnswerById(long id);
     Page<AnswerDTO> getAnswersByQuestionId(long questionId, Pageable pageable);
+
+    void verifyPassword(long answerId, String password);
 }

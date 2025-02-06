@@ -53,3 +53,13 @@ include::{snippets}/getQuestions/http-response.adoc[]
 
 ==== Response Fields
 include::{snippets}/getQuestions/response-fields.adoc[]
+
+== 질문 비밀번호 검증
+==== HTTP Request
+include::{snippets}/questionVerification/http-request.adoc[]
+
+==== HTTP Response
+include::{snippets}/questionVerification/http-response.adoc[]
+
+==== Response Fields
+include::{snippets}/questionVerification/response-fields.adoc[]

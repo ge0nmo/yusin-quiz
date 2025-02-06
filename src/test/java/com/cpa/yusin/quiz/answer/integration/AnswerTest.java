@@ -1,5 +1,7 @@
 package com.cpa.yusin.quiz.answer.integration;
 
+import com.cpa.yusin.quiz.answer.controller.dto.request.AnswerRegisterRequest;
+import com.cpa.yusin.quiz.answer.controller.dto.request.AnswerUpdateRequest;
 import com.cpa.yusin.quiz.answer.domain.Answer;
 import com.cpa.yusin.quiz.answer.service.port.AnswerRepository;
 import com.cpa.yusin.quiz.config.TeardownExtension;
@@ -18,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
 import org.springframework.restdocs.RestDocumentationContextProvider;
 import org.springframework.restdocs.RestDocumentationExtension;
 import org.springframework.restdocs.payload.JsonFieldType;
@@ -29,8 +32,7 @@ import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.documentationConfiguration;
-import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
-import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
+import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.*;
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.*;
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.prettyPrint;
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
@@ -98,6 +100,7 @@ class AnswerTest
         question = questionRepository.save(Question.builder()
                 .id(1L)
                 .title("정답이 4번인 이유")
+                .username("유저1")
                 .content("왜 4번이죠?")
                 .password("123123")
                 .problem(problem)
@@ -113,6 +116,86 @@ class AnswerTest
 
         mapper = new ObjectMapper();
 
+    }
+
+    @Test
+    void save() throws Exception
+    {
+        // given
+        AnswerRegisterRequest request = AnswerRegisterRequest.builder()
+                .username("관리자")
+                .content("이전 영상을 참고해주세요")
+                .password("123123")
+                .build();
+
+        long questionId = 1L;
+
+        // when
+        ResultActions resultActions = mvc
+                .perform(post("/api/v1/question/{questionId}/answer", questionId)
+                        .content(mapper.writeValueAsString(request))
+                        .contentType(MediaType.APPLICATION_JSON));
+
+        // then
+        resultActions
+                .andExpect(status().isCreated())
+                .andDo(document("saveAnswer",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+
+                        requestFields(
+                                fieldWithPath("username").type(JsonFieldType.STRING).description("답변 등록자 이름"),
+                                fieldWithPath("password").type(JsonFieldType.STRING).description("비밀번호"),
+                                fieldWithPath("content").type(JsonFieldType.STRING).description("내용")
+
+                        ),
+
+                        responseFields(
+                                fieldWithPath("data").type(JsonFieldType.NUMBER).description("답변 고유 식별자")
+                        )
+
+                ))
+        ;
+
+    }
+
+    @Test
+    void update() throws Exception
+    {
+        // given
+        AnswerUpdateRequest request = AnswerUpdateRequest.builder()
+                .content("해당 링크를 참조해주세요.")
+                .build();
+
+        // when
+        ResultActions resultActions = mvc
+                .perform(patch("/api/v1/answer/{answerId}", answer.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(request))
+                );
+
+        // then
+        resultActions
+                .andExpect(status().isOk())
+                .andDo(document("updateAnswer",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+
+                        requestFields(
+                                fieldWithPath("content").type(JsonFieldType.STRING).description("내용")
+
+                        ),
+
+                        responseFields(
+                                fieldWithPath("data.id").type(JsonFieldType.NUMBER).description("답변 고유 식별자"),
+                                fieldWithPath("data.username").type(JsonFieldType.STRING).description("답변 등록자 이름"),
+                                fieldWithPath("data.content").type(JsonFieldType.STRING).description("답변 내용"),
+                                fieldWithPath("data.createdAt").type(JsonFieldType.STRING).description("답변 등록 시간")
+
+                        )
+
+                ))
+        ;
     }
 
 
@@ -183,5 +266,32 @@ class AnswerTest
 
                 ));
 
+    }
+
+    @Test
+    void verifyAnswer() throws Exception
+    {
+        // given
+        long id = 1L;
+        String password = "123123";
+
+
+        // when
+        ResultActions resultActions = mvc
+                .perform(get("/api/v1/answer/{answerId}/verification", id)
+                        .queryParam("password", password))
+                ;
+
+        // then
+        resultActions
+                .andExpect(status().isOk())
+                .andDo(document("answerVerification",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+
+                        responseFields(
+                                fieldWithPath("data").type(JsonFieldType.BOOLEAN).description("인증 성공 여부")
+                        )
+                ));
     }
 }

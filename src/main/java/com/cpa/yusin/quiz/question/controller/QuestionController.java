@@ -62,7 +62,7 @@ public class QuestionController
 
     @GetMapping("/question/{questionId}/verification")
     public ResponseEntity<?> verifyQuestionPassword(@PathVariable("questionId") long questionId,
-                                                    @RequestParam String password)
+                                                    @RequestParam("password") String password)
     {
         questionService.verifyPassword(questionId, password);
 

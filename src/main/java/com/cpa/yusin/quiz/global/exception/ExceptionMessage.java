@@ -38,8 +38,13 @@ public enum ExceptionMessage
 
     QUESTION_NOT_FOUND("해당 질문 정보를 찾을 수 없습니다."),
 
-    INVALID_QUESTION_PASSWORD("해당 질문의 비밀번호와 일치하지 않습니다"),
+    INVALID_QUESTION_PASSWORD("비밀번호가 일치하지 않습니다"),
 
+
+    /**
+     *  answer
+     */
+    INVALID_ANSWER_PASSWORD("비밀번호가 일치하지 않습니다"),
 
     /**
      * subscription plan

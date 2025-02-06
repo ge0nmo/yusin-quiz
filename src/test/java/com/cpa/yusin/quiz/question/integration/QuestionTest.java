@@ -99,6 +99,7 @@ class QuestionTest
                         .id(1L)
                         .title("정답이 4번인 이유")
                         .content("왜 4번이죠?")
+                        .username("유저1")
                         .password("123123")
                         .problem(problem)
                         .build());
@@ -110,6 +111,7 @@ class QuestionTest
         // given
         QuestionRegisterRequest request = QuestionRegisterRequest.builder()
                 .title("@Import 관련 질문")
+                .username("유저1")
                 .password("123123")
                 .content("AtTargetAtWithinTest class에 대한 질문이 있어 글 남깁니다.\n" +
                         "\n" +
@@ -136,6 +138,7 @@ class QuestionTest
                         preprocessResponse(prettyPrint()),
 
                         requestFields(
+                                fieldWithPath("username").type(JsonFieldType.STRING).description("질문 등록자 이름"),
                                 fieldWithPath("password").type(JsonFieldType.STRING).description("비밀번호"),
                                 fieldWithPath("title").type(JsonFieldType.STRING).description("제목"),
                                 fieldWithPath("content").type(JsonFieldType.STRING).description("내용")
@@ -181,6 +184,7 @@ class QuestionTest
 
                         responseFields(
                                 fieldWithPath("data.id").type(JsonFieldType.NUMBER).description("질문 고유 식별자"),
+                                fieldWithPath("data.username").type(JsonFieldType.STRING).description("질문 등록자 이름"),
                                 fieldWithPath("data.title").type(JsonFieldType.STRING).description("질문 제목"),
                                 fieldWithPath("data.content").type(JsonFieldType.STRING).description("질문 내용"),
                                 fieldWithPath("data.isAnswered").type(JsonFieldType.BOOLEAN).description("질문 답변 여부"),
@@ -212,6 +216,7 @@ class QuestionTest
 
                         responseFields(
                                 fieldWithPath("data.id").type(JsonFieldType.NUMBER).description("질문 고유 식별자"),
+                                fieldWithPath("data.username").type(JsonFieldType.STRING).description("질문 등록자 이름"),
                                 fieldWithPath("data.title").type(JsonFieldType.STRING).description("질문 제목"),
                                 fieldWithPath("data.content").type(JsonFieldType.STRING).description("질문 내용"),
                                 fieldWithPath("data.isAnswered").type(JsonFieldType.BOOLEAN).description("질문 답변 여부"),
@@ -225,13 +230,13 @@ class QuestionTest
     void getAllByProblemId() throws Exception
     {
         // given
-        questionRepository.save(Question.builder().id(2L).title("2번은 왜 정답이 아니죠?").content("2번은 왜 정답이 아니죠?").password("123123").problem(problem).build());
-        questionRepository.save(Question.builder().id(3L).title("3번은 왜 정답이 아니죠?").content("3번은 왜 정답이 아니죠?").password("123123").problem(problem).build());
-        questionRepository.save(Question.builder().id(4L).title("4번은 왜 정답이 아니죠?").content("4번은 왜 정답이 아니죠?").password("123123").problem(problem).build());
-        questionRepository.save(Question.builder().id(5L).title("5번은 왜 정답이 아니죠?").content("5번은 왜 정답이 아니죠?").password("123123").problem(problem).build());
-        questionRepository.save(Question.builder().id(6L).title("6번은 왜 정답이 아니죠?").content("6번은 왜 정답이 아니죠?").password("123123").problem(problem).build());
-        questionRepository.save(Question.builder().id(7L).title("7번은 왜 정답이 아니죠?").content("7번은 왜 정답이 아니죠?").password("123123").problem(problem).build());
-        questionRepository.save(Question.builder().id(8L).title("8번은 왜 정답이 아니죠?").content("8번은 왜 정답이 아니죠?").password("123123").problem(problem).build());
+        questionRepository.save(Question.builder().id(2L).title("2번은 왜 정답이 아니죠?").content("2번은 왜 정답이 아니죠?").username("유저1").password("123123").problem(problem).build());
+        questionRepository.save(Question.builder().id(3L).title("3번은 왜 정답이 아니죠?").content("3번은 왜 정답이 아니죠?").username("유저1").password("123123").problem(problem).build());
+        questionRepository.save(Question.builder().id(4L).title("4번은 왜 정답이 아니죠?").content("4번은 왜 정답이 아니죠?").username("유저1").password("123123").problem(problem).build());
+        questionRepository.save(Question.builder().id(5L).title("5번은 왜 정답이 아니죠?").content("5번은 왜 정답이 아니죠?").username("유저1").password("123123").problem(problem).build());
+        questionRepository.save(Question.builder().id(6L).title("6번은 왜 정답이 아니죠?").content("6번은 왜 정답이 아니죠?").username("유저1").password("123123").problem(problem).build());
+        questionRepository.save(Question.builder().id(7L).title("7번은 왜 정답이 아니죠?").content("7번은 왜 정답이 아니죠?").username("유저1").password("123123").problem(problem).build());
+        questionRepository.save(Question.builder().id(8L).title("8번은 왜 정답이 아니죠?").content("8번은 왜 정답이 아니죠?").username("유저1").password("123123").problem(problem).build());
 
         int pageSize = 10;
         int pageNumber = 0;
@@ -253,6 +258,7 @@ class QuestionTest
 
                         responseFields(
                                 fieldWithPath("data[].id").type(JsonFieldType.NUMBER).description("질문 고유 식별자"),
+                                fieldWithPath("data[].username").type(JsonFieldType.STRING).description("질문 등록자 이름"),
                                 fieldWithPath("data[].title").type(JsonFieldType.STRING).description("질문 제목"),
                                 fieldWithPath("data[].content").type(JsonFieldType.STRING).description("질문 내용"),
                                 fieldWithPath("data[].isAnswered").type(JsonFieldType.BOOLEAN).description("질문 답변 여부"),
@@ -268,6 +274,34 @@ class QuestionTest
                 ));
 
 
+
+    }
+
+    @Test
+    void verifyPassword() throws Exception
+    {
+        // given
+        String password = "123123";
+        long id = 1L;
+
+        // when
+        ResultActions resultActions = mvc
+                .perform(get("/api/v1/question/{questionId}/verification", id)
+                        .queryParam("password", password))
+                ;
+
+        // then
+        resultActions
+                .andExpect(status().isOk())
+                .andDo(document("questionVerification",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+
+                        responseFields(
+                                fieldWithPath("data").type(JsonFieldType.BOOLEAN).description("인증 성공 여부")
+                        )
+
+                ));
 
     }
 }

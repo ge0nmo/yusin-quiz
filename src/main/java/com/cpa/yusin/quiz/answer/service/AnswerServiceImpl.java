@@ -58,4 +58,11 @@ public class AnswerServiceImpl implements AnswerService
         return answerRepository.findByQuestionId(questionId, pageable)
                 .map(answerMapper::toAnswerDTO);
     }
+
+    @Override
+    public void verifyPassword(long answerId, String password)
+    {
+        Answer answer = findById(answerId);
+        answer.verifyPassword(password);
+    }
 }
