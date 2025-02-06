@@ -3,42 +3,41 @@ let selectedSubjectName;
 let selectedYear;
 let selectedExamId;
 let selectedExamName;
-let problemContentQuill;
-let problemContentQuillInstances = {};
-let problemExplanationQuillInstances = {};
-
-let problemExplanationQuill;
 
 
-const toolbarOptions = [
-    ['bold', 'italic', 'underline', 'strike'],
-    [{ 'header': 1 }, { 'header': 2 }],
-    [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-
-    [{ 'color': [] }, { 'background': [] }],
-    ['image', 'link'],
-]
-
-const quillOption = {
-    modules: {
-        toolbar: toolbarOptions
-    },
-    theme: 'snow'
+const summernoteOption = {
+    toolbar: [
+        // [groupName, [list of button]]
+        ['fontname', ['fontname']],
+        ['fontsize', ['fontsize']],
+        ['style', ['bold', 'italic', 'underline','strikethrough', 'clear']],
+        ['color', ['forecolor','color']],
+        ['table', ['table']],
+        ['para', ['ul', 'ol', 'paragraph']],
+        ['height', ['height']],
+        ['insert',['picture','link','video']],
+        ['view', ['fullscreen', 'help']]
+    ],
+    fontNames: ['Arial', 'Arial Black', 'Comic Sans MS', 'Courier New','맑은 고딕','궁서','굴림체','굴림','돋움체','바탕체'],
+    fontSizes: ['8','9','10','11','12','14','16','18','20','22','24','28','30','36','50','72'],
+    callbacks: {
+        onImageUpload: function(files) {
+            uploadImageToServer(files[0], $(this));
+        }
+    }
 };
 
 window.onload = async function() {
     addHandlerChoiceButton();
     await addHandlerSubjectDropdown();
 
-    problemContentQuill = new Quill('#problemContent', quillOption);
-    problemExplanationQuill = new Quill('#problemExplanation', quillOption);
-
-    problemContentQuill.getModule('toolbar').addHandler('image', selectLocalImage);
-    problemExplanationQuill.getModule('toolbar').addHandler('image', selectLocalImage);
-
     document.querySelector('.search-click').addEventListener('click', () => addHandlerSearchClick());
     document.querySelector('.add-problem-button').addEventListener('click', () => prepareProblemForm());
     document.querySelector('.problem-save-button').addEventListener('click', () => addHandlerProblemSaveClick());
+
+    $('#problemContent').summernote(summernoteOption);
+
+    $('#problemExplanation').summernote(summernoteOption);
 };
 
 function addHandlerChoiceButton(){
@@ -103,12 +102,6 @@ function selectLocalImage() {
                 throw new Error('Image upload failed');
             }
 
-            const imageUrl = await response.text();
-
-            // Insert image URL into editor
-            const range = this.quill.getSelection(true);
-            this.quill.insertEmbed(range.index, 'image', imageUrl);
-            this.quill.setSelection(range.index + 1);
 
         } catch (error) {
             console.error('Error uploading image:', error);
@@ -224,12 +217,10 @@ async function addHandlerSearchClick() {
 }
 
 
-function loadProblemData(problemList) {
+async function loadProblemData(problemList) {
     const examTable = document.getElementById('examTable');
     examTable.innerHTML = '';
     let html = '';
-
-    console.log('문제 = ', problemList);
 
     problemList.forEach((problem) => {
         const choiceList = problem.choices;
@@ -237,64 +228,56 @@ function loadProblemData(problemList) {
         const problemId = problem.id;
 
         html += `
-                <div id="problem-${problemId}" class="card shadow-sm mb-4" data-problem-id="${problemId}">
-                    <div class="card-header bg-primary text-white">
-                        <div class="d-flex justify-content-between">
-                            <h5 class="mb-0">
-                                문제<input class="ml-2 problemNumber" value="${problem.number}" style="width: 50px">
-                            </h5>
-
-                            <div class="d-flex justify-content-end">
-                                <button class="problemEditBtn btn btn-outline-light" onclick="handleUpdateProblemClick(${problemId})">
-                                    <img class="editImg" src="/img/save.svg" alt="">
-                                </button>
-                                <button class="removeBtn btn btn-outline-light" onclick="handleRemoveProblem(${problemId})">
-                                    <img src="/img/trash.svg" alt="">
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="card-body">
-                        <div class="mb-3">
-                             <div id="problemContent-${problemId}" class="problemContent form-control"></div>
-                        </div>
-
-                        <div class="choices list-group">${choiceHTML}</div>
-
-                         <div class="add-choice d-flex list-group-item list-group-item-action justify-content-center">
-                            <button class="btn btn-outline-secondary" onclick="handleAddChoice(${problemId})">
-                                <span>문항 추가</span>
-                                <img src="/img/add_icon.png" alt="" >
+            <div id="problem-${problemId}" class="card shadow-sm mb-4" data-problem-id="${problemId}">
+                <div class="card-header bg-primary text-white">
+                    <div class="d-flex justify-content-between">
+                        <h5 class="mb-0">
+                            문제<input class="ml-2 problemNumber" value="${problem.number}" style="width: 50px">
+                        </h5>
+                        <div class="d-flex justify-content-end">
+                            <button class="problemEditBtn btn btn-outline-light" onclick="handleUpdateProblemClick(${problemId})">
+                                <img class="editImg" src="/img/save.svg" alt="">
+                            </button>
+                            <button class="removeBtn btn btn-outline-light" onclick="handleRemoveProblem(${problemId})">
+                                <img src="/img/trash.svg" alt="">
                             </button>
                         </div>
-
-                        <div class="list-group-item list-group-item-action problem-explanation-container">
-                            <span>문제 해설</span>                        
-                            <div id="problemExplanation-${problemId}" class="problemExplanation form-control">
-                            
-                            </div>                                                                                                                                           
-                        </div>
-
                     </div>
                 </div>
-            `
-    })
+                <div class="card-body">
+                    <div class="mb-3">
+                        <textarea id="problemContent-${problemId}" class="problemContent form-control"></textarea>
+                    </div>
+
+                    <div class="choices list-group">${choiceHTML}</div>
+
+                    <div class="add-choice d-flex list-group-item list-group-item-action justify-content-center">
+                        <button class="btn btn-outline-secondary" onclick="handleAddChoice(${problemId})">
+                            <span>문항 추가</span>
+                            <img src="/img/add_icon.png" alt="">
+                        </button>
+                    </div>
+
+                    <div class="list-group-item list-group-item-action problem-explanation-container">
+                        <span>문제 해설</span>
+                        <textarea id="problemExplanation-${problemId}" class="problemExplanation form-control"></textarea>
+                    </div>
+                </div>
+            </div>
+        `;
+    });
 
     examTable.innerHTML = html;
 
+
     problemList.forEach((problem) => {
-        const problemContentQuillContainer = document.getElementById(`problemContent-${problem.id}`);
-        const contentQuill = new Quill(problemContentQuillContainer, quillOption);
-        contentQuill.getModule('toolbar').addHandler('image', selectLocalImage);
-        contentQuill.root.innerHTML = problem.content;
-        problemContentQuillInstances[problem.id] = contentQuill;
+        const problemContent = $(`#problemContent-${problem.id}`);
+        problemContent.summernote(summernoteOption);
+        problemContent.summernote('code', problem.content);
 
-
-        const problemExplanationQuillContainer = document.getElementById(`problemExplanation-${problem.id}`);
-        const explanationQuill = new Quill(problemExplanationQuillContainer, quillOption);
-        explanationQuill.getModule('toolbar').addHandler('image', selectLocalImage);
-        explanationQuill.root.innerHTML = problem.explanation;
-        problemExplanationQuillInstances[problem.id] = explanationQuill;
+        const problemExplanation = $(`#problemExplanation-${problem.id}`);
+        problemExplanation.summernote(summernoteOption);
+        problemExplanation.summernote('code', problem.explanation);
     });
 }
 
@@ -401,34 +384,26 @@ async function addNewChoice(problemId, buttonElement){
 
 }
 
-async function addHandlerProblemSaveClick(){
-    try{
-        const saveModal = document.getElementById('add-problem-modal');
-
-        const numElement = document.getElementById('problemNumber');
-
-        const problemNumber = Number(numElement.value);
-        const problemContent = problemContentQuill.root.innerHTML;
-        const explanation = problemExplanationQuill.root.innerHTML;
-
-
-        console.log(`문제 내용 = ${problemContent}`);
+async function addHandlerProblemSaveClick() {
+    try {
+        const problemNumber = Number(document.getElementById('problemNumber').value);
+        const problemContent = $('#problemContent').summernote('code');
+        const explanation = $('#problemExplanation').summernote('code');
 
         const choiceContainer = document.getElementById('choicesContainer');
         const choiceRows = choiceContainer.querySelectorAll('.choice-row');
         const choiceCreateRequest = [];
         let choiceNumber = 1;
+
         choiceRows.forEach((choiceRow) => {
             const isAnswer = choiceRow.querySelector('.isAnswer').checked;
             const choiceContent = choiceRow.querySelector('.choiceContent').value;
 
-            const choice = {
-                number: choiceNumber,
+            choiceCreateRequest.push({
+                number: choiceNumber++,
                 content: choiceContent,
                 isAnswer: isAnswer,
-            };
-            choiceCreateRequest.push(choice);
-            choiceNumber++;
+            });
         });
 
         const problemCreateRequest = {
@@ -439,23 +414,21 @@ async function addHandlerProblemSaveClick(){
         };
 
         await saveProblem(problemCreateRequest);
-
         const problemList = await getJSON(`/admin/problem/list?examId=${selectedExamId}`);
 
-
         loadProblemData(problemList);
-        resetProblemContainer(numElement, choiceContainer);
-    } catch (error){
+        resetProblemContainer();
+    } catch (error) {
         console.log(error);
         alert('문제 저장 실패');
     }
 }
 
-function resetProblemContainer(numElement, choiceContainer){
-    numElement.value = '';
-    problemContentQuill.root.innerHTML = '';
-    choiceContainer.innerHTML = '';
-    problemExplanationQuill.root.innerHTML = '';
+function resetProblemContainer() {
+    document.getElementById('problemNumber').value = '';
+    $('#problemContent').summernote('code', '');
+    $('#problemExplanation').summernote('code', '');
+    document.getElementById('choicesContainer').innerHTML = '';
 }
 
 async function saveProblem(problemCreateRequest){
@@ -475,41 +448,35 @@ async function saveProblem(problemCreateRequest){
 
 }
 
-async function handleUpdateProblemClick(problemId){
-    try{
+async function handleUpdateProblemClick(problemId) {
+    try {
         const problemForm = document.getElementById(`problem-${problemId}`);
-
         const num = Number(problemForm.querySelector('.problemNumber').value);
-        const content = problemContentQuillInstances[problemId].root.innerHTML;
-        const explanation = problemExplanationQuillInstances[problemId].root.innerHTML;
-
-
+        const content = $(`#problemContent-${problemId}`).summernote('code');
+        const explanation = $(`#problemExplanation-${problemId}`).summernote('code');
 
         const problemUpdateRequest = {
             number: num,
             content: content,
             explanation: explanation,
-        }
+        };
 
         const response = await fetch(`/admin/problem/${problemId}`, {
             method: 'PATCH',
-            headers: {
-                'Content-Type': 'application/json'
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(problemUpdateRequest),
-        })
+        });
 
-        if(!response.ok){
-            throw new Error('수정 실패');
-        }
+        if (!response.ok) throw new Error('수정 실패');
 
         const problemList = await getJSON(`/admin/problem/list?examId=${selectedExamId}`);
         loadProblemData(problemList);
-    } catch (error){
+    } catch (error) {
         console.log(error);
-        alert('문제 수정 중 오류가 발생했습니다.');
+        alert('문제 수정 중 오류 발생');
     }
 }
+
 
 
 async function handleUpdateChoiceClick(choiceId){
@@ -620,19 +587,40 @@ function resetAddProblemModal() {
     // Reset problem number
     document.getElementById('problemNumber').value = '';
 
-    // Reset Quill content
-    if (problemContentQuill) {
-        problemContentQuill.root.innerHTML = '';
-    }
-
-    // Reset explanation quill container
-    if(problemExplanationQuill){
-        problemExplanationQuill.root.innerHTML = '';
-    }
-
     // Clear choices container
     const choiceContainer = document.getElementById('choicesContainer');
     choiceContainer.innerHTML = '';
+}
+
+function uploadImageToServer(file, editor) {
+    if (!file.type.includes('image/')) {
+        alert('Please select an image file');
+        return;
+    }
+
+    if (file.size > 20 * 1024 * 1024) {
+        alert('Image size should not exceed 20MB');
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    fetch('/admin/file', {
+        method: 'POST',
+        body: formData
+    })
+        .then(response => {
+            if (!response.ok) throw new Error('Image upload failed');
+            return response.text();
+        })
+        .then(imageUrl => {
+            editor.summernote('insertImage', imageUrl);
+        })
+        .catch(error => {
+            console.error('Error uploading image:', error);
+            alert('Failed to upload image');
+        });
 }
 
 const getJSON  = async function(url){
