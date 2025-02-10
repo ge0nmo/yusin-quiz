@@ -1,5 +1,6 @@
 package com.cpa.yusin.quiz.answer.domain;
 
+import com.cpa.yusin.quiz.answer.controller.dto.request.AnswerUpdateRequest;
 import com.cpa.yusin.quiz.common.infrastructure.BaseEntity;
 import com.cpa.yusin.quiz.global.exception.AnswerException;
 import com.cpa.yusin.quiz.global.exception.ExceptionMessage;
@@ -30,6 +31,11 @@ public class Answer extends BaseEntity
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "question_id", nullable = false, updatable = false)
     private Question question;
+
+    public void update(AnswerUpdateRequest request)
+    {
+        this.content = request.getContent();
+    }
 
     public void verifyPassword(String password)
     {

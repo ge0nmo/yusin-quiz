@@ -9,6 +9,8 @@ import com.cpa.yusin.quiz.answer.domain.Answer;
 import com.cpa.yusin.quiz.answer.service.port.AnswerRepository;
 import com.cpa.yusin.quiz.global.exception.AnswerException;
 import com.cpa.yusin.quiz.global.exception.ExceptionMessage;
+import com.cpa.yusin.quiz.question.controller.port.QuestionService;
+import com.cpa.yusin.quiz.question.domain.Question;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -24,18 +26,25 @@ public class AnswerServiceImpl implements AnswerService
 {
     private final AnswerRepository answerRepository;
     private final AnswerMapper answerMapper;
+    private final QuestionService questionService;
 
     @Transactional
     @Override
     public long save(AnswerRegisterRequest request, long questionId)
     {
-        return 0;
+        Question question = questionService.findById(questionId);
+        Answer answer = answerMapper.toAnswerEntity(request, question);
+
+        return answerRepository.save(answer).getId();
     }
 
     @Transactional
     @Override
-    public void update(AnswerUpdateRequest request, long questionId)
+    public void update(AnswerUpdateRequest request, long answerId)
     {
+        Answer answer = findById(answerId);
+        answer.update(request);
+        answerRepository.save(answer);
     }
 
     @Override

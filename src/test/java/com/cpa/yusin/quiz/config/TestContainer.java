@@ -226,7 +226,7 @@ public class TestContainer
 
         this.answerRepository = new FakeAnswerRepository();
         this.answerMapper = new AnswerMapper();
-        this.answerService = new AnswerServiceImpl(this.answerRepository, this.answerMapper);
+        this.answerService = new AnswerServiceImpl(this.answerRepository, this.answerMapper, this.questionService);
     }
 
 }
