@@ -14,6 +14,7 @@ import com.cpa.yusin.quiz.question.service.port.QuestionRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -62,6 +63,13 @@ public class QuestionServiceImpl implements QuestionService
     {
         Question question = findById(id);
         return questionMapper.toQuestionDTO(question);
+    }
+
+    @Override
+    public Page<QuestionDTO> findAllQuestions(Pageable pageable)
+    {
+        return questionRepository.findAllQuestions(pageable)
+                .map(questionMapper::toQuestionDTO);
     }
 
     @Override

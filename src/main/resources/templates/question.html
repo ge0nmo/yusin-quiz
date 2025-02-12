@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en" xmlns:th="https://www.thymeleaf.org/">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Home</title>
+
+    <!-- Custom styles for this template-->
+    <link th:href="@{/css/sb-admin-2.min.css}" rel="stylesheet">
+</head>
+<body>
+
+<div id="wrapper">
+    <div th:replace="~{fragments/side.html :: side}"></div>
+    <div id="content-wrapper" class="d-flex flex-column">
+        <!-- Header -->
+        <div id="content">
+            <header th:replace="~{fragments/header.html :: header}"></header>
+
+            <!--Main Content -->
+
+            <div class="container-fluid">
+                <div class="col-12">
+                    <div class="card shadow mb-4">
+                        <div class="card-header bg-white border-0 pl-3 pt-3 pb-0">
+                            <h6 class="m-0 font-weight-bold text-primary mb-3">
+                                질문 관리
+                            </h6>
+
+                        </div>
+
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table id="load-questions" class="table table-bordered" th:width="100" th:cellspacing="0">
+                                    <thead class="thead-light">
+                                    <tr>
+                                        <th scope="col">유저 이름</th>
+                                        <th scope="col">제목</th>
+                                        <th scope="col">등록 시간</th>
+
+                                    </tr>
+                                    </thead>
+
+                                    <!-- member list rendering-->
+                                    <tbody id="questionList">
+                                    <tr th:each="question : ${questions}" th:class="${question.isAnswered} ? 'table-success' : ''">
+                                        <td th:text="${question.username}"></td>
+                                        <td th:text="${question.title}"></td>
+                                        <td th:text="${#temporals.format(question.createdAt, 'yyyy-MM-dd HH:mm')}"></td>
+                                    </tr>
+
+                                    </tbody>
+                                </table>
+
+                                <!-- Pagination Controls -->
+                                <div class="d-flex justify-content-end">
+                                    <nav>
+                                        <ul class="pagination">
+                                            <li class="page-item"><a class="page-link " th:classappend="${pageInfo.isFirst()} ? 'd-none'">
+                                                이전 페이지</a>
+                                            </li>
+
+                                            <li class="page-item"><a class="page-link " th:classappend="${pageInfo.isLast()} ? 'd-none'">
+                                                다음 페이지</a>
+                                            </li>
+                                        </ul>
+                                    </nav>
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+</div>
+
+
+<script th:src="@{/vendor/jquery/jquery.min.js}"></script>
+<script th:src="@{/vendor/bootstrap/js/bootstrap.bundle.min.js}"></script>
+
+<script src="/js/question.js"></script>
+
+</body>
+</html>

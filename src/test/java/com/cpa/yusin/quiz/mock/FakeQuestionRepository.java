@@ -44,6 +44,17 @@ public class FakeQuestionRepository implements QuestionRepository
     }
 
     @Override
+    public Page<Question> findAllQuestions(Pageable pageable)
+    {
+        List<Question> response = data.stream()
+                .limit(pageable.getPageSize())
+                .sorted(Comparator.comparing(Question::getId).reversed())
+                .toList();
+
+        return new PageImpl<>(response, pageable, data.size());
+    }
+
+    @Override
     public Page<Question> findAllByProblemId(long problemId, Pageable pageable)
     {
         List<Question> questions = data.stream().filter(item -> Objects.equals(item.getProblem().getId(), problemId))

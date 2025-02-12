@@ -10,8 +10,9 @@ public interface QuestionRepository
 {
     Question save(Question question);
 
-
     Optional<Question> findById(long id);
+
+    Page<Question> findAllQuestions(Pageable pageable);
 
     Page<Question> findAllByProblemId(long problemId, Pageable pageable);
 }

@@ -14,4 +14,8 @@ public interface QuestionJpaRepository extends JpaRepository<Question, Long>
             "ORDER BY q.createdAt DESC ")
     Page<Question> findAllByProblemId(@Param("problemId") long problemId,
                                       Pageable pageable);
+
+    @Query("SELECT q FROM Question q " +
+            "ORDER BY q.createdAt DESC ")
+    Page<Question> findAllQuestions(Pageable pageable);
 }

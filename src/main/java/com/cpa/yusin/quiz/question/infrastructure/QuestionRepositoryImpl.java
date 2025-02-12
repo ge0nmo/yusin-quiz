@@ -29,6 +29,12 @@ public class QuestionRepositoryImpl implements QuestionRepository
     }
 
     @Override
+    public Page<Question> findAllQuestions(Pageable pageable)
+    {
+        return questionJpaRepository.findAllQuestions(pageable);
+    }
+
+    @Override
     public Page<Question> findAllByProblemId(long problemId, Pageable pageable)
     {
         return questionJpaRepository.findAllByProblemId(problemId, pageable);
