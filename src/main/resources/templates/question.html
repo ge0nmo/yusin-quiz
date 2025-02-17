@@ -45,29 +45,15 @@
 
                                     <!-- member list rendering-->
                                     <tbody id="questionList">
-                                    <tr th:each="question : ${questions}" th:class="${question.isAnswered} ? 'table-success' : ''">
-                                        <td th:text="${question.username}"></td>
-                                        <td th:text="${question.title}"></td>
-                                        <td th:text="${#temporals.format(question.createdAt, 'yyyy-MM-dd HH:mm')}"></td>
-                                    </tr>
 
                                     </tbody>
                                 </table>
 
-                                <!-- Pagination Controls -->
-                                <div class="d-flex justify-content-end">
-                                    <nav>
-                                        <ul class="pagination">
-                                            <li class="page-item"><a class="page-link " th:classappend="${pageInfo.isFirst()} ? 'd-none'">
-                                                이전 페이지</a>
-                                            </li>
+                                <ul class="pagination">
+                                    <li class="page-item"><a class="page-link prevPage" href="#">이전 페이지</a></li>
+                                    <li class="page-item"><a class="page-link nextPage" href="#">다음 페이지</a></li>
+                                </ul>
 
-                                            <li class="page-item"><a class="page-link " th:classappend="${pageInfo.isLast()} ? 'd-none'">
-                                                다음 페이지</a>
-                                            </li>
-                                        </ul>
-                                    </nav>
-                                </div>
                             </div>
 
                         </div>
