@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en" xmlns:th="https://www.thymeleaf.org/">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Home</title>
+
+    <!-- Custom styles for this template-->
+    <link th:href="@{/css/sb-admin-2.min.css}" rel="stylesheet">
+</head>
+<body>
+
+<div id="wrapper">
+    <div th:replace="~{fragments/side.html :: side}"></div>
+    <div id="content-wrapper" class="d-flex flex-column">
+        <!-- Header -->
+        <div id="content">
+            <header th:replace="~{fragments/header.html :: header}"></header>
+
+            <!--Main Content -->
+
+            <div class="container-fluid">
+                <div class="col-12">
+                    <div class="card shadow mb-4">
+                        <div class="card-header bg-white border-0 pl-3 pt-3 pb-0">
+                            <h6 class="m-0 font-weight-bold text-primary mb-3">
+                                과목 관리
+                            </h6>
+
+                            <div class="float-left">
+                                <button class="btn btn-light font-weight-bold text-black-50" onclick="window.history.back()">
+                                    뒤로 가기
+                                </button>
+                            </div>
+
+                            <div class="float-right">
+                                <button class="btn btn-light" data-toggle="modal" data-target="#problem-detail-modal" >
+                                    <img class="ml-2" th:src="@{/img/search.svg}" alt="">문제 보기
+                                </button>
+                            </div>
+
+                        </div>
+
+                        <div class="card-body">
+                            <input type="hidden" id="questionId" th:value="${question.id}">
+                            <section id="question-area">
+                                <div class="question-detail">
+                                    <div class="question-header m-2">
+                                        <h5 class="font-weight-bold text-dark" th:text="${question.title}"></h5>
+                                    </div>
+
+                                    <div class="question-user-info d-flex justify-content-sm-start align-items-center border-bottom-light">
+                                        <p class="card-subtitle m-1 mr-2 font-weight-light" th:text="${question.username}"></p>
+                                        <p class="m-1 ml-2 font-weight-light" th:text="${#temporals.format(question.createdAt, 'yyyy-MM-dd HH:mm')}"></p>
+                                    </div>
+
+                                    <div class="question-body m-4 p-3 border" style="min-height: 300px">
+                                        <p class="card-text" th:text="${question.content}"></p>
+                                    </div>
+                                </div>
+
+                                <div class="answer-detail">
+                                    <div class="answer-header m2">
+                                        <h5 class="font-weight-bold">답변</h5>
+                                    </div>
+
+
+                                </div>
+                            </section>
+
+
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- problem Modal -->
+    <div class="modal fade" id="problem-detail-modal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="card-heading">문제 정보</h4>
+                    <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <form id="problem-form" class="form">
+                    <div class="modal-body">
+                        <div id="problem-area">
+
+                            <div class="mb-4">
+                                <h3>
+                                    문제 <span th:text="${problem.number}"></span>
+                                </h3>
+                                <p th:utext="${problem.content}"></p>
+
+                                <div id="choices">
+                                    <ul class="list-group">
+                                        <li class="list-group-item" th:each="choice : ${choices}">
+                                            <strong th:text="${choice.number} + '.'"></strong>
+                                            <span th:text="${choice.content}"></span>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <div class="explanation">
+                                <strong>해설: </strong>
+                                <span th:utext="${problem.explanation}"></span>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">확인</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+
+</div>
+
+
+<script th:src="@{/vendor/jquery/jquery.min.js}"></script>
+<script th:src="@{/vendor/bootstrap/js/bootstrap.bundle.min.js}"></script>
+
+<script src="/js/answer.js"></script>
+
+</body>
+</html>

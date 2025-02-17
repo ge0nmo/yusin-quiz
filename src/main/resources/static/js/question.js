@@ -44,7 +44,11 @@ function renderQuestionList(questions) {
 
       row.innerHTML = `
         <td>${question.username}</td>
-        <td>${question.title}</td>
+        <td>
+            <a href="/admin/question/${question.id}/answer">
+                ${question.title}
+            </a>
+        </td>
         <td>${formatDate(question.createdAt)}</td>
       `;
 
