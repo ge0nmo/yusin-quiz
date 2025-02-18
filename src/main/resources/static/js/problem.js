@@ -25,7 +25,20 @@ const summernoteOption = {
         onImageUpload: function(files) {
             uploadImageToServer(files[0], $(this));
         }
+    },
+    onPaste: function(e) {
+        const clipboardData = e.originalEvent.clipboardData;
+        if (clipboardData && clipboardData.items) {
+            Array.from(clipboardData.items).forEach(item => {
+                if (item.kind === 'file' && item.type.indexOf('image/') !== -1) {
+                    const blob = item.getAsFile();
+                    uploadImageToServer(blob, $(this));
+                    e.preventDefault();
+                }
+            });
+        }
     }
+
 };
 
 window.onload = async function() {
@@ -214,7 +227,7 @@ async function addHandlerSearchClick() {
     }
 
     const problemList = await getJSON(`/admin/problem/list?examId=${selectedExamId}`);
-    loadProblemData(problemList);
+    await loadProblemData(problemList);
 }
 
 
@@ -396,9 +409,15 @@ async function addHandlerProblemSaveClick() {
         const choiceCreateRequest = [];
         let choiceNumber = 1;
 
+        let hasAnswer = false;
+
         choiceRows.forEach((choiceRow) => {
             const isAnswer = choiceRow.querySelector('.isAnswer').checked;
-            const choiceContent = choiceRow.querySelector('.choiceContent').value;
+            const choiceContent = choiceRow.querySelector('.choiceContent').value.trim();
+
+            if(!choiceContent) return;
+
+            if(isAnswer) hasAnswer = true;
 
             choiceCreateRequest.push({
                 number: choiceNumber++,
@@ -407,6 +426,10 @@ async function addHandlerProblemSaveClick() {
             });
         });
 
+        if(!hasAnswer){
+            throw new Error('정답을 선택해주세요');
+        }
+
         const problemCreateRequest = {
             number: problemNumber,
             content: problemContent,
@@ -414,14 +437,14 @@ async function addHandlerProblemSaveClick() {
             choices: choiceCreateRequest
         };
 
+
         await saveProblem(problemCreateRequest);
         const problemList = await getJSON(`/admin/problem/list?examId=${selectedExamId}`);
 
-        loadProblemData(problemList);
+        await loadProblemData(problemList);
         resetProblemContainer();
     } catch (error) {
-        console.log(error);
-        alert('문제 저장 실패');
+        alert(error.message);
     }
 }
 
@@ -471,7 +494,7 @@ async function handleUpdateProblemClick(problemId) {
         if (!response.ok) throw new Error('수정 실패');
 
         const problemList = await getJSON(`/admin/problem/list?examId=${selectedExamId}`);
-        loadProblemData(problemList);
+        await loadProblemData(problemList);
     } catch (error) {
         console.log(error);
         alert('문제 수정 중 오류 발생');
@@ -484,7 +507,7 @@ async function handleUpdateChoiceClick(choiceId){
     try{
         await updateChoice(choiceId);
         const problemList = await getJSON(`/admin/problem/list?examId=${selectedExamId}`);
-        loadProblemData(problemList);
+        await loadProblemData(problemList);
     } catch (error){
         throw error();
     }
@@ -561,7 +584,7 @@ async function handleRemoveProblem(problemId){
         });
 
         const problemList = await getJSON(`/admin/problem/list?examId=${selectedExamId}`);
-        loadProblemData(problemList);
+        await loadProblemData(problemList);
         resetAddProblemModal();
     } catch(error){
         throw new Error('');
@@ -582,6 +605,12 @@ function prepareProblemForm(){
     subjectTitle.value = selectedSubjectName;
     examYear.value = selectedYear;
     examName.value = selectedExamName;
+
+    resetAddProblemModal();
+    const choicesContainer = document.getElementById('choicesContainer');
+    for(let i=0; i<5; i++){
+        addChoiceBtn.click();
+    }
 }
 
 function resetAddProblemModal() {
