@@ -39,4 +39,9 @@ public class QuestionRepositoryImpl implements QuestionRepository
     {
         return questionJpaRepository.findAllByProblemId(problemId, pageable);
     }
+
+    @Override
+    public void deleteById(long id) {
+        questionJpaRepository.deleteById(id);
+    }
 }

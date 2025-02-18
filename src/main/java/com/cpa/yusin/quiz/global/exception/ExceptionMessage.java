@@ -40,6 +40,7 @@ public enum ExceptionMessage
 
     INVALID_QUESTION_PASSWORD("비밀번호가 일치하지 않습니다"),
 
+    QUESTION_HAS_ANSWERS("답글이 달린 질문은 삭제할 수 없습니다"),
 
     /**
      *  answer

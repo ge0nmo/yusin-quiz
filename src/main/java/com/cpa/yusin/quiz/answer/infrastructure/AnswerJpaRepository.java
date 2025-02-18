@@ -20,4 +20,6 @@ public interface AnswerJpaRepository extends JpaRepository<Answer, Long>
             "WHERE a.question.id = :questionId " +
             "ORDER BY a.createdAt ASC ")
     List<Answer> findByQuestionId(long questionId);
+
+    boolean existsByQuestionId(long questionId);
 }

@@ -9,6 +9,7 @@ import com.cpa.yusin.quiz.answer.domain.Answer;
 import com.cpa.yusin.quiz.answer.service.port.AnswerRepository;
 import com.cpa.yusin.quiz.global.exception.AnswerException;
 import com.cpa.yusin.quiz.global.exception.ExceptionMessage;
+import com.cpa.yusin.quiz.global.exception.QuestionException;
 import com.cpa.yusin.quiz.member.domain.Member;
 import com.cpa.yusin.quiz.question.controller.port.QuestionService;
 import com.cpa.yusin.quiz.question.domain.Question;
@@ -27,7 +28,7 @@ import java.util.List;
 @Transactional
 @RequiredArgsConstructor
 @Service
-public class AnswerServiceImpl implements AnswerService
+public class AnswerServiceImpl implements AnswerService, AnswerChecker
 {
     private final AnswerRepository answerRepository;
     private final AnswerMapper answerMapper;
@@ -102,8 +103,16 @@ public class AnswerServiceImpl implements AnswerService
 
     @Override
     public void deleteAnswer(long answerId) {
+        log.info("delete answer : {}", answerId);
         findById(answerId);
 
         answerRepository.deleteById(answerId);
+    }
+
+    @Override
+    public void hasAnswer(long questionId) {
+        if(answerRepository.hasAnswers(questionId)){
+            throw new QuestionException(ExceptionMessage.QUESTION_HAS_ANSWERS);
+        }
     }
 }

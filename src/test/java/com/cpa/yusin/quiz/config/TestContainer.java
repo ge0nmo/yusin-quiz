@@ -2,6 +2,7 @@ package com.cpa.yusin.quiz.config;
 
 import com.cpa.yusin.quiz.answer.controller.mapper.AnswerMapper;
 import com.cpa.yusin.quiz.answer.controller.port.AnswerService;
+import com.cpa.yusin.quiz.answer.service.AnswerChecker;
 import com.cpa.yusin.quiz.answer.service.AnswerServiceImpl;
 import com.cpa.yusin.quiz.answer.service.port.AnswerRepository;
 import com.cpa.yusin.quiz.choice.controller.mapper.ChoiceMapper;
@@ -161,6 +162,7 @@ public class TestContainer
     public final AnswerRepository answerRepository;
     public final AnswerMapper answerMapper;
     public final AnswerService answerService;
+    public final AnswerChecker answerChecker;
 
     public TestContainer()
     {
@@ -224,12 +226,17 @@ public class TestContainer
 
         this.questionRepository = new FakeQuestionRepository();
         this.questionMapper = new QuestionMapper();
-        this.questionService = new QuestionServiceImpl(questionRepository, problemService, questionMapper);
-        this.questionAnswerService = new QuestionAnswerService(questionService);
+
 
         this.answerRepository = new FakeAnswerRepository();
         this.answerMapper = new AnswerMapper();
+
+        this.questionAnswerService = new QuestionAnswerService(questionRepository);
+
         this.answerService = new AnswerServiceImpl(this.answerRepository, this.answerMapper, this.questionAnswerService);
+        this.answerChecker = new AnswerServiceImpl(this.answerRepository, this.answerMapper, this.questionAnswerService);
+
+        this.questionService = new QuestionServiceImpl(questionRepository, problemService, questionMapper, answerChecker);
     }
 
 }

@@ -294,4 +294,29 @@ class AnswerTest
                         )
                 ));
     }
+
+    @Test
+    void deleteAnswer() throws Exception
+    {
+        // given
+        long answerId = answer.getId();
+
+        // when
+        ResultActions resultActions = mvc.perform(delete("/api/v1/answer/{answerId}", answerId));
+
+
+        // then
+        resultActions
+                .andExpect(status().isNoContent())
+                .andDo(document("deleteAnswer",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+
+                        responseFields(
+                                fieldWithPath("data").type(JsonFieldType.BOOLEAN).description("삭제 성공 여부")
+                        )
+
+                ));
+
+    }
 }

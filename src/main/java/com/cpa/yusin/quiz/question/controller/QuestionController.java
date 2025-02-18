@@ -67,4 +67,12 @@ public class QuestionController
 
         return ResponseEntity.ok(new GlobalResponse<>(true));
     }
+
+    @DeleteMapping("/question/{questionId}")
+    public ResponseEntity<?> deleteById(@PathVariable("questionId") long questionId)
+    {
+        questionService.deleteById(questionId);
+
+        return new ResponseEntity<>(new GlobalResponse<>(true), HttpStatus.NO_CONTENT);
+    }
 }

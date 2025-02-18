@@ -1,5 +1,6 @@
 package com.cpa.yusin.quiz.question.service;
 
+import com.cpa.yusin.quiz.answer.service.AnswerChecker;
 import com.cpa.yusin.quiz.global.exception.ExceptionMessage;
 import com.cpa.yusin.quiz.global.exception.QuestionException;
 import com.cpa.yusin.quiz.problem.controller.port.ProblemService;
@@ -28,6 +29,7 @@ public class QuestionServiceImpl implements QuestionService
     private final QuestionRepository questionRepository;
     private final ProblemService problemService;
     private final QuestionMapper questionMapper;
+    private final AnswerChecker answerChecker;
 
     @Transactional
     @Override
@@ -90,5 +92,13 @@ public class QuestionServiceImpl implements QuestionService
     {
         Question question = findById(questionId);
         question.verify(password);
+    }
+
+    @Override
+    public void deleteById(long questionId) {
+        Question question = findById(questionId);
+        answerChecker.hasAnswer(question.getId());
+
+        questionRepository.deleteById(questionId);
     }
 }

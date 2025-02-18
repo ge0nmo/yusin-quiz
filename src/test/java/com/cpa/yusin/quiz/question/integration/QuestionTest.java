@@ -1,5 +1,7 @@
 package com.cpa.yusin.quiz.question.integration;
 
+import com.cpa.yusin.quiz.answer.domain.Answer;
+import com.cpa.yusin.quiz.answer.service.port.AnswerRepository;
 import com.cpa.yusin.quiz.config.TeardownExtension;
 import com.cpa.yusin.quiz.exam.domain.Exam;
 import com.cpa.yusin.quiz.exam.service.port.ExamRepository;
@@ -58,6 +60,9 @@ class QuestionTest
 
     @Autowired
     ProblemRepository problemRepository;
+
+    @Autowired
+    AnswerRepository answerRepository;
 
     Subject subject;
     Exam exam;
@@ -299,6 +304,30 @@ class QuestionTest
 
                         responseFields(
                                 fieldWithPath("data").type(JsonFieldType.BOOLEAN).description("인증 성공 여부")
+                        )
+
+                ));
+
+    }
+
+    @Test
+    void deleteById() throws Exception {
+        // given
+        long questionId = question.getId();
+
+        // when
+        ResultActions resultActions = mvc.perform(delete("/api/v1/question/{questionId}", questionId));
+
+
+        // then
+        resultActions
+                .andExpect(status().isNoContent())
+                .andDo(document("deleteQuestion",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+
+                        responseFields(
+                                fieldWithPath("data").type(JsonFieldType.BOOLEAN).description("삭제 성공 여부")
                         )
 
                 ));

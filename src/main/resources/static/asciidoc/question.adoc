@@ -63,3 +63,13 @@ include::{snippets}/questionVerification/http-response.adoc[]
 
 ==== Response Fields
 include::{snippets}/questionVerification/response-fields.adoc[]
+
+== 질문 삭제
+==== HTTP Request
+include::{snippets}/deleteQuestion/http-request.adoc[]
+
+==== HTTP Response
+include::{snippets}/deleteQuestion/http-response.adoc[]
+
+==== Response Fields
+include::{snippets}/deleteQuestion/response-fields.adoc[]

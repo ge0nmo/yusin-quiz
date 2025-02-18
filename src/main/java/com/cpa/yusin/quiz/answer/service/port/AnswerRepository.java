@@ -19,4 +19,6 @@ public interface AnswerRepository
     List<Answer> findByQuestionId(long questionId);
 
     void deleteById(long id);
+
+    boolean hasAnswers(long questionId);
 }

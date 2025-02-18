@@ -43,4 +43,9 @@ public class AnswerRepositoryImpl implements AnswerRepository
     public void deleteById(long id) {
         answerJpaRepository.deleteById(id);
     }
+
+    @Override
+    public boolean hasAnswers(long questionId) {
+        return answerJpaRepository.existsByQuestionId(questionId);
+    }
 }

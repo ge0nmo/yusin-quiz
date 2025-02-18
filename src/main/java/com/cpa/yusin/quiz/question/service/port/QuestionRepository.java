@@ -15,4 +15,6 @@ public interface QuestionRepository
     Page<Question> findAllQuestions(Pageable pageable);
 
     Page<Question> findAllByProblemId(long problemId, Pageable pageable);
+
+    void deleteById(long id);
 }

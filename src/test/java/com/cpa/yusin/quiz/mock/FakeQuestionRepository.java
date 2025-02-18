@@ -62,4 +62,9 @@ public class FakeQuestionRepository implements QuestionRepository
 
         return new PageImpl<>(questions, pageable, data.size());
     }
+
+    @Override
+    public void deleteById(long id) {
+        data.removeIf(item -> Objects.equals(item.getId(), id));
+    }
 }
