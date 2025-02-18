@@ -18,6 +18,7 @@ const summernoteOption = {
         ['insert',['picture','link','video']],
         ['view', ['fullscreen', 'help']]
     ],
+    lang: 'ko-KR',
     fontNames: ['Arial', 'Arial Black', 'Comic Sans MS', 'Courier New','맑은 고딕','궁서','굴림체','굴림','돋움체','바탕체'],
     fontSizes: ['8','9','10','11','12','14','16','18','20','22','24','28','30','36','50','72'],
     callbacks: {
@@ -50,7 +51,7 @@ function addHandlerChoiceButton(){
 
 
         choiceRow.innerHTML = `
-            <input type="text" class="form-control choiceContent" required>
+            <textarea class="form-control choiceContent" required></textarea>
             <div class="input-group-append">
                 <div class="input-group-text">
                     <input type="checkbox" class="isAnswer" aria-label="정답 체크">
@@ -290,7 +291,7 @@ function loadChoiceData(choiceList){
         html += `
                 <div id="choice-${choiceId}" class="list-group-item list-group-item-action d-flex align-items-center choice-item " data-choice-id="${choiceId}">
                     <input type="number" class="choice-number mr-2 col-1" value="${choice.number}" placeholder="번호" style="width: 50px">
-                    <input type="text" class="choice-content flex-grow-1" value="${choice.content}">
+                    <textarea class="choice-content flex-grow-1">${choice.content}</textarea>
 
                     <input class="form-check-input isAnswer" type="checkbox" value="" id='checkBox=${choiceId}' ${choice.isAnswer ? 'checked' : ''}>
 
@@ -317,8 +318,8 @@ function handleAddChoice(problemId){
     const choiceDiv = document.createElement('div');
     choiceDiv.classList.add('list-group-item', 'list-group-item-action', 'd-flex', 'align-items-center', 'choice-item');
     choiceDiv.innerHTML += `
-            <input type="number" class="choice-number mr-2 col-1" placeholder="번호" style="width: 50px">
-            <input type="text" class="choice-content flex-grow-1" placeholder="내용">
+            <input type="number" class="choice-number mr-2 col-1 input-group" placeholder="" style="width: 50px">
+            <textarea class="choice-content flex-grow-1" placeholder="내용"></textarea>
 
             <input class="form-check-input isAnswer" type="checkbox" value="">
 
