@@ -2,6 +2,9 @@ let selectedSubjectId;
 let selectedSubjectName;
 let selectedYear;
 let selectedExamId;
+const yearDropdown = document.querySelector('#year-dropdown');
+const yearContent = document.querySelector('#year-content');
+const examName = document.querySelector('#examName');
 
 window.onload = async function(){
     selectedSubjectId = sessionStorage.getItem("subjectId");
@@ -64,7 +67,7 @@ async function addHandlerYearDropdown(){
 }
 
 function clearYearDropdown(){
-    document.querySelector('#year-dropdown').textContent = '연도 선택';
+    yearDropdown.textContent = '연도 선택';
     document.querySelector('#year-content').innerHTML = '';
     selectedYear = null;
 }
@@ -72,7 +75,7 @@ function clearYearDropdown(){
 
 async function addHandlerSelectYear(year) {
     selectedYear = year;
-    document.querySelector('#year-dropdown').textContent = selectedYear;
+    yearDropdown.textContent = selectedYear;
 
     if (selectedSubjectId && selectedYear) {
         const examList = await getJSON(`/admin/subject/${selectedSubjectId}/exam?year=${selectedYear}`);
@@ -91,7 +94,6 @@ function prepareExamForm(){
 }
 
 function prepareUpdateExamForm(exam){
-    console.log('selected subject name = ', selectedSubjectName);
     document.querySelectorAll('.selectedSubjectName').forEach((input) => {
         input.value = selectedSubjectName;
     })
@@ -191,12 +193,12 @@ function updateExam(){
 
 function saveExam(){
     const name = document.querySelector('#examName').value;
-    const year = document.querySelector('#examYear').value;
+    const year = Number(document.querySelector('#examYear').value);
 
 
     const examCreateRequest = {
         name: name,
-        year: Number(year),
+        year: year,
     }
 
     selectedYear = year;
@@ -212,6 +214,8 @@ function saveExam(){
         .then(() => {
             getExamList(selectedSubjectId, selectedYear)
                 .then(examList => {
+                    yearDropdown.textContent = selectedYear;
+
                     hideModal();
 
                     loadData(examList);
