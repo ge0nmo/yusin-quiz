@@ -16,6 +16,7 @@ import com.cpa.yusin.quiz.member.service.port.MemberValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -28,7 +29,6 @@ public class AuthenticationServiceImpl implements AuthenticationService
     private final JwtService jwtService;
     private final MemberRepository memberRepository;
     private final CustomAuthenticationProvider authenticationProvider;
-    private final MemberDetailsService memberDetailsService;
     private final MemberMapper memberMapper;
     private final MemberValidator memberValidator;
 
@@ -47,9 +47,8 @@ public class AuthenticationServiceImpl implements AuthenticationService
 
     private LoginResponse processLogin(String email, String password)
     {
-        authenticationProvider.authenticate(new UsernamePasswordAuthenticationToken(email, password));
-
-        MemberDetails memberDetails = memberDetailsService.loadUserByUsername(email);
+        Authentication auth = authenticationProvider.authenticate(new UsernamePasswordAuthenticationToken(email, password));
+        MemberDetails memberDetails = (MemberDetails) auth.getPrincipal();
 
         Member member = memberDetails.getMember();
 

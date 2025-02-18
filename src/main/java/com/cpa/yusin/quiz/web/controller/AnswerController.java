@@ -4,25 +4,23 @@ import com.cpa.yusin.quiz.answer.controller.dto.response.AnswerDTO;
 import com.cpa.yusin.quiz.answer.controller.port.AnswerService;
 import com.cpa.yusin.quiz.choice.controller.port.ChoiceService;
 import com.cpa.yusin.quiz.choice.domain.Choice;
-import com.cpa.yusin.quiz.common.controller.dto.response.GlobalResponse;
-import com.cpa.yusin.quiz.common.controller.dto.response.PageInfo;
-import com.cpa.yusin.quiz.problem.controller.port.ProblemService;
+import com.cpa.yusin.quiz.global.details.MemberDetails;
+import com.cpa.yusin.quiz.member.domain.Member;
 import com.cpa.yusin.quiz.problem.domain.Problem;
 import com.cpa.yusin.quiz.question.controller.port.QuestionService;
 import com.cpa.yusin.quiz.question.domain.Question;
+import com.cpa.yusin.quiz.web.dto.AdminAnswerRegisterRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.List;
 
 
@@ -44,22 +42,29 @@ public class AnswerController {
 
         List<Choice> choices = choiceService.findAllByProblemId(problem.getId());
 
+        List<AnswerDTO> answers = answerService.getAnswersByQuestionId(questionId);
+
         model.addAttribute("problem", problem);
         model.addAttribute("choices", choices);
         model.addAttribute("question", question);
+        model.addAttribute("answers", answers);
 
         return "answer";
     }
 
     @ResponseBody
-    @GetMapping("/{questionId}/answer/list")
-    public ResponseEntity<?> getAnswers(@PathVariable("questionId") long questionId,
-                                        @PageableDefault Pageable pageable)
+    @PostMapping("/{questionId}/answer")
+    public ResponseEntity<?> createAnswer(@PathVariable("questionId") long questionId,
+                                          @Validated @RequestBody AdminAnswerRegisterRequest request,
+                                          Principal principal)
     {
-        Page<AnswerDTO> response = answerService.getAnswersByQuestionId(questionId, pageable);
+        log.info("principal {}", principal.getName());
+        log.info("principal object = {}", principal);
+        MemberDetails memberDetails = (MemberDetails) ((Authentication) principal).getPrincipal();
+        log.info("memberDetails: {}", memberDetails);
 
-        return ResponseEntity.ok(new GlobalResponse<>(response.getContent(), PageInfo.of(response)));
+        long response = answerService.save(request, questionId, memberDetails.getMember());
+
+        return ResponseEntity.ok(response);
     }
-
-
 }

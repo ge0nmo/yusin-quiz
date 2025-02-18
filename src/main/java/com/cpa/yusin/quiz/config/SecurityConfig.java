@@ -3,6 +3,8 @@ package com.cpa.yusin.quiz.config;
 import com.cpa.yusin.quiz.global.details.MemberDetailsService;
 import com.cpa.yusin.quiz.global.filter.SecurityFilter;
 import com.cpa.yusin.quiz.global.jwt.JwtService;
+import com.cpa.yusin.quiz.global.security.CustomAuthenticationProvider;
+import com.cpa.yusin.quiz.global.security.FormAuthenticationProvider;
 import com.cpa.yusin.quiz.global.security.oauth2.CustomOAuth2Service;
 import com.cpa.yusin.quiz.global.security.oauth2.HttpCookieOAuth2AuthorizationRequestRepository;
 import com.cpa.yusin.quiz.global.security.oauth2.OAuth2AuthenticationSuccessHandler;
@@ -35,7 +37,11 @@ public class SecurityConfig
     private final JwtService jwtService;
     private final MemberDetailsService memberDetailsService;
 
-    public SecurityConfig(CustomOAuth2Service oAuth2UserService, OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler, HttpCookieOAuth2AuthorizationRequestRepository httpCookieOAuth2AuthorizationRequestRepository, JwtService jwtService, MemberDetailsService memberDetailsService)
+    public SecurityConfig(CustomOAuth2Service oAuth2UserService,
+                          OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler,
+                          HttpCookieOAuth2AuthorizationRequestRepository httpCookieOAuth2AuthorizationRequestRepository,
+                          JwtService jwtService,
+                          MemberDetailsService memberDetailsService)
     {
         this.oAuth2UserService = oAuth2UserService;
         this.oAuth2AuthenticationSuccessHandler = oAuth2AuthenticationSuccessHandler;
@@ -119,8 +125,13 @@ public class SecurityConfig
                 )
                 .logout(logout ->
                         logout
+                                .logoutSuccessUrl("/admin/login")
+                                .invalidateHttpSession(true)
+                                .deleteCookies("JSESSIONID")
                                 .logoutSuccessUrl("/admin/login"))
         ;
+
+        http.authenticationProvider(formAuthenticationProvider());
 
 
         return http.build();
@@ -149,5 +160,10 @@ public class SecurityConfig
         source.registerCorsConfiguration("/**", configuration);
 
         return source;
+    }
+
+    @Bean
+    public FormAuthenticationProvider formAuthenticationProvider() {
+        return new FormAuthenticationProvider(memberDetailsService, bCryptPasswordEncoder());
     }
 }

@@ -62,12 +62,43 @@
                                 </div>
 
                                 <div class="answer-detail">
-                                    <div class="answer-header m2">
-                                        <h5 class="font-weight-bold">답변</h5>
+                                    <h5 class="font-weight-bold" th:if="${#lists.isEmpty(answers)}">
+                                        등록된 답변이 없습니다.
+                                    </h5>
+
+                                    <div th:each="answer : ${answers}" class="answer-item border-bottom p-3">
+                                        <div class="answer-user-info d-flex justify-content-sm-start align-items-center">
+                                            <p class="m-1 mr-2 font-weight-bold" th:text="${answer.username}"></p>
+                                            <p class="m1 ml-2 font-weight-light" th:text="${#temporals.format(answer.createdAt, 'yyyy-MM-dd HH:mm')}"></p>
+                                        </div>
+
+                                        <div class="answer-content mt-2" th:text="${answer.content}">
+                                        </div>
+
+                                    </div>
+
+                                    <!-- Answer Form -->
+                                    <div class="answer-form-container card shadow mb-4 mt-4">
+                                        <div class="card-header py-3">
+                                            <h6 class="m-0 font-weight-bold text-primary">답변 작성</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <form id="answer-form">
+
+                                                <div class="form-group">
+                                                    <textarea class="form-control" id="answer-content" name="content" rows="5" placeholder="답변 내용" required></textarea>
+                                                </div>
+                                                <button type="submit" class="btn btn-primary float-right">
+                                                    답변 등록
+                                                </button>
+                                            </form>
+                                        </div>
                                     </div>
 
 
+
                                 </div>
+
                             </section>
 
 

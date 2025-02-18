@@ -4,63 +4,53 @@ import com.cpa.yusin.quiz.global.details.MemberDetails;
 import com.cpa.yusin.quiz.global.details.MemberDetailsService;
 import com.cpa.yusin.quiz.global.exception.ExceptionMessage;
 import com.cpa.yusin.quiz.global.exception.MemberException;
-import com.cpa.yusin.quiz.member.domain.type.Platform;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Component;
 
 @RequiredArgsConstructor
-@Component("jwtTokenAuthentication")
-public class CustomAuthenticationProvider implements AuthenticationProvider
-{
+public class FormAuthenticationProvider implements AuthenticationProvider {
     private final MemberDetailsService memberDetailsService;
     private final PasswordEncoder passwordEncoder;
 
-
     @Override
-    public Authentication authenticate(Authentication authentication) throws AuthenticationException
-    {
+    public Authentication authenticate(Authentication authentication) throws AuthenticationException {
         String email = authentication.getName();
-
         MemberDetails memberDetails = memberDetailsService.loadUserByUsername(email);
 
-        if(memberDetails == null)
+        if (memberDetails == null)
             throw new MemberException(ExceptionMessage.USER_NOT_FOUND);
 
         String password = authentication.getCredentials().toString();
-
         validateMember(password, memberDetails);
 
         return new UsernamePasswordAuthenticationToken(memberDetails, null, memberDetails.getAuthorities());
     }
 
     @Override
-    public boolean supports(Class<?> authentication)
-    {
+    public boolean supports(Class<?> authentication) {
         return UsernamePasswordAuthenticationToken.class.isAssignableFrom(authentication);
     }
 
-    private void validateMember(String password, MemberDetails memberDetails)
-    {
+    private void validateMember(String password, MemberDetails memberDetails) {
         validatePassword(password, memberDetails);
-        validatePlatform(memberDetails);
+        // You might want to modify this to check for admin role instead of platform
+        validateRole(memberDetails);
     }
 
-    private void validatePassword(String password, MemberDetails memberDetails)
-    {
-        if(!passwordEncoder.matches(password, memberDetails.getPassword())){
+    private void validatePassword(String password, MemberDetails memberDetails) {
+        if (!passwordEncoder.matches(password, memberDetails.getPassword())) {
             throw new MemberException(ExceptionMessage.USER_NOT_FOUND);
         }
     }
 
-    private void validatePlatform(MemberDetails memberDetails)
-    {
-        if(!Platform.HOME.equals(memberDetails.getMember().getPlatform())) {
-            throw new MemberException(ExceptionMessage.USER_NOT_FOUND);
+    private void validateRole(MemberDetails memberDetails) {
+        if (!memberDetails.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"))) {
+            throw new MemberException(ExceptionMessage.NO_AUTHORIZATION);
         }
     }
 }

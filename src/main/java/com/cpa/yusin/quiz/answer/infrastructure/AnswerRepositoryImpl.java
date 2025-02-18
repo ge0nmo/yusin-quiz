@@ -7,6 +7,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @RequiredArgsConstructor
@@ -31,5 +32,10 @@ public class AnswerRepositoryImpl implements AnswerRepository
     public Page<Answer> findByQuestionId(long questionId, Pageable pageable)
     {
         return answerJpaRepository.findByQuestionId(questionId, pageable);
+    }
+
+    @Override
+    public List<Answer> findByQuestionId(long questionId) {
+        return answerJpaRepository.findByQuestionId(questionId);
     }
 }

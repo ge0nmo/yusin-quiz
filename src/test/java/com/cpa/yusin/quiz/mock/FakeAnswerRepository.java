@@ -49,4 +49,9 @@ public class FakeAnswerRepository implements AnswerRepository
 
         return new PageImpl<>(response, pageable, data.size());
     }
+
+    @Override
+    public List<Answer> findByQuestionId(long questionId) {
+        return data.stream().filter(item -> Objects.equals(item.getQuestion().getId(), questionId)).toList();
+    }
 }

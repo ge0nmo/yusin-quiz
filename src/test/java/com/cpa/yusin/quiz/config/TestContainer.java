@@ -181,7 +181,7 @@ public class TestContainer
         this.jwtService = new JwtServiceImpl(FAKE_SECRET_KEY);
         this.memberValidator = new MemberValidatorImpl(this.memberRepository);
         this.authenticationService = new AuthenticationServiceImpl(this.passwordEncoder, this.jwtService,
-                this.memberRepository, this.authenticationProvider, this.memberDetailsService, this.memberMapper, this.memberValidator);
+                this.memberRepository, this.authenticationProvider, this.memberMapper, this.memberValidator);
         this.memberController = new MemberController(this.memberService);
 
 

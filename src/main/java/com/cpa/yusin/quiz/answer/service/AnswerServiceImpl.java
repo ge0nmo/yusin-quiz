@@ -9,14 +9,18 @@ import com.cpa.yusin.quiz.answer.domain.Answer;
 import com.cpa.yusin.quiz.answer.service.port.AnswerRepository;
 import com.cpa.yusin.quiz.global.exception.AnswerException;
 import com.cpa.yusin.quiz.global.exception.ExceptionMessage;
+import com.cpa.yusin.quiz.member.domain.Member;
 import com.cpa.yusin.quiz.question.controller.port.QuestionService;
 import com.cpa.yusin.quiz.question.domain.Question;
+import com.cpa.yusin.quiz.web.dto.AdminAnswerRegisterRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Slf4j
 @Transactional
@@ -34,6 +38,14 @@ public class AnswerServiceImpl implements AnswerService
     {
         Question question = questionService.findById(questionId);
         Answer answer = answerMapper.toAnswerEntity(request, question);
+
+        return answerRepository.save(answer).getId();
+    }
+
+    @Override
+    public long save(AdminAnswerRegisterRequest request, long questionId, Member admin) {
+        Question question = questionService.findById(questionId);
+        Answer answer = answerMapper.toAnswerEntity(request, admin, question);
 
         return answerRepository.save(answer).getId();
     }
@@ -66,6 +78,13 @@ public class AnswerServiceImpl implements AnswerService
     {
         return answerRepository.findByQuestionId(questionId, pageable)
                 .map(answerMapper::toAnswerDTO);
+    }
+
+    @Override
+    public List<AnswerDTO> getAnswersByQuestionId(long questionId) {
+        return answerRepository.findByQuestionId(questionId).stream()
+                .map(answerMapper::toAnswerDTO)
+                .toList();
     }
 
     @Override
