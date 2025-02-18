@@ -44,6 +44,12 @@ public class QuestionServiceImpl implements QuestionService
 
     @Transactional
     @Override
+    public Question save(Question question) {
+        return questionRepository.save(question);
+    }
+
+    @Transactional
+    @Override
     public void update(QuestionUpdateRequest request, long questionId)
     {
         Question question = findById(questionId);

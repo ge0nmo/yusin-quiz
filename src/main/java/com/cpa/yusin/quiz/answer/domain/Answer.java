@@ -28,8 +28,6 @@ public class Answer extends BaseEntity
     @Column(nullable = false)
     private String content;
 
-    private boolean answeredByAdmin;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "question_id", nullable = false, updatable = false)
     private Question question;

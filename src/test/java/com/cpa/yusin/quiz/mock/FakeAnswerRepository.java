@@ -54,4 +54,9 @@ public class FakeAnswerRepository implements AnswerRepository
     public List<Answer> findByQuestionId(long questionId) {
         return data.stream().filter(item -> Objects.equals(item.getQuestion().getId(), questionId)).toList();
     }
+
+    @Override
+    public void deleteById(long id) {
+        data.removeIf(item -> Objects.equals(item.getId(), id));
+    }
 }

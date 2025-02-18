@@ -26,14 +26,14 @@ import java.util.List;
 
 @Slf4j
 @RequiredArgsConstructor
-@RequestMapping("/admin/question")
+@RequestMapping("/admin")
 @Controller("webAnswerController")
 public class AnswerController {
     private final AnswerService answerService;
     private final QuestionService questionService;
     private final ChoiceService choiceService;
 
-    @GetMapping("/{questionId}/answer")
+    @GetMapping("/question/{questionId}/answer")
     public String getPage(@PathVariable Long questionId,
                           Model model)
     {
@@ -53,7 +53,7 @@ public class AnswerController {
     }
 
     @ResponseBody
-    @PostMapping("/{questionId}/answer")
+    @PostMapping("/question/{questionId}/answer")
     public ResponseEntity<?> createAnswer(@PathVariable("questionId") long questionId,
                                           @Validated @RequestBody AdminAnswerRegisterRequest request,
                                           Principal principal)
@@ -66,5 +66,12 @@ public class AnswerController {
         long response = answerService.save(request, questionId, memberDetails.getMember());
 
         return ResponseEntity.ok(response);
+    }
+
+    @ResponseBody
+    @DeleteMapping("/answer/{answerId}")
+    public void deleteAnswer(@PathVariable("answerId") long answerId)
+    {
+        answerService.deleteAnswer(answerId);
     }
 }

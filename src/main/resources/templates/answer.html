@@ -66,10 +66,16 @@
                                         등록된 답변이 없습니다.
                                     </h5>
 
-                                    <div th:each="answer : ${answers}" class="answer-item border-bottom p-3">
-                                        <div class="answer-user-info d-flex justify-content-sm-start align-items-center">
-                                            <p class="m-1 mr-2 font-weight-bold" th:text="${answer.username}"></p>
-                                            <p class="m1 ml-2 font-weight-light" th:text="${#temporals.format(answer.createdAt, 'yyyy-MM-dd HH:mm')}"></p>
+                                    <div th:each="answer : ${answers}" class="answer-item border-bottom p-3" th:value="${answer.id}">
+                                        <div class="answer-header d-flex justify-content-between">
+                                            <div class="answer-user-info d-flex justify-content-sm-start align-items-center">
+                                                <p class="m-1 mr-2 font-weight-bold" th:text="${answer.username}"></p>
+                                                <p class="m1 ml-2 font-weight-light" th:text="${#temporals.format(answer.createdAt, 'yyyy-MM-dd HH:mm')}"></p>
+                                            </div>
+
+                                            <div class="answer-delete">
+                                                <button class="btn btn-primary font-weight-light answer-delete-btn">삭제</button>
+                                            </div>
                                         </div>
 
                                         <div class="answer-content mt-2" th:text="${answer.content}">
@@ -94,8 +100,6 @@
                                             </form>
                                         </div>
                                     </div>
-
-
 
                                 </div>
 

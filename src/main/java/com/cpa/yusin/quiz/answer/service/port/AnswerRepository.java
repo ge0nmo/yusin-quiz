@@ -17,4 +17,6 @@ public interface AnswerRepository
     Page<Answer> findByQuestionId(long questionId, Pageable pageable);
 
     List<Answer> findByQuestionId(long questionId);
+
+    void deleteById(long id);
 }

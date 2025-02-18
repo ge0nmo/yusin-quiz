@@ -27,4 +27,6 @@ public interface AnswerService
     List<AnswerDTO> getAnswersByQuestionId(long questionId);
 
     void verifyPassword(long answerId, String password);
+
+    void deleteAnswer(long answerId);
 }

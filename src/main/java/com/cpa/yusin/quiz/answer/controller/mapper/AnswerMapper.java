@@ -27,7 +27,6 @@ public class AnswerMapper
                 .username(member.getUsername())
                 .password(member.getUsername())
                 .content(request.getContent())
-                .answeredByAdmin(true)
                 .question(question)
                 .build();
     }

@@ -17,7 +17,6 @@ public class QuestionMapper
                 .username(request.getUsername())
                 .content(request.getContent())
                 .problem(problem)
-                .isAnswered(false)
                 .build();
     }
 
@@ -29,7 +28,7 @@ public class QuestionMapper
                 .username(question.getUsername())
                 .content(question.getContent())
                 .createdAt(question.getCreatedAt())
-                .isAnswered(question.isAnswered())
+                .answeredByAdmin(question.isAnsweredByAdmin())
                 .build();
     }
 }

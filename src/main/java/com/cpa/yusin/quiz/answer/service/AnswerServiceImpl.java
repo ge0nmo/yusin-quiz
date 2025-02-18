@@ -12,6 +12,7 @@ import com.cpa.yusin.quiz.global.exception.ExceptionMessage;
 import com.cpa.yusin.quiz.member.domain.Member;
 import com.cpa.yusin.quiz.question.controller.port.QuestionService;
 import com.cpa.yusin.quiz.question.domain.Question;
+import com.cpa.yusin.quiz.question.service.QuestionAnswerService;
 import com.cpa.yusin.quiz.web.dto.AdminAnswerRegisterRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -30,24 +31,29 @@ public class AnswerServiceImpl implements AnswerService
 {
     private final AnswerRepository answerRepository;
     private final AnswerMapper answerMapper;
-    private final QuestionService questionService;
+    private final QuestionAnswerService questionAnswerService;
 
     @Transactional
     @Override
     public long save(AnswerRegisterRequest request, long questionId)
     {
-        Question question = questionService.findById(questionId);
+        Question question = questionAnswerService.getQuestion(questionId);
         Answer answer = answerMapper.toAnswerEntity(request, question);
 
         return answerRepository.save(answer).getId();
     }
 
+    @Transactional
     @Override
     public long save(AdminAnswerRegisterRequest request, long questionId, Member admin) {
-        Question question = questionService.findById(questionId);
+        Question question = questionAnswerService.getQuestion(questionId);
         Answer answer = answerMapper.toAnswerEntity(request, admin, question);
 
-        return answerRepository.save(answer).getId();
+        answer = answerRepository.save(answer);
+
+        questionAnswerService.answerQuestion(questionId);
+
+        return answer.getId();
     }
 
     @Transactional
@@ -92,5 +98,12 @@ public class AnswerServiceImpl implements AnswerService
     {
         Answer answer = findById(answerId);
         answer.verifyPassword(password);
+    }
+
+    @Override
+    public void deleteAnswer(long answerId) {
+        findById(answerId);
+
+        answerRepository.deleteById(answerId);
     }
 }

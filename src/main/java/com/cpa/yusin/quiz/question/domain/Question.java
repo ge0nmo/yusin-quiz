@@ -29,7 +29,8 @@ public class Question extends BaseEntity
 
     private String content;
 
-    private boolean isAnswered;
+    @Column(nullable = false)
+    private boolean answeredByAdmin;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "problem_id", nullable = false)
@@ -40,6 +41,11 @@ public class Question extends BaseEntity
     {
         this.title = title;
         this.content = content;
+    }
+
+    public void answerByAdmin()
+    {
+        this.answeredByAdmin = true;
     }
 
     public void verify(String inputPassword)

@@ -42,6 +42,7 @@ import com.cpa.yusin.quiz.problem.service.ProblemServiceImpl;
 import com.cpa.yusin.quiz.problem.service.port.ProblemRepository;
 import com.cpa.yusin.quiz.question.controller.mapper.QuestionMapper;
 import com.cpa.yusin.quiz.question.controller.port.QuestionService;
+import com.cpa.yusin.quiz.question.service.QuestionAnswerService;
 import com.cpa.yusin.quiz.question.service.QuestionServiceImpl;
 import com.cpa.yusin.quiz.question.service.port.QuestionRepository;
 import com.cpa.yusin.quiz.subject.controller.SubjectController;
@@ -150,6 +151,7 @@ public class TestContainer
     public final QuestionRepository questionRepository;
     public final QuestionMapper questionMapper;
     public final QuestionService questionService;
+    public final QuestionAnswerService questionAnswerService;
 
     public final CascadeDeleteService cascadeDeleteService;
 
@@ -223,10 +225,11 @@ public class TestContainer
         this.questionRepository = new FakeQuestionRepository();
         this.questionMapper = new QuestionMapper();
         this.questionService = new QuestionServiceImpl(questionRepository, problemService, questionMapper);
+        this.questionAnswerService = new QuestionAnswerService(questionService);
 
         this.answerRepository = new FakeAnswerRepository();
         this.answerMapper = new AnswerMapper();
-        this.answerService = new AnswerServiceImpl(this.answerRepository, this.answerMapper, this.questionService);
+        this.answerService = new AnswerServiceImpl(this.answerRepository, this.answerMapper, this.questionAnswerService);
     }
 
 }

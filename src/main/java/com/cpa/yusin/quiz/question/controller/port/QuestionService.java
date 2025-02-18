@@ -11,6 +11,8 @@ public interface QuestionService
 {
     long save(QuestionRegisterRequest request, long problemId);
 
+    Question save(Question question);
+
     void update(QuestionUpdateRequest request, long questionId);
 
     Question findById(long id);

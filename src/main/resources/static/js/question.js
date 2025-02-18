@@ -35,10 +35,13 @@ function renderQuestionList(questions) {
 
   // Create rows for each question
     questions.forEach(question => {
+
+        console.log('question = ', question);
+        console.log("답글 달렸나? = ", question.answeredByAdmin);
       const row = document.createElement('tr');
 
     // Add 'table-success' class if question is answered
-      if (question.isAnswered) {
+      if (question.answeredByAdmin) {
         row.classList.add('table-success');
       }
 

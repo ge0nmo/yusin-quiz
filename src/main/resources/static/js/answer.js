@@ -1,5 +1,6 @@
 const answerDetail = document.querySelector('.answer-detail');
 const answerForm = document.getElementById('answer-form');
+const deleteBtns = document.querySelectorAll('.answer-delete-btn');
 
 const questionId = document.getElementById('questionId').value;
 
@@ -7,8 +8,13 @@ const questionId = document.getElementById('questionId').value;
 window.onload = function() {
     answerForm.addEventListener('submit', handlerRegisterAnswer);
 
-}
+    deleteBtns.forEach((btn) => {
+        const answerId = btn.closest('.answer-item').getAttribute('value');
+        console.log('answerId = ',answerId);
+        btn.addEventListener('click', (e) => handleDeleteClick(e, answerId))
+    });
 
+}
 
 async function handlerRegisterAnswer(e){
     e.preventDefault();
@@ -27,6 +33,17 @@ async function handlerRegisterAnswer(e){
     await postJSON(`/admin/question/${questionId}/answer`, request);
 
     resetAnswerForm(content);
+    window.location.reload();
+}
+
+async function handleDeleteClick(e, answerId){
+    e.preventDefault();
+
+    console.log('answerId ', answerId);
+    if(confirm('정말 삭제하시겠습니까?')){
+        await deleteJSON(`/admin/answer/${answerId}`);
+    }
+
     window.location.reload();
 }
 
@@ -77,3 +94,19 @@ const getJSON = async function(url) {
         throw err;
     }
 };
+
+const deleteJSON = async function(url, id){
+    try{
+        const fetchPro = fetch(url, {
+            method: 'DELETE',
+        });
+
+        const res = await fetchPro;
+        if(!res.ok){
+            throw new Error(`${data.message} (${res.status})`);
+        }
+    } catch (err){
+        throw err;
+    }
+
+}

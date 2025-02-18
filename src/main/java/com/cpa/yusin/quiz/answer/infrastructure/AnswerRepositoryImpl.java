@@ -38,4 +38,9 @@ public class AnswerRepositoryImpl implements AnswerRepository
     public List<Answer> findByQuestionId(long questionId) {
         return answerJpaRepository.findByQuestionId(questionId);
     }
+
+    @Override
+    public void deleteById(long id) {
+        answerJpaRepository.deleteById(id);
+    }
 }
