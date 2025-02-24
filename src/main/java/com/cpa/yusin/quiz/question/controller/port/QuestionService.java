@@ -23,7 +23,7 @@ public interface QuestionService
 
     Page<QuestionDTO> getAllByProblemId(Pageable pageable, long problemId);
 
-    void verifyPassword(long questionId, String password);
+    boolean verifyPassword(long questionId, String password);
 
     void deleteById(long id);
 }

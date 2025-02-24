@@ -37,10 +37,8 @@ public class Answer extends BaseEntity
         this.content = request.getContent();
     }
 
-    public void verifyPassword(String password)
+    public boolean verifyPassword(String password)
     {
-        if(!this.password.equals(password)){
-            throw new AnswerException(ExceptionMessage.INVALID_ANSWER_PASSWORD);
-        }
+        return this.password.equals(password);
     }
 }

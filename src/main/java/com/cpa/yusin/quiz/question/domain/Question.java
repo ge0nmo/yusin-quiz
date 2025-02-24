@@ -48,10 +48,8 @@ public class Question extends BaseEntity
         this.answeredByAdmin = true;
     }
 
-    public void verify(String inputPassword)
+    public boolean verify(String inputPassword)
     {
-        if(!this.password.equals(inputPassword)){
-            throw new QuestionException(ExceptionMessage.INVALID_QUESTION_PASSWORD);
-        }
+        return this.password.equals(inputPassword);
     }
 }

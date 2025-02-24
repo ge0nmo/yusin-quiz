@@ -66,9 +66,9 @@ public class QuestionController
     public ResponseEntity<?> verifyQuestionPassword(@PathVariable("questionId") long questionId,
                                                     @RequestParam("password") String password)
     {
-        questionService.verifyPassword(questionId, password);
+        boolean response = questionService.verifyPassword(questionId, password);
 
-        return ResponseEntity.ok(new GlobalResponse<>(true));
+        return ResponseEntity.ok(new GlobalResponse<>(response));
     }
 
     @DeleteMapping("/question/{questionId}")

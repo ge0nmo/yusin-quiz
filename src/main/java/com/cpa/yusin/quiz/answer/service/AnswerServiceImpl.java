@@ -94,10 +94,10 @@ public class AnswerServiceImpl implements AnswerService, AnswerChecker
     }
 
     @Override
-    public void verifyPassword(long answerId, String password)
+    public boolean verifyPassword(long answerId, String password)
     {
         Answer answer = findById(answerId);
-        answer.verifyPassword(password);
+        return answer.verifyPassword(password);
     }
 
     @Transactional
