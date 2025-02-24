@@ -101,9 +101,9 @@ public class AnswerServiceImpl implements AnswerService, AnswerChecker
         answer.verifyPassword(password);
     }
 
+    @Transactional
     @Override
     public void deleteAnswer(long answerId) {
-        log.info("delete answer : {}", answerId);
         findById(answerId);
 
         answerRepository.deleteById(answerId);

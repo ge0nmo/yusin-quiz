@@ -1,7 +1,5 @@
 package com.cpa.yusin.quiz.mock;
 
-import com.cpa.yusin.quiz.payment.domain.Payment;
-import com.cpa.yusin.quiz.problem.domain.Problem;
 import com.cpa.yusin.quiz.question.domain.Question;
 import com.cpa.yusin.quiz.question.service.port.QuestionRepository;
 import org.springframework.data.domain.Page;

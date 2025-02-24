@@ -94,9 +94,11 @@ public class QuestionServiceImpl implements QuestionService
         question.verify(password);
     }
 
+    @Transactional
     @Override
     public void deleteById(long questionId) {
         Question question = findById(questionId);
+        log.info("question id = {}", question);
         answerChecker.hasAnswer(question.getId());
 
         questionRepository.deleteById(questionId);
