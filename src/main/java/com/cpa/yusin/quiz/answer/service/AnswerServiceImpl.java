@@ -11,7 +11,6 @@ import com.cpa.yusin.quiz.global.exception.AnswerException;
 import com.cpa.yusin.quiz.global.exception.ExceptionMessage;
 import com.cpa.yusin.quiz.global.exception.QuestionException;
 import com.cpa.yusin.quiz.member.domain.Member;
-import com.cpa.yusin.quiz.question.controller.port.QuestionService;
 import com.cpa.yusin.quiz.question.domain.Question;
 import com.cpa.yusin.quiz.question.service.QuestionAnswerService;
 import com.cpa.yusin.quiz.web.dto.AdminAnswerRegisterRequest;
