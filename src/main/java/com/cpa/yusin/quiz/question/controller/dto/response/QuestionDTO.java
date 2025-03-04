@@ -15,6 +15,7 @@ public class QuestionDTO
     private final String title;
     private final String username;
     private final String content;
+    private final int answerCount;
     private final boolean answeredByAdmin;
     private final LocalDateTime createdAt;
 }

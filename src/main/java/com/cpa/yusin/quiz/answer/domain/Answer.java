@@ -2,8 +2,6 @@ package com.cpa.yusin.quiz.answer.domain;
 
 import com.cpa.yusin.quiz.answer.controller.dto.request.AnswerUpdateRequest;
 import com.cpa.yusin.quiz.common.infrastructure.BaseEntity;
-import com.cpa.yusin.quiz.global.exception.AnswerException;
-import com.cpa.yusin.quiz.global.exception.ExceptionMessage;
 import com.cpa.yusin.quiz.question.domain.Question;
 import jakarta.persistence.*;
 import lombok.*;

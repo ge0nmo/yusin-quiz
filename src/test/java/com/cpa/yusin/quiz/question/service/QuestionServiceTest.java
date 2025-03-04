@@ -116,6 +116,7 @@ class QuestionServiceTest
                 .id(1L)
                 .title("title")
                 .content("content")
+                .answerCount(0)
                 .password("123").build());
 
         // when
@@ -136,6 +137,7 @@ class QuestionServiceTest
                 .title("title1")
                 .content("content1")
                 .problem(problem)
+                .answerCount(0)
                 .password("123").build());
 
         testContainer.questionRepository.save(Question.builder()
@@ -143,12 +145,14 @@ class QuestionServiceTest
                 .title("title2")
                 .content("content2")
                 .problem(problem)
+                .answerCount(0)
                 .password("123").build());
 
         testContainer.questionRepository.save(Question.builder()
                 .id(3L)
                 .title("title3")
                 .content("content3")
+                .answerCount(0)
                 .problem(Problem.builder().id(2L).build())
                 .password("123").build());
 

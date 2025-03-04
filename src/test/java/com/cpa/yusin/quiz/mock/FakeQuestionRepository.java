@@ -23,6 +23,7 @@ public class FakeQuestionRepository implements QuestionRepository
                     .title(question.getTitle())
                     .content(question.getContent())
                     .password(question.getPassword())
+                    .answerCount(question.getAnswerCount())
                     .problem(question.getProblem())
                     .build();
 

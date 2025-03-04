@@ -17,13 +17,17 @@ public class QuestionAnswerService
     private final QuestionRepository questionRepository;
 
     @Transactional
-    public void answerQuestion(long questionId)
+    public void answerQuestionByAdmin(long questionId)
     {
         Question question = getQuestion(questionId);
         question.answerByAdmin();
-
     }
 
+    @Transactional
+    public void updateAnswerCount(Question question, int count)
+    {
+        question.updateAnswerCount(count);
+    }
 
     public Question getQuestion(long questionId)
     {

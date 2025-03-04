@@ -62,7 +62,7 @@ public class AnswerController
 
     @GetMapping("/answer/{answerId}/verification")
     public ResponseEntity<GlobalResponse<Boolean>> verifyPassword(@PathVariable("answerId") long answerId,
-                                                                 @RequestParam("password") String password)
+                                                                  @RequestParam("password") String password)
     {
         boolean response = answerService.verifyPassword(answerId, password);
 

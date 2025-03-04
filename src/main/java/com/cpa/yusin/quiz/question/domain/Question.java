@@ -32,6 +32,9 @@ public class Question extends BaseEntity
     @Column(nullable = false)
     private boolean answeredByAdmin;
 
+    @Column(nullable = false)
+    private Integer answerCount;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "problem_id", nullable = false)
     private Problem problem;
@@ -46,6 +49,13 @@ public class Question extends BaseEntity
     public void answerByAdmin()
     {
         this.answeredByAdmin = true;
+        updateAnswerCount(1);
+    }
+
+    public void updateAnswerCount(int count)
+    {
+        int newCount = this.answerCount + count;
+        this.answerCount = Math.max(newCount, 0);
     }
 
     public boolean verify(String inputPassword)

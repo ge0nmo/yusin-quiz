@@ -103,6 +103,7 @@ class AnswerTest
                 .username("유저1")
                 .content("왜 4번이죠?")
                 .password("123123")
+                .answerCount(0)
                 .problem(problem)
                 .build());
 

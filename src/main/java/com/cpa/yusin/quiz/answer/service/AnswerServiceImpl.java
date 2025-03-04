@@ -39,6 +39,7 @@ public class AnswerServiceImpl implements AnswerService, AnswerChecker
     {
         Question question = questionAnswerService.getQuestion(questionId);
         Answer answer = answerMapper.toAnswerEntity(request, question);
+        questionAnswerService.updateAnswerCount(question, 1);
 
         return answerRepository.save(answer).getId();
     }
@@ -51,7 +52,7 @@ public class AnswerServiceImpl implements AnswerService, AnswerChecker
 
         answer = answerRepository.save(answer);
 
-        questionAnswerService.answerQuestion(questionId);
+        questionAnswerService.answerQuestionByAdmin(questionId);
 
         return answer.getId();
     }
@@ -103,7 +104,9 @@ public class AnswerServiceImpl implements AnswerService, AnswerChecker
     @Transactional
     @Override
     public void deleteAnswer(long answerId) {
-        findById(answerId);
+        Answer answer = findById(answerId);
+        Question question = answer.getQuestion();
+        questionAnswerService.updateAnswerCount(question, -1);
 
         answerRepository.deleteById(answerId);
     }
