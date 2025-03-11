@@ -73,8 +73,13 @@
                                                 <p class="m1 ml-2 font-weight-light" th:text="${#temporals.format(answer.createdAt, 'yyyy-MM-dd HH:mm')}"></p>
                                             </div>
 
-                                            <div class="answer-delete">
-                                                <button class="btn btn-primary font-weight-light answer-delete-btn">삭제</button>
+                                            <div class="answer-change-form d-flex justify-content-end">
+                                                <div class="answer-update">
+                                                    <button class="btn btn-primary font-weight-light answer-update-btn">수정</button>
+                                                </div>
+                                                <div class="answer-delete">
+                                                    <button class="btn btn-primary font-weight-light answer-delete-btn">삭제</button>
+                                                </div>
                                             </div>
                                         </div>
 

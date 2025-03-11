@@ -14,6 +14,7 @@ import com.cpa.yusin.quiz.member.domain.Member;
 import com.cpa.yusin.quiz.question.domain.Question;
 import com.cpa.yusin.quiz.question.service.QuestionAnswerService;
 import com.cpa.yusin.quiz.web.dto.AdminAnswerRegisterRequest;
+import com.cpa.yusin.quiz.web.dto.AdminAnswerUpdateRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -62,7 +63,17 @@ public class AnswerServiceImpl implements AnswerService, AnswerChecker
     public void update(AnswerUpdateRequest request, long answerId)
     {
         Answer answer = findById(answerId);
-        answer.update(request);
+        answer.update(request.getContent());
+        answerRepository.save(answer);
+    }
+
+    @Transactional
+    @Override
+    public void updateInAdminPage(AdminAnswerUpdateRequest request, long answerId)
+    {
+        Answer answer = findById(answerId);
+        answer.update(request.content());
+
         answerRepository.save(answer);
     }
 

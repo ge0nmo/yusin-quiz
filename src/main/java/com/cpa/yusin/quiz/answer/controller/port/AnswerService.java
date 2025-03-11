@@ -4,9 +4,9 @@ import com.cpa.yusin.quiz.answer.controller.dto.request.AnswerRegisterRequest;
 import com.cpa.yusin.quiz.answer.controller.dto.request.AnswerUpdateRequest;
 import com.cpa.yusin.quiz.answer.controller.dto.response.AnswerDTO;
 import com.cpa.yusin.quiz.answer.domain.Answer;
-import com.cpa.yusin.quiz.global.details.MemberDetails;
 import com.cpa.yusin.quiz.member.domain.Member;
 import com.cpa.yusin.quiz.web.dto.AdminAnswerRegisterRequest;
+import com.cpa.yusin.quiz.web.dto.AdminAnswerUpdateRequest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -18,7 +18,9 @@ public interface AnswerService
 
     long save(AdminAnswerRegisterRequest request, long questionId, Member admin);
 
-    void update(AnswerUpdateRequest request, long questionId);
+    void update(AnswerUpdateRequest request, long answerId);
+
+    void updateInAdminPage(AdminAnswerUpdateRequest request, long answer);
 
     Answer findById(long id);
 

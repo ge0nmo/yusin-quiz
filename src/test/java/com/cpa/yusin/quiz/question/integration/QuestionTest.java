@@ -246,7 +246,7 @@ class QuestionTest
 
         // when
         ResultActions resultActions = mvc
-                .perform(get("/api/v1/problem/{problemId}/question?page=1&size=10", problem.getId())
+                .perform(get("/api/v1/problem/{problemId}/question", problem.getId())
                         .queryParam("page", Integer.toString(pageNumber))
                         .queryParam("size", Integer.toString(pageSize))
                 );

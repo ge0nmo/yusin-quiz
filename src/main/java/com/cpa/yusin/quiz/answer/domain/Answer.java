@@ -30,9 +30,9 @@ public class Answer extends BaseEntity
     @JoinColumn(name = "question_id", nullable = false, updatable = false)
     private Question question;
 
-    public void update(AnswerUpdateRequest request)
+    public void update(String content)
     {
-        this.content = request.getContent();
+        this.content = content;
     }
 
     public boolean verifyPassword(String password)
