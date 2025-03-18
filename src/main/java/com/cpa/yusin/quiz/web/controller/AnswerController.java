@@ -10,6 +10,7 @@ import com.cpa.yusin.quiz.problem.domain.Problem;
 import com.cpa.yusin.quiz.question.controller.port.QuestionService;
 import com.cpa.yusin.quiz.question.domain.Question;
 import com.cpa.yusin.quiz.web.dto.AdminAnswerRegisterRequest;
+import com.cpa.yusin.quiz.web.dto.AdminAnswerUpdateRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -58,13 +59,23 @@ public class AnswerController {
                                           @Validated @RequestBody AdminAnswerRegisterRequest request,
                                           Principal principal)
     {
-        log.info("principal {}", principal.getName());
-        log.info("principal object = {}", principal);
         MemberDetails memberDetails = (MemberDetails) ((Authentication) principal).getPrincipal();
-        log.info("memberDetails: {}", memberDetails);
 
         long response = answerService.save(request, questionId, memberDetails.getMember());
 
+        return ResponseEntity.ok(response);
+    }
+
+    @ResponseBody
+    @PatchMapping("/answer/{answerId}")
+    public ResponseEntity<?> updateAnswer(@PathVariable("answerId") long answerId,
+                                          @Validated @RequestBody AdminAnswerUpdateRequest request,
+                                          Principal principal)
+    {
+        MemberDetails memberDetails = (MemberDetails) ((Authentication) principal).getPrincipal();
+
+        answerService.updateInAdminPage(request, answerId);
+        AnswerDTO response = answerService.getAnswerById(answerId);
         return ResponseEntity.ok(response);
     }
 

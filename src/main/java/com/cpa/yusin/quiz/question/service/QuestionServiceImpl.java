@@ -15,7 +15,6 @@ import com.cpa.yusin.quiz.question.service.port.QuestionRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -88,15 +87,17 @@ public class QuestionServiceImpl implements QuestionService
     }
 
     @Override
-    public void verifyPassword(long questionId, String password)
+    public boolean verifyPassword(long questionId, String password)
     {
         Question question = findById(questionId);
-        question.verify(password);
+        return question.verify(password);
     }
 
+    @Transactional
     @Override
     public void deleteById(long questionId) {
         Question question = findById(questionId);
+        log.info("question id = {}", question);
         answerChecker.hasAnswer(question.getId());
 
         questionRepository.deleteById(questionId);

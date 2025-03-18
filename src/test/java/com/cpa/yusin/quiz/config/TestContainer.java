@@ -35,8 +35,6 @@ import com.cpa.yusin.quiz.member.service.MemberServiceImpl;
 import com.cpa.yusin.quiz.member.service.port.MemberRepository;
 import com.cpa.yusin.quiz.member.service.port.MemberValidator;
 import com.cpa.yusin.quiz.mock.*;
-import com.cpa.yusin.quiz.payment.controller.mapper.PaymentMapper;
-import com.cpa.yusin.quiz.payment.service.port.PaymentRepository;
 import com.cpa.yusin.quiz.problem.controller.mapper.ProblemMapper;
 import com.cpa.yusin.quiz.problem.controller.port.ProblemService;
 import com.cpa.yusin.quiz.problem.service.ProblemServiceImpl;
@@ -53,19 +51,6 @@ import com.cpa.yusin.quiz.subject.infrastructure.SubjectValidatorImpl;
 import com.cpa.yusin.quiz.subject.service.SubjectServiceImpl;
 import com.cpa.yusin.quiz.subject.service.port.SubjectRepository;
 import com.cpa.yusin.quiz.subject.service.port.SubjectValidator;
-import com.cpa.yusin.quiz.subscription.controller.SubscriptionController;
-import com.cpa.yusin.quiz.subscription.controller.mapper.SubscriptionMapper;
-import com.cpa.yusin.quiz.subscription.controller.port.SubscriptionService;
-import com.cpa.yusin.quiz.subscription.service.SubscriptionServiceImpl;
-import com.cpa.yusin.quiz.subscription.service.port.SubscriptionRepository;
-import com.cpa.yusin.quiz.subscription.service.port.SubscriptionValidator;
-import com.cpa.yusin.quiz.subscriptionPlan.controller.AdminSubscriptionPlanController;
-import com.cpa.yusin.quiz.subscriptionPlan.controller.mapper.SubscriptionPlanMapper;
-import com.cpa.yusin.quiz.subscriptionPlan.controller.port.SubscriptionPlanService;
-import com.cpa.yusin.quiz.subscriptionPlan.infrastructure.SubscriptionPlanValidatorImpl;
-import com.cpa.yusin.quiz.subscriptionPlan.service.SubscriptionPlanServiceImpl;
-import com.cpa.yusin.quiz.subscriptionPlan.service.port.SubscriptionPlanRepository;
-import com.cpa.yusin.quiz.subscriptionPlan.service.port.SubscriptionPlanValidator;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -119,32 +104,6 @@ public class TestContainer
     public final ProblemRepository problemRepository;
     public final ProblemService problemService;
 
-
-    /**
-     *  subscriptionPlan
-     */
-    public final SubscriptionPlanRepository subscriptionPlanRepository;
-    public final SubscriptionPlanService subscriptionPlanService;
-    public final SubscriptionPlanMapper subscriptionPlanMapper;
-    public final SubscriptionPlanValidator subscriptionPlanValidator;
-    public final AdminSubscriptionPlanController adminSubscriptionPlanController;
-
-
-    /**
-     * subscription
-     */
-    public final SubscriptionRepository subscriptionRepository;
-    public final SubscriptionValidator subscriptionValidator;
-    public final SubscriptionService subscriptionService;
-    public final SubscriptionMapper subscriptionMapper;
-    public final SubscriptionController subscriptionController;
-
-    /**
-     * payment
-     */
-
-    public final PaymentRepository paymentRepository;
-    public final PaymentMapper paymentMapper;
 
     /**
      * question
@@ -207,22 +166,6 @@ public class TestContainer
         this.problemMapper = new ProblemMapper();
         this.problemService = new ProblemServiceImpl(this.problemRepository, this.problemMapper,
                 this.examService, this.choiceService);
-
-        this.subscriptionPlanRepository = new FakeSubscriptionPlanRepository();
-        this.subscriptionPlanMapper = new SubscriptionPlanMapper();
-        this.subscriptionPlanValidator = new SubscriptionPlanValidatorImpl(this.subscriptionPlanRepository);
-        this.subscriptionPlanService = new SubscriptionPlanServiceImpl(subscriptionPlanRepository, subscriptionPlanMapper, subscriptionPlanValidator);
-        this.adminSubscriptionPlanController = new AdminSubscriptionPlanController(this.subscriptionPlanService);
-
-        this.paymentMapper = new PaymentMapper();
-        this.paymentRepository = new FakePaymentRepository();
-
-        this.subscriptionRepository = new FakeSubscriptionRepository();
-        this.subscriptionValidator = new SubscriptionValidator(subscriptionRepository, clockHolder);
-        this.subscriptionMapper = new SubscriptionMapper(paymentMapper, subscriptionPlanMapper);
-        this.subscriptionService = new SubscriptionServiceImpl(this.subscriptionRepository,
-                paymentRepository, subscriptionPlanRepository, merchantIdGenerator, subscriptionMapper, subscriptionValidator, clockHolder, memberRepository);
-        this.subscriptionController = new SubscriptionController(this.subscriptionService);
 
         this.questionRepository = new FakeQuestionRepository();
         this.questionMapper = new QuestionMapper();

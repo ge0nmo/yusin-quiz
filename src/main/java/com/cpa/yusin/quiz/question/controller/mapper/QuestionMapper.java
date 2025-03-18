@@ -17,6 +17,7 @@ public class QuestionMapper
                 .username(request.getUsername())
                 .content(request.getContent())
                 .problem(problem)
+                .answerCount(0)
                 .build();
     }
 
@@ -28,6 +29,7 @@ public class QuestionMapper
                 .username(question.getUsername())
                 .content(question.getContent())
                 .createdAt(question.getCreatedAt())
+                .answerCount(question.getAnswerCount())
                 .answeredByAdmin(question.isAnsweredByAdmin())
                 .build();
     }

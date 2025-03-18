@@ -11,10 +11,10 @@ import com.cpa.yusin.quiz.global.exception.AnswerException;
 import com.cpa.yusin.quiz.global.exception.ExceptionMessage;
 import com.cpa.yusin.quiz.global.exception.QuestionException;
 import com.cpa.yusin.quiz.member.domain.Member;
-import com.cpa.yusin.quiz.question.controller.port.QuestionService;
 import com.cpa.yusin.quiz.question.domain.Question;
 import com.cpa.yusin.quiz.question.service.QuestionAnswerService;
 import com.cpa.yusin.quiz.web.dto.AdminAnswerRegisterRequest;
+import com.cpa.yusin.quiz.web.dto.AdminAnswerUpdateRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -40,6 +40,7 @@ public class AnswerServiceImpl implements AnswerService, AnswerChecker
     {
         Question question = questionAnswerService.getQuestion(questionId);
         Answer answer = answerMapper.toAnswerEntity(request, question);
+        questionAnswerService.updateAnswerCount(question, 1);
 
         return answerRepository.save(answer).getId();
     }
@@ -52,7 +53,7 @@ public class AnswerServiceImpl implements AnswerService, AnswerChecker
 
         answer = answerRepository.save(answer);
 
-        questionAnswerService.answerQuestion(questionId);
+        questionAnswerService.answerQuestionByAdmin(questionId);
 
         return answer.getId();
     }
@@ -62,7 +63,17 @@ public class AnswerServiceImpl implements AnswerService, AnswerChecker
     public void update(AnswerUpdateRequest request, long answerId)
     {
         Answer answer = findById(answerId);
-        answer.update(request);
+        answer.update(request.getContent());
+        answerRepository.save(answer);
+    }
+
+    @Transactional
+    @Override
+    public void updateInAdminPage(AdminAnswerUpdateRequest request, long answerId)
+    {
+        Answer answer = findById(answerId);
+        answer.update(request.content());
+
         answerRepository.save(answer);
     }
 
@@ -95,16 +106,18 @@ public class AnswerServiceImpl implements AnswerService, AnswerChecker
     }
 
     @Override
-    public void verifyPassword(long answerId, String password)
+    public boolean verifyPassword(long answerId, String password)
     {
         Answer answer = findById(answerId);
-        answer.verifyPassword(password);
+        return answer.verifyPassword(password);
     }
 
+    @Transactional
     @Override
     public void deleteAnswer(long answerId) {
-        log.info("delete answer : {}", answerId);
-        findById(answerId);
+        Answer answer = findById(answerId);
+        Question question = answer.getQuestion();
+        questionAnswerService.updateAnswerCount(question, -1);
 
         answerRepository.deleteById(answerId);
     }

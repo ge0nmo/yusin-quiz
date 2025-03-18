@@ -1,6 +1,6 @@
-const answerDetail = document.querySelector('.answer-detail');
 const answerForm = document.getElementById('answer-form');
-const deleteBtns = document.querySelectorAll('.answer-delete-btn');
+const deleteBtnList = document.querySelectorAll('.answer-delete-btn');
+const updateBtnList = document.querySelectorAll('.answer-update-btn');
 
 const questionId = document.getElementById('questionId').value;
 
@@ -8,12 +8,17 @@ const questionId = document.getElementById('questionId').value;
 window.onload = function() {
     answerForm.addEventListener('submit', handlerRegisterAnswer);
 
-    deleteBtns.forEach((btn) => {
+    deleteBtnList.forEach((btn) => {
         const answerId = btn.closest('.answer-item').getAttribute('value');
         console.log('answerId = ',answerId);
         btn.addEventListener('click', (e) => handleDeleteClick(e, answerId))
     });
 
+    updateBtnList.forEach((btn) => {
+        const answerId = btn.closest('.answer-item').getAttribute('value');
+        console.log(`answerId=, `, answerId);
+        btn.addEventListener('click', (e) => handleUpdateClick(e, answerId))
+    })
 }
 
 async function handlerRegisterAnswer(e){
@@ -47,6 +52,59 @@ async function handleDeleteClick(e, answerId){
     window.location.reload();
 }
 
+async function handleUpdateClick(e, answerId) {
+    e.preventDefault();
+    const answerItem = e.target.closest('.answer-item');
+    const contentDiv = answerItem.querySelector('.answer-content');
+    const currentContent = contentDiv.textContent.trim();
+    const updateBtn = e.target;
+
+    // Create editable textarea
+    const textarea = document.createElement('textarea');
+    textarea.className = 'form-control mb-2';
+    textarea.value = currentContent;
+
+    // Replace content with textarea
+    contentDiv.replaceWith(textarea);
+    updateBtn.textContent = '저장';
+
+    // Remove previous event listener
+    updateBtn.removeEventListener('click', handleUpdateClick);
+
+    // Add temporary save handler
+    const saveHandler = async (saveEvent) => {
+        saveEvent.preventDefault();
+        const newContent = textarea.value.trim();
+
+        if (!newContent) {
+            alert('답변 내용을 입력해주세요.');
+            return;
+        }
+
+        try {
+            const request = { content: newContent };
+            await patchJSON(`/admin/answer/${answerId}`, request);
+
+            // Create new content display
+            const newContentDiv = document.createElement('div');
+            newContentDiv.className = 'answer-content mt-2';
+            newContentDiv.textContent = newContent;
+
+            // Replace textarea with updated content
+            textarea.replaceWith(newContentDiv);
+            updateBtn.textContent = '수정';
+
+            // Restore original event listener
+            updateBtn.removeEventListener('click', saveHandler);
+            updateBtn.addEventListener('click', (e) => handleUpdateClick(e, answerId));
+        } catch (error) {
+            alert('답변 수정에 실패했습니다.');
+            console.error('Update error:', error);
+        }
+    };
+
+    updateBtn.addEventListener('click', saveHandler);
+}
 
 function resetAnswerForm(contentElement){
     contentElement.value = '';

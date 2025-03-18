@@ -57,7 +57,7 @@ public class QuestionController
     public ResponseEntity<GlobalResponse<List<QuestionDTO>>> getAllByProblemId(@PathVariable("problemId") long problemId,
                                                                                @PageableDefault Pageable pageable)
     {
-        Page<QuestionDTO> response = questionService.getAllByProblemId(pageable, problemId);
+        Page<QuestionDTO> response = questionService.getAllByProblemId(pageable.previousOrFirst(), problemId);
 
         return ResponseEntity.ok(new GlobalResponse<>(response.getContent(), PageInfo.of(response)));
     }
@@ -66,9 +66,9 @@ public class QuestionController
     public ResponseEntity<?> verifyQuestionPassword(@PathVariable("questionId") long questionId,
                                                     @RequestParam("password") String password)
     {
-        questionService.verifyPassword(questionId, password);
+        boolean response = questionService.verifyPassword(questionId, password);
 
-        return ResponseEntity.ok(new GlobalResponse<>(true));
+        return ResponseEntity.ok(new GlobalResponse<>(response));
     }
 
     @DeleteMapping("/question/{questionId}")

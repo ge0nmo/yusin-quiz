@@ -1,6 +1,5 @@
 package com.cpa.yusin.quiz.question.integration;
 
-import com.cpa.yusin.quiz.answer.domain.Answer;
 import com.cpa.yusin.quiz.answer.service.port.AnswerRepository;
 import com.cpa.yusin.quiz.config.TeardownExtension;
 import com.cpa.yusin.quiz.exam.domain.Exam;
@@ -20,8 +19,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.restdocs.RestDocumentationContextProvider;
 import org.springframework.restdocs.RestDocumentationExtension;
@@ -37,7 +34,6 @@ import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.docu
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.*;
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.*;
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
-import static org.springframework.restdocs.request.RequestDocumentation.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith({RestDocumentationExtension.class, TeardownExtension.class})
@@ -106,6 +102,7 @@ class QuestionTest
                         .content("왜 4번이죠?")
                         .username("유저1")
                         .password("123123")
+                        .answerCount(0)
                         .problem(problem)
                         .build());
     }
@@ -152,9 +149,7 @@ class QuestionTest
 
                         responseFields(
                                 fieldWithPath("data").type(JsonFieldType.NUMBER).description("질문 고유 식별자")
-                        )
-
-                        ))
+                        )))
                 ;
     }
 
@@ -192,6 +187,7 @@ class QuestionTest
                                 fieldWithPath("data.username").type(JsonFieldType.STRING).description("질문 등록자 이름"),
                                 fieldWithPath("data.title").type(JsonFieldType.STRING).description("질문 제목"),
                                 fieldWithPath("data.content").type(JsonFieldType.STRING).description("질문 내용"),
+                                fieldWithPath("data.answerCount").type(JsonFieldType.NUMBER).description("질문의 답변 수"),
                                 fieldWithPath("data.answeredByAdmin").type(JsonFieldType.BOOLEAN).description("질문 답변 여부"),
                                 fieldWithPath("data.createdAt").type(JsonFieldType.STRING).description("질문 등록 시간")
 
@@ -224,6 +220,7 @@ class QuestionTest
                                 fieldWithPath("data.username").type(JsonFieldType.STRING).description("질문 등록자 이름"),
                                 fieldWithPath("data.title").type(JsonFieldType.STRING).description("질문 제목"),
                                 fieldWithPath("data.content").type(JsonFieldType.STRING).description("질문 내용"),
+                                fieldWithPath("data.answerCount").type(JsonFieldType.NUMBER).description("질문의 답변 수"),
                                 fieldWithPath("data.answeredByAdmin").type(JsonFieldType.BOOLEAN).description("질문 답변 여부"),
                                 fieldWithPath("data.createdAt").type(JsonFieldType.STRING).description("질문 등록 시간")
                         )
@@ -235,13 +232,13 @@ class QuestionTest
     void getAllByProblemId() throws Exception
     {
         // given
-        questionRepository.save(Question.builder().id(2L).title("2번은 왜 정답이 아니죠?").content("2번은 왜 정답이 아니죠?").username("유저1").password("123123").problem(problem).build());
-        questionRepository.save(Question.builder().id(3L).title("3번은 왜 정답이 아니죠?").content("3번은 왜 정답이 아니죠?").username("유저1").password("123123").problem(problem).build());
-        questionRepository.save(Question.builder().id(4L).title("4번은 왜 정답이 아니죠?").content("4번은 왜 정답이 아니죠?").username("유저1").password("123123").problem(problem).build());
-        questionRepository.save(Question.builder().id(5L).title("5번은 왜 정답이 아니죠?").content("5번은 왜 정답이 아니죠?").username("유저1").password("123123").problem(problem).build());
-        questionRepository.save(Question.builder().id(6L).title("6번은 왜 정답이 아니죠?").content("6번은 왜 정답이 아니죠?").username("유저1").password("123123").problem(problem).build());
-        questionRepository.save(Question.builder().id(7L).title("7번은 왜 정답이 아니죠?").content("7번은 왜 정답이 아니죠?").username("유저1").password("123123").problem(problem).build());
-        questionRepository.save(Question.builder().id(8L).title("8번은 왜 정답이 아니죠?").content("8번은 왜 정답이 아니죠?").username("유저1").password("123123").problem(problem).build());
+        questionRepository.save(Question.builder().id(2L).title("2번은 왜 정답이 아니죠?").answerCount(0).content("2번은 왜 정답이 아니죠?").username("유저1").password("123123").problem(problem).build());
+        questionRepository.save(Question.builder().id(3L).title("3번은 왜 정답이 아니죠?").answerCount(0).content("3번은 왜 정답이 아니죠?").username("유저1").password("123123").problem(problem).build());
+        questionRepository.save(Question.builder().id(4L).title("4번은 왜 정답이 아니죠?").answerCount(0).content("4번은 왜 정답이 아니죠?").username("유저1").password("123123").problem(problem).build());
+        questionRepository.save(Question.builder().id(5L).title("5번은 왜 정답이 아니죠?").answerCount(0).content("5번은 왜 정답이 아니죠?").username("유저1").password("123123").problem(problem).build());
+        questionRepository.save(Question.builder().id(6L).title("6번은 왜 정답이 아니죠?").answerCount(0).content("6번은 왜 정답이 아니죠?").username("유저1").password("123123").problem(problem).build());
+        questionRepository.save(Question.builder().id(7L).title("7번은 왜 정답이 아니죠?").answerCount(0).content("7번은 왜 정답이 아니죠?").username("유저1").password("123123").problem(problem).build());
+        questionRepository.save(Question.builder().id(8L).title("8번은 왜 정답이 아니죠?").answerCount(0).content("8번은 왜 정답이 아니죠?").username("유저1").password("123123").problem(problem).build());
 
         int pageSize = 10;
         int pageNumber = 0;
@@ -266,6 +263,7 @@ class QuestionTest
                                 fieldWithPath("data[].username").type(JsonFieldType.STRING).description("질문 등록자 이름"),
                                 fieldWithPath("data[].title").type(JsonFieldType.STRING).description("질문 제목"),
                                 fieldWithPath("data[].content").type(JsonFieldType.STRING).description("질문 내용"),
+                                fieldWithPath("data[].answerCount").type(JsonFieldType.NUMBER).description("질문의 답변 수"),
                                 fieldWithPath("data[].answeredByAdmin").type(JsonFieldType.BOOLEAN).description("질문 답변 여부"),
                                 fieldWithPath("data[].createdAt").type(JsonFieldType.STRING).description("질문 등록 시간"),
 

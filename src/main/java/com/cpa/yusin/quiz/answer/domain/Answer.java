@@ -2,8 +2,6 @@ package com.cpa.yusin.quiz.answer.domain;
 
 import com.cpa.yusin.quiz.answer.controller.dto.request.AnswerUpdateRequest;
 import com.cpa.yusin.quiz.common.infrastructure.BaseEntity;
-import com.cpa.yusin.quiz.global.exception.AnswerException;
-import com.cpa.yusin.quiz.global.exception.ExceptionMessage;
 import com.cpa.yusin.quiz.question.domain.Question;
 import jakarta.persistence.*;
 import lombok.*;
@@ -32,15 +30,13 @@ public class Answer extends BaseEntity
     @JoinColumn(name = "question_id", nullable = false, updatable = false)
     private Question question;
 
-    public void update(AnswerUpdateRequest request)
+    public void update(String content)
     {
-        this.content = request.getContent();
+        this.content = content;
     }
 
-    public void verifyPassword(String password)
+    public boolean verifyPassword(String password)
     {
-        if(!this.password.equals(password)){
-            throw new AnswerException(ExceptionMessage.INVALID_ANSWER_PASSWORD);
-        }
+        return this.password.equals(password);
     }
 }
