@@ -121,6 +121,7 @@ public class SecurityConfig
                                 .passwordParameter("password")
                                 .successForwardUrl("/admin/home")
                                 .defaultSuccessUrl("/admin/home", true)
+                                .failureUrl("/admin/login?error")
                                 .permitAll()
                 )
                 .logout(logout ->

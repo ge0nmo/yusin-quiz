@@ -9,6 +9,7 @@ import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 @RequiredArgsConstructor
@@ -37,13 +38,12 @@ public class FormAuthenticationProvider implements AuthenticationProvider {
 
     private void validateMember(String password, MemberDetails memberDetails) {
         validatePassword(password, memberDetails);
-        // You might want to modify this to check for admin role instead of platform
         validateRole(memberDetails);
     }
 
     private void validatePassword(String password, MemberDetails memberDetails) {
         if (!passwordEncoder.matches(password, memberDetails.getPassword())) {
-            throw new MemberException(ExceptionMessage.USER_NOT_FOUND);
+            throw new UsernameNotFoundException(ExceptionMessage.USER_NOT_FOUND.getMessage());
         }
     }
 

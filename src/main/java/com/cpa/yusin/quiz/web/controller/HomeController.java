@@ -1,7 +1,5 @@
 package com.cpa.yusin.quiz.web.controller;
 
-import com.cpa.yusin.quiz.member.controller.port.AuthenticationService;
-import com.cpa.yusin.quiz.member.controller.port.MemberService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
@@ -15,9 +13,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @Controller
 public class HomeController
 {
-    private final AuthenticationService authenticationService;
-    private final MemberService memberService;
-
     @GetMapping("/login")
     public String login()
     {
