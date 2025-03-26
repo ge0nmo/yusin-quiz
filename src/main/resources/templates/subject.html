@@ -8,7 +8,7 @@
     <title>Home</title>
 
     <!-- Custom styles for this template-->
-    <link th:href="@{/css/sb-admin-2.min.css}" rel="stylesheet">
+    <link th:href="@{/static/css/sb-admin-2.min.css}" rel="stylesheet">
 </head>
 <body>
 
@@ -27,7 +27,7 @@
                             </h6>
                             <div class="float-right">
                                 <button class="btn btn-light" data-toggle="modal" data-target="#add-subject-modal" >
-                                    <img class="ml-2" th:src="@{/img/add_icon.png}" alt="">과목 추가
+                                    <img class="ml-2" th:src="@{/static/img/add_icon.png}" alt="">과목 추가
                                 </button>
                             </div>
 
@@ -90,7 +90,7 @@
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">취소</button>
                         <button type="button" value="" name="save" class="btn btn-primary" th:onclick="saveSubject()">
-                            <img class="loading-save" style="display:none;" th:src="@{/img/loading.gif}" width=30 height=30>
+                            <img class="loading-save" style="display:none;" th:src="@{/static/img/loading.gif}" width=30 height=30>
                             저장
                         </button>
                     </div>
@@ -124,7 +124,7 @@
 
                     <div class="modal-footer">
                         <button type="button" value="" name="save" class="btn btn-primary" th:onclick="updateSubject()">
-                            <img class="loading-save" alt="save"  style="display:none;" th:src="@{/img/loading.gif}" width=30 height=30>
+                            <img class="loading-save" alt="save"  style="display:none;" th:src="@{/static/img/loading.gif}" width=30 height=30>
                             저장
                         </button>
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">
@@ -143,8 +143,8 @@
 
 
 
-<script th:src="@{/vendor/jquery/jquery.min.js}"></script>
-<script th:src="@{/vendor/bootstrap/js/bootstrap.bundle.min.js}"></script>
+<script th:src="@{/static/vendor/jquery/jquery.min.js}"></script>
+<script th:src="@{/static/vendor/bootstrap/js/bootstrap.bundle.min.js}"></script>
 
 <script th:inline="javascript">
     let currentPage = 0;
@@ -182,10 +182,10 @@
                             <div class="d-flex justify-content-end">
                                 <button class="btn btn-default" type="button">
                                     <img onclick="prepareUpdateSubjectForm(${subject.id}, '${subject.name}')" data-toggle="modal" data-target="#update-subject-modal"
-                                    alt="update" src="/img/edit.svg">
+                                    alt="update" src="/static/img/edit.svg">
                                 </button>
                                 <button onclick="removeSubject(${subject.id})" class="btn btn-default" type="button">
-                                    <img alt="remove" src="/img/trash.svg">
+                                    <img alt="remove" src="/static/img/trash.svg">
                                 </button>
                             </div>
                         </div>

@@ -8,7 +8,7 @@
     <title>Home</title>
 
     <!-- Custom styles for this template-->
-    <link th:href="@{/css/sb-admin-2.min.css}" rel="stylesheet">
+    <link th:href="@{/static/css/sb-admin-2.min.css}" rel="stylesheet">
 </head>
 <body>
 
@@ -54,7 +54,7 @@
 
                             <div class="float-right">
                                 <button class="btn btn-light" data-toggle="modal" data-target="#add-exam-modal" onclick="prepareExamForm()">
-                                    <img class="ml-2" th:src="@{/img/add_icon.png}" alt="">과목 추가
+                                    <img class="ml-2" th:src="@{/static/img/add_icon.png}" alt="">과목 추가
                                 </button>
                             </div>
 
@@ -181,7 +181,7 @@
 
                     <div class="modal-footer">
                         <button type="button" value="" name="save" class="btn btn-primary" th:onclick="updateExam()">
-                            <img class="loading-save" alt="save"  style="display:none;" th:src="@{/img/loading.gif}" width=30 height=30>
+                            <img class="loading-save" alt="save"  style="display:none;" th:src="@{/static/img/loading.gif}" width=30 height=30>
                             저장
                         </button>
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">
@@ -197,10 +197,10 @@
 </div>
 
 
-<script th:src="@{/vendor/jquery/jquery.min.js}"></script>
-<script th:src="@{/vendor/bootstrap/js/bootstrap.bundle.min.js}"></script>
+<script th:src="@{/static/vendor/jquery/jquery.min.js}"></script>
+<script th:src="@{/static/vendor/bootstrap/js/bootstrap.bundle.min.js}"></script>
 
-<script src="/js/exam.js"></script>
+<script src="/static/js/exam.js"></script>
 
 </body>
 </html>

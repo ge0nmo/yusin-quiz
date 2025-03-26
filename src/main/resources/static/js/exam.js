@@ -128,10 +128,10 @@ function drawList(list){
                         ${exam.name}
                         <div class="d-flex justify-content-end">
                             <button onclick='prepareUpdateExamForm(${JSON.stringify(exam)})' data-toggle="modal" data-target="#update-exam-modal" class="btn btn-default" type="button">
-                                <img class="" alt="update" src="/img/edit.svg" >
+                                <img class="" alt="update" src="/static/img/edit.svg" >
                             </button>
                             <button onclick="removeExam(${exam.id})" class="btn btn-default" type="button">
-                                <img class="" alt="remove" src="/img/trash.svg" >
+                                <img class="" alt="remove" src="/static/img/trash.svg" >
                             </button>
                         </div>
                     </div>

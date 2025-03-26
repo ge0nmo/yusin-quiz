@@ -8,7 +8,7 @@
     <title>Home</title>
 
     <!-- Custom styles for this template-->
-    <link th:href="@{/css/sb-admin-2.min.css}" rel="stylesheet">
+    <link th:href="@{/static/css/sb-admin-2.min.css}" rel="stylesheet">
 </head>
 <body>
 
@@ -37,7 +37,7 @@
 
                             <div class="float-right">
                                 <button class="btn btn-light" data-toggle="modal" data-target="#problem-detail-modal" >
-                                    <img class="ml-2" th:src="@{/img/search.svg}" alt="">문제 보기
+                                    <img class="ml-2" th:src="@{/static/img/search.svg}" alt="">문제 보기
                                 </button>
                             </div>
 
@@ -173,10 +173,10 @@
 </div>
 
 
-<script th:src="@{/vendor/jquery/jquery.min.js}"></script>
-<script th:src="@{/vendor/bootstrap/js/bootstrap.bundle.min.js}"></script>
+<script th:src="@{/static/vendor/jquery/jquery.min.js}"></script>
+<script th:src="@{/static/vendor/bootstrap/js/bootstrap.bundle.min.js}"></script>
 
-<script src="/js/answer.js"></script>
+<script src="/static/js/answer.js"></script>
 
 </body>
 </html>

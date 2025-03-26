@@ -250,10 +250,10 @@ async function loadProblemData(problemList) {
                         </h5>
                         <div class="d-flex justify-content-end">
                             <button class="problemEditBtn btn btn-outline-light" onclick="handleUpdateProblemClick(${problemId})">
-                                <img class="editImg" src="/img/save.svg" alt="">
+                                <img class="editImg" src="/static/img/save.svg" alt="">
                             </button>
                             <button class="removeBtn btn btn-outline-light" onclick="handleRemoveProblem(${problemId})">
-                                <img src="/img/trash.svg" alt="">
+                                <img src="/static/img/trash.svg" alt="">
                             </button>
                         </div>
                     </div>
@@ -268,7 +268,7 @@ async function loadProblemData(problemList) {
                     <div class="add-choice d-flex list-group-item list-group-item-action justify-content-center">
                         <button class="btn btn-outline-secondary" onclick="handleAddChoice(${problemId})">
                             <span>문항 추가</span>
-                            <img src="/img/add_icon.png" alt="">
+                            <img src="/static/img/add_icon.png" alt="">
                         </button>
                     </div>
 
@@ -310,10 +310,10 @@ function loadChoiceData(choiceList){
 
                     <div class="choice-btn ml-2">
                         <button class="choiceEditBtn btn btn-sm btn-outline-secondary p-1" onclick="handleUpdateChoiceClick(${choiceId})">
-                            <img src="/img/save.svg" alt="" class="m-1">
+                            <img src="/static/img/save.svg" alt="" class="m-1">
                         </button>
                         <button class="btn btn-sm btn-outline-secondary p-1 isRemove" onclick="handleRemoveChoiceClick(${choiceId})">
-                            <img src="/img/trash.svg" alt="" class="m-1">
+                            <img src="/static/img/trash.svg" alt="" class="m-1">
                         </button>
                     </div>
                 </div>
@@ -338,10 +338,10 @@ function handleAddChoice(problemId){
 
             <div class="choice-btn ml-2">
                 <button class="choiceEditBtn btn btn-sm btn-outline-secondary p-1" onclick="addNewChoice(${problemId}, this)">
-                    <img src="/img/save.svg" alt="" class="m-1">
+                    <img src="/static/img/save.svg" alt="" class="m-1">
                 </button>
                 <button class="btn btn-sm btn-outline-secondary p-1 isRemove" onclick="removeNewChoice(this)">
-                    <img src="/img/trash.svg" alt="" class="m-1">
+                    <img src="/static/img/trash.svg" alt="" class="m-1">
                 </button>
             </div>
         `
