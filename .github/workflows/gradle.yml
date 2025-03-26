@@ -92,11 +92,11 @@ jobs:
     steps:
       - name: Set Target IP
         run: |
-          STATUS=$(curl -o /dev/null -w "%{http_code}" "http://${{ secrets.EC2_SERVER_IP }}/env" )
+          STATUS=$(curl -o /dev/null -w "%{http_code}" "http://${{ secrets.EC2_SERVER_IP }}/api/v1/env" )
           echo $STATUS
           
           if [ $STATUS = 200 ]; then
-            CURRENT_UPSTREAM=$(curl -s "http://${{ secrets.EC2_SERVER_IP }}/env")
+            CURRENT_UPSTREAM=$(curl -s "http://${{ secrets.EC2_SERVER_IP }}/api/v1/env")
           else
             CURRENT_UPSTREAM=green
           fi
