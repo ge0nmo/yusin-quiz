@@ -6,6 +6,8 @@ import com.cpa.yusin.quiz.global.exception.QuestionException;
 import com.cpa.yusin.quiz.problem.domain.Problem;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Builder
@@ -35,6 +37,7 @@ public class Question extends BaseEntity
     @Column(nullable = false)
     private Integer answerCount;
 
+    @OnDelete(action = OnDeleteAction.CASCADE)
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "problem_id", nullable = false)
     private Problem problem;
