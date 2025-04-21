@@ -54,30 +54,13 @@ window.onload = async function() {
     $('#problemExplanation').summernote(summernoteOption);
 };
 
+
 function addHandlerChoiceButton(){
     const choicesContainer = document.getElementById('choicesContainer');
     const addChoiceBtn = document.getElementById('addChoiceBtn');
 
     addChoiceBtn.addEventListener('click', function() {
-        const choiceRow = document.createElement('div');
-        choiceRow.className = 'choice-row input-group mb-2';
-
-
-        choiceRow.innerHTML = `
-            <textarea class="form-control choiceContent" required></textarea>
-            <div class="input-group-append">
-                <div class="input-group-text">
-                    <input type="checkbox" class="isAnswer" aria-label="정답 체크">
-                </div>
-                <button class="btn btn-outline-danger remove-choice-btn" type="button">
-                    <i class="fas fa-trash"></i>
-                </button>
-            </div>
-        `;
-
-        const removeBtn = choiceRow.querySelector('.remove-choice-btn');
-        removeBtn.addEventListener('click', () => choiceRow.remove());
-
+        const choiceRow = createNewChoiceRow();
         choicesContainer.appendChild(choiceRow);
     });
 }
@@ -452,7 +435,14 @@ function resetProblemContainer() {
     document.getElementById('problemNumber').value = '';
     $('#problemContent').summernote('code', '');
     $('#problemExplanation').summernote('code', '');
-    document.getElementById('choicesContainer').innerHTML = '';
+    const choicesContainer = document.getElementById('choicesContainer');
+    choicesContainer.innerHTML = '';
+
+    // Add 5 new empty choice rows
+    for (let i = 0; i < 5; i++) {
+        const choiceRow = createNewChoiceRow();
+        choicesContainer.appendChild(choiceRow);
+    }
 }
 
 async function saveProblem(problemCreateRequest){
@@ -591,10 +581,31 @@ async function handleRemoveProblem(problemId){
     }
 }
 
+function createNewChoiceRow() {
+    const choiceRow = document.createElement('div');
+    choiceRow.className = 'choice-row input-group mb-2';
+    choiceRow.innerHTML = `
+        <textarea class="form-control choiceContent" required></textarea>
+        <div class="input-group-append">
+            <div class="input-group-text">
+                <input type="checkbox" class="isAnswer" aria-label="정답 체크">
+            </div>
+            <button class="btn btn-outline-danger remove-choice-btn" type="button">
+                <i class="fas fa-trash"></i>
+            </button>
+        </div>
+    `;
+
+    const removeBtn = choiceRow.querySelector('.remove-choice-btn');
+    removeBtn.addEventListener('click', () => choiceRow.remove());
+
+    return choiceRow;
+}
+
+
 function prepareProblemForm(){
     if(!selectedSubjectName || !selectedYear || !selectedExamName){
         alert("시험을 선택해주세요");
-
         return false;
     }
 
@@ -606,11 +617,7 @@ function prepareProblemForm(){
     examYear.value = selectedYear;
     examName.value = selectedExamName;
 
-    resetAddProblemModal();
-    const choicesContainer = document.getElementById('choicesContainer');
-    for(let i=0; i<5; i++){
-        addChoiceBtn.click();
-    }
+    resetProblemContainer(); // Resets form and initializes 5 choices
 }
 
 function resetAddProblemModal() {
