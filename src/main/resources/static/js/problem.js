@@ -426,6 +426,8 @@ async function addHandlerProblemSaveClick() {
 
         await loadProblemData(problemList);
         resetProblemContainer();
+
+        alert('저장되었습니다.');
     } catch (error) {
         alert(error.message);
     }
