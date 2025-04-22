@@ -35,16 +35,12 @@ public class MemberServiceImpl implements MemberService
         Member targetMember = findById(memberId);
         targetMember.update(request);
 
-        log.info("targetMember {}", targetMember );
-
         memberRepository.save(targetMember);
     }
 
     @Override
     public MemberDTO getById(long id)
     {
-        log.info("member id = {}", id);
-
         return memberMapper.toMemberDTO(findById(id));
     }
 

@@ -56,7 +56,6 @@ public class JwtServiceImpl implements JwtService
     {
         Date expirationDate = extractClaim(token, Claims::getExpiration);
         String email = extractSubject(token);
-        log.info("validation processing...");
 
         return !expirationDate.before(new Date()) && memberDetails.getUsername().equals(email);
     }

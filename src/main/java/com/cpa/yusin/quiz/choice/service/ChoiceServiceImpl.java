@@ -83,7 +83,6 @@ public class ChoiceServiceImpl implements ChoiceService
     public void deleteById(long choiceId)
     {
         Choice choice = findById(choiceId);
-        log.info("Delete choice with id {}", choiceId);
 
         choiceRepository.deleteById(choice.getId());
     }

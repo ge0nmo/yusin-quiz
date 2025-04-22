@@ -97,7 +97,6 @@ public class QuestionServiceImpl implements QuestionService
     @Override
     public void deleteById(long questionId) {
         Question question = findById(questionId);
-        log.info("question id = {}", question);
         answerChecker.hasAnswer(question.getId());
 
         questionRepository.deleteById(questionId);
