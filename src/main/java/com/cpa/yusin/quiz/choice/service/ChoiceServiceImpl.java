@@ -1,6 +1,7 @@
 package com.cpa.yusin.quiz.choice.service;
 
 import com.cpa.yusin.quiz.choice.controller.dto.request.ChoiceCreateRequest;
+import com.cpa.yusin.quiz.choice.controller.dto.request.ChoiceRequest;
 import com.cpa.yusin.quiz.choice.controller.dto.request.ChoiceUpdateRequest;
 import com.cpa.yusin.quiz.choice.controller.dto.response.ChoiceResponse;
 import com.cpa.yusin.quiz.choice.controller.mapper.ChoiceMapper;
@@ -15,6 +16,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -44,6 +47,34 @@ public class ChoiceServiceImpl implements ChoiceService
     public long save(Choice choice)
     {
         return choiceRepository.save(choice).getId();
+    }
+
+    @Transactional
+    public List<Choice> saveOrUpdate(List<ChoiceRequest> requests, Problem problem)
+    {
+        List<Choice> choices = new ArrayList<>();
+        for(ChoiceRequest request : requests)
+        {
+            Choice choice = request.isNew() ? Choice.fromSaveOrUpdate(request, problem) : update(request);
+            if(choice != null) choices.add(choice);
+        }
+
+        if(!choices.isEmpty())
+            return choiceRepository.saveAll(choices);
+
+        return Collections.emptyList();
+    }
+
+    private Choice update(ChoiceRequest request)
+    {
+        Choice choice = findById(request.getId());
+        if(request.isRemovedYn()){
+            choiceRepository.deleteById(choice.getId());
+            return null;
+        }
+
+        choice.update(request.getNumber(), request.getContent(), request.getIsAnswer());
+        return choice;
     }
 
     @Transactional

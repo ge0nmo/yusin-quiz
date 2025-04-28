@@ -34,6 +34,16 @@ public class Problem
     @JoinColumn(name = "exam_id", nullable = false)
     private Exam exam;
 
+    public static Problem fromSaveOrUpdate(ProblemRequest request, Exam exam)
+    {
+        return Problem.builder()
+                .content(request.getContent())
+                .explanation(request.getExplanation())
+                .number(request.getNumber())
+                .exam(exam)
+                .build();
+    }
+
 
     public void update(String content, int number, String explanation)
     {

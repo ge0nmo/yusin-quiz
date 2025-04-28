@@ -1,7 +1,6 @@
 package com.cpa.yusin.quiz.choice.controller.mapper;
 
 import com.cpa.yusin.quiz.choice.controller.dto.request.ChoiceCreateRequest;
-import com.cpa.yusin.quiz.choice.controller.dto.request.ChoiceRequest;
 import com.cpa.yusin.quiz.choice.controller.dto.request.ChoiceUpdateRequest;
 import com.cpa.yusin.quiz.choice.controller.dto.response.ChoiceCreateResponse;
 import com.cpa.yusin.quiz.choice.controller.dto.response.ChoiceResponse;

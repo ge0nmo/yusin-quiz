@@ -2,11 +2,13 @@ package com.cpa.yusin.quiz.problem.service;
 
 import com.cpa.yusin.quiz.choice.controller.dto.response.ChoiceResponse;
 import com.cpa.yusin.quiz.choice.controller.port.ChoiceService;
+import com.cpa.yusin.quiz.choice.domain.Choice;
 import com.cpa.yusin.quiz.exam.controller.port.ExamService;
 import com.cpa.yusin.quiz.exam.domain.Exam;
 import com.cpa.yusin.quiz.global.exception.ExceptionMessage;
 import com.cpa.yusin.quiz.global.exception.ProblemException;
 import com.cpa.yusin.quiz.problem.controller.dto.request.ProblemCreateRequest;
+import com.cpa.yusin.quiz.problem.controller.dto.request.ProblemRequest;
 import com.cpa.yusin.quiz.problem.controller.dto.request.ProblemUpdateRequest;
 import com.cpa.yusin.quiz.problem.controller.dto.response.ProblemDTO;
 import com.cpa.yusin.quiz.problem.controller.dto.response.ProblemResponse;
@@ -53,6 +55,17 @@ public class ProblemServiceImpl implements ProblemService
 
         problem.update(request.getContent(), request.getNumber(), request.getExplanation());
         problemRepository.save(problem);
+    }
+
+    @Transactional
+    @Override
+    public ProblemDTO saveOrUpdate(ProblemRequest request, long examId)
+    {
+        Exam exam = examService.findById(examId);
+        Problem problem = Problem.fromSaveOrUpdate(request, exam);
+        problem = problemRepository.save(problem);
+        List<Choice> choices = choiceService.saveOrUpdate(request.getChoices(), problem);
+        return problemMapper.toProblemDTO2(problem, choices);
     }
 
     @Transactional

@@ -15,7 +15,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class ProblemServiceTest extends MockSetup
 {
-    /*@Test
+    @Test
     void saveOrUpdate()
     {
         // given
@@ -28,12 +28,11 @@ class ProblemServiceTest extends MockSetup
 
         );
 
-        List<ProblemRequest> request = List.of(
-                ProblemRequest.builder().content("problem1").number(1).choices(choices1).build()
-        );
+        ProblemRequest request =
+                ProblemRequest.builder().content("problem1").number(1).choices(choices1).build();
 
         // when
-        testContainer.problemService.saveOrUpdateProblem(biologyExam2.getId(), request);
+        testContainer.problemService.saveOrUpdate(request, biologyExam2.getId());
 
         // then
         List<Choice> choices = testContainer.choiceRepository.findAllByExamId(biologyExam2.getId());
@@ -63,34 +62,9 @@ class ProblemServiceTest extends MockSetup
 
         assertThat(problems.getFirst().getContent()).isEqualTo("problem1");
         assertThat(problems.getFirst().getNumber()).isEqualTo(1);
-    }*/
+    }
 
-    /*@DisplayName("completePayment when ids exist in the request")
-    @Test
-    void saveOrUpdate2()
-    {
-        // given
-        List<ChoiceRequest> choices1 = List.of(
-                ChoiceRequest.builder().id(1L).content("problem1 - choice1").number(1).isAnswer(false).build(),
-                ChoiceRequest.builder().id(2L).content("problem1 - choice2").number(2).isAnswer(true).build(),
-                ChoiceRequest.builder().id(3L).content("problem1 - choice3").number(3).isDeleted(true).isAnswer(false).build()
-        );
 
-        List<ProblemRequest> request = List.of(
-                ProblemRequest.builder().id(physicsProblem1.getId()).content("problem1").number(1).choices(choices1).build()
-        );
-
-        // when
-        testContainer.problemService.saveOrUpdateProblem(physicsExam1.getId(), request);
-
-        // then
-        List<Choice> choices = testContainer.choiceRepository.findAllByExamId(physicsExam1.getId());
-
-        assertThat(choices).hasSize(2);
-        assertThat(choices.getFirst().getContent()).isEqualTo("problem1 - choice1");
-        assertThat(choices.getFirst().getNumber()).isEqualTo(1);
-        assertThat(choices.getFirst().getIsAnswer()).isFalse();
-    }*/
 
     @Test
     void getById()
