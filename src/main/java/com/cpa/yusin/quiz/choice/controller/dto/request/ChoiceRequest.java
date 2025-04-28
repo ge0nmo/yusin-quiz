@@ -22,7 +22,7 @@ public class ChoiceRequest
 
     public boolean isNew()
     {
-        return !removedYn;
+        return id.equals(-1L);
     }
 
 }

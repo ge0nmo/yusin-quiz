@@ -77,26 +77,6 @@ public class ChoiceServiceImpl implements ChoiceService
         return choice;
     }
 
-    @Transactional
-    @Override
-    public void update(List<ChoiceUpdateRequest> requests, Problem problem)
-    {
-        for(ChoiceUpdateRequest request : requests)
-        {
-            if(request.getId() == null){
-                Choice choice = choiceMapper.fromUpdateRequestToChoice(request, problem);
-                choiceRepository.save(choice);
-            } else{
-                Choice choice = findById(request.getId());
-                if(request.getIsDeleted()){
-                    choiceRepository.deleteById(choice.getId());
-                }else{
-                    choice.update(request.getNumber(), request.getContent(), request.getIsAnswer());
-                    choiceRepository.save(choice);
-                }
-            }
-        }
-    }
 
     @Transactional
     @Override

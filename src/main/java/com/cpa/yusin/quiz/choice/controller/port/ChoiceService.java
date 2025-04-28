@@ -18,7 +18,6 @@ public interface ChoiceService
 
     List<Choice> saveOrUpdate(List<ChoiceRequest> requests, Problem problem);
 
-    void update(List<ChoiceUpdateRequest> requests, Problem problem);
 
     void update(long choiceId, ChoiceUpdateRequest request);
 

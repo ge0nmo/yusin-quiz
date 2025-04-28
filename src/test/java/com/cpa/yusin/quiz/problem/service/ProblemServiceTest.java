@@ -4,6 +4,7 @@ import com.cpa.yusin.quiz.choice.controller.dto.request.ChoiceRequest;
 import com.cpa.yusin.quiz.choice.domain.Choice;
 import com.cpa.yusin.quiz.config.MockSetup;
 import com.cpa.yusin.quiz.problem.controller.dto.request.ProblemRequest;
+import com.cpa.yusin.quiz.problem.controller.dto.response.ProblemDTO;
 import com.cpa.yusin.quiz.problem.controller.dto.response.ProblemResponse;
 import com.cpa.yusin.quiz.problem.domain.Problem;
 import org.junit.jupiter.api.DisplayName;
@@ -62,6 +63,47 @@ class ProblemServiceTest extends MockSetup
 
         assertThat(problems.getFirst().getContent()).isEqualTo("problem1");
         assertThat(problems.getFirst().getNumber()).isEqualTo(1);
+    }
+
+    @Test
+    void saveOrUpdate_whenUpdate()
+    {
+        // given
+        long examId = biologyExam1.getId();
+        Problem savedProblem = testContainer.problemRepository.save(Problem.builder()
+                .id(10L)
+                .number(10)
+                .content("알맞은 것을 고르시오")
+                .explanation("설명")
+                .exam(biologyExam1)
+                .build());
+
+        testContainer.choiceRepository.saveAll(List.of(
+                Choice.builder().id(10L).number(1).content("1").problem(savedProblem).isAnswer(false).build(),
+                Choice.builder().id(11L).number(2).content("2").problem(savedProblem).isAnswer(true).build(),
+                Choice.builder().id(12L).number(3).content("3").problem(savedProblem).isAnswer(true).build(),
+                Choice.builder().id(13L).number(4).content("4").problem(savedProblem).isAnswer(false).build(),
+                Choice.builder().id(14L).number(5).content("5").problem(savedProblem).isAnswer(false).build()
+        ));
+        List<ChoiceRequest> choiceRequests = List.of(
+                ChoiceRequest.builder().id(10L).number(1).content("수정1").isAnswer(true).build(),
+                ChoiceRequest.builder().id(10L).number(1).content("수정2").isAnswer(false).build(),
+                ChoiceRequest.builder().id(10L).number(1).content("수정3").isAnswer(false).build(),
+                ChoiceRequest.builder().id(10L).number(1).content("수정4").isAnswer(false).build(),
+                ChoiceRequest.builder().id(10L).number(1).content("수정5").isAnswer(false).build()
+        );
+
+        ProblemRequest request = ProblemRequest.builder().id(10L).number(10).content("알맞을 것을 고르시오(수정)")
+                .explanation("설명(수정)").choices(choiceRequests).build();
+
+        // when
+
+        ProblemDTO result = testContainer.problemService.saveOrUpdate(request, examId);
+
+        // then
+        assertThat(result.getContent()).isEqualTo("알맞을 것을 고르시오(수정)");
+        assertThat(result.getExplanation()).isEqualTo("설명(수정)");
+
     }
 
 
