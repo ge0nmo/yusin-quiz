@@ -45,7 +45,7 @@ jobs:
 
       - name: Move test.properties
         run: |
-          echo "${{ secrets.TEST_PROPERTIES }}" | base64 --decode -i > ./src/test/resources/application-test.properties
+          printf "%s" "${{ secrets.TEST_PROPERTIES }}" | base64 --decode > ./src/test/resources/application-test.properties
           
           cat ./src/test/resources/application-test.properties
 
