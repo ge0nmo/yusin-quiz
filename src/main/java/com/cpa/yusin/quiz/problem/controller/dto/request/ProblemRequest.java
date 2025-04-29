@@ -1,7 +1,6 @@
 package com.cpa.yusin.quiz.problem.controller.dto.request;
 
 import com.cpa.yusin.quiz.choice.controller.dto.request.ChoiceRequest;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 
 import java.util.List;
@@ -16,12 +15,11 @@ public class ProblemRequest
     private Long id;
     private String content;
     private int number;
-    private Boolean isDeleted;
+    private String explanation;
     private List<ChoiceRequest> choices;
 
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     public boolean isNew()
     {
-        return id == null || id <= 0;
+        return this.id == null || this.id.equals(-1L);
     }
 }

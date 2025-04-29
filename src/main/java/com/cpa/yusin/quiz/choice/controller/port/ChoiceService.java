@@ -1,6 +1,7 @@
 package com.cpa.yusin.quiz.choice.controller.port;
 
 import com.cpa.yusin.quiz.choice.controller.dto.request.ChoiceCreateRequest;
+import com.cpa.yusin.quiz.choice.controller.dto.request.ChoiceRequest;
 import com.cpa.yusin.quiz.choice.controller.dto.request.ChoiceUpdateRequest;
 import com.cpa.yusin.quiz.choice.controller.dto.response.ChoiceResponse;
 import com.cpa.yusin.quiz.choice.domain.Choice;
@@ -15,7 +16,7 @@ public interface ChoiceService
 
     long save(Choice choice);
 
-    void update(List<ChoiceUpdateRequest> requests, Problem problem);
+    List<Choice> saveOrUpdate(List<ChoiceRequest> requests, Problem problem);
 
     void update(long choiceId, ChoiceUpdateRequest request);
 

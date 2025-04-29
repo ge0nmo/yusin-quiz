@@ -163,7 +163,7 @@ public class TestContainer
         this.choiceMapper = new ChoiceMapperImpl();
         this.choiceService = new ChoiceServiceImpl(this.choiceRepository, this.choiceMapper);
 
-        this.problemMapper = new ProblemMapper();
+        this.problemMapper = new ProblemMapper(this.choiceMapper);
         this.problemService = new ProblemServiceImpl(this.problemRepository, this.problemMapper,
                 this.examService, this.choiceService);
 

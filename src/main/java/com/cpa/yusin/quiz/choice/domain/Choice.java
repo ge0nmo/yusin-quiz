@@ -2,8 +2,6 @@ package com.cpa.yusin.quiz.choice.domain;
 
 import com.cpa.yusin.quiz.choice.controller.dto.request.ChoiceRequest;
 import com.cpa.yusin.quiz.common.infrastructure.BaseEntity;
-import com.cpa.yusin.quiz.global.exception.ExceptionMessage;
-import com.cpa.yusin.quiz.global.exception.ProblemException;
 import com.cpa.yusin.quiz.problem.domain.Problem;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -46,5 +44,14 @@ public class Choice extends BaseEntity
         this.isAnswer = isAnswer;
     }
 
+    public static Choice fromSaveOrUpdate(ChoiceRequest request, Problem problem)
+    {
+        return Choice.builder()
+                .content(request.getContent())
+                .number(request.getNumber())
+                .isAnswer(request.getIsAnswer())
+                .problem(problem)
+                .build();
+    }
 
 }

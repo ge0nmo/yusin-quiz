@@ -1,6 +1,5 @@
 package com.cpa.yusin.quiz.choice.controller.dto.request;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
@@ -18,12 +17,12 @@ public class ChoiceRequest
     private String content;
     @NotNull
     private Boolean isAnswer;
-    @NotNull
-    private Boolean isDeleted;
 
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    private boolean removedYn;
+
     public boolean isNew()
     {
-        return id == null || id < 0;
+        return this.id == null || this.id.equals(-1L);
     }
+
 }

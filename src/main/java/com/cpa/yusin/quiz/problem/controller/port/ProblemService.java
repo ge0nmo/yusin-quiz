@@ -13,6 +13,9 @@ public interface ProblemService
 {
     void save(long examId, ProblemCreateRequest request);
 
+    ProblemDTO processSaveOrUpdate(ProblemRequest request, long examId);
+
+
     void update(long problemId, ProblemUpdateRequest request);
 
     void deleteProblem(long problemId);
