@@ -87,7 +87,7 @@ spring:
 
   data:
     redis:
-      host: localhost
+      host: redis-server
       port: 6379
       password:
 
@@ -104,4 +104,3 @@ management:
 logging:
   level:
     root: info
-    org.springframework.data.redis: debug
