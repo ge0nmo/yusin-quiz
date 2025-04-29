@@ -6,7 +6,6 @@ import com.cpa.yusin.quiz.choice.controller.mapper.ChoiceMapper;
 import com.cpa.yusin.quiz.choice.domain.Choice;
 import com.cpa.yusin.quiz.exam.domain.Exam;
 import com.cpa.yusin.quiz.problem.controller.dto.request.ProblemCreateRequest;
-import com.cpa.yusin.quiz.problem.controller.dto.request.ProblemRequest;
 import com.cpa.yusin.quiz.problem.controller.dto.response.ProblemCreateResponse;
 import com.cpa.yusin.quiz.problem.controller.dto.response.ProblemDTO;
 import com.cpa.yusin.quiz.problem.controller.dto.response.ProblemResponse;
@@ -63,7 +62,7 @@ public class ProblemMapper
                 .build();
     }
 
-    public ProblemDTO toProblemDTO2(Problem problem, List<Choice> choices)
+    public ProblemDTO mapToProblemDTO(Problem problem, List<Choice> choices)
     {
         if(problem == null)
             return null;

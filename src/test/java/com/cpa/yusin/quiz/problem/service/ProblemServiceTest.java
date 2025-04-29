@@ -33,7 +33,7 @@ class ProblemServiceTest extends MockSetup
                 ProblemRequest.builder().content("problem1").number(1).choices(choices1).build();
 
         // when
-        testContainer.problemService.saveOrUpdate(request, biologyExam2.getId());
+        testContainer.problemService.processSaveOrUpdate(request, biologyExam2.getId());
 
         // then
         List<Choice> choices = testContainer.choiceRepository.findAllByExamId(biologyExam2.getId());
@@ -98,7 +98,7 @@ class ProblemServiceTest extends MockSetup
 
         // when
 
-        ProblemDTO result = testContainer.problemService.saveOrUpdate(request, examId);
+        ProblemDTO result = testContainer.problemService.processSaveOrUpdate(request, examId);
 
         // then
         assertThat(result.getContent()).isEqualTo("알맞을 것을 고르시오(수정)");

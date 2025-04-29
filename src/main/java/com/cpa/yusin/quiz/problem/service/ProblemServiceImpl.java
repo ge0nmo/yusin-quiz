@@ -59,29 +59,31 @@ public class ProblemServiceImpl implements ProblemService
 
     @Transactional
     @Override
-    public ProblemDTO saveOrUpdate(ProblemRequest request, long examId)
+    public ProblemDTO processSaveOrUpdate(ProblemRequest request, long examId)
     {
         Exam exam = examService.findById(examId);
 
-        Problem problem =  request.isNew() ? save(request, examId) : update(request);
+        return request.isNew() ? save(request, exam) : update(request);
+    }
+
+    private ProblemDTO save(ProblemRequest request, Exam exam){
+        Problem problem = Problem.fromSaveOrUpdate(request, exam);
+        problem = problemRepository.save(problem);
 
         List<Choice> choices = choiceService.saveOrUpdate(request.getChoices(), problem);
-        return problemMapper.toProblemDTO2(problem, choices);
+
+        return problemMapper.mapToProblemDTO(problem, choices);
     }
 
-    private Problem save(ProblemRequest request, long examId){
-        Exam exam = examService.findById(examId);
-
-        Problem problem = Problem.fromSaveOrUpdate(request, exam);
-
-        return problemRepository.save(problem);
-    }
-
-    private Problem update(ProblemRequest request)
+    private ProblemDTO update(ProblemRequest request)
     {
         Problem problem = findById(request.getId());
         problem.update(request.getContent(), request.getNumber(), request.getExplanation());
-        return problemRepository.save(problem);
+        problem = problemRepository.save(problem);
+
+        List<Choice> choices = choiceService.saveOrUpdate(request.getChoices(), problem);
+
+        return problemMapper.mapToProblemDTO(problem, choices);
     }
 
 

@@ -13,7 +13,7 @@ public interface ProblemService
 {
     void save(long examId, ProblemCreateRequest request);
 
-    ProblemDTO saveOrUpdate(ProblemRequest request, long examId);
+    ProblemDTO processSaveOrUpdate(ProblemRequest request, long examId);
 
 
     void update(long problemId, ProblemUpdateRequest request);

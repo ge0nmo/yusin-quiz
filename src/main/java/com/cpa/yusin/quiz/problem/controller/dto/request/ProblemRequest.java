@@ -20,6 +20,6 @@ public class ProblemRequest
 
     public boolean isNew()
     {
-        return id.equals(-1L);
+        return this.id == null || this.id.equals(-1L);
     }
 }
