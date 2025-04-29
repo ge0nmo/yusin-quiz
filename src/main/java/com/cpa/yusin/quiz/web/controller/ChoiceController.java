@@ -18,23 +18,27 @@ public class ChoiceController
     private final ProblemChoiceFacade problemChoiceFacade;
 
     @PostMapping("/choice")
-    public ResponseEntity<Long> save(@RequestParam("problemId") long problemId, @Validated @RequestBody ChoiceCreateRequest request)
+    public ResponseEntity<Long> save(@RequestParam("problemId") long problemId,
+                                     @Validated @RequestBody ChoiceCreateRequest request,
+                                     @RequestParam("examId") long examId)
     {
-        long response = problemChoiceFacade.saveChoice(problemId, request);
+        long response = problemChoiceFacade.saveChoice(problemId, request, examId);
 
         return ResponseEntity.ok(response);
     }
 
     @PatchMapping("/choice/{choiceId}")
-    public void update(@PathVariable("choiceId") long choiceId, @Validated @RequestBody ChoiceUpdateRequest request)
+    public void update(@PathVariable("choiceId") long choiceId, @Validated @RequestBody ChoiceUpdateRequest request,
+                       @RequestParam("examId") long examId)
     {
-        choiceService.update(choiceId, request);
+        choiceService.update(choiceId, request, examId);
     }
 
     @DeleteMapping("/choice/{choiceId}")
-    public ResponseEntity<Void> delete(@PathVariable("choiceId") long choiceId)
+    public ResponseEntity<Void> delete(@PathVariable("choiceId") long choiceId,
+                                       @RequestParam("examId") long examId)
     {
-        choiceService.deleteById(choiceId);
+        choiceService.deleteById(choiceId, examId);
 
         return ResponseEntity.noContent().build();
     }

@@ -1,10 +1,11 @@
 package com.cpa.yusin.quiz.web.controller;
 
 
+import com.cpa.yusin.quiz.common.controller.dto.response.GlobalResponse;
 import com.cpa.yusin.quiz.global.utils.DateUtils;
 import com.cpa.yusin.quiz.problem.controller.dto.request.ProblemCreateRequest;
 import com.cpa.yusin.quiz.problem.controller.dto.request.ProblemUpdateRequest;
-import com.cpa.yusin.quiz.problem.controller.dto.response.ProblemResponse;
+import com.cpa.yusin.quiz.problem.controller.dto.response.ProblemDTO;
 import com.cpa.yusin.quiz.problem.controller.port.ProblemService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -35,9 +36,10 @@ public class ProblemController
 
     @ResponseBody
     @GetMapping("/problem/list")
-    public List<ProblemResponse> get(@RequestParam("examId") long examId)
+    public List<ProblemDTO> get(@RequestParam("examId") long examId)
     {
-        return problemService.getAllByExamId(examId);
+        GlobalResponse<List<ProblemDTO>> response = problemService.getAllByExamId(examId);
+        return response.getData();
     }
 
     @ResponseBody
@@ -49,15 +51,17 @@ public class ProblemController
 
     @ResponseBody
     @PatchMapping("/problem/{problemId}")
-    public void update(@PathVariable("problemId") long problemId, @Validated @RequestBody ProblemUpdateRequest request)
+    public void update(@PathVariable("problemId") long problemId, @Validated @RequestBody ProblemUpdateRequest request,
+                       @RequestParam("examId") long examId)
     {
-        problemService.update(problemId, request);
+        problemService.update(problemId, request, examId);
     }
 
     @ResponseBody
     @DeleteMapping("/problem/{problemId}")
-    public void delete(@PathVariable("problemId") long problemId)
+    public void delete(@PathVariable("problemId") long problemId,
+                       @RequestParam("examId") long examId)
     {
-        problemService.deleteProblem(problemId);
+        problemService.deleteProblem(problemId, examId);
     }
 }

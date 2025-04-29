@@ -2,7 +2,6 @@ package com.cpa.yusin.quiz.problem.controller;
 
 import com.cpa.yusin.quiz.common.controller.dto.response.GlobalResponse;
 import com.cpa.yusin.quiz.problem.controller.dto.response.ProblemDTO;
-import com.cpa.yusin.quiz.problem.controller.dto.response.ProblemResponse;
 import com.cpa.yusin.quiz.problem.controller.port.ProblemService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -26,11 +25,11 @@ public class ProblemController
     }
 
     @GetMapping
-    public ResponseEntity<GlobalResponse<List<ProblemResponse>>> getAllByExamId(@RequestParam("examId") long examId)
+    public ResponseEntity<GlobalResponse<List<ProblemDTO>>> getAllByExamId(@RequestParam("examId") long examId)
     {
-        List<ProblemResponse> response = problemService.getAllByExamId(examId);
+        GlobalResponse<List<ProblemDTO>> response = problemService.getAllByExamId(examId);
 
-        return ResponseEntity.ok(new GlobalResponse<>(response));
+        return ResponseEntity.ok(response);
     }
 
 }

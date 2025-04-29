@@ -354,7 +354,7 @@ async function addNewChoice(problemId, buttonElement){
             isAnswer: isAnswer,
         };
 
-        const response = await fetch(`/admin/choice?problemId=${problemId}`, {
+        const response = await fetch(`/admin/choice?problemId=${problemId}&examId=${selectedExamId}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -477,7 +477,7 @@ async function handleUpdateProblemClick(problemId) {
             explanation: explanation,
         };
 
-        const response = await fetch(`/admin/problem/${problemId}`, {
+        const response = await fetch(`/admin/problem/${problemId}?examId=${selectedExamId}`, {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(problemUpdateRequest),
@@ -521,7 +521,7 @@ async function updateChoice(choiceId){
             isAnswer: isAnswer
         }
 
-        const response = await fetch(`/admin/choice/${choiceId}`, {
+        const response = await fetch(`/admin/choice/${choiceId}?examId=${selectedExamId}`, {
             method: 'PATCH',
             headers: {
                 'Content-Type': 'application/json'
@@ -545,7 +545,7 @@ async function handleRemoveChoiceClick(choiceId){
 
         const choiceItem = document.querySelector(`.choice-item[data-choice-id="${choiceId}"]`);
 
-        const response = await fetch(`/admin/choice/${choiceId}`, {
+        const response = await fetch(`/admin/choice/${choiceId}?examId=${selectedExamId}`, {
             method: 'DELETE',
         });
 
@@ -571,7 +571,7 @@ async function handleRemoveProblem(problemId){
             return;
         }
 
-        await fetch(`/admin/problem/${problemId}`, {
+        await fetch(`/admin/problem/${problemId}?examId=${selectedExamId}`, {
             method: 'DELETE',
         });
 

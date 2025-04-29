@@ -12,15 +12,15 @@ import java.util.Map;
 
 public interface ChoiceService
 {
-    void save(Problem problem, List<ChoiceCreateRequest> requests);
+    void save(Problem problem, List<ChoiceCreateRequest> requests, long examId);
 
-    long save(Choice choice);
+    long save(Choice choice, long examId);
 
     List<Choice> saveOrUpdate(List<ChoiceRequest> requests, Problem problem);
 
-    void update(long choiceId, ChoiceUpdateRequest request);
+    void update(long choiceId, ChoiceUpdateRequest request, long examId);
 
-    void deleteById(long choiceId);
+    void deleteById(long choiceId, long examId);
 
     Choice findById(long id);
 

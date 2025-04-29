@@ -3,6 +3,7 @@ package com.cpa.yusin.quiz.problem.service;
 import com.cpa.yusin.quiz.choice.controller.dto.response.ChoiceResponse;
 import com.cpa.yusin.quiz.choice.controller.port.ChoiceService;
 import com.cpa.yusin.quiz.choice.domain.Choice;
+import com.cpa.yusin.quiz.common.controller.dto.response.GlobalResponse;
 import com.cpa.yusin.quiz.exam.controller.port.ExamService;
 import com.cpa.yusin.quiz.exam.domain.Exam;
 import com.cpa.yusin.quiz.global.exception.ExceptionMessage;
@@ -11,13 +12,14 @@ import com.cpa.yusin.quiz.problem.controller.dto.request.ProblemCreateRequest;
 import com.cpa.yusin.quiz.problem.controller.dto.request.ProblemRequest;
 import com.cpa.yusin.quiz.problem.controller.dto.request.ProblemUpdateRequest;
 import com.cpa.yusin.quiz.problem.controller.dto.response.ProblemDTO;
-import com.cpa.yusin.quiz.problem.controller.dto.response.ProblemResponse;
 import com.cpa.yusin.quiz.problem.controller.mapper.ProblemMapper;
 import com.cpa.yusin.quiz.problem.controller.port.ProblemService;
 import com.cpa.yusin.quiz.problem.domain.Problem;
 import com.cpa.yusin.quiz.problem.service.port.ProblemRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,6 +37,7 @@ public class ProblemServiceImpl implements ProblemService
     private final ExamService examService;
     private final ChoiceService choiceService;
 
+    @CacheEvict(value = "problems", key = "#examId")
     @Transactional
     @Override
     public void save(long examId, ProblemCreateRequest request)
@@ -44,12 +47,13 @@ public class ProblemServiceImpl implements ProblemService
         Problem problem = problemMapper.toProblemEntity(request, exam);
 
         problem = problemRepository.save(problem);
-        choiceService.save(problem, request.getChoices());
+        choiceService.save(problem, request.getChoices(), examId);
     }
 
+    @CacheEvict(value = "problems", key = "#examId")
     @Transactional
     @Override
-    public void update(long problemId, ProblemUpdateRequest request)
+    public void update(long problemId, ProblemUpdateRequest request, long examId)
     {
         Problem problem = findById(problemId);
 
@@ -57,6 +61,7 @@ public class ProblemServiceImpl implements ProblemService
         problemRepository.save(problem);
     }
 
+    @CacheEvict(value = "problems", key = "#examId")
     @Transactional
     @Override
     public ProblemDTO processSaveOrUpdate(ProblemRequest request, long examId)
@@ -87,23 +92,27 @@ public class ProblemServiceImpl implements ProblemService
     }
 
 
+    @CacheEvict(value = "problems", key = "#examId")
     @Transactional
     @Override
-    public void deleteProblem(long problemId)
+    public void deleteProblem(long problemId, long examId)
     {
         choiceService.deleteAllByProblemId(problemId);
         problemRepository.deleteById(problemId);
     }
 
+    @Cacheable(value = "problems", key = "#examId")
     @Override
-    public List<ProblemResponse> getAllByExamId(long examId)
+    public GlobalResponse<List<ProblemDTO>> getAllByExamId(long examId)
     {
         List<Problem> problems = problemRepository.findAllByExamId(examId);
         Map<Long, List<ChoiceResponse>> choiceMap = choiceService.findAllByExamId(examId);
 
-        return problems.stream()
-                .map(problem -> problemMapper.toResponse(problem, choiceMap.get(problem.getId())))
+        List<ProblemDTO> response = problems.stream()
+                .map(problem -> problemMapper.toProblemDTO(problem, choiceMap.get(problem.getId())))
                 .toList();
+
+        return new GlobalResponse<>(response);
     }
 
 

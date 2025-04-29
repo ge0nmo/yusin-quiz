@@ -13,6 +13,7 @@ import com.cpa.yusin.quiz.global.exception.ExceptionMessage;
 import com.cpa.yusin.quiz.problem.domain.Problem;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,9 +33,10 @@ public class ChoiceServiceImpl implements ChoiceService
     private final ChoiceRepository choiceRepository;
     private final ChoiceMapper choiceMapper;
 
+    @CacheEvict(value = "problems", key = "#examId")
     @Transactional
     @Override
-    public void save(Problem problem, List<ChoiceCreateRequest> requests)
+    public void save(Problem problem, List<ChoiceCreateRequest> requests, long examId)
     {
         List<Choice> choiceRequests = requests.stream().map(request -> choiceMapper.fromCreateRequestToChoice(request, problem))
                 .toList();
@@ -42,9 +44,10 @@ public class ChoiceServiceImpl implements ChoiceService
         choiceRepository.saveAll(choiceRequests);
     }
 
+    @CacheEvict(value = "problems", key = "#examId")
     @Transactional
     @Override
-    public long save(Choice choice)
+    public long save(Choice choice, long examId)
     {
         return choiceRepository.save(choice).getId();
     }
@@ -78,10 +81,10 @@ public class ChoiceServiceImpl implements ChoiceService
         return choice;
     }
 
-
+    @CacheEvict(value = "problems", key = "#examId")
     @Transactional
     @Override
-    public void update(long choiceId, ChoiceUpdateRequest request)
+    public void update(long choiceId, ChoiceUpdateRequest request, long examId)
     {
         Choice choice = findById(choiceId);
 
@@ -90,9 +93,10 @@ public class ChoiceServiceImpl implements ChoiceService
         choiceRepository.save(choice);
     }
 
+    @CacheEvict(value = "problems", key = "#examId")
     @Transactional
     @Override
-    public void deleteById(long choiceId)
+    public void deleteById(long choiceId, long examId)
     {
         Choice choice = findById(choiceId);
 

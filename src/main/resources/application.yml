@@ -85,6 +85,13 @@ spring:
   mvc:
     static-path-pattern: /static/**
 
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      password:
+
+
 management:
   endpoints:
     web:
@@ -97,3 +104,4 @@ management:
 logging:
   level:
     root: info
+    org.springframework.data.redis: debug
