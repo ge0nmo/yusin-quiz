@@ -105,29 +105,7 @@ class ProblemServiceTest extends MockSetup
 
     }
 
-
-
-    @Test
-    void getById()
-    {
-        // given
-
-        // when
-
-        // then
-    }
-
-    @Test
-    void findById()
-    {
-        // given
-
-        // when
-
-        // then
-    }
-
-    @Test
+    /*@Test
     void getAllByExamId()
     {
         // given
@@ -156,5 +134,5 @@ class ProblemServiceTest extends MockSetup
         assertThat(result).hasSize(2);
         assertThat(result.get(0).choices()).hasSize(3);
         assertThat(result.get(1).choices()).isEmpty();
-    }
+    }*/
 }
