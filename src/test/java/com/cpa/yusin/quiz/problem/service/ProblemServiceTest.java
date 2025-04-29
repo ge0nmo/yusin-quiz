@@ -2,12 +2,11 @@ package com.cpa.yusin.quiz.problem.service;
 
 import com.cpa.yusin.quiz.choice.controller.dto.request.ChoiceRequest;
 import com.cpa.yusin.quiz.choice.domain.Choice;
+import com.cpa.yusin.quiz.common.controller.dto.response.GlobalResponse;
 import com.cpa.yusin.quiz.config.MockSetup;
 import com.cpa.yusin.quiz.problem.controller.dto.request.ProblemRequest;
 import com.cpa.yusin.quiz.problem.controller.dto.response.ProblemDTO;
-import com.cpa.yusin.quiz.problem.controller.dto.response.ProblemResponse;
 import com.cpa.yusin.quiz.problem.domain.Problem;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -101,8 +100,8 @@ class ProblemServiceTest extends MockSetup
         ProblemDTO result = testContainer.problemService.processSaveOrUpdate(request, examId);
 
         // then
-        assertThat(result.getContent()).isEqualTo("알맞을 것을 고르시오(수정)");
-        assertThat(result.getExplanation()).isEqualTo("설명(수정)");
+        assertThat(result.content()).isEqualTo("알맞을 것을 고르시오(수정)");
+        assertThat(result.explanation()).isEqualTo("설명(수정)");
 
     }
 
@@ -150,11 +149,12 @@ class ProblemServiceTest extends MockSetup
                 .build());
 
         // when
-        List<ProblemResponse> result = testContainer.problemService.getAllByExamId(examId);
+        GlobalResponse<List<ProblemDTO>> response = testContainer.problemService.getAllByExamId(examId);
+        List<ProblemDTO> result = response.getData();
 
         // then
         assertThat(result).hasSize(2);
-        assertThat(result.get(0).getChoices()).hasSize(3);
-        assertThat(result.get(1).getChoices()).isEmpty();
+        assertThat(result.get(0).choices()).hasSize(3);
+        assertThat(result.get(1).choices()).isEmpty();
     }
 }

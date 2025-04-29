@@ -7,6 +7,7 @@ import com.cpa.yusin.quiz.choice.domain.Choice;
 import com.cpa.yusin.quiz.problem.controller.port.ProblemService;
 import com.cpa.yusin.quiz.problem.domain.Problem;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,11 +20,11 @@ public class ProblemChoiceFacade
     private final ChoiceService choiceService;
     private final ChoiceMapper choiceMapper;
 
-    public long saveChoice(long problemId, ChoiceCreateRequest request)
+    public long saveChoice(long problemId, ChoiceCreateRequest request, long examId)
     {
         Problem problem = problemService.findById(problemId);
         Choice choice = choiceMapper.fromCreateRequestToChoice(request, problem);
 
-        return choiceService.save(choice);
+        return choiceService.save(choice, examId);
     }
 }
