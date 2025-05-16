@@ -12,41 +12,6 @@ services:
     networks:
       - quiz
 
-  prometheus:
-    image: prom/prometheus:latest
-    container_name: prometheus
-    ports:
-      - "9090:9090"
-    volumes:
-      - /home/ubuntu/prometheus.yml:/etc/prometheus/prometheus.yml
-    networks:
-      - quiz
-
-  grafana:
-    image: grafana/grafana:latest
-    container_name: grafana
-    ports:
-      - "3000:3000"
-    volumes:
-      - ./grafana/provisioning/:/etc/grafana/provisioning/
-    depends_on:
-      - prometheus
-    networks:
-      - quiz
-
-  node-exporter:
-    image: prom/node-exporter:latest
-    container_name: node-exporter
-    ports:
-      - "9100:9100"
-    networks:
-      - quiz
-    command:
-      - '--path.rootfs=/host'
-    volumes:
-      - '/:/host:ro,rslave'
-
-
 networks:
   quiz:
     external: true
