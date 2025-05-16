@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  blue:
+    image: ands0927/yusin-quiz:latest
+    container_name: green
+    ports:
+      - "8081:8081"
+    environment:
+      - PROFILES=green
+      - ENV=greens
+    networks:
+      - quiz
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - /home/ubuntu/prometheus.yml:/etc/prometheus/prometheus.yml
+    networks:
+      - quiz
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./grafana/provisioning/:/etc/grafana/provisioning/
+    depends_on:
+      - prometheus
+    networks:
+      - quiz
+
+networks:
+  quiz:
+    external: true
