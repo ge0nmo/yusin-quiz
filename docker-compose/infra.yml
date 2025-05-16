@@ -33,3 +33,7 @@ services:
       - '--path.rootfs=/host'
     volumes:
       - '/:/host:ro,rslave'
+
+networks:
+  quiz:
+    external: true
