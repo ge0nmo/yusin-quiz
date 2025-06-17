@@ -34,6 +34,34 @@ services:
     volumes:
       - '/:/host:ro,rslave'
 
+  nginx:
+    image: nginx:latest
+    container_name: nginx-server
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /etc/nginx/cof.d:/etc/nginx/conf.d
+      - /home/application/frontend:/home/application/frontend
+      - /etc/letsencrypt:/etc/letsencrypt
+    depends_on:
+      - prometheus
+      - grafana
+    networks:
+      - quiz
+
+  certbot:
+    image: certbot/certbot
+    container_name: certbot
+    volumes:
+      - /etc/letsencrypt:/etc/letsencrypt # 인증서 저장소
+      - /var/lib/letsencrypt:/var/lib/letsencrypt # 인증서 상태 저장소
+      - /home/application/frontend:/var/www/certbot
+    networks:
+      - quiz
+    command:
+      - "certonly --webroot --webroot-path=/var/www/certbot -d finuminu.com -d www.finuminu.com"
+
 networks:
   quiz:
     external: true
