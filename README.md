@@ -21,7 +21,7 @@
 
 - Developed RESTful APIs and admin panel using **Spring Boot**
 - Built and managed cloud infrastructure on **AWS (Lightsail, S3, IAM, Route53)**
-- Applied **SSL auto-renewal** via **Nginx + Let’s Encrypt**
+- Applied **SSL auto-renewal** via **Nginx + Let’s Encrypt + Certbot**
 - Built **zero-downtime Blue-Green deployment pipeline** using **GitHub Actions + Docker + Nginx**
 - Implemented **Redis caching** for high-load performance optimization
 - Built a **real-time monitoring system** using **Grafana + Prometheus + Node Exporter**
