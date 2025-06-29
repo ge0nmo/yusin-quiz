@@ -7,11 +7,11 @@
 
 ## 👥 Team Structure
 
-| Role        | Headcount | Responsibility                  |
-|-------------|------------|----------------------------------|
-| PM          | 1 person   | Planning and project management |
-| Backend     | 1 person   | API & Admin page development, DevOps |
-| Frontend    | 1 person   | User interface development       |
+| Role        | Headcount | Responsibility                       |
+|-------------|-----------|--------------------------------------|
+| PM          | 1         | Planning and project management      |
+| Backend     | 1         | API & Admin page development, DevOps |
+| Frontend    | 1         | User interface development           |
 
 ---
 
