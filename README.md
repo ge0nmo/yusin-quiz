@@ -1,6 +1,6 @@
-# 🧠 CPA Quiz Web Service (Launching August 2025)
+# 🧠 Quiz Web Service
 
-> A real-time quiz platform designed for CPA exam candidates  
+> A real-time quiz platform designed for exam candidates  
 > Enhancing learning efficiency and providing instant feedback through a web-based system.
 
 ---
