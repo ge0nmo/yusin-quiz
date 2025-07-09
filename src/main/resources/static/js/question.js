@@ -4,89 +4,98 @@ const prevPage = document.querySelector('.prevPage');
 const nextPage = document.querySelector('.nextPage');
 const questionList = document.querySelector('#questionList');
 
-window.onload = function(){
+// Initialize page
+window.onload = function() {
     loadPage();
-
-    // Add event listeners for pagination
-    prevPage.addEventListener('click', handlePrevPage);
-    nextPage.addEventListener('click', handleNextPage);
+    initializePagination();
 };
 
-async function loadPage(){
-  try {
-      const data = await getJSON(`/admin/question/list?page=${currentPage - 1}&size=${pageSize}`);
-      renderQuestionList(data.data);
+function initializePagination() {
+    prevPage.addEventListener('click', handlePrevPage);
+    nextPage.addEventListener('click', handleNextPage);
+}
 
-      // Update pagination buttons based on pageInfo
-      updatePaginationButtons(data.pageInfo);
-  } catch (err) {
-      console.error('Error loading page:', err);
-  }
+async function loadPage() {
+    try {
+        showLoadingState();
+        const data = await getJSON(`/admin/question/list?page=${currentPage - 1}&size=${pageSize}`);
+        renderQuestionList(data.data);
+        updatePaginationButtons(data.pageInfo);
+    } catch (err) {
+        console.error('Error loading page:', err);
+        showErrorState();
+    } finally {
+        hideLoadingState();
+    }
 }
 
 function renderQuestionList(questions) {
-    // Clear existing content
     questionList.innerHTML = '';
 
     if (!questions || questions.length === 0) {
-        questionList.innerHTML = '<tr><td colspan="3" class="text-center">등록된 질문이 없습니다.</td></tr>';
+        showEmptyState();
         return;
     }
 
-  // Create rows for each question
+    const fragment = document.createDocumentFragment();
+
     questions.forEach(question => {
+        const row = createQuestionRow(question);
+        fragment.appendChild(row);
+    });
 
-        console.log('question = ', question);
-        console.log("답글 달렸나? = ", question.answeredByAdmin);
-      const row = document.createElement('tr');
+    questionList.appendChild(fragment);
+}
 
-    // Add 'table-success' class if question is answered
-      if (question.answeredByAdmin) {
+function createQuestionRow(question) {
+    const row = document.createElement('tr');
+    if (question.answeredByAdmin) {
         row.classList.add('table-success');
-      }
+    }
 
-      row.innerHTML = `
-        <td>${question.username}</td>
+    row.innerHTML = `
+        <td class="text-nowrap">${escapeHtml(question.username)}</td>
         <td>
-            <a href="/admin/question/${question.id}/answer">
-                ${question.title}
+            <a href="/admin/question/${question.id}/answer" class="question-link">
+                ${escapeHtml(question.title)}
             </a>
         </td>
-        <td>${formatDate(question.createdAt)}</td>
-      `;
+        <td class="text-nowrap">${formatDate(question.createdAt)}</td>
+    `;
 
-      questionList.appendChild(row);
-  });
+    return row;
 }
 
 function formatDate(dateString) {
-    const date = new Date(dateString);
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    const hours = String(date.getHours()).padStart(2, '0');
-    const minutes = String(date.getMinutes()).padStart(2, '0');
-
-    return `${year}-${month}-${day} ${hours}:${minutes}`;
+    try {
+        const date = new Date(dateString);
+        return new Intl.DateTimeFormat('ko-KR', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false
+        }).format(date);
+    } catch (e) {
+        console.error('Date formatting error:', e);
+        return dateString;
+    }
 }
 
 function updatePaginationButtons(pageInfo) {
-    // Disable previous page button if on first page
-    if (pageInfo.currentPage <= 1) {
-        prevPage.parentElement.classList.add('disabled');
-    } else {
-        prevPage.parentElement.classList.remove('disabled');
-    }
+    const prevPageItem = prevPage.parentElement;
+    const nextPageItem = nextPage.parentElement;
 
-    // Disable next page button if on last page
-    if (pageInfo.currentPage >= pageInfo.totalPages) {
-        nextPage.parentElement.classList.add('disabled');
-    } else {
-        nextPage.parentElement.classList.remove('disabled');
-    }
+    prevPageItem.classList.toggle('disabled', pageInfo.currentPage <= 1);
+    nextPageItem.classList.toggle('disabled', pageInfo.currentPage >= pageInfo.totalPages);
+
+    // Update aria-disabled for accessibility
+    prevPage.setAttribute('aria-disabled', pageInfo.currentPage <= 1);
+    nextPage.setAttribute('aria-disabled', pageInfo.currentPage >= pageInfo.totalPages);
 }
 
-function handlePrevPage(e){
+function handlePrevPage(e) {
     e.preventDefault();
     if (currentPage > 1) {
         currentPage--;
@@ -94,23 +103,73 @@ function handlePrevPage(e){
     }
 }
 
-function handleNextPage(e){
+function handleNextPage(e) {
     e.preventDefault();
-    if (currentPage < document.querySelector('.nextPage').parentElement.classList.contains('disabled')) {
-        return;
+    if (!e.target.closest('.page-item').classList.contains('disabled')) {
+        currentPage++;
+        loadPage();
     }
-    currentPage++;
-    loadPage();
 }
 
+// Utility Functions
+function showLoadingState() {
+    questionList.innerHTML = `
+        <tr>
+            <td colspan="3" class="text-center py-4">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+            </td>
+        </tr>
+    `;
+}
+
+function hideLoadingState() {
+    // Loading state will be replaced by actual content
+}
+
+function showErrorState() {
+    questionList.innerHTML = `
+        <tr>
+            <td colspan="3" class="text-center text-danger py-4">
+                <i class="fas fa-exclamation-circle me-2"></i>데이터를 불러오는데 실패했습니다.
+            </td>
+        </tr>
+    `;
+}
+
+function showEmptyState() {
+    questionList.innerHTML = `
+        <tr>
+            <td colspan="3" class="text-center text-muted py-4">
+                <i class="fas fa-inbox me-2"></i>등록된 질문이 없습니다.
+            </td>
+        </tr>
+    `;
+}
+
+function escapeHtml(unsafe) {
+    return unsafe
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+// API Call
 const getJSON = async function(url) {
     try {
-        const res = await fetch(url);
-        const data = await res.json();
-        if (!res.ok) throw new Error(`${data.message} (${res.status})`);
+        const response = await fetch(url);
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(`${data.message || 'API Error'} (${response.status})`);
+        }
+
         return data;
     } catch (err) {
-        console.error('Error fetching data:', err);
+        console.error('API Error:', err);
         throw err;
     }
 };

@@ -1,82 +1,63 @@
-<!doctype html>
-<html lang="en" xmlns:th="https://www.thymeleaf.org/">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport"
-          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>관리자 페이지</title>
 
-    <link th:href="@{/static/css/sb-admin-2.min.css}" rel="stylesheet">
-    <link th:href="@{/static/css/custom.css}" rel="stylesheet">
-
-</head>
-<body>
-<div th:fragment="side">
-    <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
-
-        <!-- Sidebar - Brand -->
-        <a class="sidebar-brand d-flex align-items-center justify-content-center" href="#">
-            <div class="sidebar-brand-icon rotate-n-15">
-                <i class="fas fa-laugh-wink"></i>
-            </div>
-            <div class="sidebar-brand-text mx-3">관리자 페이지</div>
+<div class="bg-dark text-white d-flex flex-column" th:fragment="side" style="width: 250px; min-height: 100vh;">
+    <div class="d-flex flex-column h-100">
+        <!-- Brand/logo -->
+        <a class="navbar-brand d-flex align-items-center p-3 text-white text-decoration-none" href="#">
+            <i class="fas fa-graduation-cap fs-4 me-2"></i>
+            <span class="fs-5 fw-semibold">Admin Portal</span>
         </a>
 
-        <!-- Divider -->
-        <hr class="sidebar-divider my-0">
+        <hr class="text-white-50 my-0">
 
-        <!-- Nav Item - Dashboard -->
-        <li class="nav-item" th:classappend="${activePage == 'home'} ? 'active'">
-            <a class="nav-link" th:href="@{/admin/home}">
-                <i class="fas fa-fw fa-tachometer-alt"></i>
-                <span>Dashboard</span></a>
-        </li>
+        <!-- Navigation Menu -->
+        <ul class="nav nav-pills flex-column mb-auto p-2">
+            <li class="nav-item py-1">
+                <a class="nav-link text-white" th:classappend="${activePage == 'home'} ? 'active bg-primary' : 'text-white-50 hover-white'"
+                   th:href="@{/admin/home}">
+                    <i class="fas fa-home me-2"></i>
+                    Dashboard
+                </a>
+            </li>
 
-        <!-- Divider -->
-        <hr class="sidebar-divider">
+            <!-- <li class="nav-item py-1">
+                <a class="nav-link" th:classappend="${activePage == 'member'} ? 'active bg-primary' : 'text-white-50 hover-white'"
+                   th:href="@{/admin/member}">
+                    <i class="fas fa-users me-2"></i>
+                    유저 관리
+                </a>
+            </li> -->
 
-        <!-- Nav Item - Pages Collapse Menu -->
-        <li class="nav-item" th:classappend="${activePage == 'member'} ? 'active'">
-            <a class="nav-link" th:href="@{/admin/member}">
-                <span>유저 관리</span>
-            </a>
-        </li>
+            <li class="nav-item py-1">
+                <a class="nav-link" th:classappend="${activePage == 'subject'} ? 'active bg-primary' : 'text-white-50 hover-white'"
+                   th:href="@{/admin/subject}">
+                    <i class="fas fa-book me-2"></i>
+                    과목 관리
+                </a>
+            </li>
 
-        <li class="nav-item" th:classappend="${activePage == 'subject'} ? 'active'">
-            <a class="nav-link" th:href="@{/admin/subject}">
-                <span>과목 관리</span>
-            </a>
-        </li>
+            <li class="nav-item py-1">
+                <a class="nav-link" th:classappend="${activePage == 'exam'} ? 'active bg-primary' : 'text-white-50 hover-white'"
+                   th:href="@{/admin/exam}">
+                    <i class="fas fa-file-alt me-2"></i>
+                    시험 관리
+                </a>
+            </li>
 
-        <li class="nav-item" th:classappend="${activePage == 'exam'} ? 'active'">
-            <a class="nav-link" th:href="@{/admin/exam}">
-                <span>시험 관리</span>
-            </a>
-        </li>
+            <li class="nav-item py-1">
+                <a class="nav-link" th:classappend="${activePage == 'problem'} ? 'active bg-primary' : 'text-white-50 hover-white'"
+                   th:href="@{/admin/problem}">
+                    <i class="fas fa-tasks me-2"></i>
+                    문제 관리
+                </a>
+            </li>
 
-        <li class="nav-item" th:classappend="${activePage == 'problem'} ? 'active'">
-            <a class="nav-link" th:href="@{/admin/problem}">
-                <span>문제 관리</span>
-            </a>
-        </li>
-
-        <li class="nav-item" th:classappend="${activePage == 'question'} ? 'active'">
-            <a class="nav-link" th:href="@{/admin/question}">
-                <span>질문 관리</span>
-            </a>
-        </li>
-
-
-
-
-
-    </ul>
-
+            <li class="nav-item py-1">
+                <a class="nav-link" th:classappend="${activePage == 'question'} ? 'active bg-primary' : 'text-white-50 hover-white'"
+                   th:href="@{/admin/question}">
+                    <i class="fas fa-question-circle me-2"></i>
+                    질문 관리
+                </a>
+            </li>
+        </ul>
+    </div>
 </div>
-
-</body>
-</html>
-
-
-

@@ -1,7 +1,6 @@
 const answerForm = document.getElementById('answer-form');
 const deleteBtnList = document.querySelectorAll('.answer-delete-btn');
 const updateBtnList = document.querySelectorAll('.answer-update-btn');
-
 const questionId = document.getElementById('questionId').value;
 
 // Initialize - load answers on page load
@@ -9,69 +8,74 @@ window.onload = function() {
     answerForm.addEventListener('submit', handlerRegisterAnswer);
 
     deleteBtnList.forEach((btn) => {
-        const answerId = btn.closest('.answer-item').getAttribute('value');
-        console.log('answerId = ',answerId);
-        btn.addEventListener('click', (e) => handleDeleteClick(e, answerId))
+        const answerId = btn.closest('.card').getAttribute('value');
+        btn.addEventListener('click', (e) => handleDeleteClick(e, answerId));
     });
 
     updateBtnList.forEach((btn) => {
-        const answerId = btn.closest('.answer-item').getAttribute('value');
-        console.log(`answerId=, `, answerId);
-        btn.addEventListener('click', (e) => handleUpdateClick(e, answerId))
-    })
+        const answerId = btn.closest('.card').getAttribute('value');
+        btn.addEventListener('click', (e) => handleUpdateClick(e, answerId));
+    });
 }
 
-async function handlerRegisterAnswer(e){
+async function handlerRegisterAnswer(e) {
     e.preventDefault();
     const content = document.getElementById('answer-content').value.trim();
-    console.log(`answer content = `, content)
 
-    if(!content){
+    if (!content) {
         alert('답변 내용을 입력해주세요');
         return;
     }
 
-    const request = {
-        content: content
-    };
-
-    await postJSON(`/admin/question/${questionId}/answer`, request);
-
-    resetAnswerForm(content);
-    window.location.reload();
+    try {
+        await postJSON(`/admin/question/${questionId}/answer`, { content });
+        resetAnswerForm(document.getElementById('answer-content'));
+        window.location.reload();
+    } catch (error) {
+        console.error('Error registering answer:', error);
+        alert('답변 등록에 실패했습니다.');
+    }
 }
 
-async function handleDeleteClick(e, answerId){
+async function handleDeleteClick(e, answerId) {
     e.preventDefault();
 
-    console.log('answerId ', answerId);
-    if(confirm('정말 삭제하시겠습니까?')){
-        await deleteJSON(`/admin/answer/${answerId}`);
+    if (confirm('정말 삭제하시겠습니까?')) {
+        try {
+            await deleteJSON(`/admin/answer/${answerId}`);
+            window.location.reload();
+        } catch (error) {
+            console.error('Error deleting answer:', error);
+            alert('답변 삭제에 실패했습니다.');
+        }
     }
-
-    window.location.reload();
 }
 
 async function handleUpdateClick(e, answerId) {
     e.preventDefault();
-    const answerItem = e.target.closest('.answer-item');
-    const contentDiv = answerItem.querySelector('.answer-content');
-    const currentContent = contentDiv.textContent.trim();
+    const cardBody = e.target.closest('.card-body');
+    const contentDiv = cardBody.querySelector('.answer-content');
     const updateBtn = e.target;
 
-    // Create editable textarea
+    // If we're already in edit mode, return
+    if (updateBtn.textContent === '저장') {
+        return;
+    }
+
+    const currentContent = contentDiv.textContent.trim();
+
     const textarea = document.createElement('textarea');
     textarea.className = 'form-control mb-2';
     textarea.value = currentContent;
+    textarea.rows = 3;
 
-    // Replace content with textarea
-    contentDiv.replaceWith(textarea);
+    contentDiv.style.display = 'none';
+    cardBody.insertBefore(textarea, contentDiv.nextSibling);
+
     updateBtn.textContent = '저장';
+    updateBtn.classList.remove('btn-outline-primary');
+    updateBtn.classList.add('btn-primary');
 
-    // Remove previous event listener
-    updateBtn.removeEventListener('click', handleUpdateClick);
-
-    // Add temporary save handler
     const saveHandler = async (saveEvent) => {
         saveEvent.preventDefault();
         const newContent = textarea.value.trim();
@@ -82,46 +86,42 @@ async function handleUpdateClick(e, answerId) {
         }
 
         try {
-            const request = { content: newContent };
-            await patchJSON(`/admin/answer/${answerId}`, request);
+            await patchJSON(`/admin/answer/${answerId}`, { content: newContent });
 
-            // Create new content display
-            const newContentDiv = document.createElement('div');
-            newContentDiv.className = 'answer-content mt-2';
-            newContentDiv.textContent = newContent;
+            contentDiv.textContent = newContent;
+            contentDiv.style.display = '';
+            textarea.remove();
 
-            // Replace textarea with updated content
-            textarea.replaceWith(newContentDiv);
             updateBtn.textContent = '수정';
+            updateBtn.classList.remove('btn-primary');
+            updateBtn.classList.add('btn-outline-primary');
 
-            // Restore original event listener
             updateBtn.removeEventListener('click', saveHandler);
-            updateBtn.addEventListener('click', (e) => handleUpdateClick(e, answerId));
         } catch (error) {
-            alert('답변 수정에 실패했습니다.');
             console.error('Update error:', error);
+            alert('답변 수정에 실패했습니다.');
         }
     };
 
+    updateBtn.removeEventListener('click', handleUpdateClick);
     updateBtn.addEventListener('click', saveHandler);
 }
 
-function resetAnswerForm(contentElement){
+function resetAnswerForm(contentElement) {
     contentElement.value = '';
 }
 
-const postJSON = async function(url, uploadData){
+const postJSON = async function(url, uploadData) {
     return await sendJson('POST', url, uploadData);
 }
 
-const patchJSON = async function(url, uploadData){
+const patchJSON = async function(url, uploadData) {
     return await sendJson('PATCH', url, uploadData);
 }
 
-
-const sendJson  = async function(method, url, uploadData){
-    try{
-        const fetchPro = fetch(url, {
+const sendJson = async function(method, url, uploadData) {
+    try {
+        const response = await fetch(url, {
             method: method,
             headers: {
                 'Content-Type': 'application/json'
@@ -129,42 +129,31 @@ const sendJson  = async function(method, url, uploadData){
             body: JSON.stringify(uploadData),
         });
 
-        const res = await fetchPro;
-        const data = await res.json();
-
-        if (!res.ok) {
-            throw new Error(`${data.message} (${res.status})`);
+        if (!response.ok) {
+            const data = await response.json();
+            throw new Error(`${data.message || 'API Error'} (${response.status})`);
         }
-        return data;
-    } catch (err){
-        throw err
+
+        return await response.json();
+    } catch (err) {
+        console.error('API Error:', err);
+        throw err;
     }
 }
 
-const getJSON = async function(url) {
+const deleteJSON = async function(url) {
     try {
-        const res = await fetch(url);
-        const data = await res.json();
-        if (!res.ok) throw new Error(`${data.message} (${res.status})`);
-        return data;
-    } catch (err) {
-        console.error('Error fetching data:', err);
-        throw err;
-    }
-};
-
-const deleteJSON = async function(url, id){
-    try{
-        const fetchPro = fetch(url, {
-            method: 'DELETE',
+        const response = await fetch(url, {
+            method: 'DELETE'
         });
 
-        const res = await fetchPro;
-        if(!res.ok){
-            throw new Error(`${data.message} (${res.status})`);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
         }
-    } catch (err){
+
+        return response;
+    } catch (err) {
+        console.error('Delete Error:', err);
         throw err;
     }
-
 }

@@ -1,264 +1,297 @@
-let selectedSubjectId;
-let selectedSubjectName;
-let selectedYear;
-let selectedExamId;
-const yearDropdown = document.querySelector('#year-dropdown');
-const yearContent = document.querySelector('#year-content');
-const examName = document.querySelector('#examName');
+const examApp = {
+    selectedSubjectId: null,
+    selectedSubjectName: null,
+    selectedYear: null,
+    selectedExamId: null,
+    yearDropdown: document.querySelector('#year-dropdown'),
+    examNameInput: document.querySelector('#examName'),
 
-window.onload = async function(){
-    selectedSubjectId = sessionStorage.getItem("subjectId");
-    selectedSubjectName = sessionStorage.getItem("subjectName");
+    async init() {
+        this.selectedSubjectId = sessionStorage.getItem("subjectId");
+        this.selectedSubjectName = sessionStorage.getItem("subjectName");
 
-    await addHandlerSubjectDropdown();
+        await this.addHandlerSubjectDropdown();
 
-    if(selectedSubjectId && selectedSubjectName){
-        sessionStorage.removeItem("subjectId");
-        sessionStorage.removeItem("subjectName");
+        if(this.selectedSubjectId && this.selectedSubjectName) {
+            sessionStorage.removeItem("subjectId");
+            sessionStorage.removeItem("subjectName");
+            await this.addHandlerYearDropdown();
+        }
+    },
 
-        const examList = await getJSON(`/admin/subject/${selectedSubjectId}/exam?year=${selectedYear}`);
-        loadData(examList);
-    }
-}
+    async addHandlerSubjectDropdown() {
+        const dropdown = document.querySelector('#subject-dropdown-content');
+        const subjectDropdownButton = document.querySelector('#subject-dropdown');
+        dropdown.innerHTML = '';
 
+        try {
+            const response = await fetch("/admin/subject/list");
+            const data = await response.json();
 
-async function addHandlerSubjectDropdown(){
-    const dropdown = document.querySelector('#subject-dropdown-content');
+            if (this.selectedSubjectId && this.selectedSubjectName) {
+                subjectDropdownButton.textContent = this.selectedSubjectName;
+            } else if (data.length > 0) {
+                this.selectedSubjectId = data[0].id;
+                this.selectedSubjectName = data[0].name;
+                subjectDropdownButton.textContent = this.selectedSubjectName;
+                await this.addHandlerYearDropdown();
+            } else {
+                subjectDropdownButton.textContent = '과목 없음';
+                subjectDropdownButton.disabled = true;
+            }
 
-    const data = await getJSON("/admin/subject/list");
+            data.forEach((subject) => {
+                const button = document.createElement('button');
+                button.className = 'dropdown-item';
+                button.type = 'button';
+                button.textContent = subject.name;
+                button.addEventListener('click', () => this.addHandlerSelectSubject(subject.id, subject.name));
+                dropdown.appendChild(button);
+            });
+        } catch (error) {
+            console.error('Error fetching subjects:', error);
+        }
+    },
 
-    data.forEach((subject) => {
-        const listGroup = document.createElement('button');
-        listGroup.className = 'list-group-item dropdown-item';
-        listGroup.textContent = subject.name;
-        dropdown.appendChild(listGroup);
-        listGroup.addEventListener('click', () => addHandlerSelectSubject(subject.id, subject.name));
-    });
-}
+    async addHandlerSelectSubject(subjectId, subjectName) {
+        this.clearYearDropdown();
+        this.selectedSubjectId = subjectId;
+        this.selectedSubjectName = subjectName;
+        document.querySelector('#subject-dropdown').textContent = this.selectedSubjectName;
+        await this.addHandlerYearDropdown();
+    },
 
-async function addHandlerSelectSubject(subjectId, subjectName) {
-    clearYearDropdown();
+    async addHandlerYearDropdown() {
+        const dropdown = document.querySelector('#year-content');
+        dropdown.innerHTML = '';
 
-    selectedSubjectId = subjectId;
-    console.log('선택한 과목 id = ', selectedSubjectId);
-    selectedSubjectName = subjectName;
-    const subjectDropdown = document.querySelector('#subject-dropdown');
+        if (!this.selectedSubjectId) return;
 
-    subjectDropdown.textContent = selectedSubjectName;
+        try {
+            const response = await fetch(`/admin/exam/year?subjectId=${this.selectedSubjectId}`);
+            const data = await response.json();
 
-    await addHandlerYearDropdown();
-}
+            if (data.length > 0) {
+                this.selectedYear = data[0];
+                this.yearDropdown.textContent = this.selectedYear;
+                const examList = await this.getExamList(this.selectedSubjectId, this.selectedYear);
+                this.loadData(examList);
+            } else {
+                this.yearDropdown.textContent = '연도 없음';
+                this.loadData([]);
+            }
 
-async function addHandlerYearDropdown(){
-    console.log('addHandlerYearDropdown');
-    const subjectId = selectedSubjectId;
-    const dropdown = document.querySelector('#year-content');
+            data.forEach((year) => {
+                const button = document.createElement('button');
+                button.className = 'dropdown-item';
+                button.type = 'button';
+                button.textContent = year;
+                button.addEventListener('click', () => this.addHandlerSelectYear(year));
+                dropdown.appendChild(button);
+            });
+        } catch (error) {
+            console.error('Error fetching years:', error);
+        }
+    },
 
-    const data = await getJSON(`/admin/exam/year?subjectId=${subjectId}`);
+    clearYearDropdown() {
+        this.yearDropdown.textContent = '연도 선택';
+        document.querySelector('#year-content').innerHTML = '';
+        this.selectedYear = null;
+        this.loadData([]);
+    },
 
-    for(const year of data){
-        const listGroup = document.createElement('button');
-        listGroup.className = 'list-group-item dropdown-item';
-        listGroup.textContent = year;
-        dropdown.appendChild(listGroup);
-        listGroup.addEventListener('click', () => addHandlerSelectYear(year));
-    }
+    async addHandlerSelectYear(year) {
+        this.selectedYear = year;
+        this.yearDropdown.textContent = this.selectedYear;
 
-}
+        if (this.selectedSubjectId && this.selectedYear) {
+            const examList = await this.getExamList(this.selectedSubjectId, this.selectedYear);
+            this.loadData(examList);
+        } else {
+            this.loadData([]);
+        }
+    },
 
-function clearYearDropdown(){
-    yearDropdown.textContent = '연도 선택';
-    document.querySelector('#year-content').innerHTML = '';
-    selectedYear = null;
-}
+    prepareExamForm() {
+        document.querySelectorAll('.selectedSubjectName').forEach((input) => {
+            input.value = this.selectedSubjectName || '';
+        });
 
+        this.examNameInput.value = '';
+        document.querySelector('#examYear').value = this.selectedYear || new Date().getFullYear();
+    },
 
-async function addHandlerSelectYear(year) {
-    selectedYear = year;
-    yearDropdown.textContent = selectedYear;
+    prepareUpdateExamForm(exam) {
+        document.querySelectorAll('.selectedSubjectName').forEach((input) => {
+            input.value = this.selectedSubjectName || '';
+        });
 
-    if (selectedSubjectId && selectedYear) {
-        const examList = await getJSON(`/admin/subject/${selectedSubjectId}/exam?year=${selectedYear}`);
-        loadData(examList);
-    }
-}
+        document.querySelector('#newExamName').value = exam.name;
+        document.querySelector('#newExamYear').value = exam.year;
+        this.selectedExamId = exam.id;
+    },
 
-
-function prepareExamForm(){
-    document.querySelectorAll('.selectedSubjectName').forEach((input) => {
-        input.value = selectedSubjectName;
-    })
-
-    document.querySelector('#examName').value = '';
-    document.querySelector('#examYear').value = selectedYear;
-}
-
-function prepareUpdateExamForm(exam){
-    document.querySelectorAll('.selectedSubjectName').forEach((input) => {
-        input.value = selectedSubjectName;
-    })
-
-    document.querySelector('#newExamName').value = exam.name;
-    document.querySelector('#newExamYear').value = exam.year;
-
-    selectedExamId = exam.id;
-}
-
-function loadData(examList){
-    if(!examList || examList.length === 0){
-        document.getElementById('examList').innerHTML = `
+    loadData(examList) {
+        const examListElement = document.getElementById('examList');
+        if (!examList || examList.length === 0) {
+            examListElement.innerHTML = `
                 <tr>
-                    <td colspan="2" class="text-center">등록된 시험이 없습니다.</td>
+                    <td colspan="2" class="text-center py-4">등록된 시험이 없습니다.</td>
                 </tr>
-            `
-    } else{
-        drawList(examList);
-    }
-}
+            `;
+            return;
+        }
+        this.drawList(examList);
+    },
 
-function drawList(list){
-    let html = '';
-
-    list.forEach((exam) => {
-        html += `
-                <tr>
-                    <td>${exam.year}</td>
-                    <td>
-                    <div class="d-flex justify-content-between">
+    drawList(list) {
+        const html = list.map(exam => `
+            <tr>
+                <td>${exam.year}</td>
+                <td>
+                    <div class="d-flex justify-content-between align-items-center">
                         ${exam.name}
                         <div class="d-flex justify-content-end">
-                            <button onclick='prepareUpdateExamForm(${JSON.stringify(exam)})' data-toggle="modal" data-target="#update-exam-modal" class="btn btn-default" type="button">
-                                <img class="" alt="update" src="/static/img/edit.svg" >
+                            <button onclick='examApp.prepareUpdateExamForm(${JSON.stringify(exam)})' 
+                                    data-bs-toggle="modal" 
+                                    data-bs-target="#update-exam-modal" 
+                                    class="btn btn-link p-0 me-2" 
+                                    type="button">
+                                <img alt="update" src="/static/img/edit.svg" width="20" height="20">
                             </button>
-                            <button onclick="removeExam(${exam.id})" class="btn btn-default" type="button">
-                                <img class="" alt="remove" src="/static/img/trash.svg" >
+                            <button onclick="examApp.removeExam(${exam.id})" 
+                                    class="btn btn-link p-0" 
+                                    type="button">
+                                <img alt="remove" src="/static/img/trash.svg" width="20" height="20">
                             </button>
                         </div>
                     </div>
-                    </td>
-                </tr>
-            `;
-    });
+                </td>
+            </tr>
+        `).join('');
 
-    document.getElementById('examList').innerHTML = html;
-}
+        document.getElementById('examList').innerHTML = html;
+    },
 
+    async removeExam(examId) {
+        if (!confirm('정말 삭제하시겠습니까?')) {
+            return;
+        }
 
-function removeExam(examId){
-    if(!confirm('정말 삭제하시겠습니까?')){
-        return;
-    }
-    fetch(`/admin/exam/${examId}`, {
-        method: 'DELETE',
-    })
-        .then((res) => {
-            if(!res.ok){
+        try {
+            const response = await fetch(`/admin/exam/${examId}`, {
+                method: 'DELETE'
+            });
+
+            if (!response.ok) {
                 throw new Error('삭제에 실패했습니다');
             }
-            return getExamList(selectedSubjectId, selectedYear);
-        })
-        .then(examList => {
-            loadData(examList);
-        })
-}
 
-
-function updateExam(){
-    const examName = document.querySelector('#newExamName').value
-    const examYear = document.querySelector('#newExamYear').value
-
-    const examUpdateRequest = {
-        name: examName,
-        year: examYear,
-    }
-
-    fetch(`/admin/exam/${selectedExamId}`, {
-        method: 'PATCH',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(examUpdateRequest),
-    })
-        .then(response => response.json())
-        .then(() => {
-            getExamList(selectedSubjectId, selectedYear)
-                .then(examList => {
-                    $('#update-exam-modal').modal('hide');
-                    loadData(examList);
-                })
-        })
-
-}
-
-
-function saveExam(){
-    const name = document.querySelector('#examName').value;
-    const year = Number(document.querySelector('#examYear').value);
-
-
-    const examCreateRequest = {
-        name: name,
-        year: year,
-    }
-
-    selectedYear = year;
-
-    fetch(`/admin/exam?subjectId=${selectedSubjectId}`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(examCreateRequest),
-    })
-        .then(response => response.json())
-        .then(() => {
-            getExamList(selectedSubjectId, selectedYear)
-                .then(examList => {
-                    yearDropdown.textContent = selectedYear;
-
-                    hideModal();
-
-                    loadData(examList);
-                })
-        })
-        .catch(error => {
-            console.log(error);
-        })
-}
-
-
-function hideModal(){
-    $('#add-exam-modal').modal('hide');
-}
-
-function getExamList(subjectId, year) {
-    if(!subjectId) return;
-
-    return new Promise((resolve, reject) => {
-        $.ajax({
-            url: `/admin/subject/${subjectId}/exam?year=${year}`,
-            type: 'GET',
-            success: function(examList) {
-                resolve(examList);
-            },
-            error: function(error) {
-                reject(error);
-            }
-        });
-    });
-}
-
-
-const getJSON  = async function(url){
-    try{
-        const res = await fetch(url);
-        const data = await res.json();
-
-        if (!res.ok) {
-            throw new Error(`${data.message} (${res.status})`);
+            const examList = await this.getExamList(this.selectedSubjectId, this.selectedYear);
+            this.loadData(examList);
+            await this.addHandlerYearDropdown();
+        } catch (error) {
+            console.error("Error removing exam:", error);
+            alert("시험 삭제 중 오류가 발생했습니다.");
         }
-        return data;
-    } catch (err){
-        throw err
+    },
+
+    async updateExam() {
+        const examName = document.querySelector('#newExamName').value;
+        const examYear = document.querySelector('#newExamYear').value;
+
+        const examUpdateRequest = {
+            name: examName,
+            year: Number(examYear)
+        };
+
+        try {
+            const response = await fetch(`/admin/exam/${this.selectedExamId}`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(examUpdateRequest)
+            });
+
+            if (!response.ok) {
+                throw new Error('수정에 실패했습니다.');
+            }
+
+            const examList = await this.getExamList(this.selectedSubjectId, this.selectedYear);
+            this.hideModal('update-exam-modal');
+            this.loadData(examList);
+            await this.addHandlerYearDropdown();
+        } catch (error) {
+            console.error("Error updating exam:", error);
+            alert("시험 정보 수정 중 오류가 발생했습니다.");
+        }
+    },
+
+    async saveExam() {
+        const name = this.examNameInput.value;
+        const year = Number(document.querySelector('#examYear').value);
+
+        if (!this.selectedSubjectId) {
+            alert("과목을 먼저 선택해주세요.");
+            return;
+        }
+
+        const examCreateRequest = {
+            name: name,
+            year: year
+        };
+
+        this.selectedYear = year;
+
+        try {
+            const response = await fetch(`/admin/exam?subjectId=${this.selectedSubjectId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(examCreateRequest)
+            });
+
+            if (!response.ok) {
+                throw new Error('저장에 실패했습니다.');
+            }
+
+            const examList = await this.getExamList(this.selectedSubjectId, this.selectedYear);
+            this.yearDropdown.textContent = this.selectedYear;
+            this.hideModal('add-exam-modal');
+            this.loadData(examList);
+            await this.addHandlerYearDropdown();
+        } catch (error) {
+            console.error("Error saving exam:", error);
+            alert("시험 저장 중 오류가 발생했습니다.");
+        }
+    },
+
+    hideModal(modalId) {
+        const modalElement = document.getElementById(modalId);
+        if (modalElement) {
+            const modalInstance = bootstrap.Modal.getInstance(modalElement);
+            if (modalInstance) {
+                modalInstance.hide();
+            }
+        }
+    },
+
+    async getExamList(subjectId, year) {
+        if (!subjectId) return [];
+
+        try {
+            const response = await fetch(`/admin/subject/${subjectId}/exam?year=${year}`);
+            return await response.json();
+        } catch (error) {
+            console.error("Error fetching exam list:", error);
+            return [];
+        }
     }
-}
+};
+
+// Initialize the app
+window.examApp = examApp;
+document.addEventListener('DOMContentLoaded', () => examApp.init());
