@@ -4,6 +4,7 @@ import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.servlet.NoHandlerFoundException;
 
 import java.io.IOException;
 import java.util.NoSuchElementException;
@@ -108,5 +110,11 @@ public class ExceptionAdvice
         log.error("입출력 예외가 발생했습니다.", e);
 
         return ErrorResponse.of(HttpStatus.BAD_REQUEST, e.getMessage());
+    }
+
+    @ExceptionHandler(NoHandlerFoundException.class)
+    public ResponseEntity<String> handleNoHandlerFoundException(NoHandlerFoundException ex) {
+        // 필요한 경우, 로그를 남기고, 404 상태 코드와 함께 응답
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("요청한 경로를 찾을 수 없습니다.");
     }
 }
