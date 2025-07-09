@@ -1,81 +1,107 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en" xmlns:th="https://www.thymeleaf.org/">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport"
-          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Home</title>
+    <title>질문 관리</title>
 
-    <!-- Custom styles for this template-->
-    <link th:href="@{/static/css/sb-admin-2.min.css}" rel="stylesheet">
+    <!-- Bootstrap CSS CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <style>
+        .table-success { background-color: rgba(40, 167, 69, 0.1) !important; }
+        .page-link { cursor: pointer; }
+        .question-link {
+            color: #0d6efd;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        .question-link:hover {
+            color: #0a58ca;
+            text-decoration: underline;
+        }
+        .table > :not(caption) > * > * {
+            padding: 1rem 0.75rem;
+        }
+        .card {
+            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+            border: none;
+        }
+        .card-header {
+            border-bottom: 1px solid rgba(0,0,0,.1);
+            padding: 1rem 1.35rem;
+            background-color: transparent;
+        }
+    </style>
 </head>
-<body>
-
-<div id="wrapper">
+<body class="bg-light">
+<div id="wrapper" class="d-flex"> <!-- Added d-flex -->
     <div th:replace="~{fragments/side.html :: side}"></div>
-    <div id="content-wrapper" class="d-flex flex-column">
-        <!-- Header -->
+    <div id="content-wrapper" class="d-flex flex-column w-100"> <!-- Added w-100 -->
         <div id="content">
+            <!-- Header -->
             <header th:replace="~{fragments/header.html :: header}"></header>
 
-            <!--Main Content -->
-
-            <div class="container-fluid">
-                <div class="col-12">
-                    <div class="card shadow mb-4">
-                        <div class="card-header bg-white border-0 pl-3 pt-3 pb-0">
-                            <h6 class="m-0 font-weight-bold text-primary mb-3">
-                                질문 관리
-                            </h6>
-
-                        </div>
-
-                        <div class="card-body">
-                            <div class="table-responsive">
-                                <table id="load-questions" class="table table-bordered" th:width="100" th:cellspacing="0">
-                                    <thead class="thead-light">
-                                    <tr>
-                                        <th scope="col">유저 이름</th>
-                                        <th scope="col">제목</th>
-                                        <th scope="col">등록 시간</th>
-
-                                    </tr>
-                                    </thead>
-
-                                    <!-- member list rendering-->
-                                    <tbody id="questionList">
-
-                                    </tbody>
-                                </table>
-
-                                <ul class="pagination">
-                                    <li class="page-item"><a class="page-link prevPage" href="#">이전 페이지</a></li>
-                                    <li class="page-item"><a class="page-link nextPage" href="#">다음 페이지</a></li>
-                                </ul>
-
+            <!-- Main Content -->
+            <div class="container-fluid px-4 py-4"> <!-- Added px-4 to match problem.html -->
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card mb-4">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0 text-primary fw-bold">
+                                    <i class="fas fa-comments me-2"></i>질문 관리
+                                </h5>
+                                <div class="d-flex gap-2">
+                                    <span class="badge bg-success">답변완료</span>
+                                    <span class="badge bg-secondary">미답변</span>
+                                </div>
                             </div>
 
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-hover align-middle">
+                                        <thead class="table-light">
+                                        <tr>
+                                            <th class="text-nowrap">유저 이름</th>
+                                            <th>제목</th>
+                                            <th class="text-nowrap">등록 시간</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody id="questionList">
+                                        <!-- Questions will be loaded here -->
+                                        </tbody>
+                                    </table>
+
+                                    <nav aria-label="Question list pagination" class="mt-4">
+                                        <ul class="pagination justify-content-center">
+                                            <li class="page-item">
+                                                <a class="page-link prevPage">
+                                                    <i class="fas fa-chevron-left"></i> 이전
+                                                </a>
+                                            </li>
+                                            <li class="page-item">
+                                                <a class="page-link nextPage">
+                                                    다음 <i class="fas fa-chevron-right"></i>
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </nav>
+                                </div>
+                            </div>
                         </div>
-
                     </div>
-
                 </div>
             </div>
-
         </div>
-
     </div>
-
-
-
 </div>
 
-
-<script th:src="@{/static/vendor/jquery/jquery.min.js}"></script>
-<script th:src="@{/static/vendor/bootstrap/js/bootstrap.bundle.min.js}"></script>
-
+<!-- Bootstrap Bundle with Popper -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<!-- Custom JavaScript -->
 <script src="/static/js/question.js"></script>
-
 </body>
 </html>
