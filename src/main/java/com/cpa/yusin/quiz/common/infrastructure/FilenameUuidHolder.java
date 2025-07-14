@@ -6,9 +6,9 @@ import org.springframework.stereotype.Component;
 
 import java.util.UUID;
 
-@Qualifier("systemUuidHolder")
+@Qualifier("filenameUuidHolder")
 @Component
-public class SystemUuidHolder implements UuidHolder
+public class FilenameUuidHolder implements UuidHolder
 {
     @Override
     public String getRandom()

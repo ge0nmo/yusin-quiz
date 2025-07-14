@@ -29,6 +29,7 @@ public class FileServiceImpl implements FileService
     private final AmazonS3 amazonS3;
     private final FileMapper fileMapper;
     private final FileRepository fileRepository;
+    private final FilenameGenerator filenameGenerator;
 
     @Value("${cloud.aws.s3.bucket}")
     private String bucket;
@@ -40,10 +41,9 @@ public class FileServiceImpl implements FileService
     @Override
     public FileResponse save(MultipartFile file)
     {
-        String uniqueFilename = getUniqueFilename();
+        String uniqueFilename = filenameGenerator.createStoreFileName(file.getOriginalFilename());
 
         String url = updateFileToS3(uniqueFilename, file);
-        log.info("url = {}", url);
 
         File fileDomain = fileMapper.toFileDomain(url, uniqueFilename, file);
 
@@ -56,7 +56,7 @@ public class FileServiceImpl implements FileService
     {
         try {
             ObjectMetadata metadata = new ObjectMetadata();
-            String objectFilename = getObjectFileName(uniqueFilename + file.getContentType());
+            String objectFilename = getObjectFileName(uniqueFilename);
 
             metadata.setContentType(file.getContentType());
             metadata.setContentLength(file.getSize());
@@ -67,23 +67,6 @@ public class FileServiceImpl implements FileService
         } catch (IOException e) {
             throw new FileException(ExceptionMessage.INVALID_DATA);
         }
-    }
-
-    private String extractType(String filename)
-    {
-        if (!StringUtils.hasLength(filename)) {
-            throw new FileException(ExceptionMessage.INVALID_DATA);
-        }
-
-        int location = filename.lastIndexOf('.');
-        String fileType = filename.substring(location + 1);
-        log.info("file type = {}", fileType);
-        return fileType;
-    }
-
-    private String getUniqueFilename()
-    {
-        return UUID.randomUUID().toString();
     }
 
     private String getObjectFileName(String uniqueFilename)

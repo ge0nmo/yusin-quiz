@@ -1,15 +1,15 @@
 package com.cpa.yusin.quiz.global.security.oauth2;
 
 import com.cpa.yusin.quiz.common.service.UuidHolder;
+import com.cpa.yusin.quiz.global.details.MemberDetails;
 import com.cpa.yusin.quiz.global.exception.ExceptionMessage;
 import com.cpa.yusin.quiz.global.exception.MemberException;
-import com.cpa.yusin.quiz.member.domain.Member;
-import com.cpa.yusin.quiz.global.details.MemberDetails;
-import com.cpa.yusin.quiz.member.service.port.MemberRepository;
 import com.cpa.yusin.quiz.global.security.oauth2.user.OAuth2UserInfo;
 import com.cpa.yusin.quiz.global.security.oauth2.user.OAuth2UserInfoFactory;
-import lombok.RequiredArgsConstructor;
+import com.cpa.yusin.quiz.member.domain.Member;
+import com.cpa.yusin.quiz.member.service.port.MemberRepository;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
@@ -20,12 +20,17 @@ import org.springframework.util.StringUtils;
 import java.util.Optional;
 
 @Slf4j
-@RequiredArgsConstructor
 @Service
 public class CustomOAuth2Service extends DefaultOAuth2UserService
 {
     private final MemberRepository memberRepository;
     private final UuidHolder uuidHolder;
+
+    public CustomOAuth2Service(MemberRepository memberRepository, @Qualifier("systemUuidHolder") UuidHolder uuidHolder)
+    {
+        this.memberRepository = memberRepository;
+        this.uuidHolder = uuidHolder;
+    }
 
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException
