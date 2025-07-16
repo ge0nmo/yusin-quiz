@@ -1,7 +1,6 @@
 package com.cpa.yusin.quiz.visitor.domain;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 
 import java.time.LocalDate;
