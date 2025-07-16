@@ -1,5 +1,6 @@
 package com.cpa.yusin.quiz.visitor.service.port;
 
+import com.cpa.yusin.quiz.visitor.controller.dto.DailyVisitorCountDto;
 import com.cpa.yusin.quiz.visitor.domain.Visitor;
 
 import java.time.LocalDate;
@@ -18,5 +19,5 @@ public interface VisitorRepository
 
     long countByVisitedAt(LocalDate visitedAt);
 
-    long countAll();
+    List<DailyVisitorCountDto> countByVisitedAtBetween(LocalDate start, LocalDate end);
 }

@@ -12,9 +12,15 @@ public class VisitorScheduler
 {
     private final VisitorService visitorService;
 
-    @Scheduled(initialDelay = 30 * 60 * 1000, fixedDelay = 30 * 60 * 1000)
-    public void callVisitorData()
-    {
-        visitorService.flushRedisToDatabase();
+    @Scheduled(cron = "0 30 23 * * *")
+    public void flushVisitorData() {
+        try {
+            log.info("Starting scheduled visitor data flush");
+            visitorService.flushRedisToDatabase();
+            log.info("Completed scheduled visitor data flush");
+        } catch (Exception e) {
+            log.error("Failed to execute scheduled visitor data flush", e);
+        }
     }
+
 }

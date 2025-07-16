@@ -31,7 +31,6 @@ public class UserCountFilter extends OncePerRequestFilter
                                     @NonNull FilterChain filterChain) throws ServletException, IOException
     {
         try{
-            log.info("visitor save in redis");
             visitorService.saveInRedis(request);
         } catch (Exception e){
             log.info("Failed to saveInRedis visitor count: {}", e.getMessage());

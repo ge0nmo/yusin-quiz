@@ -1,5 +1,6 @@
 package com.cpa.yusin.quiz.visitor.infrastructure;
 
+import com.cpa.yusin.quiz.visitor.controller.dto.DailyVisitorCountDto;
 import com.cpa.yusin.quiz.visitor.domain.Visitor;
 import com.cpa.yusin.quiz.visitor.service.port.VisitorRepository;
 import lombok.RequiredArgsConstructor;
@@ -46,8 +47,9 @@ public class VisitorRepositoryImpl implements VisitorRepository
     }
 
     @Override
-    public long countAll()
+    public List<DailyVisitorCountDto> countByVisitedAtBetween(LocalDate start, LocalDate end)
     {
-        return visitorJpaRepository.count();
+        return visitorJpaRepository.findDailyVisitorCounts(start, end);
     }
+
 }

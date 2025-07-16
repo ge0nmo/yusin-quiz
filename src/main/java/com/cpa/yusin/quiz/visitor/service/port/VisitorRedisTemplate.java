@@ -1,7 +1,9 @@
 package com.cpa.yusin.quiz.visitor.service.port;
 
 import com.cpa.yusin.quiz.common.service.ClockHolder;
+import com.cpa.yusin.quiz.global.utils.CommonFunction;
 import com.cpa.yusin.quiz.visitor.controller.dto.VisitorSerialization;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Repository;
@@ -15,40 +17,55 @@ import java.util.Set;
 @Repository
 public class VisitorRedisTemplate
 {
+    private static final String VISITOR_KEY = "visitors:%s";
+    private static final Duration KEY_TTL = Duration.ofDays(2); // 2일 후
+
     private final RedisTemplate<String, String> redisTemplate;
     private final ClockHolder clockHolder;
     private final VisitorSerializer serializer;
 
-    private static final String VISITOR_KEY = "ActiveUsers:";
 
-    /**
-     * saved in redis for an hour
-     */
-
-    public void saveVisitorKey(String visitorSerialization)
+    public void saveVisitor(HttpServletRequest request)
     {
-        if(!redisTemplate.hasKey(VISITOR_KEY + visitorSerialization)){
-            redisTemplate.opsForValue().set(VISITOR_KEY + visitorSerialization, visitorSerialization, Duration.ofMinutes(30));
-        }
+        LocalDate today = clockHolder.getCurrentDateTime().toLocalDate();
+        String key = String.format(VISITOR_KEY, today);
+
+        String ipAddress = CommonFunction.getIpAddress(request);
+        String userAgent = CommonFunction.getUserAgent(request);
+        String serializedVisitor = serializer.getSerialization(ipAddress, userAgent, today);
+
+        redisTemplate.opsForSet().add(key, serializedVisitor);
+        redisTemplate.expire(key, KEY_TTL); // TTL 설정
     }
 
-    public VisitorSerialization getByIpAndUserAgent(String ipAddress, String userAgent, LocalDate today)
-    {
-        String serialization = serializer.getSerialization(ipAddress, userAgent, today);
-        String value = redisTemplate.opsForValue().get(VISITOR_KEY + serialization);
-
-        return serializer.getDeserialization(value);
+    public Set<String> getVisitors(LocalDate date) {
+        String key = String.format(VISITOR_KEY, date);
+        return redisTemplate.opsForSet().members(key);
     }
 
-    public List<String> getVisitorValues()
-    {
-        Set<String> keys = redisTemplate.keys(VISITOR_KEY + "*");
-        return redisTemplate.opsForValue().multiGet(keys);
+    public void deleteVisitors(LocalDate date) {
+        String key = String.format(VISITOR_KEY, date);
+        redisTemplate.delete(key);
     }
 
-    public void deleteSerialization(String serialization)
+    public Long getVisitorCount(LocalDate date)
     {
-        redisTemplate.delete(VISITOR_KEY + serialization);
+        String key = String.format(VISITOR_KEY, date);
+        return redisTemplate.opsForSet().size(key);
     }
+
+    public Boolean hasKey(LocalDate date)
+    {
+        String key = String.format(VISITOR_KEY, date);
+        return redisTemplate.hasKey(key);
+    }
+
+    public Duration getExpire(LocalDate date)
+    {
+        String key = String.format(VISITOR_KEY, date);
+        Long seconds = redisTemplate.getExpire(key);
+        return Duration.ofSeconds(seconds);
+    }
+
 
 }
