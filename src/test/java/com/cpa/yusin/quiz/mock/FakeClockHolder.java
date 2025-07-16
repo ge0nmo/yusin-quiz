@@ -15,6 +15,6 @@ public class FakeClockHolder implements ClockHolder
     @Override
     public LocalDateTime getCurrentDateTime()
     {
-        return LocalDateTime.now();
+        return LocalDateTime.of(2025, 1, 1, 0, 0, 0);
     }
 }

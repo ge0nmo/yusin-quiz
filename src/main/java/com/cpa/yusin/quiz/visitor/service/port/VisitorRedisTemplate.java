@@ -2,7 +2,6 @@ package com.cpa.yusin.quiz.visitor.service.port;
 
 import com.cpa.yusin.quiz.common.service.ClockHolder;
 import com.cpa.yusin.quiz.global.utils.CommonFunction;
-import com.cpa.yusin.quiz.visitor.controller.dto.VisitorSerialization;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -10,7 +9,6 @@ import org.springframework.stereotype.Repository;
 
 import java.time.Duration;
 import java.time.LocalDate;
-import java.util.List;
 import java.util.Set;
 
 @RequiredArgsConstructor
