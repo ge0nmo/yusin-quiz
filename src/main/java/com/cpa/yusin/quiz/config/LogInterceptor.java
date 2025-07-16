@@ -8,6 +8,7 @@ import org.slf4j.MDC;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -15,10 +16,14 @@ import java.util.UUID;
 @Component
 public class LogInterceptor implements HandlerInterceptor
 {
+    List<String> excludePaths = List.of("/static/js", "/static/css", "/static/img", "/favicon.ico");
+
     private static final String REQUEST_ID = "requestId";
 
     @Override
-    public boolean preHandle(HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull Object handler) {
+    public boolean preHandle(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull Object handler) {
+        if(shouldNotFilter(request)) return true;
+
         String requestId = generateRequestId();
         MDC.put(REQUEST_ID, requestId);
         request.setAttribute("startTime", System.currentTimeMillis());
@@ -30,6 +35,8 @@ public class LogInterceptor implements HandlerInterceptor
     public void afterCompletion(@NonNull HttpServletRequest request,
                                 @NonNull HttpServletResponse response,
                                 @NonNull Object handler, Exception ex) {
+        if(shouldNotFilter(request)) return;
+
         long duration = calculateDuration(request);
         String requestId = MDC.get(REQUEST_ID);
         try{
@@ -49,5 +56,10 @@ public class LogInterceptor implements HandlerInterceptor
     private long calculateDuration(HttpServletRequest request) {
         long startTime = (long) request.getAttribute("startTime");
         return System.currentTimeMillis() - startTime;
+    }
+
+    private boolean shouldNotFilter(HttpServletRequest request)
+    {
+        return excludePaths.stream().anyMatch(request.getRequestURI()::startsWith);
     }
 }

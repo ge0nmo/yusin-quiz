@@ -2,8 +2,8 @@ package com.cpa.yusin.quiz.config;
 
 import com.cpa.yusin.quiz.global.details.MemberDetailsService;
 import com.cpa.yusin.quiz.global.filter.SecurityFilter;
+import com.cpa.yusin.quiz.global.filter.UserCountFilter;
 import com.cpa.yusin.quiz.global.jwt.JwtService;
-import com.cpa.yusin.quiz.global.security.CustomAuthenticationProvider;
 import com.cpa.yusin.quiz.global.security.FormAuthenticationProvider;
 import com.cpa.yusin.quiz.global.security.oauth2.CustomOAuth2Service;
 import com.cpa.yusin.quiz.global.security.oauth2.HttpCookieOAuth2AuthorizationRequestRepository;
@@ -25,7 +25,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.Arrays;
 
-import static com.cpa.yusin.quiz.global.utils.ApplicationConstants.*;
+import static com.cpa.yusin.quiz.global.utils.ApplicationConstants.FORM_ENDPOINT_WHITELIST;
 
 @Configuration
 @EnableWebSecurity
@@ -36,27 +36,24 @@ public class SecurityConfig
     private final HttpCookieOAuth2AuthorizationRequestRepository httpCookieOAuth2AuthorizationRequestRepository;
     private final JwtService jwtService;
     private final MemberDetailsService memberDetailsService;
+    private final SecurityFilter securityFilter;
+    private final UserCountFilter userCountFilter;
 
     public SecurityConfig(CustomOAuth2Service oAuth2UserService,
                           OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler,
                           HttpCookieOAuth2AuthorizationRequestRepository httpCookieOAuth2AuthorizationRequestRepository,
                           JwtService jwtService,
-                          MemberDetailsService memberDetailsService)
+                          MemberDetailsService memberDetailsService, SecurityFilter securityFilter, UserCountFilter userCountFilter)
     {
         this.oAuth2UserService = oAuth2UserService;
         this.oAuth2AuthenticationSuccessHandler = oAuth2AuthenticationSuccessHandler;
         this.httpCookieOAuth2AuthorizationRequestRepository = httpCookieOAuth2AuthorizationRequestRepository;
         this.jwtService = jwtService;
         this.memberDetailsService = memberDetailsService;
+        this.securityFilter = securityFilter;
+        this.userCountFilter = userCountFilter;
     }
 
-
-
-    @Bean
-    public SecurityFilter securityFilter()
-    {
-        return new SecurityFilter(memberDetailsService, jwtService);
-    }
 
     @Order(1)
     @Bean
@@ -91,7 +88,8 @@ public class SecurityConfig
                 );
 
         http
-                .addFilterBefore(securityFilter(), UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(userCountFilter, securityFilter.getClass());
 
         return http.build();
     }
@@ -134,6 +132,8 @@ public class SecurityConfig
 
         http.authenticationProvider(formAuthenticationProvider());
 
+        http
+                .addFilterBefore(userCountFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }

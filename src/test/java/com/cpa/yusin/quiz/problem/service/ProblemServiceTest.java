@@ -118,7 +118,7 @@ class ProblemServiceTest extends MockSetup
                 .exam(biologyExam1)
                 .build();
 
-        testContainer.choiceRepository.save(Choice.builder()
+        testContainer.choiceRepository.saveInRedis(Choice.builder()
                 .id(10L)
                 .number(1)
                 .content("biology content")
