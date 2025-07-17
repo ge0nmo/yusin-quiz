@@ -1,5 +1,6 @@
 package com.cpa.yusin.quiz.global.filter;
 
+import com.cpa.yusin.quiz.global.utils.VisitorWhiteListMatcher;
 import com.cpa.yusin.quiz.visitor.service.VisitorService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -13,7 +14,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.List;
+import java.util.Optional;
 
 @RequiredArgsConstructor
 @Order(2)
@@ -22,8 +23,7 @@ import java.util.List;
 public class UserCountFilter extends OncePerRequestFilter
 {
     private final VisitorService visitorService;
-
-    List<String> WHITE_LIST = List.of("/css", "/js", "/favicon.ico", "/images");
+    private final VisitorWhiteListMatcher whiteListMatcher;
 
     @Override
     protected void doFilterInternal(@NonNull HttpServletRequest request,
@@ -42,8 +42,12 @@ public class UserCountFilter extends OncePerRequestFilter
     @Override
     protected boolean shouldNotFilter(@NonNull HttpServletRequest request) throws ServletException
     {
-        String path = request.getRequestURI();
+        String requestURI = request.getRequestURI();
+        String userAgent = Optional.ofNullable(request.getHeader("User-Agent")).orElse("").toLowerCase();
 
-        return WHITE_LIST.stream().anyMatch(path::startsWith);
+        log.info("Request URI: {}, User Agent: {}", requestURI, userAgent);
+
+        return whiteListMatcher.isWhiteListed(requestURI, userAgent);
     }
+
 }
