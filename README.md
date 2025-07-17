@@ -1,6 +1,6 @@
 # 🧠 Quiz Web Service
 
-> A real-time quiz platform designed for exam candidates  
+> A quiz platform designed for exam candidates  
 > Enhancing learning efficiency and providing instant feedback through a web-based system.
 
 ---
