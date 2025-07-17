@@ -45,8 +45,6 @@ public class UserCountFilter extends OncePerRequestFilter
         String requestURI = request.getRequestURI();
         String userAgent = Optional.ofNullable(request.getHeader("User-Agent")).orElse("").toLowerCase();
 
-        log.info("Request URI: {}, User Agent: {}", requestURI, userAgent);
-
         return whiteListMatcher.isWhiteListed(requestURI, userAgent);
     }
 
