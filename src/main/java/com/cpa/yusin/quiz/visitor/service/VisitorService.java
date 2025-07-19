@@ -36,6 +36,7 @@ public class VisitorService
         }
     }
 
+    @Transactional
     public void flushRedisToDatabase() {
         LocalDate today = clockHolder.getCurrentDateTime().toLocalDate();
 

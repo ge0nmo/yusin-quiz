@@ -43,9 +43,10 @@ public class UserCountFilter extends OncePerRequestFilter
     protected boolean shouldNotFilter(@NonNull HttpServletRequest request) throws ServletException
     {
         String requestURI = request.getRequestURI();
-        String userAgent = Optional.ofNullable(request.getHeader("User-Agent")).orElse("").toLowerCase();
+        String userAgent = request.getHeader("User-Agent");
+        if(userAgent == null) return true;
 
-        return whiteListMatcher.isWhiteListed(requestURI, userAgent);
+        return whiteListMatcher.isWhiteListed(requestURI, userAgent.toLowerCase());
     }
 
 }
