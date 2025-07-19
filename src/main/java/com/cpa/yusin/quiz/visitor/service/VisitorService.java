@@ -60,7 +60,7 @@ public class VisitorService
                             v.getVisitedAt()
                     ))
                     .distinct()
-                    .collect(Collectors.toList());
+                    .toList();
 
             if (visitors.isEmpty()) {
                 log.info("No unique visitors to save for date: {}", today);
@@ -68,11 +68,7 @@ public class VisitorService
             }
 
             try {
-                for(Visitor visitor : visitors)
-                {
-                    visitorRepository.save(visitor);
-                }
-
+                visitorRepository.saveAll(visitors);
                 visitorRedisTemplate.deleteVisitors(today);
                 log.info("Successfully flushed {} visitors to database for date: {}",
                         visitors.size(), today);
