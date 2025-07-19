@@ -12,8 +12,9 @@ public class VisitorScheduler
 {
     private final VisitorService visitorService;
 
-    @Scheduled(fixedRate = 5)
-    public void flushVisitorData() {
+    @Scheduled(cron = "0 0 0 * * *")
+    public void flushVisitorData()
+    {
         try {
             log.info("Starting scheduled visitor data flush");
             visitorService.flushRedisToDatabase();
