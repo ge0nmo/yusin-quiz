@@ -12,7 +12,7 @@ public class VisitorScheduler
 {
     private final VisitorService visitorService;
 
-    @Scheduled(initialDelay = 60 * 1000, fixedRate = 60 * 1000)
+    @Scheduled(fixedRate = 5)
     public void flushVisitorData() {
         try {
             log.info("Starting scheduled visitor data flush");
