@@ -4,10 +4,12 @@ import com.cpa.yusin.quiz.visitor.controller.dto.VisitorSerialization;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
 
+@Slf4j
 @RequiredArgsConstructor
 @Component
 public class VisitorSerializer
@@ -17,6 +19,7 @@ public class VisitorSerializer
     public String getSerialization(String ipAddress, String userAgent, LocalDate visitedAt)
     {
         VisitorSerialization visitor = VisitorSerialization.from(ipAddress, userAgent, visitedAt);
+        log.info("getSerialization: ip = {}, userAgent = {}, visitedAt = {}", ipAddress, userAgent, visitedAt);
         try {
             return objectMapper.writeValueAsString(visitor);
         } catch (JsonProcessingException e) {
@@ -27,7 +30,9 @@ public class VisitorSerializer
     public VisitorSerialization getDeserialization(String serialization)
     {
         try{
-            return objectMapper.readValue(serialization, VisitorSerialization.class);
+            VisitorSerialization visitorSerialization = objectMapper.readValue(serialization, VisitorSerialization.class);
+            log.info("getDeserialization: ip = {}, userAgent = {}, visitedAt = {}", visitorSerialization.getIpAddress(), visitorSerialization.getUserAgent(), visitorSerialization.getVisitedAt());
+            return visitorSerialization;
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }

@@ -36,7 +36,6 @@ public class VisitorService
         }
     }
 
-    @Transactional
     public void flushRedisToDatabase() {
         LocalDate today = clockHolder.getCurrentDateTime().toLocalDate();
 
@@ -68,7 +67,11 @@ public class VisitorService
             }
 
             try {
-                visitorRepository.saveAll(visitors);
+                for(Visitor visitor : visitors)
+                {
+                    visitorRepository.save(visitor);
+                }
+
                 visitorRedisTemplate.deleteVisitors(today);
                 log.info("Successfully flushed {} visitors to database for date: {}",
                         visitors.size(), today);
