@@ -2,7 +2,6 @@ package com.cpa.yusin.quiz.visitor.service.port;
 
 import com.cpa.yusin.quiz.common.service.ClockHolder;
 import com.cpa.yusin.quiz.global.utils.CommonFunction;
-import io.jsonwebtoken.io.IOException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -12,6 +11,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ScanOptions;
 import org.springframework.stereotype.Repository;
 
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.LocalDate;
@@ -78,7 +78,7 @@ public class VisitorRedisTemplate
                 while (cursor.hasNext()) {
                     matchingKeys.add(new String(cursor.next(), StandardCharsets.UTF_8));
                 }
-            } catch (IOException e) {
+            } catch (Exception e) {
                 throw new RuntimeException("Failed to scan Redis keys", e);
             }
             return matchingKeys;
