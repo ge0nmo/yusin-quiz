@@ -53,7 +53,7 @@ class VisitorRedisTemplateTest
         given(redisTemplate.opsForSet()).willReturn(setOperations);
         LocalDate today = testContainer.clockHolder.getCurrentDateTime().toLocalDate();
         String key = String.format("visitors:%s", today);
-        String serializedVisitor = "{\"ipAddress\":\"127.0.0.1\",\"userAgent\":\"test\",\"visitedAt\":\"2025-01-01\"}";
+        String serializedVisitor = "{\"ipAddress\":\"127.0.0.1\",\"userAgent\":\"test\",\"visitedAt\":\"2025-01-01 00:00:00.000000\"}";
 
         given(visitorSerializer.getSerialization(any(), any(), any())).willReturn(serializedVisitor);
 
@@ -62,7 +62,7 @@ class VisitorRedisTemplateTest
 
         // then
         verify(setOperations).add(key, serializedVisitor);
-        verify(redisTemplate).expire(key, Duration.ofDays(2));
+        verify(redisTemplate).expire(key, Duration.ofHours(1));
     }
 
     @Test

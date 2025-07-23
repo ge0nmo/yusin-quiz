@@ -9,7 +9,6 @@ import com.cpa.yusin.quiz.visitor.service.port.VisitorRepository;
 import com.cpa.yusin.quiz.visitor.service.port.VisitorSerializer;
 import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,11 +16,11 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
@@ -73,12 +72,14 @@ class VisitorServiceTest
     void flushRedisToDatabase()
     {
         // given
-        LocalDate today = testContainer.clockHolder.getCurrentDateTime().toLocalDate();
-        String serializedVisitor = "{\"ipAddress\":\"127.0.0.1\",\"userAgent\":\"test\",\"visitedAt\":\"2025-07-16\"}";
-        VisitorSerialization visitorDto = VisitorSerialization.from("127.0.0.1", "test", today);
-        Visitor visitor = Visitor.of("127.0.0.1", "test", today);
+        LocalDateTime currentDateTime = testContainer.clockHolder.getCurrentDateTime();
+        LocalDate today = currentDateTime.toLocalDate();
 
-        given(visitorRedisTemplate.hasKey(today)).willReturn(true);
+        String serializedVisitor = "{\"ipAddress\":\"127.0.0.1\",\"userAgent\":\"test\",\"visitedAt\":\"2025-07-16\"}";
+        VisitorSerialization visitorDto = VisitorSerialization.from("127.0.0.1", "test", currentDateTime);
+        Visitor visitor = Visitor.of("127.0.0.1", "test", currentDateTime);
+
+
         given(visitorRedisTemplate.getVisitors(today)).willReturn(Set.of(serializedVisitor));
         given(serializer.getDeserialization(serializedVisitor)).willReturn(visitorDto);
         given(visitorRepository.saveAll(any())).willReturn(List.of(visitor));
@@ -98,7 +99,7 @@ class VisitorServiceTest
     {
         // given
         LocalDate today = testContainer.clockHolder.getCurrentDateTime().toLocalDate();
-        given(visitorRedisTemplate.hasKey(today)).willReturn(false);
+        //given(visitorRedisTemplate.hasKey(today)).willReturn(false);
 
         // when
         visitorService.flushRedisToDatabase();

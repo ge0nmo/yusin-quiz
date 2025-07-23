@@ -6,7 +6,9 @@ import com.cpa.yusin.quiz.visitor.service.port.VisitorRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
+import java.sql.Date;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -47,9 +49,19 @@ public class VisitorRepositoryImpl implements VisitorRepository
     }
 
     @Override
-    public List<DailyVisitorCountDto> countByVisitedAtBetween(LocalDate start, LocalDate end)
-    {
-        return visitorJpaRepository.findDailyVisitorCounts(start, end);
+    public List<DailyVisitorCountDto> countByVisitedAtBetween(LocalDate startDate, LocalDate endDate) {
+        LocalDateTime start = startDate.atStartOfDay();
+        LocalDateTime end = endDate.plusDays(1).atStartOfDay().minusNanos(1);
+
+        return visitorJpaRepository.findDailyVisitorCounts(start, end)
+                .stream()
+                .map(row -> new DailyVisitorCountDto(
+                        ((Date) row[0]).toLocalDate(),
+                        ((Number) row[1]).longValue()
+                ))
+                .toList();
     }
+
+
 
 }
