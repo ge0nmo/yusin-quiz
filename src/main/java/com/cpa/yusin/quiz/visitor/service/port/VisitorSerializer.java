@@ -7,7 +7,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -16,7 +16,7 @@ public class VisitorSerializer
 {
     private final ObjectMapper objectMapper;
 
-    public String getSerialization(String ipAddress, String userAgent, LocalDate visitedAt)
+    public String getSerialization(String ipAddress, String userAgent, LocalDateTime visitedAt)
     {
         VisitorSerialization visitor = VisitorSerialization.from(ipAddress, userAgent, visitedAt);
         log.info("getSerialization: ip = {}, userAgent = {}, visitedAt = {}", ipAddress, userAgent, visitedAt);

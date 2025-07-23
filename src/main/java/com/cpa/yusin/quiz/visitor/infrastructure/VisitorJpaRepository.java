@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -17,11 +18,16 @@ public interface VisitorJpaRepository extends JpaRepository<Visitor, Long>
 
     long countByVisitedAt(@Param("visitedAt")LocalDate visitedAt);
 
-    @Query("SELECT new com.cpa.yusin.quiz.visitor.controller.dto.DailyVisitorCountDto(" +
-            "v.visitedAt, COUNT(v))" +
-            "FROM Visitor v " +
-            "WHERE v.visitedAt BETWEEN :start AND :end " +
-            "GROUP BY v.visitedAt " +
-            "ORDER BY v.visitedAt ASC")
-    List<DailyVisitorCountDto> findDailyVisitorCounts(LocalDate start, LocalDate end);
+
+    @Query(nativeQuery = true, value = """
+        SELECT CAST(v.visited_at AS date) as date, COUNT(DISTINCT v.id) as count
+            FROM visitor v 
+            WHERE v.visited_at BETWEEN :start AND :end 
+            GROUP BY CAST(v.visited_at AS date) 
+            ORDER BY date
+    """)
+    List<Object[]> findDailyVisitorCounts(@Param("start") LocalDateTime start,
+                                          @Param("end") LocalDateTime end);
+
+    
 }

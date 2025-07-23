@@ -3,7 +3,7 @@ package com.cpa.yusin.quiz.visitor.domain;
 import jakarta.persistence.*;
 import lombok.Getter;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Getter
 @Table(uniqueConstraints = {
@@ -23,9 +23,9 @@ public class Visitor
     private String userAgent;
 
     @Column(nullable = false)
-    private LocalDate visitedAt;
+    private LocalDateTime visitedAt;
 
-    public static Visitor of(String ipAddress, String userAgent, LocalDate today)
+    public static Visitor of(String ipAddress, String userAgent, LocalDateTime today)
     {
         Visitor visitor = new Visitor();
         visitor.ipAddress = ipAddress;

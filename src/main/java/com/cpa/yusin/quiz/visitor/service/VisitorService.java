@@ -15,7 +15,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -37,51 +36,41 @@ public class VisitorService
     }
 
     @Transactional
-    public void flushRedisToDatabase() {
+    public void flushRedisToDatabase()
+    {
         LocalDate today = clockHolder.getCurrentDateTime().toLocalDate();
 
-        try {
-            if (!visitorRedisTemplate.hasKey(today)) {
-                log.info("No Redis key exists for date: {}", today);
-                return;
-            }
-
-            Set<String> serializedVisitors = visitorRedisTemplate.getVisitors(today);
-            if (serializedVisitors.isEmpty()) {
-                log.info("No visitors to flush for date: {}", today);
-                return;
-            }
-
-            List<Visitor> visitors = serializedVisitors.stream()
-                    .map(serializer::getDeserialization)
-                    .map(v -> Visitor.of(
-                            v.getIpAddress(),
-                            v.getUserAgent(),
-                            v.getVisitedAt()
-                    ))
-                    .distinct()
-                    .toList();
-
-            if (visitors.isEmpty()) {
-                log.info("No unique visitors to save for date: {}", today);
-                return;
-            }
-
-            try {
-                visitorRepository.saveAll(visitors);
-                visitorRedisTemplate.deleteVisitors(today);
-                log.info("Successfully flushed {} visitors to database for date: {}",
-                        visitors.size(), today);
-            } catch (Exception e) {
-                log.error("Failed to save visitors to database: {}", e.getMessage(), e);
-                throw new RuntimeException("Failed to save visitors", e);
-            }
-
-        } catch (Exception e) {
-            log.error("Error during Redis to Database flush: {}", e.getMessage(), e);
-            throw e;
+        Set<String> serializedVisitors = visitorRedisTemplate.getVisitors(today);
+        if (serializedVisitors.isEmpty()) {
+            log.info("No visitors to flush for date: {}", today);
+            return;
         }
 
+        List<Visitor> visitors = deserializeVisitors(serializedVisitors);
+
+        if (visitors.isEmpty()) {
+            log.info("No unique visitors to save for date: {}", today);
+            return;
+        }
+
+        visitorRepository.saveAll(visitors);
+
+        visitorRedisTemplate.deleteVisitors(today);
+        visitorRedisTemplate.deleteVisitedKey();
+    }
+
+
+    private List<Visitor> deserializeVisitors(Set<String> serializedVisitors)
+    {
+        return serializedVisitors.stream()
+                .map(serializer::getDeserialization)
+                .map(v -> Visitor.of(
+                        v.getIpAddress(),
+                        v.getUserAgent(),
+                        v.getVisitedAt()
+                ))
+                .distinct()
+                .toList();
     }
 
     @Transactional(readOnly = true)
