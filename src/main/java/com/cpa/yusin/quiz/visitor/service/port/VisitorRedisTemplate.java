@@ -44,7 +44,6 @@ public class VisitorRedisTemplate
 
         String visitedKey = String.format(VISITED, ipAddress);
         if(redisTemplate.hasKey(visitedKey)) {
-            log.info("This IP address has already visited.");
             return;
         }
 
@@ -95,12 +94,6 @@ public class VisitorRedisTemplate
             redisTemplate.delete(keysToDelete);
         }
 
-    }
-
-    public Boolean hasKey(LocalDate date)
-    {
-        String key = String.format(VISITOR_KEY, date);
-        return redisTemplate.hasKey(key);
     }
 
 }

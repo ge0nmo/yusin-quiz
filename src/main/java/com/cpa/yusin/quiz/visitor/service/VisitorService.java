@@ -42,14 +42,12 @@ public class VisitorService
 
         Set<String> serializedVisitors = visitorRedisTemplate.getVisitors(today);
         if (serializedVisitors.isEmpty()) {
-            log.info("No visitors to flush for date: {}", today);
             return;
         }
 
         List<Visitor> visitors = deserializeVisitors(serializedVisitors);
 
         if (visitors.isEmpty()) {
-            log.info("No unique visitors to save for date: {}", today);
             return;
         }
 
