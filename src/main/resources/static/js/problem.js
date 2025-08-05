@@ -278,13 +278,8 @@ const problemApp = {
                     </div>
                 </div>
                 <div class="btn-group">
-                    <button class="btn btn-outline-primary btn-sm" 
-                            onclick="problemApp.handleUpdateChoiceClick(${choice.id})"
-                            title="저장">
-                        <i class="fas fa-save"></i>
-                    </button>
-                    <button class="btn btn-outline-danger btn-sm" 
-                            onclick="problemApp.handleRemoveChoiceClick(${choice.id})"
+                    <button class="btn btn-outline-danger btn-sm remove-choice" 
+                            onclick="problemApp.markChoiceAsRemoved(${choice.id})"
                             title="삭제">
                         <i class="fas fa-trash"></i>
                     </button>
@@ -369,17 +364,38 @@ const problemApp = {
             const content = $(`#problemContent-${problemId}`).summernote('code');
             const explanation = $(`#problemExplanation-${problemId}`).summernote('code');
 
-            const response = await fetch(`/admin/problem/${problemId}?examId=${this.selectedExamId}`, {
+            // 선택지 데이터 수집
+            const choices = Array.from(problemForm.querySelectorAll('.choice-item')).map(choiceItem => {
+                const choiceId = choiceItem.getAttribute('data-choice-id');
+                return {
+                    id: choiceId ? parseInt(choiceId) : null,
+                    number: Number(choiceItem.querySelector('.choice-number').value),
+                    content: choiceItem.querySelector('.choice-content').value,
+                    isAnswer: choiceItem.querySelector('.isAnswer').checked,
+                    removedYn: choiceItem.classList.contains('removed')
+                };
+            });
+
+            const requestData = {
+                id: problemId,
+                number: num,
+                content: content,
+                explanation: explanation,
+                choices: choices
+            };
+
+            const response = await fetch(`/admin/problem?examId=${this.selectedExamId}`, {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    number: num,
-                    content: content,
-                    explanation: explanation,
-                }),
+                body: JSON.stringify(requestData)
             });
 
             if (!response.ok) throw new Error('수정 실패');
+
+            // 업데이트 후 문제 목록 새로고침
+            const problemList = await this.getJSON(`/admin/problem/list?examId=${this.selectedExamId}`);
+            await this.loadProblemData(problemList);
+
             alert('문제가 성공적으로 업데이트되었습니다.');
         } catch (error) {
             console.error('Error updating problem:', error);
@@ -466,6 +482,14 @@ const problemApp = {
             console.error('Error saving choice:', error);
             alert(error.message);
         }
+    },
+
+    markChoiceAsRemoved(choiceId) {
+        if (!confirm('정말 이 선택지를 삭제하시겠습니까?')) return;
+
+        const choiceElement = document.getElementById(`choice-${choiceId}`);
+        choiceElement.classList.add('removed');
+        choiceElement.style.display = 'none';
     },
 
     updateChoiceElement(element, choiceId) {

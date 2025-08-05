@@ -168,3 +168,7 @@ input[type="number"].problemNumber::-webkit-outer-spin-button {
 .summernote-container {
     margin-bottom: 1.5rem;
 }
+
+.choice-item.removed {
+    display: none;
+}
