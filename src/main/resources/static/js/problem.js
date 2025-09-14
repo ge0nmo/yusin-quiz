@@ -24,8 +24,24 @@ const problemApp = {
         callbacks: {
             onImageUpload: function(files) {
                 problemApp.uploadImageToServer(files[0], $(this));
+            },
+
+            onPaste: function(e) {
+                e.preventDefault();
+                const clipboardData = (e.originalEvent || e).clipboardData;
+                const text = clipboardData.getData('text/plain'); // 순수 텍스트만 추출
+
+                const selection = window.getSelection();
+                if (!selection.rangeCount) return;
+
+                // 현재 커서 위치에 텍스트 노드 삽입
+                selection.deleteFromDocument();
+                selection.getRangeAt(0).insertNode(document.createTextNode(text));
+
+                // 커서를 끝으로 이동
+                selection.collapseToEnd();
             }
-        }
+        },
     },
 
     async init() {

@@ -34,7 +34,6 @@ public class SecurityConfig
     private final CustomOAuth2Service oAuth2UserService;
     private final OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler;
     private final HttpCookieOAuth2AuthorizationRequestRepository httpCookieOAuth2AuthorizationRequestRepository;
-    private final JwtService jwtService;
     private final MemberDetailsService memberDetailsService;
     private final SecurityFilter securityFilter;
     private final UserCountFilter userCountFilter;
@@ -42,13 +41,11 @@ public class SecurityConfig
     public SecurityConfig(CustomOAuth2Service oAuth2UserService,
                           OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler,
                           HttpCookieOAuth2AuthorizationRequestRepository httpCookieOAuth2AuthorizationRequestRepository,
-                          JwtService jwtService,
                           MemberDetailsService memberDetailsService, SecurityFilter securityFilter, UserCountFilter userCountFilter)
     {
         this.oAuth2UserService = oAuth2UserService;
         this.oAuth2AuthenticationSuccessHandler = oAuth2AuthenticationSuccessHandler;
         this.httpCookieOAuth2AuthorizationRequestRepository = httpCookieOAuth2AuthorizationRequestRepository;
-        this.jwtService = jwtService;
         this.memberDetailsService = memberDetailsService;
         this.securityFilter = securityFilter;
         this.userCountFilter = userCountFilter;
