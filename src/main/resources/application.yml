@@ -85,12 +85,6 @@ spring:
   mvc:
     static-path-pattern: /static/**
 
-  data:
-    redis:
-      host: redis-server
-      port: 6379
-      password:
-
 
 management:
   endpoints:

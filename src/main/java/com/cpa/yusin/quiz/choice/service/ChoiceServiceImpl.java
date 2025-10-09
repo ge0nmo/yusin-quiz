@@ -33,7 +33,6 @@ public class ChoiceServiceImpl implements ChoiceService
     private final ChoiceRepository choiceRepository;
     private final ChoiceMapper choiceMapper;
 
-    @CacheEvict(value = "problems", key = "#examId")
     @Transactional
     @Override
     public void save(Problem problem, List<ChoiceCreateRequest> requests, long examId)
@@ -44,7 +43,6 @@ public class ChoiceServiceImpl implements ChoiceService
         choiceRepository.saveAll(choiceRequests);
     }
 
-    @CacheEvict(value = "problems", key = "#examId")
     @Transactional
     @Override
     public long save(Choice choice, long examId)
@@ -81,7 +79,6 @@ public class ChoiceServiceImpl implements ChoiceService
         return choice;
     }
 
-    @CacheEvict(value = "problems", key = "#examId")
     @Transactional
     @Override
     public void update(long choiceId, ChoiceUpdateRequest request, long examId)
@@ -93,7 +90,6 @@ public class ChoiceServiceImpl implements ChoiceService
         choiceRepository.save(choice);
     }
 
-    @CacheEvict(value = "problems", key = "#examId")
     @Transactional
     @Override
     public void deleteById(long choiceId, long examId)
