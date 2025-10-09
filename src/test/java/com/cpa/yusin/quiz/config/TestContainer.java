@@ -38,6 +38,7 @@ import com.cpa.yusin.quiz.mock.*;
 import com.cpa.yusin.quiz.problem.controller.mapper.ProblemMapper;
 import com.cpa.yusin.quiz.problem.controller.port.ProblemService;
 import com.cpa.yusin.quiz.problem.service.ProblemServiceImpl;
+import com.cpa.yusin.quiz.problem.service.ProblemValidator;
 import com.cpa.yusin.quiz.problem.service.port.ProblemRepository;
 import com.cpa.yusin.quiz.question.controller.mapper.QuestionMapper;
 import com.cpa.yusin.quiz.question.controller.port.QuestionService;
@@ -103,7 +104,7 @@ public class TestContainer
     public final ProblemMapper problemMapper;
     public final ProblemRepository problemRepository;
     public final ProblemService problemService;
-
+    public final ProblemValidator problemValidator;
 
     /**
      * question
@@ -164,8 +165,9 @@ public class TestContainer
         this.choiceService = new ChoiceServiceImpl(this.choiceRepository, this.choiceMapper);
 
         this.problemMapper = new ProblemMapper(this.choiceMapper);
+        problemValidator = new ProblemValidator(this.problemRepository);
         this.problemService = new ProblemServiceImpl(this.problemRepository, this.problemMapper,
-                this.examService, this.choiceService);
+                this.examService, this.choiceService, this.problemValidator);
 
         this.questionRepository = new FakeQuestionRepository();
         this.questionMapper = new QuestionMapper();

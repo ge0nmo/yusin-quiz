@@ -36,21 +36,22 @@ public class ProblemServiceImpl implements ProblemService
     private final ProblemMapper problemMapper;
     private final ExamService examService;
     private final ChoiceService choiceService;
+    private final ProblemValidator problemValidator;
 
-    @CacheEvict(value = "problems", key = "#examId")
     @Transactional
     @Override
     public void save(long examId, ProblemCreateRequest request)
     {
         Exam exam = examService.findById(examId);
 
+        problemValidator.validateUniqueProblemNumber(examId, request.getNumber());
+
         Problem problem = problemMapper.toProblemEntity(request, exam);
 
         problem = problemRepository.save(problem);
-        choiceService.save(problem, request.getChoices(), examId);
+        choiceService.save(problem, request.getChoices());
     }
 
-    @CacheEvict(value = "problems", key = "#examId")
     @Transactional
     @Override
     public void update(long problemId, ProblemUpdateRequest request, long examId)
@@ -61,7 +62,6 @@ public class ProblemServiceImpl implements ProblemService
         problemRepository.save(problem);
     }
 
-    @CacheEvict(value = "problems", key = "#examId")
     @Transactional
     @Override
     public ProblemDTO processSaveOrUpdate(ProblemRequest request, long examId)
@@ -92,16 +92,14 @@ public class ProblemServiceImpl implements ProblemService
     }
 
 
-    @CacheEvict(value = "problems", key = "#examId")
     @Transactional
     @Override
-    public void deleteProblem(long problemId, long examId)
+    public void deleteProblem(long problemId)
     {
         choiceService.deleteAllByProblemId(problemId);
         problemRepository.deleteById(problemId);
     }
 
-    @Cacheable(value = "problems", key = "#examId")
     @Override
     public GlobalResponse<List<ProblemDTO>> getAllByExamId(long examId)
     {

@@ -2,8 +2,6 @@ package com.cpa.yusin.quiz.config;
 
 import com.cpa.yusin.quiz.global.details.MemberDetailsService;
 import com.cpa.yusin.quiz.global.filter.SecurityFilter;
-import com.cpa.yusin.quiz.global.filter.UserCountFilter;
-import com.cpa.yusin.quiz.global.jwt.JwtService;
 import com.cpa.yusin.quiz.global.security.FormAuthenticationProvider;
 import com.cpa.yusin.quiz.global.security.oauth2.CustomOAuth2Service;
 import com.cpa.yusin.quiz.global.security.oauth2.HttpCookieOAuth2AuthorizationRequestRepository;
@@ -36,19 +34,17 @@ public class SecurityConfig
     private final HttpCookieOAuth2AuthorizationRequestRepository httpCookieOAuth2AuthorizationRequestRepository;
     private final MemberDetailsService memberDetailsService;
     private final SecurityFilter securityFilter;
-    private final UserCountFilter userCountFilter;
 
     public SecurityConfig(CustomOAuth2Service oAuth2UserService,
                           OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler,
                           HttpCookieOAuth2AuthorizationRequestRepository httpCookieOAuth2AuthorizationRequestRepository,
-                          MemberDetailsService memberDetailsService, SecurityFilter securityFilter, UserCountFilter userCountFilter)
+                          MemberDetailsService memberDetailsService, SecurityFilter securityFilter)
     {
         this.oAuth2UserService = oAuth2UserService;
         this.oAuth2AuthenticationSuccessHandler = oAuth2AuthenticationSuccessHandler;
         this.httpCookieOAuth2AuthorizationRequestRepository = httpCookieOAuth2AuthorizationRequestRepository;
         this.memberDetailsService = memberDetailsService;
         this.securityFilter = securityFilter;
-        this.userCountFilter = userCountFilter;
     }
 
 
@@ -85,8 +81,7 @@ public class SecurityConfig
                 );
 
         http
-                .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
-                .addFilterBefore(userCountFilter, securityFilter.getClass());
+                .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
@@ -128,9 +123,6 @@ public class SecurityConfig
         ;
 
         http.authenticationProvider(formAuthenticationProvider());
-
-        http
-                .addFilterBefore(userCountFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }

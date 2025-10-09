@@ -423,7 +423,7 @@ const problemApp = {
         if (!confirm('정말 이 문제를 삭제하시겠습니까?')) return;
 
         try {
-            const response = await fetch(`/admin/problem/${problemId}?examId=${this.selectedExamId}`, {
+            const response = await fetch(`/admin/problem/${problemId}`, {
                 method: 'DELETE',
             });
             if (!response.ok) throw new Error('삭제 실패');
@@ -479,7 +479,7 @@ const problemApp = {
             const content = choiceElement.querySelector('.choice-content').value;
             const isAnswer = choiceElement.querySelector('.isAnswer').checked;
 
-            const response = await fetch(`/admin/choice?problemId=${problemId}&examId=${this.selectedExamId}`, {
+            const response = await fetch(`/admin/choice?problemId=${problemId}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -530,7 +530,7 @@ const problemApp = {
                 isAnswer: choiceElement.querySelector('.isAnswer').checked
             };
 
-            const response = await fetch(`/admin/choice/${choiceId}?problemId=${problemId}&examId=${this.selectedExamId}`, {
+            const response = await fetch(`/admin/choice/${choiceId}?problemId=${problemId}`, {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data)
@@ -551,7 +551,7 @@ const problemApp = {
             const choiceElement = document.getElementById(`choice-${choiceId}`);
             const problemId = choiceElement.closest('.problem-card').getAttribute('data-problem-id');
 
-            const response = await fetch(`/admin/choice/${choiceId}?problemId=${problemId}&examId=${this.selectedExamId}`, {
+            const response = await fetch(`/admin/choice/${choiceId}?problemId=${problemId}`, {
                 method: 'DELETE'
             });
 
@@ -611,7 +611,10 @@ const problemApp = {
             body: JSON.stringify(problemData),
         });
 
-        if (!response.ok) throw new Error('저장 실패');
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || "저장 실패");
+        }
     },
 
     hideModal(modalId) {

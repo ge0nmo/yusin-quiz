@@ -13,6 +13,8 @@ public interface ProblemJpaRepository extends JpaRepository<Problem, Long>
     @Query("SELECT p FROM Problem p WHERE p.exam.id = :examId ORDER BY p.number ASC")
     List<Problem> findAllByExamId(@Param("examId") long examId);
 
+    boolean existsByExamIdAndNumber(@Param("examId") Long examId, @Param("number") int number);
+
     @Modifying
     @Query("DELETE FROM Problem p " +
             "WHERE p.exam.id IN (SELECT e.id FROM Exam e WHERE e.subjectId = :subjectId)")

@@ -24,6 +24,7 @@ public enum ExceptionMessage
     EXAM_DUPLICATED("동일한 시험 정보가 존재합니다"),
 
     PROBLEM_NOT_FOUND("해당 문제 정보를 찾을 수 없습니다."),
+    PROBLEM_NUMBER_EXISTS("해당 문제 번호가 이미 존재합니다."),
 
     CHOICE_NOT_FOUND("해당 보기 정보를 찾을 수 없습니다."),
 

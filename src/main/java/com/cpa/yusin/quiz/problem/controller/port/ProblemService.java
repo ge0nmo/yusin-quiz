@@ -18,7 +18,7 @@ public interface ProblemService
 
     void update(long problemId, ProblemUpdateRequest request, long examId);
 
-    void deleteProblem(long problemId, long examId);
+    void deleteProblem(long problemId);
 
     GlobalResponse<List<ProblemDTO>> getAllByExamId(long examId);
 

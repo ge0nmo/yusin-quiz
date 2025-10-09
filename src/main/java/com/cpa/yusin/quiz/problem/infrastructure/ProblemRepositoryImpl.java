@@ -68,4 +68,10 @@ public class ProblemRepositoryImpl implements ProblemRepository
     {
         problemJpaRepository.deleteAllByExamSubjectId(subjectId);
     }
+
+    @Override
+    public boolean existsByExamIdAndNumber(Long examId, int number)
+    {
+        return problemJpaRepository.existsByExamIdAndNumber(examId, number);
+    }
 }

@@ -24,4 +24,6 @@ public interface ProblemRepository
     void deleteAllByExamId(long examId);
 
     void deleteAllBySubjectId(long subjectId);
+
+    boolean existsByExamIdAndNumber(Long examId, int number);
 }
