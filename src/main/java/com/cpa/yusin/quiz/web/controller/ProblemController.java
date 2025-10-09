@@ -59,9 +59,8 @@ public class ProblemController
 
     @ResponseBody
     @DeleteMapping("/problem/{problemId}")
-    public void delete(@PathVariable("problemId") long problemId,
-                       @RequestParam("examId") long examId)
+    public void delete(@PathVariable("problemId") long problemId)
     {
-        problemService.deleteProblem(problemId, examId);
+        problemService.deleteProblem(problemId);
     }
 }

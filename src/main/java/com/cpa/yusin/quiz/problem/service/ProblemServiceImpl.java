@@ -36,6 +36,7 @@ public class ProblemServiceImpl implements ProblemService
     private final ProblemMapper problemMapper;
     private final ExamService examService;
     private final ChoiceService choiceService;
+    private final ProblemValidator problemValidator;
 
     @Transactional
     @Override
@@ -43,10 +44,12 @@ public class ProblemServiceImpl implements ProblemService
     {
         Exam exam = examService.findById(examId);
 
+        problemValidator.validateUniqueProblemNumber(examId, request.getNumber());
+
         Problem problem = problemMapper.toProblemEntity(request, exam);
 
         problem = problemRepository.save(problem);
-        choiceService.save(problem, request.getChoices(), examId);
+        choiceService.save(problem, request.getChoices());
     }
 
     @Transactional
@@ -91,7 +94,7 @@ public class ProblemServiceImpl implements ProblemService
 
     @Transactional
     @Override
-    public void deleteProblem(long problemId, long examId)
+    public void deleteProblem(long problemId)
     {
         choiceService.deleteAllByProblemId(problemId);
         problemRepository.deleteById(problemId);

@@ -85,4 +85,10 @@ public class FakeProblemRepository implements ProblemRepository
     {
         data.removeIf(item -> item.getExam().getSubjectId().equals(subjectId));
     }
+
+    @Override
+    public boolean existsByExamIdAndNumber(Long examId, int number)
+    {
+        return false;
+    }
 }

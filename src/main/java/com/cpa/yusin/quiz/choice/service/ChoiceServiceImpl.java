@@ -35,7 +35,7 @@ public class ChoiceServiceImpl implements ChoiceService
 
     @Transactional
     @Override
-    public void save(Problem problem, List<ChoiceCreateRequest> requests, long examId)
+    public void save(Problem problem, List<ChoiceCreateRequest> requests)
     {
         List<Choice> choiceRequests = requests.stream().map(request -> choiceMapper.fromCreateRequestToChoice(request, problem))
                 .toList();
@@ -45,7 +45,7 @@ public class ChoiceServiceImpl implements ChoiceService
 
     @Transactional
     @Override
-    public long save(Choice choice, long examId)
+    public long save(Choice choice)
     {
         return choiceRepository.save(choice).getId();
     }
@@ -81,7 +81,7 @@ public class ChoiceServiceImpl implements ChoiceService
 
     @Transactional
     @Override
-    public void update(long choiceId, ChoiceUpdateRequest request, long examId)
+    public void update(long choiceId, ChoiceUpdateRequest request)
     {
         Choice choice = findById(choiceId);
 
@@ -92,7 +92,7 @@ public class ChoiceServiceImpl implements ChoiceService
 
     @Transactional
     @Override
-    public void deleteById(long choiceId, long examId)
+    public void deleteById(long choiceId)
     {
         Choice choice = findById(choiceId);
 
@@ -131,11 +131,6 @@ public class ChoiceServiceImpl implements ChoiceService
                         mapping(choiceMapper::toResponse, toList())));
     }
 
-    @Override
-    public void deleteAllByIds(List<Long> ids)
-    {
-        choiceRepository.deleteAllByIdInBatch(ids);
-    }
 
     @Override
     public void deleteAllByProblemId(long problemId)
@@ -147,13 +142,4 @@ public class ChoiceServiceImpl implements ChoiceService
         choiceRepository.deleteAllByIdInBatch(choiceList);
     }
 
-    @Override
-    public void deleteAllByProblemIds(List<Long> problemIds)
-    {
-        List<Long> choiceList = choiceRepository.findAllByProblemIds(problemIds).stream()
-                .map(Choice::getId)
-                .toList();
-
-        choiceRepository.deleteAllByIdInBatch(choiceList);
-    }
 }

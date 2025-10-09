@@ -20,11 +20,11 @@ public class ProblemChoiceFacade
     private final ChoiceService choiceService;
     private final ChoiceMapper choiceMapper;
 
-    public long saveChoice(long problemId, ChoiceCreateRequest request, long examId)
+    public long saveChoice(long problemId, ChoiceCreateRequest request)
     {
         Problem problem = problemService.findById(problemId);
         Choice choice = choiceMapper.fromCreateRequestToChoice(request, problem);
 
-        return choiceService.save(choice, examId);
+        return choiceService.save(choice);
     }
 }
