@@ -12,6 +12,12 @@ import lombok.NoArgsConstructor;
 
 @AllArgsConstructor
 @NoArgsConstructor
+@Table(name = "problem",
+    uniqueConstraints = @UniqueConstraint(
+            name = "uk_problem_exam_id_number",
+            columnNames = {"exam_id", "number"}
+    )
+)
 @Entity
 @Getter
 @Builder
@@ -52,10 +58,4 @@ public class Problem
         this.explanation = explanation;
     }
 
-    private void validateExamId(long examId)
-    {
-        if(!exam.getId().equals(examId))
-            throw new ExamException(ExceptionMessage.EXAM_NOT_FOUND);
-
-    }
 }

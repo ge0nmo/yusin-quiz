@@ -89,6 +89,7 @@ public class FakeProblemRepository implements ProblemRepository
     @Override
     public boolean existsByExamIdAndNumber(Long examId, int number)
     {
-        return false;
+        return data.stream()
+                .anyMatch(p -> p.getExam().getId().equals(examId) && p.getNumber() == number);
     }
 }

@@ -612,8 +612,14 @@ const problemApp = {
         });
 
         if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.message || "저장 실패");
+            let errorMessage = "저장 실패";
+            try {
+                const errorData = await response.json();
+                errorMessage = errorData.message || errorMessage;
+            } catch (e) {
+
+            }
+            throw new Error(errorMessage);
         }
     },
 
