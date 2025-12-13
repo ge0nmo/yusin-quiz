@@ -1,39 +1,17 @@
 /* Layout Reset */
-body {
-    background-color: #f8f9fc;
-}
+body { background-color: #f8f9fc; }
+#content-wrapper { margin-left: 260px; min-height: 100vh; display: flex; flex-direction: column; }
+@media (max-width: 768px) { #content-wrapper { margin-left: 0; } }
 
-#content-wrapper {
-    margin-left: 260px;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-}
-
-@media (max-width: 768px) {
-    #content-wrapper { margin-left: 0; }
-}
-
-/* [수정됨] Grid Layout (기존 Masonry 제거 -> Grid 적용) */
-/* 이렇게 해야 1, 2, 3 순서대로 가로로 배치됩니다 */
+/* Grid Layout (가로 채우기) */
 .problems-container {
     display: grid;
-    grid-template-columns: repeat(1, 1fr); /* 모바일: 1열 */
+    grid-template-columns: repeat(1, 1fr);
     gap: 1.5rem;
     width: 100%;
 }
-
-@media (min-width: 992px) {
-    .problems-container {
-        grid-template-columns: repeat(2, 1fr); /* 태블릿: 2열 */
-    }
-}
-
-@media (min-width: 1400px) {
-    .problems-container {
-        grid-template-columns: repeat(3, 1fr); /* 데스크탑: 3열 */
-    }
-}
+@media (min-width: 992px) { .problems-container { grid-template-columns: repeat(2, 1fr); } }
+@media (min-width: 1400px) { .problems-container { grid-template-columns: repeat(3, 1fr); } }
 
 /* Card Style */
 .problem-card {
@@ -43,55 +21,42 @@ body {
     box-shadow: 0 2px 10px rgba(0,0,0,0.03);
     transition: all 0.2s ease-in-out;
     cursor: pointer;
-
-    /* Grid 높이 맞춤 설정 */
     margin-bottom: 0;
     height: 100%;
     display: flex;
     flex-direction: column;
 }
+.problem-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.08); }
+.problem-header { background: linear-gradient(to right, #ffffff, #f8f9fa); padding: 12px 16px; border-bottom: 1px solid #f1f1f1; }
+.problem-card .card-body { flex: 1; display: flex; flex-direction: column; }
 
-.problem-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 20px rgba(0,0,0,0.08);
-}
-
-.problem-header {
-    background: linear-gradient(to right, #ffffff, #f8f9fa);
-    padding: 12px 16px;
-    border-bottom: 1px solid #f1f1f1;
-}
-
-.problem-card .card-body {
-    flex: 1; /* 내용이 적어도 카드가 꽉 차게 늘어남 */
-}
-
+/* Choice Preview Area */
 .choices-preview {
     font-size: 0.9rem;
     background-color: #f8f9fa;
     border-radius: 8px;
-    padding: 10px;
-    margin-top: 10px;
+    padding: 12px;
+    margin-top: auto; /* 내용이 적어도 하단에 붙도록 */
 }
 
-/* Modal Fixes */
-.modal-body {
-    max-height: 85vh;
-    overflow-y: auto;
-    background-color: #f8f9fa;
+/* [중요] 선택지 텍스트 줄바꿈 처리 */
+.choice-text-wrap {
+    white-space: normal;       /* 줄바꿈 허용 */
+    word-break: break-all;     /* 긴 단어 강제 줄바꿈 (영어/숫자 연속 등) */
+    overflow-wrap: break-word; /* 표준 줄바꿈 */
+    line-height: 1.4;
 }
 
-/* [유지] Summernote 에디터 크기 강제 확장 (시원하게 보이도록) */
+/* Modal & Editor Fixes */
+.modal-body { max-height: 85vh; overflow-y: auto; background-color: #f8f9fa; }
+
+/* Summernote Editor Force Height */
 .note-editor .note-editable {
-    min-height: 400px !important; /* 문제 내용 높이 */
+    min-height: 400px !important;
     font-size: 16px;
     line-height: 1.6;
 }
-
-/* 해설란은 조금 더 작아도 됨 */
-#problemExplanation + .note-editor .note-editable {
-    min-height: 200px !important;
-}
+#problemExplanation + .note-editor .note-editable { min-height: 200px !important; }
 
 .note-editor.note-frame {
     border-radius: 0 0 6px 6px;
@@ -99,13 +64,9 @@ body {
     border-top: none;
     box-shadow: none;
 }
+.note-toolbar { background-color: #ffffff; border-bottom: 1px solid #dee2e6; }
 
-.note-toolbar {
-    background-color: #ffffff;
-    border-bottom: 1px solid #dee2e6;
-}
-
-/* Choice Row Style */
+/* Choice Row Style in Modal */
 .choice-row {
     background-color: #fff;
     transition: background-color 0.2s;
@@ -114,12 +75,5 @@ body {
     border: 1px solid #e9ecef;
     margin-bottom: 8px;
 }
-
-.choice-row:hover {
-    background-color: #f1f3f5;
-}
-
-.choice-row input[type="radio"]:checked + input {
-    font-weight: bold;
-    color: #198754;
-}
+.choice-row:hover { background-color: #f1f3f5; }
+.choice-row input[type="radio"]:checked + input { font-weight: bold; color: #198754; }

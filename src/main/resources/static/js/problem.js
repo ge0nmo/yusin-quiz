@@ -5,7 +5,7 @@ const problemApp = {
     selectedExamId: null,
     selectedExamName: null,
 
-    // [변경] 높이를 시원하게 키움 (CSS min-height와 함께 작동)
+    // Summernote 설정
     summernoteOption: {
         height: 400,
         lang: 'ko-KR',
@@ -157,10 +157,11 @@ const problemApp = {
         const contentPreview = strip(problem.content);
         const dataJson = JSON.stringify(problem).replace(/"/g, '&quot;');
 
+        // [수정] text-truncate 제거하고, d-flex + choice-text-wrap 적용
         const choicesHtml = (problem.choices || []).map(c =>
-            `<div class="text-truncate ${c.isAnswer ? 'text-success fw-bold' : 'text-secondary'}">
-                <span class="badge ${c.isAnswer ? 'bg-success' : 'bg-light text-dark border'} me-1">${c.number}</span>
-                ${c.content}
+            `<div class="d-flex align-items-start mb-2 ${c.isAnswer ? 'text-success fw-bold' : 'text-secondary'}">
+                <span class="badge ${c.isAnswer ? 'bg-success' : 'bg-light text-dark border'} me-2 mt-1" style="min-width: 24px;">${c.number}</span>
+                <span class="choice-text-wrap">${c.content}</span>
              </div>`
         ).join('');
 
@@ -174,7 +175,7 @@ const problemApp = {
             </div>
             <div class="card-body p-3">
                 <div class="mb-3" style="min-height: 40px;">${contentPreview}...</div>
-                <div class="choices-preview small border-top pt-2">
+                <div class="choices-preview border-top pt-3">
                     ${choicesHtml}
                 </div>
             </div>
@@ -182,7 +183,7 @@ const problemApp = {
         `;
     },
 
-    // --- 3. 모달 제어 (getOrCreateInstance 사용) ---
+    // --- 3. 모달 제어 ---
     openCreateModal() {
         if(!this.selectedExamId) return alert("시험을 먼저 선택해주세요.");
 
@@ -194,7 +195,6 @@ const problemApp = {
 
         for(let i=1; i<=5; i++) this.addChoiceRow({number: i, content: '', isAnswer: false});
 
-        // [수정] 인스턴스 재사용
         bootstrap.Modal.getOrCreateInstance(document.getElementById('add-problem-modal')).show();
     },
 
@@ -211,7 +211,6 @@ const problemApp = {
 
         (problem.choices || []).forEach(c => this.addChoiceRow(c));
 
-        // [수정] 인스턴스 재사용
         bootstrap.Modal.getOrCreateInstance(document.getElementById('add-problem-modal')).show();
     },
 
@@ -249,7 +248,7 @@ const problemApp = {
         document.getElementById('choicesContainer').insertAdjacentHTML('beforeend', html);
     },
 
-    // --- 4. 저장 및 백드롭 해결 ---
+    // --- 4. 저장 ---
     async saveProblem() {
         const modalEl = document.getElementById('add-problem-modal');
         const mode = modalEl.getAttribute('data-mode');
@@ -303,19 +302,13 @@ const problemApp = {
 
             if(!res.ok) throw new Error("저장 실패");
 
-            // [수정] 모달 닫기 로직 강화
-            const modalInstance = bootstrap.Modal.getOrCreateInstance(modalEl);
-            modalInstance.hide();
-
-            // [중요] Backdrop 강제 제거 (화면 어두움 방지)
+            bootstrap.Modal.getOrCreateInstance(modalEl).hide();
             this.removeBackdrop();
-
             this.searchProblems();
             alert("저장되었습니다.");
         } catch(e) { console.error(e); alert("오류 발생"); }
     },
 
-    // 화면 어두움 문제 해결을 위한 유틸리티
     removeBackdrop() {
         const backdrops = document.querySelectorAll('.modal-backdrop');
         backdrops.forEach(backdrop => backdrop.remove());
