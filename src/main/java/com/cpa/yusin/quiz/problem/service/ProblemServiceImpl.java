@@ -134,8 +134,6 @@ public class ProblemServiceImpl implements ProblemService
                     String signedContent = replaceImageSrcWithPresignedUrl(problem.getContent());
                     String signedExplanation = replaceImageSrcWithPresignedUrl(problem.getExplanation());
 
-                    // Choice는 텍스트이므로 변환 로직 제거됨
-
                     return ProblemDTO.builder()
                             .id(problem.getId())
                             .number(problem.getNumber())

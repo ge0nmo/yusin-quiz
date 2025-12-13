@@ -1,19 +1,19 @@
 package com.cpa.yusin.quiz.config;
 
-import com.amazonaws.ClientConfiguration; // [추가]
-import com.amazonaws.auth.AWSStaticCredentialsProvider;
-import com.amazonaws.auth.BasicAWSCredentials;
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
+import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
+import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
+import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 
 @Profile("!test")
 @Configuration
-public class S3Config
-{
+public class S3Config {
+
     @Value("${cloud.aws.credentials.access-key}")
     private String accessKey;
 
@@ -23,19 +23,25 @@ public class S3Config
     @Value("${cloud.aws.region.static}")
     private String region;
 
+    // 1. 파일 업로드 및 삭제용 클라이언트
     @Bean
-    public AmazonS3 amazonS3Client()
-    {
-        BasicAWSCredentials credentials = new BasicAWSCredentials(accessKey, secretKey);
+    public S3Client s3Client() {
+        return S3Client.builder()
+                .region(Region.of(region))
+                .credentialsProvider(StaticCredentialsProvider.create(
+                        AwsBasicCredentials.create(accessKey, secretKey)
+                ))
+                .build();
+    }
 
-        ClientConfiguration clientConfig = new ClientConfiguration();
-        clientConfig.setSignerOverride("AWSS3V4SignerType");
-
-        return AmazonS3ClientBuilder
-                .standard()
-                .withRegion(region)
-                .withCredentials(new AWSStaticCredentialsProvider(credentials))
-                .withClientConfiguration(clientConfig) // [추가] 설정을 빌더에 적용
+    // 2. Presigned URL 발급 전용 객체 (V2는 분리되어 있음)
+    @Bean
+    public S3Presigner s3Presigner() {
+        return S3Presigner.builder()
+                .region(Region.of(region))
+                .credentialsProvider(StaticCredentialsProvider.create(
+                        AwsBasicCredentials.create(accessKey, secretKey)
+                ))
                 .build();
     }
 }

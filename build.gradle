@@ -65,7 +65,8 @@ dependencies {
     testImplementation 'org.springframework.restdocs:spring-restdocs-mockmvc'
 
     //s3
-    implementation 'com.amazonaws:aws-java-sdk-s3:1.12.691'
+    implementation platform('software.amazon.awssdk:bom:2.21.1') // 버전 관리 BOM
+    implementation 'software.amazon.awssdk:s3'
 
     implementation 'org.jsoup:jsoup:1.21.1'
 

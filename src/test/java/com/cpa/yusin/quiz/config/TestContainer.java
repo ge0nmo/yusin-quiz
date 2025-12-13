@@ -131,7 +131,7 @@ public class TestContainer
 
     public TestContainer()
     {
-        this.fileService = new FileServiceImpl(null, null, null, null);
+        this.fileService = new FileServiceImpl(null, null, null, null, null);
         this.clockHolder = new FakeClockHolder();
         this.merchantIdGenerator = new FakeMerchantIdGenerator();
 
