@@ -114,6 +114,15 @@ public class SecurityConfig
                                 .failureUrl("/admin/login?error")
                                 .permitAll()
                 )
+                .rememberMe(remember -> remember
+                        .key("uniqueAndSecretKey")
+                        .rememberMeParameter("remember-me")
+                        .tokenValiditySeconds(86400 * 14)
+                        .userDetailsService(memberDetailsService)
+                        .authenticationSuccessHandler((request, response, authentication) -> {
+                            response.sendRedirect("/admin/home");
+                        })
+                )
                 .logout(logout -> logout
                         .logoutUrl("/admin/logout")
                         .logoutSuccessUrl("/admin/login")

@@ -22,9 +22,9 @@
             <div class="topbar-divider d-none d-sm-block border-end mx-3" style="height: 24px; border-color: #555 !important;"></div>
 
             <li class="nav-item dropdown no-arrow">
-                <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
+                <a class="nav-link dropdown-toggle d-flex align-items-center gap-2" href="#" id="userDropdown" role="button"
                    data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    <span class="mr-3 d-none d-lg-inline text-white small fw-bold"
+                    <span class="d-none d-lg-inline text-white small fw-bold"
                           th:text="${#authentication.principal.member.username}">Admin</span>
                     <div class="bg-dark text-white rounded-circle d-flex align-items-center justify-content-center shadow-sm"
                          style="width: 35px; height: 35px; font-size: 0.9rem; border: 1px solid #666;">
