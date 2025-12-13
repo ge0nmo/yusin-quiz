@@ -1,9 +1,9 @@
 package com.cpa.yusin.quiz.config;
 
+import com.amazonaws.ClientConfiguration; // [추가]
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -28,11 +28,14 @@ public class S3Config
     {
         BasicAWSCredentials credentials = new BasicAWSCredentials(accessKey, secretKey);
 
+        ClientConfiguration clientConfig = new ClientConfiguration();
+        clientConfig.setSignerOverride("AWSS3V4SignerType");
+
         return AmazonS3ClientBuilder
                 .standard()
                 .withRegion(region)
                 .withCredentials(new AWSStaticCredentialsProvider(credentials))
+                .withClientConfiguration(clientConfig) // [추가] 설정을 빌더에 적용
                 .build();
     }
 }
-
