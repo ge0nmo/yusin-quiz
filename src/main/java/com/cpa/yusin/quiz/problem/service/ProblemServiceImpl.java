@@ -131,14 +131,14 @@ public class ProblemServiceImpl implements ProblemService
         List<ProblemDTO> response = problems.stream()
                 .map(problem -> {
                     // [수정] 조회 시에도 문제/해설만 Presigned URL 변환
-                    String signedContent = replaceImageSrcWithPresignedUrl(problem.getContent());
-                    String signedExplanation = replaceImageSrcWithPresignedUrl(problem.getExplanation());
+                    //String signedContent = replaceImageSrcWithPresignedUrl(problem.getContent());
+                    //String signedExplanation = replaceImageSrcWithPresignedUrl(problem.getExplanation());
 
                     return ProblemDTO.builder()
                             .id(problem.getId())
                             .number(problem.getNumber())
-                            .content(signedContent)
-                            .explanation(signedExplanation)
+                            .content(problem.getContent())
+                            .explanation(problem.getExplanation())
                             .choices(choiceMap.get(problem.getId()))
                             .build();
                 })
@@ -154,14 +154,14 @@ public class ProblemServiceImpl implements ProblemService
         List<ChoiceResponse> choices = choiceService.getAllByProblemId(problem.getId());
 
         // [수정] 단건 조회 시 문제/해설만 변환
-        String signedContent = replaceImageSrcWithPresignedUrl(problem.getContent());
-        String signedExplanation = replaceImageSrcWithPresignedUrl(problem.getExplanation());
+        //String signedContent = replaceImageSrcWithPresignedUrl(problem.getContent());
+        //String signedExplanation = replaceImageSrcWithPresignedUrl(problem.getExplanation());
 
         return ProblemDTO.builder()
                 .id(problem.getId())
                 .number(problem.getNumber())
-                .content(signedContent)
-                .explanation(signedExplanation)
+                .content(problem.getContent())
+                .explanation(problem.getExplanation())
                 .choices(choices)
                 .build();
     }

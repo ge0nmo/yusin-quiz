@@ -45,7 +45,8 @@ public class FileServiceImpl implements FileService {
 
     @Transactional
     @Override
-    public FileResponse save(MultipartFile file) {
+    public String save(MultipartFile file)
+    {
         String uniqueFilename = filenameGenerator.createStoreFileName(file.getOriginalFilename());
         String objectKey = prefix + "/" + uniqueFilename;
 
@@ -63,9 +64,9 @@ public class FileServiceImpl implements FileService {
             String url = s3Client.utilities().getUrl(GetUrlRequest.builder().bucket(bucket).key(objectKey).build()).toString();
 
             File fileDomain = fileMapper.toFileDomain(url, uniqueFilename, file);
-            fileDomain = fileRepository.save(fileDomain);
+            fileRepository.save(fileDomain);
 
-            return fileMapper.domainToFileResponse(fileDomain);
+            return url;
 
         } catch (IOException e) {
             throw new FileException(ExceptionMessage.INVALID_DATA);

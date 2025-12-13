@@ -19,8 +19,6 @@ public class FileController
     @PostMapping
     public String save(@RequestParam(value = "file") MultipartFile file)
     {
-        FileResponse response = fileService.save(file);
-
-        return response.getUrl();
+        return fileService.save(file);
     }
 }
