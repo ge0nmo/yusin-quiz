@@ -5,660 +5,349 @@ const problemApp = {
     selectedExamId: null,
     selectedExamName: null,
 
+    // [변경] 높이를 시원하게 키움 (CSS min-height와 함께 작동)
     summernoteOption: {
-        toolbar: [
-            ['fontname', ['fontname']],
-            ['fontsize', ['fontsize']],
-            ['style', ['bold', 'italic', 'underline', 'strikethrough', 'clear']],
-            ['color', ['forecolor', 'color']],
-            ['table', ['table']],
-            ['para', ['ul', 'ol', 'paragraph']],
-            ['height', ['height']],
-            ['insert', ['picture', 'link', 'video']],
-            ['view', ['fullscreen', 'help']]
-        ],
+        height: 400,
         lang: 'ko-KR',
-        fontNames: ['Arial', 'Arial Black', 'Comic Sans MS', 'Courier New', '맑은 고딕', '궁서', '굴림체', '굴림', '돋움체', '바탕체'],
-        fontSizes: ['8', '9', '10', '11', '12', '14', '16', '18', '20', '22', '24', '28', '30', '36', '50', '72'],
-        height: 200,
+        toolbar: [
+            ['style', ['bold', 'italic', 'underline', 'clear']],
+            ['font', ['strikethrough', 'superscript', 'subscript', 'color']],
+            ['fontsize', ['fontsize']],
+            ['para', ['ul', 'ol', 'paragraph']],
+            ['table', ['table']],
+            ['insert', ['link', 'picture', 'hr']],
+            ['view', ['codeview', 'help']]
+        ],
         callbacks: {
             onImageUpload: function(files) {
                 problemApp.uploadImageToServer(files[0], $(this));
-            },
-
-            onPaste: function(e) {
-                e.preventDefault();
-                const clipboardData = (e.originalEvent || e).clipboardData;
-                const text = clipboardData.getData('text/plain'); // 순수 텍스트만 추출
-
-                const selection = window.getSelection();
-                if (!selection.rangeCount) return;
-
-                // 현재 커서 위치에 텍스트 노드 삽입
-                selection.deleteFromDocument();
-                selection.getRangeAt(0).insertNode(document.createTextNode(text));
-
-                // 커서를 끝으로 이동
-                selection.collapseToEnd();
             }
-        },
+        }
     },
 
     async init() {
         await new Promise(resolve => {
-            const checkDependencies = () => {
-                if (window.jQuery && jQuery.fn.summernote) {
-                    resolve();
-                } else {
-                    setTimeout(checkDependencies, 100);
-                }
-            };
-            checkDependencies();
+            const check = () => window.jQuery && jQuery.fn.summernote ? resolve() : setTimeout(check, 100);
+            check();
         });
 
-        this.initializeEventListeners();
-        await this.addHandlerSubjectDropdown();
-
-        try {
-            this.initializeSummernote();
-        } catch (error) {
-            console.error('Error initializing Summernote:', error);
-        }
+        this.initEventListeners();
+        await this.loadSubjects();
     },
 
-    initializeEventListeners() {
-        document.querySelector('.search-click').addEventListener('click', () => this.addHandlerSearchClick());
-        document.querySelector('.add-problem-button').addEventListener('click', () => this.prepareProblemForm());
-        document.querySelector('.problem-save-button').addEventListener('click', () => this.addHandlerProblemSaveClick());
-        document.getElementById('addChoiceBtn').addEventListener('click', () => this.addNewChoiceRow());
-        document.getElementById('examList').addEventListener('change', (e) => this.handleExamSelection(e));
+    initEventListeners() {
+        document.querySelector('.search-click').addEventListener('click', () => this.searchProblems());
+        document.querySelector('.add-problem-button').addEventListener('click', () => this.openCreateModal());
+        document.querySelector('.problem-save-button').addEventListener('click', () => this.saveProblem());
+        document.getElementById('addChoiceBtn').addEventListener('click', () => this.addChoiceRow());
+        document.getElementById('examList').addEventListener('change', (e) => {
+            this.selectedExamId = e.target.value;
+            this.selectedExamName = e.target.options[e.target.selectedIndex].text;
+        });
     },
 
-    initializeSummernote() {
-        if (typeof $.fn.summernote === 'undefined') {
-            console.error('Summernote is not loaded');
-            return;
-        }
-
+    // --- 1. 필터 데이터 로딩 ---
+    async loadSubjects() {
         try {
-            $('#problemContent').summernote(this.summernoteOption);
-            $('#problemExplanation').summernote(this.summernoteOption);
-        } catch (error) {
-            console.error('Error initializing Summernote:', error);
-        }
-    },
+            const subjects = await this.getJSON("/admin/subject/list");
+            const dropdown = document.getElementById('subject-dropdown-content');
+            dropdown.innerHTML = '';
 
-    async addHandlerSubjectDropdown() {
-        const dropdown = document.querySelector('#subject-dropdown-content');
-        dropdown.innerHTML = '';
-
-        try {
-            const data = await this.getJSON("/admin/subject/list");
-            data.forEach((subject) => {
-                const button = document.createElement('button');
-                button.className = 'dropdown-item';
-                button.textContent = subject.name;
-                button.addEventListener('click', () => this.addHandlerSelectSubject(subject.id, subject.name));
-                dropdown.appendChild(button);
+            subjects.forEach(sub => {
+                const li = document.createElement('li');
+                const btn = document.createElement('a');
+                btn.className = 'dropdown-item';
+                btn.href = '#';
+                btn.textContent = sub.name;
+                btn.onclick = (e) => {
+                    e.preventDefault();
+                    this.selectSubject(sub.id, sub.name);
+                };
+                li.appendChild(btn);
+                dropdown.appendChild(li);
             });
-        } catch (error) {
-            console.error('Error loading subjects:', error);
-            alert('과목 목록을 불러오는데 실패했습니다.');
-        }
+        } catch(e) { console.error("과목 로딩 실패", e); }
     },
 
-    async addHandlerSelectSubject(subjectId, subjectName) {
-        this.clearYearDropdown();
-        this.clearExamDropdown();
+    async selectSubject(id, name) {
+        this.selectedSubjectId = id;
+        this.selectedSubjectName = name;
+        document.getElementById('subject-dropdown').textContent = name;
 
-        this.selectedSubjectId = subjectId;
-        this.selectedSubjectName = subjectName;
-        document.querySelector('#subject-dropdown').textContent = this.selectedSubjectName;
-
-        await this.addHandlerYearDropdown();
-    },
-
-    async addHandlerYearDropdown() {
-        const dropdown = document.querySelector('#year-content');
-        dropdown.innerHTML = '';
-
-        try {
-            const data = await this.getJSON(`/admin/exam/year?subjectId=${this.selectedSubjectId}`);
-            data.forEach(year => {
-                const button = document.createElement('button');
-                button.className = 'dropdown-item';
-                button.textContent = year;
-                button.addEventListener('click', () => this.addHandlerSelectYear(year));
-                dropdown.appendChild(button);
-            });
-        } catch (error) {
-            console.error('Error loading years:', error);
-            alert('연도 목록을 불러오는데 실패했습니다.');
-        }
-    },
-
-    async addHandlerSelectYear(year) {
-        this.selectedYear = year;
-        document.querySelector('#year-dropdown').textContent = this.selectedYear;
-
-        if (this.selectedSubjectId && this.selectedYear) {
-            await this.loadExamList();
-        }
-    },
-
-    clearYearDropdown() {
-        document.querySelector('#year-dropdown').textContent = '연도 선택';
-        document.querySelector('#year-content').innerHTML = '';
         this.selectedYear = null;
-    },
-
-    clearExamDropdown() {
-        const examList = document.getElementById('examList');
-        examList.innerHTML = '<option value="">시험 선택</option>';
         this.selectedExamId = null;
+        document.getElementById('year-dropdown').textContent = '연도 선택';
+        document.getElementById('year-content').innerHTML = '';
+        document.getElementById('examList').innerHTML = '<option value="">시험을 선택하세요</option>';
+        document.getElementById('examTable').innerHTML = '';
+
+        await this.loadYears();
     },
 
-    async loadExamList() {
-        const examList = document.getElementById('examList');
+    async loadYears() {
+        if(!this.selectedSubjectId) return;
+        try {
+            const years = await this.getJSON(`/admin/exam/year?subjectId=${this.selectedSubjectId}`);
+            const dropdown = document.getElementById('year-content');
+            dropdown.innerHTML = '';
+
+            years.forEach(year => {
+                const li = document.createElement('li');
+                const btn = document.createElement('a');
+                btn.className = 'dropdown-item';
+                btn.href = '#';
+                btn.textContent = `${year}년`;
+                btn.onclick = (e) => {
+                    e.preventDefault();
+                    this.selectYear(year);
+                };
+                li.appendChild(btn);
+                dropdown.appendChild(li);
+            });
+        } catch(e) { console.error("연도 로딩 실패", e); }
+    },
+
+    async selectYear(year) {
+        this.selectedYear = year;
+        document.getElementById('year-dropdown').textContent = `${year}년`;
+        await this.loadExams();
+    },
+
+    async loadExams() {
         try {
             const exams = await this.getJSON(`/admin/subject/${this.selectedSubjectId}/exam?year=${this.selectedYear}`);
-            examList.innerHTML = '<option value="">시험 선택</option>';
-            exams.forEach(exam => {
+            const select = document.getElementById('examList');
+            select.innerHTML = '<option value="">시험을 선택하세요</option>';
+            exams.forEach(e => {
                 const option = document.createElement('option');
-                option.value = exam.id;
-                option.textContent = exam.name;
-                examList.appendChild(option);
+                option.value = e.id;
+                option.textContent = e.name;
+                select.appendChild(option);
             });
-        } catch (error) {
-            console.error('Error loading exams:', error);
-            alert('시험 목록을 불러오는데 실패했습니다.');
-        }
+        } catch(e) { console.error("시험 로딩 실패", e); }
     },
 
-    handleExamSelection(event) {
-        this.selectedExamId = event.target.value || null;
-        this.selectedExamName = event.target.options[event.target.selectedIndex].text;
-    },
-
-    async addHandlerSearchClick() {
-        if (!this.selectedExamId) {
-            alert('시험을 선택해주세요');
-            return;
-        }
-
+    // --- 2. 문제 목록 ---
+    async searchProblems() {
+        if(!this.selectedExamId) return alert("시험을 선택해주세요.");
         try {
-            const problemList = await this.getJSON(`/admin/problem/list?examId=${this.selectedExamId}`);
-            await this.loadProblemData(problemList);
-        } catch (error) {
-            console.error('Error searching problems:', error);
-            alert('문제 목록을 불러오는데 실패했습니다.');
+            const problems = await this.getJSON(`/admin/problem/list?examId=${this.selectedExamId}`);
+            this.renderProblems(problems);
+        } catch(e) {
+            console.error(e);
+            document.getElementById('examTable').innerHTML = '<div class="text-center text-danger">데이터 로드 실패</div>';
         }
     },
 
-    async loadProblemData(problemList) {
-        const examTable = document.getElementById('examTable');
-
-        if (!problemList || problemList.length === 0) {
-            examTable.innerHTML = `
-                <div class="alert alert-info text-center">
-                    등록된 문제가 없습니다.
-                </div>
-            `;
+    renderProblems(list) {
+        const container = document.getElementById('examTable');
+        if(!list || list.length === 0) {
+            container.innerHTML = `<div class="text-center py-5 w-100 text-muted">등록된 문제가 없습니다.</div>`;
             return;
         }
-
-        const html = problemList.map(problem => this.createProblemCard(problem)).join('');
-        examTable.innerHTML = html;
-
-        problemList.forEach(problem => {
-            try {
-                this.initializeProblemEditors(problem);
-            } catch (error) {
-                console.error(`Error initializing editors for problem ${problem.id}:`, error);
-            }
-        });
+        container.innerHTML = list.map(p => this.createCardHTML(p)).join('');
     },
 
-    createProblemCard(problem) {
+    createCardHTML(problem) {
+        const strip = (html) => {
+            let tmp = document.createElement("DIV");
+            tmp.innerHTML = html;
+            return (tmp.textContent || tmp.innerText || "").substring(0, 100);
+        };
+        const contentPreview = strip(problem.content);
+        const dataJson = JSON.stringify(problem).replace(/"/g, '&quot;');
+
+        const choicesHtml = (problem.choices || []).map(c =>
+            `<div class="text-truncate ${c.isAnswer ? 'text-success fw-bold' : 'text-secondary'}">
+                <span class="badge ${c.isAnswer ? 'bg-success' : 'bg-light text-dark border'} me-1">${c.number}</span>
+                ${c.content}
+             </div>`
+        ).join('');
+
         return `
-        <div id="problem-${problem.id}" class="card problem-card" data-problem-id="${problem.id}">
-            <div class="card-header problem-header">
-                <div class="header-content">
-                    <div class="title-group">
-                        <h5>문제 ${problem.number}</h5>
-                        <input type="number" 
-                               class="form-control form-control-sm problemNumber" 
-                               value="${problem.number}" 
-                               min="1"
-                               max="40"
-                               required>
-                    </div>
-                    <div class="action-buttons">
-                        <button class="btn btn-light btn-icon problemEditBtn" 
-                                onclick="problemApp.handleUpdateProblemClick(${problem.id})"
-                                title="저장">
-                            <i class="fas fa-save"></i>
-                        </button>
-                        <button class="btn btn-light btn-icon" 
-                                onclick="problemApp.handleRemoveProblem(${problem.id})"
-                                title="삭제">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </div>
-                </div>
-            </div>
-            <div class="card-body">
-                <div class="summernote-container">
-                    <textarea id="problemContent-${problem.id}" class="problemContent">${problem.content || ''}</textarea>
-                </div>
-
-                <div class="choices-section mb-4">
-                    <div class="choices list-group mb-3">
-                        ${this.loadChoiceData(problem.choices || [])}
-                    </div>
-                    <button class="btn btn-outline-primary w-100" 
-                            onclick="problemApp.handleAddChoice(${problem.id})">
-                        <i class="fas fa-plus"></i> 선택지 추가
-                    </button>
-                </div>
-
-                <div class="explanation-section">
-                    <label class="form-label fw-bold">문제 해설</label>
-                    <textarea id="problemExplanation-${problem.id}" class="problemExplanation">${problem.explanation || ''}</textarea>
-                </div>
-            </div>
-        </div>
-    `;
-    },
-
-    loadChoiceData(choiceList) {
-        return (choiceList || []).map(choice => `
-        <div id="choice-${choice.id}" 
-             class="choice-item" 
-             data-choice-id="${choice.id}">
-            <div class="input-group">
-                <input type="number" 
-                       class="form-control form-control-sm choice-number" 
-                       value="${choice.number}"
-                       min="1"
-                       max="40"
-                       required>
-                <textarea class="form-control choice-content">${choice.content || ''}</textarea>
-                <div class="input-group-text">
-                    <div class="form-check">
-                        <input class="form-check-input isAnswer" 
-                               type="checkbox" 
-                               id="checkBox-${choice.id}" 
-                               ${choice.isAnswer ? 'checked' : ''}>
-                        <label class="form-check-label" for="checkBox-${choice.id}">정답</label>
-                    </div>
-                </div>
-                <div class="btn-group">
-                    <button class="btn btn-outline-danger btn-sm remove-choice" 
-                            onclick="problemApp.markChoiceAsRemoved(${choice.id})"
-                            title="삭제">
-                        <i class="fas fa-trash"></i>
-                    </button>
-                </div>
-            </div>
-        </div>
-    `).join('');
-    },
-
-    initializeProblemEditors(problem) {
-        if (typeof $.fn.summernote === 'undefined') {
-            console.error('Summernote is not loaded');
-            return;
-        }
-
-        try {
-            $(`#problemContent-${problem.id}`).summernote(this.summernoteOption)
-                .summernote('code', problem.content || '');
-            $(`#problemExplanation-${problem.id}`).summernote(this.summernoteOption)
-                .summernote('code', problem.explanation || '');
-        } catch (error) {
-            console.error(`Error initializing editors for problem ${problem.id}:`, error);
-            throw error;
-        }
-    },
-
-    prepareProblemForm() {
-        document.getElementById('subjectTitle').value = this.selectedSubjectName || '';
-        document.getElementById('examName').value = this.selectedExamName || '';
-        document.getElementById('examYear').value = this.selectedYear || '';
-        this.resetProblemForm();
-    },
-
-    resetProblemForm() {
-        document.getElementById('problemNumber').value = '';
-        if ($.fn.summernote) {
-            $('#problemContent').summernote('code', '');
-            $('#problemExplanation').summernote('code', '');
-        }
-        document.getElementById('choicesContainer').innerHTML = '';
-        this.addDefaultChoiceRows();
-    },
-
-    addDefaultChoiceRows() {
-        for (let i = 0; i < 5; i++) {
-            this.addNewChoiceRow();
-        }
-    },
-
-    addNewChoiceRow() {
-        const choiceRow = document.createElement('div');
-        choiceRow.className = 'choice-row';
-        choiceRow.innerHTML = `
-            <div class="input-group">
-                <input type="number" 
-                       class="form-control form-control-sm choice-number"
-                       placeholder="번호" 
-                       min="1"
-                       max="40"
-                       required>
-                <input type="text" class="form-control choiceContent" placeholder="선택지 내용" required>
-                <div class="input-group-text">
-                    <div class="form-check">
-                        <input class="form-check-input isAnswer" type="checkbox" id="choice-answer-${Date.now()}">
-                        <label class="form-check-label" for="choice-answer-${Date.now()}">정답</label>
-                    </div>
-                </div>
-                <button type="button" class="btn btn-outline-danger removeChoiceBtn">
+        <div class="problem-card" onclick='problemApp.openEditModal(${dataJson})'>
+            <div class="problem-header d-flex justify-content-between align-items-center">
+                <span class="badge bg-primary">No. ${problem.number}</span>
+                <button class="btn btn-sm btn-link text-danger p-0" onclick="event.stopPropagation(); problemApp.deleteProblem(${problem.id})">
                     <i class="fas fa-trash"></i>
+                </button>
+            </div>
+            <div class="card-body p-3">
+                <div class="mb-3" style="min-height: 40px;">${contentPreview}...</div>
+                <div class="choices-preview small border-top pt-2">
+                    ${choicesHtml}
+                </div>
+            </div>
+        </div>
+        `;
+    },
+
+    // --- 3. 모달 제어 (getOrCreateInstance 사용) ---
+    openCreateModal() {
+        if(!this.selectedExamId) return alert("시험을 먼저 선택해주세요.");
+
+        this.resetModal('새 문제 등록', 'create');
+
+        document.getElementById('subjectTitle').value = this.selectedSubjectName;
+        document.getElementById('examName').value = this.selectedExamName;
+        document.getElementById('examYear').value = `${this.selectedYear}년`;
+
+        for(let i=1; i<=5; i++) this.addChoiceRow({number: i, content: '', isAnswer: false});
+
+        // [수정] 인스턴스 재사용
+        bootstrap.Modal.getOrCreateInstance(document.getElementById('add-problem-modal')).show();
+    },
+
+    openEditModal(problem) {
+        this.resetModal('문제 수정', 'edit', problem.id);
+
+        document.getElementById('subjectTitle').value = this.selectedSubjectName;
+        document.getElementById('examName').value = this.selectedExamName;
+        document.getElementById('examYear').value = `${this.selectedYear}년`;
+
+        document.getElementById('problemNumber').value = problem.number;
+        $('#problemContent').summernote('code', problem.content);
+        $('#problemExplanation').summernote('code', problem.explanation);
+
+        (problem.choices || []).forEach(c => this.addChoiceRow(c));
+
+        // [수정] 인스턴스 재사용
+        bootstrap.Modal.getOrCreateInstance(document.getElementById('add-problem-modal')).show();
+    },
+
+    resetModal(title, mode, id = null) {
+        const modal = document.getElementById('add-problem-modal');
+        document.getElementById('modalTitle').textContent = title;
+        modal.setAttribute('data-mode', mode);
+        modal.setAttribute('data-id', id || '');
+
+        document.getElementById('problemNumber').value = '';
+        $('#problemContent').summernote('code', '');
+        $('#problemExplanation').summernote('code', '');
+        document.getElementById('choicesContainer').innerHTML = '';
+    },
+
+    addChoiceRow(data = null) {
+        const index = document.querySelectorAll('.choice-row').length + 1;
+        const number = data ? data.number : index;
+        const content = data ? data.content : '';
+        const isAnswer = data ? data.isAnswer : false;
+        const idAttr = (data && data.id) ? `data-id="${data.id}"` : '';
+
+        const html = `
+            <div class="choice-row input-group mb-2" ${idAttr}>
+                <div class="input-group-text bg-white">
+                    <input class="form-check-input mt-0 isAnswer" type="radio" name="correctAnswer" ${isAnswer ? 'checked' : ''}>
+                </div>
+                <input type="number" class="form-control choice-number" style="max-width: 60px;" value="${number}">
+                <input type="text" class="form-control choiceContent" value="${content}" placeholder="보기 내용">
+                <button type="button" class="btn btn-outline-danger" onclick="this.closest('.choice-row').remove()">
+                    <i class="fas fa-times"></i>
                 </button>
             </div>
         `;
-
-        choiceRow.querySelector('.removeChoiceBtn').addEventListener('click', () => choiceRow.remove());
-        document.getElementById('choicesContainer').appendChild(choiceRow);
+        document.getElementById('choicesContainer').insertAdjacentHTML('beforeend', html);
     },
 
-    async handleUpdateProblemClick(problemId) {
-        try {
-            const problemForm = document.getElementById(`problem-${problemId}`);
-            const num = Number(problemForm.querySelector('.problemNumber').value);
-            const content = $(`#problemContent-${problemId}`).summernote('code');
-            const explanation = $(`#problemExplanation-${problemId}`).summernote('code');
+    // --- 4. 저장 및 백드롭 해결 ---
+    async saveProblem() {
+        const modalEl = document.getElementById('add-problem-modal');
+        const mode = modalEl.getAttribute('data-mode');
+        const problemId = modalEl.getAttribute('data-id');
 
-            // 선택지 데이터 수집
-            const choices = Array.from(problemForm.querySelectorAll('.choice-item')).map(choiceItem => {
-                const choiceId = choiceItem.getAttribute('data-choice-id');
-                return {
-                    id: choiceId ? parseInt(choiceId) : null,
-                    number: Number(choiceItem.querySelector('.choice-number').value),
-                    content: choiceItem.querySelector('.choice-content').value,
-                    isAnswer: choiceItem.querySelector('.isAnswer').checked,
-                    removedYn: choiceItem.classList.contains('removed')
-                };
-            });
+        const number = document.getElementById('problemNumber').value;
+        const content = $('#problemContent').summernote('code');
+        const explanation = $('#problemExplanation').summernote('code');
 
-            const requestData = {
-                id: problemId,
-                number: num,
-                content: content,
-                explanation: explanation,
-                choices: choices
-            };
+        const choices = [];
+        let hasAnswer = false;
+        document.querySelectorAll('.choice-row').forEach(row => {
+            const cId = row.getAttribute('data-id');
+            const cNum = row.querySelector('.choice-number').value;
+            const cContent = row.querySelector('.choiceContent').value;
+            const cIsAnswer = row.querySelector('.isAnswer').checked;
 
-            const response = await fetch(`/admin/problem?examId=${this.selectedExamId}`, {
-                method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(requestData)
-            });
-
-            if (!response.ok) throw new Error('수정 실패');
-
-            // 업데이트 후 문제 목록 새로고침
-            const problemList = await this.getJSON(`/admin/problem/list?examId=${this.selectedExamId}`);
-            await this.loadProblemData(problemList);
-
-            alert('문제가 성공적으로 업데이트되었습니다.');
-        } catch (error) {
-            console.error('Error updating problem:', error);
-            alert(error.message);
-        }
-    },
-
-    async handleRemoveProblem(problemId) {
-        if (!confirm('정말 이 문제를 삭제하시겠습니까?')) return;
-
-        try {
-            const response = await fetch(`/admin/problem/${problemId}`, {
-                method: 'DELETE',
-            });
-            if (!response.ok) throw new Error('삭제 실패');
-
-            document.getElementById(`problem-${problemId}`).remove();
-            alert('문제가 삭제되었습니다.');
-        } catch (error) {
-            console.error('Error removing problem:', error);
-            alert(error.message);
-        }
-    },
-
-    async handleAddChoice(problemId) {
-        const choicesContainer = document.querySelector(`#problem-${problemId} .choices`);
-        const newChoiceDiv = document.createElement('div');
-        newChoiceDiv.className = 'choice-item';
-        newChoiceDiv.innerHTML = `
-        <div class="input-group">
-            <input type="number" 
-                   class="form-control form-control-sm choice-number"
-                   min="1"
-                   max="40"
-                   required>
-            <textarea class="form-control choice-content"></textarea>
-            <div class="input-group-text">
-                <div class="form-check">
-                    <input class="form-check-input isAnswer" type="checkbox">
-                    <label class="form-check-label">정답</label>
-                </div>
-            </div>
-            <div class="btn-group">
-                <button class="btn btn-outline-primary btn-sm save-new-choice" title="저장">
-                    <i class="fas fa-save"></i>
-                </button>
-                <button class="btn btn-outline-danger btn-sm remove-choice" title="삭제">
-                    <i class="fas fa-trash"></i>
-                </button>
-            </div>
-        </div>
-    `;
-
-        newChoiceDiv.querySelector('.save-new-choice').addEventListener('click',
-            () => this.saveNewChoice(problemId, newChoiceDiv));
-        newChoiceDiv.querySelector('.remove-choice').addEventListener('click',
-            () => newChoiceDiv.remove());
-
-        choicesContainer.appendChild(newChoiceDiv);
-    },
-
-    async saveNewChoice(problemId, choiceElement) {
-        try {
-            const num = Number(choiceElement.querySelector('.choice-number').value);
-            const content = choiceElement.querySelector('.choice-content').value;
-            const isAnswer = choiceElement.querySelector('.isAnswer').checked;
-
-            const response = await fetch(`/admin/choice?problemId=${problemId}`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    number: num,
-                    content: content,
-                    isAnswer: isAnswer,
-                }),
-            });
-
-            if (!response.ok) throw new Error('저장 실패');
-
-            const choiceId = await response.json();
-            this.updateChoiceElement(choiceElement, choiceId);
-            alert('선택지가 저장되었습니다.');
-        } catch (error) {
-            console.error('Error saving choice:', error);
-            alert(error.message);
-        }
-    },
-
-    markChoiceAsRemoved(choiceId) {
-        if (!confirm('정말 이 선택지를 삭제하시겠습니까?')) return;
-
-        const choiceElement = document.getElementById(`choice-${choiceId}`);
-        choiceElement.classList.add('removed');
-        choiceElement.style.display = 'none';
-    },
-
-    updateChoiceElement(element, choiceId) {
-        element.id = `choice-${choiceId}`;
-        element.setAttribute('data-choice-id', choiceId);
-
-        const saveBtn = element.querySelector('.save-new-choice');
-        const removeBtn = element.querySelector('.remove-choice');
-
-        saveBtn.onclick = () => this.handleUpdateChoiceClick(choiceId);
-        removeBtn.onclick = () => this.handleRemoveChoiceClick(choiceId);
-    },
-
-    async handleUpdateChoiceClick(choiceId) {
-        try {
-            const choiceElement = document.getElementById(`choice-${choiceId}`);
-            const problemId = choiceElement.closest('.problem-card').getAttribute('data-problem-id');
-
-            const data = {
-                number: Number(choiceElement.querySelector('.choice-number').value),
-                content: choiceElement.querySelector('.choice-content').value,
-                isAnswer: choiceElement.querySelector('.isAnswer').checked
-            };
-
-            const response = await fetch(`/admin/choice/${choiceId}?problemId=${problemId}`, {
-                method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data)
-            });
-
-            if (!response.ok) throw new Error('수정 실패');
-            alert('선택지가 성공적으로 업데이트되었습니다.');
-        } catch (error) {
-            console.error('Error updating choice:', error);
-            alert('선택지 수정에 실패했습니다.');
-        }
-    },
-
-    async handleRemoveChoiceClick(choiceId) {
-        if (!confirm('정말 이 선택지를 삭제하시겠습니까?')) return;
-
-        try {
-            const choiceElement = document.getElementById(`choice-${choiceId}`);
-            const problemId = choiceElement.closest('.problem-card').getAttribute('data-problem-id');
-
-            const response = await fetch(`/admin/choice/${choiceId}?problemId=${problemId}`, {
-                method: 'DELETE'
-            });
-
-            if (!response.ok) throw new Error('삭제 실패');
-
-            choiceElement.remove();
-            alert('선택지가 삭제되었습니다.');
-        } catch (error) {
-            console.error('Error removing choice:', error);
-            alert('선택지 삭제에 실패했습니다.');
-        }
-    },
-
-    async addHandlerProblemSaveClick() {
-        try {
-            const problemNumber = Number(document.getElementById('problemNumber').value);
-            const problemContent = $('#problemContent').summernote('code');
-            const explanation = $('#problemExplanation').summernote('code');
-
-            const choiceCreateRequests = Array.from(document.querySelectorAll('.choice-row'))
-                .map((row, index) => {
-                    const content = row.querySelector('.choiceContent').value.trim();
-                    if (!content) return null;
-
-                    return {
-                        number: index + 1,
-                        content: content,
-                        isAnswer: row.querySelector('.isAnswer').checked,
-                    };
-                })
-                .filter(choice => choice !== null);
-
-            if (!choiceCreateRequests.some(choice => choice.isAnswer)) {
-                throw new Error('정답을 선택해주세요');
+            if(cIsAnswer) hasAnswer = true;
+            if(cContent.trim()) {
+                choices.push({
+                    id: (mode === 'edit' && cId) ? parseInt(cId) : null,
+                    number: parseInt(cNum),
+                    content: cContent,
+                    isAnswer: cIsAnswer
+                });
             }
-
-            await this.saveProblem({
-                number: problemNumber,
-                content: problemContent,
-                explanation: explanation,
-                choices: choiceCreateRequests
-            });
-
-            const problemList = await this.getJSON(`/admin/problem/list?examId=${this.selectedExamId}`);
-            await this.loadProblemData(problemList);
-            this.hideModal('add-problem-modal');
-            alert('저장되었습니다.');
-        } catch (error) {
-            alert(error.message);
-        }
-    },
-
-    async saveProblem(problemData) {
-        const response = await fetch(`/admin/problem?examId=${this.selectedExamId}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(problemData),
         });
 
-        if (!response.ok) {
-            let errorMessage = "저장 실패";
-            try {
-                const errorData = await response.json();
-                errorMessage = errorData.message || errorMessage;
-            } catch (e) {
+        if(!number) return alert("문제 번호를 입력하세요.");
+        if($('#problemContent').summernote('isEmpty')) return alert("문제 지문을 입력하세요.");
+        if(!hasAnswer) return alert("정답을 하나 이상 선택해주세요.");
 
-            }
-            throw new Error(errorMessage);
-        }
+        const payload = {
+            id: mode === 'edit' ? parseInt(problemId) : null,
+            examId: parseInt(this.selectedExamId),
+            number: parseInt(number),
+            content: content,
+            explanation: explanation,
+            choices: choices
+        };
+
+        try {
+            const method = mode === 'edit' ? 'PATCH' : 'POST';
+            const url = `/admin/problem?examId=${this.selectedExamId}`;
+
+            const res = await fetch(url, {
+                method: method,
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(payload)
+            });
+
+            if(!res.ok) throw new Error("저장 실패");
+
+            // [수정] 모달 닫기 로직 강화
+            const modalInstance = bootstrap.Modal.getOrCreateInstance(modalEl);
+            modalInstance.hide();
+
+            // [중요] Backdrop 강제 제거 (화면 어두움 방지)
+            this.removeBackdrop();
+
+            this.searchProblems();
+            alert("저장되었습니다.");
+        } catch(e) { console.error(e); alert("오류 발생"); }
     },
 
-    hideModal(modalId) {
-        const modal = document.getElementById(modalId);
-        const bsModal = bootstrap.Modal.getInstance(modal);
-        if (bsModal) bsModal.hide();
+    // 화면 어두움 문제 해결을 위한 유틸리티
+    removeBackdrop() {
+        const backdrops = document.querySelectorAll('.modal-backdrop');
+        backdrops.forEach(backdrop => backdrop.remove());
+        document.body.classList.remove('modal-open');
+        document.body.style.overflow = '';
+        document.body.style.paddingRight = '';
+    },
+
+    async deleteProblem(id) {
+        if(!confirm("정말 삭제하시겠습니까?")) return;
+        try {
+            const res = await fetch(`/admin/problem/${id}`, { method: 'DELETE' });
+            if(res.ok) this.searchProblems();
+            else alert("삭제 실패");
+        } catch(e) { alert("오류 발생"); }
     },
 
     async getJSON(url) {
-        const response = await fetch(url);
-        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-        return await response.json();
+        const res = await fetch(url);
+        if(!res.ok) throw new Error(res.status);
+        return await res.json();
     },
 
-    uploadImageToServer(file, summernoteEditor) {
+    uploadImageToServer(file, editor) {
         const formData = new FormData();
         formData.append('file', file);
-
-        fetch('/admin/file', {
-            method: 'POST',
-            body: formData,
-        })
-            .then(response => {
-                if (!response.ok) throw new Error('Image upload failed');
-                // Get the response text directly since it's a URL string
-                return response.text();
-            })
-            .then(url => {
-                // Insert the URL directly into summernote
-                summernoteEditor.summernote('insertImage', url);
-            })
-            .catch(error => {
-                console.error('Error uploading image:', error);
-                alert('이미지 업로드에 실패했습니다.');
-            });
+        fetch('/admin/file', { method: 'POST', body: formData })
+            .then(r => r.ok ? r.text() : Promise.reject())
+            .then(url => editor.summernote('insertImage', url))
+            .catch(e => alert('이미지 업로드 실패'));
     }
 };
 
-// Initialize the app and expose it globally
 window.problemApp = problemApp;
 document.addEventListener('DOMContentLoaded', () => problemApp.init());

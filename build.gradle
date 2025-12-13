@@ -67,15 +67,12 @@ dependencies {
     //s3
     implementation 'com.amazonaws:aws-java-sdk-s3:1.12.691'
 
-    // s3 mock
-    testImplementation group: 'io.findify', name: 's3mock_2.13', version: '0.2.6'
-    implementation group: 'com.adobe.testing', name: 's3mock', version: '3.10.0'
-
     // https://mvnrepository.com/artifact/com.squareup.okhttp3/okhttp
     implementation group: 'com.squareup.okhttp3', name: 'okhttp', version: '4.9.3'
 
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
     implementation 'io.micrometer:micrometer-registry-prometheus'
+    implementation 'io.prometheus:prometheus-metrics-exposition-formats:1.2.1'
 }
 
 tasks.named('test') {

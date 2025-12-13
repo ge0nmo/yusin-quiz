@@ -10,13 +10,16 @@ import java.util.List;
 
 public interface ExamJpaRepository extends JpaRepository<Exam, Long>
 {
+    // [변경] 메서드 이름을 변경하여 오버로딩 충돌 방지 및 명확성 확보
+    // (:year IS NULL OR e.year = :year) 로직 덕분에 year가 null이면 전체 조회가 됩니다.
     @Query("SELECT e " +
             "FROM Exam e " +
             "WHERE e.subjectId = :subjectId " +
             "AND (:year IS NULL OR e.year = :year) " +
             "ORDER BY e.year DESC ")
-    List<Exam> findAllBySubjectId(@Param("subjectId") long subjectId, @Param("year") Integer year);
+    List<Exam> findExamsBySubjectIdAndYear(@Param("subjectId") long subjectId, @Param("year") Integer year);
 
+    // 1개 인자 조회 메서드 (이름 유지)
     @Query("SELECT e " +
             "FROM Exam e " +
             "WHERE e.subjectId = :subjectId")

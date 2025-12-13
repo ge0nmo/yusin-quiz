@@ -1,100 +1,81 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="https://www.thymeleaf.org/">
+<html lang="ko" xmlns:th="https://www.thymeleaf.org/">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>과목 관리</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { background-color: #f8f9fc; }
+        #content-wrapper { margin-left: 260px; min-height: 100vh; display: flex; flex-direction: column; }
+        @media (max-width: 768px) { #content-wrapper { margin-left: 0; } }
+        .cursor-pointer { cursor: pointer; }
+    </style>
 </head>
-<body class="bg-light">
-<div id="wrapper" class="d-flex">
+<body>
+<div id="wrapper">
     <div th:replace="~{fragments/side.html :: side}"></div>
-    <div id="content-wrapper" class="d-flex flex-column w-100">
-        <div id="content">
-            <header th:replace="~{fragments/header.html :: header}"></header>
-            <div class="container-fluid px-4 py-4">
-                <div class="row">
-                    <div class="col-12">
-                        <!-- Page Header -->
-                        <div class="d-flex justify-content-between align-items-center mb-4">
-                            <h4 class="fw-bold text-primary mb-0">과목 관리</h4>
-                            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#add-subject-modal">
-                                <i class="fas fa-plus me-2"></i>과목 추가
-                            </button>
-                        </div>
+    <div id="content-wrapper">
+        <header th:replace="~{fragments/header.html :: header}"></header>
 
-                        <!-- Main Content Card -->
-                        <div class="card border-0 shadow-sm">
-                            <div class="card-body p-0">
-                                <div class="table-responsive">
-                                    <table class="table table-hover mb-0">
-                                        <thead>
-                                        <tr class="bg-light">
-                                            <th class="border-0 px-4">번호</th>
-                                            <th class="border-0 px-4">과목명</th>
-                                        </tr>
-                                        </thead>
-                                        <tbody id="subjectList"></tbody>
-                                    </table>
-                                </div>
-                            </div>
-                            <!-- Pagination -->
-                            <div class="card-footer bg-white border-0 d-flex justify-content-center py-3">
-                                <div class="paging pagination"></div>
-                            </div>
-                        </div>
+        <div class="container-fluid px-4 py-4">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="h3 mb-0 text-gray-800 fw-bold">과목 관리</h1>
+                <button class="btn btn-primary shadow-sm" data-bs-toggle="modal" data-bs-target="#add-subject-modal">
+                    <i class="fas fa-plus me-2"></i>과목 추가
+                </button>
+            </div>
+
+            <div class="card shadow mb-4">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead class="table-light">
+                            <tr>
+                                <th style="width: 10%">ID</th>
+                                <th>과목명 (시험 관리 이동)</th>
+                                <th style="width: 15%" class="text-center">관리</th>
+                            </tr>
+                            </thead>
+                            <tbody id="subjectList"></tbody>
+                        </table>
                     </div>
+                    <div class="d-flex justify-content-center mt-4 paging pagination"></div>
                 </div>
             </div>
         </div>
     </div>
+</div>
 
-    <!-- Add Subject Modal -->
-    <div class="modal fade" id="add-subject-modal" tabindex="-1">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content border-0">
-                <div class="modal-header border-0 bg-light">
-                    <h5 class="modal-title fw-bold">새로운 과목 추가</h5>
-                    <button class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body px-4 py-4">
-                    <form id="subject-form">
-                        <div class="mb-3">
-                            <label for="subjectName" class="form-label">과목 이름</label>
-                            <input type="text" class="form-control" id="subjectName" required>
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer border-0">
-                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">취소</button>
-                    <button type="button" class="btn btn-primary px-4" onclick="subjectApp.saveSubject()">저장</button>
-                </div>
+<div class="modal fade" id="add-subject-modal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold">과목 추가</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="text" class="form-control" id="subjectName" placeholder="과목명을 입력하세요">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" onclick="subjectApp.saveSubject()">저장</button>
             </div>
         </div>
     </div>
+</div>
 
-    <!-- Update Subject Modal -->
-    <div class="modal fade" id="update-subject-modal" tabindex="-1">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content border-0">
-                <div class="modal-header border-0 bg-light">
-                    <h5 class="modal-title fw-bold">과목 정보 수정</h5>
-                    <button class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body px-4 py-4">
-                    <form id="update-subject-form">
-                        <div class="mb-3">
-                            <label for="newSubjectName" class="form-label">과목명</label>
-                            <input type="text" class="form-control" id="newSubjectName" required>
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer border-0">
-                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">취소</button>
-                    <button type="button" class="btn btn-primary px-4" onclick="subjectApp.updateSubject()">저장</button>
-                </div>
+<div class="modal fade" id="update-subject-modal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold">과목 수정</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="text" class="form-control" id="updateSubjectName">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" onclick="subjectApp.updateSubject()">수정</button>
             </div>
         </div>
     </div>
@@ -104,9 +85,9 @@
 <script src="/static/js/subject.js"></script>
 <script th:inline="javascript">
     document.addEventListener('DOMContentLoaded', () => {
+        // SSR 데이터가 있다면 사용, 없으면 fetch
         const initialData = {
-            response: /*[[ ${response} ]]*/ [],
-            params: /*[[ ${params} ]]*/ {}
+            response: /*[[ ${response} ]]*/ null
         };
         subjectApp.init(initialData);
     });

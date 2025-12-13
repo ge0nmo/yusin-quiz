@@ -40,7 +40,7 @@ public class MemberDetails implements UserDetails, OAuth2User
     @Override
     public String getName()
     {
-        return member.getEmail();
+        return member.getUsername();
     }
 
     @Override

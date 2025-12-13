@@ -29,7 +29,8 @@ public class ExamRepositoryImpl implements ExamRepository
     @Override
     public List<Exam> findAllBySubjectId(long subjectId, Integer year)
     {
-        return examJpaRepository.findAllBySubjectId(subjectId, year);
+        // [수정] JpaRepository에서 이름 변경한 메서드를 호출
+        return examJpaRepository.findExamsBySubjectIdAndYear(subjectId, year);
     }
 
     @Override

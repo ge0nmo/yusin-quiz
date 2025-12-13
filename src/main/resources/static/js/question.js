@@ -1,175 +1,93 @@
-let currentPage = 1;
+let currentPage = 0; // 0-based page index로 변경 (Spring Data Pageable 기본값)
 const pageSize = 10;
-const prevPage = document.querySelector('.prevPage');
-const nextPage = document.querySelector('.nextPage');
-const questionList = document.querySelector('#questionList');
+const questionList = document.getElementById('questionList');
+const loadingSpinner = document.getElementById('loadingSpinner');
 
-// Initialize page
-window.onload = function() {
-    loadPage();
-    initializePagination();
-};
+window.onload = () => loadPage(0);
 
-function initializePagination() {
-    prevPage.addEventListener('click', handlePrevPage);
-    nextPage.addEventListener('click', handleNextPage);
-}
+// 페이지 로드 함수
+async function loadPage(page) {
+    currentPage = page;
+    loadingSpinner.style.display = 'block';
+    questionList.innerHTML = ''; // 초기화
 
-async function loadPage() {
     try {
-        showLoadingState();
-        const data = await getJSON(`/admin/question/list?page=${currentPage - 1}&size=${pageSize}`);
-        renderQuestionList(data.data);
-        updatePaginationButtons(data.pageInfo);
-    } catch (err) {
-        console.error('Error loading page:', err);
-        showErrorState();
+        const response = await fetch(`/admin/question/list?page=${currentPage}&size=${pageSize}&sort=createdAt,desc`);
+        if (!response.ok) throw new Error('API Error');
+
+        const result = await response.json();
+        // GlobalResponse 구조 (data, pageInfo)에 맞춤
+        renderList(result.data);
+        updatePagination(result.pageInfo);
+
+    } catch (e) {
+        console.error(e);
+        questionList.innerHTML = `<tr><td colspan="5" class="text-center text-danger py-4">데이터 로드 실패</td></tr>`;
     } finally {
-        hideLoadingState();
+        loadingSpinner.style.display = 'none';
     }
 }
 
-function renderQuestionList(questions) {
-    questionList.innerHTML = '';
-
-    if (!questions || questions.length === 0) {
-        showEmptyState();
+function renderList(list) {
+    if (!list || list.length === 0) {
+        questionList.innerHTML = `<tr><td colspan="5" class="text-center text-muted py-5"><i class="fas fa-inbox fa-3x mb-3 text-light"></i><br>등록된 질문이 없습니다.</td></tr>`;
         return;
     }
 
-    const fragment = document.createDocumentFragment();
-
-    questions.forEach(question => {
-        const row = createQuestionRow(question);
-        fragment.appendChild(row);
-    });
-
-    questionList.appendChild(fragment);
-}
-
-function createQuestionRow(question) {
-    const row = document.createElement('tr');
-    if (question.answeredByAdmin) {
-        row.classList.add('table-success');
-    }
-
-    row.innerHTML = `
-        <td class="text-nowrap">${escapeHtml(question.username)}</td>
-        <td>
-            <a href="/admin/question/${question.id}/answer" class="question-link">
-                ${escapeHtml(question.title)}
-            </a>
-        </td>
-        <td class="text-nowrap">${formatDate(question.createdAt)}</td>
-    `;
-
-    return row;
-}
-
-function formatDate(dateString) {
-    try {
-        const date = new Date(dateString);
-        return new Intl.DateTimeFormat('ko-KR', {
-            year: 'numeric',
-            month: '2-digit',
-            day: '2-digit',
-            hour: '2-digit',
-            minute: '2-digit',
-            hour12: false
-        }).format(date);
-    } catch (e) {
-        console.error('Date formatting error:', e);
-        return dateString;
-    }
-}
-
-function updatePaginationButtons(pageInfo) {
-    const prevPageItem = prevPage.parentElement;
-    const nextPageItem = nextPage.parentElement;
-
-    prevPageItem.classList.toggle('disabled', pageInfo.currentPage <= 1);
-    nextPageItem.classList.toggle('disabled', pageInfo.currentPage >= pageInfo.totalPages);
-
-    // Update aria-disabled for accessibility
-    prevPage.setAttribute('aria-disabled', pageInfo.currentPage <= 1);
-    nextPage.setAttribute('aria-disabled', pageInfo.currentPage >= pageInfo.totalPages);
-}
-
-function handlePrevPage(e) {
-    e.preventDefault();
-    if (currentPage > 1) {
-        currentPage--;
-        loadPage();
-    }
-}
-
-function handleNextPage(e) {
-    e.preventDefault();
-    if (!e.target.closest('.page-item').classList.contains('disabled')) {
-        currentPage++;
-        loadPage();
-    }
-}
-
-// Utility Functions
-function showLoadingState() {
-    questionList.innerHTML = `
-        <tr>
-            <td colspan="3" class="text-center py-4">
-                <div class="spinner-border text-primary" role="status">
-                    <span class="visually-hidden">Loading...</span>
+    questionList.innerHTML = list.map(q => `
+        <tr onclick="location.href='/admin/question/${q.id}/answer'" style="cursor: pointer;">
+            <td class="ps-4">
+                ${q.answeredByAdmin
+        ? '<span class="badge badge-soft-success rounded-pill px-3">답변완료</span>'
+        : '<span class="badge badge-soft-warning rounded-pill px-3">미답변</span>'}
+            </td>
+            <td>
+                <a href="/admin/question/${q.id}/answer" class="question-title text-dark fw-bold">
+                    ${escapeHtml(q.title)}
+                </a>
+                <div class="small text-muted text-truncate" style="max-width: 500px;">${escapeHtml(q.content)}</div>
+            </td>
+            <td>
+                <div class="d-flex align-items-center">
+                    <div class="bg-light rounded-circle text-primary d-flex justify-content-center align-items-center me-2" style="width: 32px; height: 32px;">
+                        <i class="fas fa-user small"></i>
+                    </div>
+                    <span>${escapeHtml(q.username)}</span>
                 </div>
             </td>
-        </tr>
-    `;
-}
-
-function hideLoadingState() {
-    // Loading state will be replaced by actual content
-}
-
-function showErrorState() {
-    questionList.innerHTML = `
-        <tr>
-            <td colspan="3" class="text-center text-danger py-4">
-                <i class="fas fa-exclamation-circle me-2"></i>데이터를 불러오는데 실패했습니다.
+            <td class="text-secondary small">${formatDate(q.createdAt)}</td>
+            <td class="text-center">
+                <button class="btn btn-sm btn-light text-primary">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
             </td>
         </tr>
-    `;
+    `).join('');
 }
 
-function showEmptyState() {
-    questionList.innerHTML = `
-        <tr>
-            <td colspan="3" class="text-center text-muted py-4">
-                <i class="fas fa-inbox me-2"></i>등록된 질문이 없습니다.
-            </td>
-        </tr>
-    `;
+function updatePagination(pageInfo) {
+    const prevBtn = document.querySelector('.prevPage');
+    const nextBtn = document.querySelector('.nextPage');
+
+    // prevBtn
+    prevBtn.onclick = (e) => { e.preventDefault(); if(pageInfo.currentPage > 1) loadPage(currentPage - 1); };
+    prevBtn.parentElement.classList.toggle('disabled', pageInfo.currentPage <= 1);
+
+    // nextBtn
+    nextBtn.onclick = (e) => { e.preventDefault(); if(pageInfo.currentPage < pageInfo.totalPages) loadPage(currentPage + 1); };
+    nextBtn.parentElement.classList.toggle('disabled', pageInfo.currentPage >= pageInfo.totalPages);
 }
 
-function escapeHtml(unsafe) {
-    return unsafe
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
+// Utils
+function formatDate(dateStr) {
+    if(!dateStr) return '-';
+    const date = new Date(dateStr);
+    return date.toLocaleDateString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit' });
 }
 
-// API Call
-const getJSON = async function(url) {
-    try {
-        const response = await fetch(url);
-        const data = await response.json();
-
-        if (!response.ok) {
-            throw new Error(`${data.message || 'API Error'} (${response.status})`);
-        }
-
-        return data;
-    } catch (err) {
-        console.error('API Error:', err);
-        throw err;
-    }
-};
+function escapeHtml(text) {
+    if (!text) return '';
+    return text.replace(/[&<>"']/g, function(m) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m];
+    });
+}

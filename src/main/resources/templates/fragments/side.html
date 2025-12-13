@@ -1,63 +1,112 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
 
-<div class="bg-dark text-white d-flex flex-column" th:fragment="side" style="width: 250px; min-height: 100vh;">
-    <div class="d-flex flex-column h-100">
-        <!-- Brand/logo -->
-        <a class="navbar-brand d-flex align-items-center p-3 text-white text-decoration-none" href="#">
-            <i class="fas fa-graduation-cap fs-4 me-2"></i>
-            <span class="fs-5 fw-semibold">Admin Portal</span>
-        </a>
+<div th:fragment="side" class="d-flex flex-column flex-shrink-0 p-3"
+     style="width: 260px; height: 100vh; position: fixed; left: 0; top: 0; overflow-y: auto; z-index: 1000;
+            background-color: #1E1F20; color: #E3E3E3; font-family: system-ui, -apple-system, sans-serif;">
 
-        <hr class="text-white-50 my-0">
+    <a href="/admin/home" class="d-flex align-items-center mb-4 mt-2 px-2 text-decoration-none text-light">
+        <div class="rounded-3 d-flex align-items-center justify-content-center me-3 text-primary"
+             style="width: 40px; height: 40px; background-color: rgba(66, 133, 244, 0.1);">
+            <i class="fas fa-graduation-cap fs-5" style="color: #8ab4f8;"></i>
+        </div>
+        <div>
+            <div class="fs-6 fw-bold">Quiz Admin</div>
+            <div class="text-secondary" style="font-size: 0.75rem;">System Manager</div>
+        </div>
+    </a>
 
-        <!-- Navigation Menu -->
-        <ul class="nav nav-pills flex-column mb-auto p-2">
-            <li class="nav-item py-1">
-                <a class="nav-link text-white" th:classappend="${activePage == 'home'} ? 'active bg-primary' : 'text-white-50 hover-white'"
-                   th:href="@{/admin/home}">
-                    <i class="fas fa-home me-2"></i>
-                    Dashboard
-                </a>
-            </li>
+    <ul class="nav nav-pills flex-column mb-auto gap-1">
 
-            <!-- <li class="nav-item py-1">
-                <a class="nav-link" th:classappend="${activePage == 'member'} ? 'active bg-primary' : 'text-white-50 hover-white'"
-                   th:href="@{/admin/member}">
-                    <i class="fas fa-users me-2"></i>
-                    유저 관리
-                </a>
-            </li> -->
+        <li class="nav-item mt-2">
+            <span class="text-secondary small fw-bold px-3 py-2 d-block" style="font-size: 0.7rem; letter-spacing: 1px;">DASHBOARD</span>
+        </li>
 
-            <li class="nav-item py-1">
-                <a class="nav-link" th:classappend="${activePage == 'subject'} ? 'active bg-primary' : 'text-white-50 hover-white'"
-                   th:href="@{/admin/subject}">
-                    <i class="fas fa-book me-2"></i>
-                    과목 관리
-                </a>
-            </li>
+        <li class="nav-item">
+            <a th:href="@{/admin/home}" class="nav-link d-flex align-items-center"
+               th:classappend="${activePage == 'home'} ? 'active-gemini' : 'text-secondary hover-gemini'">
+                <i class="fas fa-chart-pie me-3 text-center" style="width: 20px;"></i>
+                대시보드
+            </a>
+        </li>
 
-            <li class="nav-item py-1">
-                <a class="nav-link" th:classappend="${activePage == 'exam'} ? 'active bg-primary' : 'text-white-50 hover-white'"
-                   th:href="@{/admin/exam}">
-                    <i class="fas fa-file-alt me-2"></i>
-                    시험 관리
-                </a>
-            </li>
+        <li class="nav-item mt-4">
+            <span class="text-secondary small fw-bold px-3 py-2 d-block" style="font-size: 0.7rem; letter-spacing: 1px;">CONTENTS</span>
+        </li>
 
-            <li class="nav-item py-1">
-                <a class="nav-link" th:classappend="${activePage == 'problem'} ? 'active bg-primary' : 'text-white-50 hover-white'"
-                   th:href="@{/admin/problem}">
-                    <i class="fas fa-tasks me-2"></i>
-                    문제 관리
-                </a>
-            </li>
+        <li class="nav-item">
+            <a th:href="@{/admin/subject}" class="nav-link d-flex align-items-center"
+               th:classappend="${activePage == 'subject'} ? 'active-gemini' : 'text-secondary hover-gemini'">
+                <i class="fas fa-book me-3 text-center" style="width: 20px;"></i>
+                과목 관리
+            </a>
+        </li>
+        <li class="nav-item">
+            <a th:href="@{/admin/exam}" class="nav-link d-flex align-items-center"
+               th:classappend="${activePage == 'exam'} ? 'active-gemini' : 'text-secondary hover-gemini'">
+                <i class="fas fa-file-alt me-3 text-center" style="width: 20px;"></i>
+                시험 관리
+            </a>
+        </li>
+        <li class="nav-item">
+            <a th:href="@{/admin/problem}" class="nav-link d-flex align-items-center"
+               th:classappend="${activePage == 'problem'} ? 'active-gemini' : 'text-secondary hover-gemini'">
+                <i class="fas fa-layer-group me-3 text-center" style="width: 20px;"></i>
+                문제 관리
+            </a>
+        </li>
+        <li class="nav-item">
+            <a th:href="@{/admin/question}" class="nav-link d-flex align-items-center"
+               th:classappend="${activePage == 'question'} ? 'active-gemini' : 'text-secondary hover-gemini'">
+                <i class="fas fa-comment-dots me-3 text-center" style="width: 20px;"></i>
+                질문/답변
+            </a>
+        </li>
+    </ul>
 
-            <li class="nav-item py-1">
-                <a class="nav-link" th:classappend="${activePage == 'question'} ? 'active bg-primary' : 'text-white-50 hover-white'"
-                   th:href="@{/admin/question}">
-                    <i class="fas fa-question-circle me-2"></i>
-                    질문 관리
-                </a>
-            </li>
-        </ul>
+    <div class="mt-auto pt-3 border-top border-secondary" style="border-color: #333 !important;">
+        <div class="dropdown">
+            <a href="#" class="d-flex align-items-center text-light text-decoration-none dropdown-toggle px-2 py-2 rounded hover-gemini"
+               id="dropdownUser1" data-bs-toggle="dropdown" aria-expanded="false">
+                <div class="bg-secondary rounded-circle me-2" style="width: 8px; height: 8px; background-color: #4caf50 !important;"></div>
+                <strong class="small" th:text="${#authentication.principal.member.username}">Admin</strong>
+            </a>
+            <ul class="dropdown-menu dropdown-menu-dark text-small shadow border-0 mb-2"
+                aria-labelledby="dropdownUser1"
+                style="background-color: #2D2E30; border-radius: 8px;">
+                <li><a class="dropdown-item small" href="#">설정</a></li>
+                <li><a class="dropdown-item small" href="#">프로필</a></li>
+                <li><hr class="dropdown-divider" style="border-color: #444;"></li>
+                <li><button class="dropdown-item small text-danger" data-bs-toggle="modal" data-bs-target="#logoutModal">로그아웃</button></li>
+            </ul>
+        </div>
     </div>
+
+    <style>
+        /* 기본 폰트 및 컬러 */
+        .text-secondary { color: #9aa0a6 !important; }
+
+        /* 메뉴 아이템 스타일 */
+        .nav-link {
+            border-radius: 50px !important; /* 둥근 캡슐 형태 */
+            padding: 10px 20px;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+        }
+
+        /* 활성화된 메뉴 (Gemini Active Blue) */
+        .active-gemini {
+            background-color: #004A77 !important; /* 짙은 블루 배경 */
+            color: #C2E7FF !important; /* 밝은 블루 텍스트 */
+            font-weight: 600;
+        }
+        .active-gemini i { color: #C2E7FF !important; }
+
+        /* 마우스 오버 효과 */
+        .hover-gemini:hover {
+            background-color: rgba(255, 255, 255, 0.08);
+            color: #E3E3E3 !important;
+        }
+    </style>
 </div>
+</html>

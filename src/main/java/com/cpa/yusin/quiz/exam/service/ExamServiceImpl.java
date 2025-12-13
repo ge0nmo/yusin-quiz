@@ -20,15 +20,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 @RequiredArgsConstructor
 @Slf4j
 @Transactional(readOnly = true)
 @Service
-public class ExamServiceImpl implements ExamService
-{
+public class ExamServiceImpl implements ExamService {
+
     private final ExamRepository examRepository;
     private final ExamMapper examMapper;
     private final SubjectService subjectService;
@@ -37,8 +36,7 @@ public class ExamServiceImpl implements ExamService
 
     @Transactional
     @Override
-    public ExamCreateResponse save(long subjectId, ExamCreateRequest request)
-    {
+    public ExamCreateResponse save(long subjectId, ExamCreateRequest request) {
         Subject subject = subjectService.findById(subjectId);
         examValidator.validate(subjectId, request.getName(), request.getYear());
 
@@ -50,75 +48,76 @@ public class ExamServiceImpl implements ExamService
 
     @Transactional
     @Override
-    public void update(long examId, ExamUpdateRequest request)
-    {
+    public void update(long examId, ExamUpdateRequest request) {
         Exam domain = findById(examId);
-
         examValidator.validate(examId, domain.getId(), request.getName(), request.getYear());
         domain.update(request);
-
         examRepository.save(domain);
     }
 
     @Override
-    public Exam findById(long id)
-    {
+    public Exam findById(long id) {
         return examRepository.findById(id)
                 .orElseThrow(() -> new ExamException(ExceptionMessage.EXAM_NOT_FOUND));
     }
 
     @Override
-    public ExamDTO getById(long id)
-    {
+    public ExamDTO getById(long id) {
         Exam domain = findById(id);
-
         return examMapper.toExamDTO(domain);
     }
 
     @Override
-    public List<ExamDTO> getAllBySubjectId(long subjectId, Integer year)
-    {
+    public List<ExamDTO> getAllBySubjectId(long subjectId, Integer year) {
+        // 과목 존재 확인
         subjectService.findById(subjectId);
 
-        List<Exam> exams = examRepository.findAllBySubjectId(subjectId, year);
+        List<Exam> exams;
 
-        if(exams.isEmpty())
+        // year가 null이면 전체 조회, 있으면 필터링 조회
+        if (year == null) {
+            // Repository에 findAllBySubjectIdOrderByYearDesc 메서드가 있다고 가정 (또는 JPA naming convention)
+            exams = examRepository.findAllBySubjectId(subjectId);
+            // 만약 Repository가 정렬을 지원하지 않는다면 여기서 Java Sorting을 해도 되지만,
+            // 가능하다면 Repository 쿼리 메서드를 `findAllBySubjectIdOrderByYearDesc(subjectId)`로 만드는 것을 추천함.
+        } else {
+            exams = examRepository.findAllBySubjectId(subjectId, year);
+        }
+
+        if (exams.isEmpty()) {
             return Collections.emptyList();
+        }
 
         return exams.stream()
-                .sorted(Comparator.comparing(Exam::getYear).reversed()
-                        .thenComparing(Exam::getName))
-                .map(this.examMapper::toExamDTO)
+                .sorted((e1, e2) -> {
+                    int yearCompare = Integer.compare(e2.getYear(), e1.getYear()); // 내림차순
+                    if (yearCompare != 0) return yearCompare;
+                    return e1.getName().compareTo(e2.getName()); // 이름은 오름차순
+                })
+                .map(examMapper::toExamDTO)
                 .toList();
     }
 
     @Override
-    public List<Integer> getAllYearsBySubjectId(long subjectId)
-    {
+    public List<Integer> getAllYearsBySubjectId(long subjectId) {
         return examRepository.getYearsBySubjectId(subjectId);
     }
 
     @Override
-    public List<Exam> getAllBySubjectId(long subjectId)
-    {
+    public List<Exam> getAllBySubjectId(long subjectId) {
         return examRepository.findAllBySubjectId(subjectId);
     }
 
     @Transactional
     @Override
-    public void deleteById(List<Long> ids)
-    {
-        ids.forEach(id -> {
-            findById(id);
-            cascadeDeleteService.deleteExamByExamId(id);
-        });
-    }
-
-    @Transactional
-    @Override
-    public void deleteById(long id)
-    {
+    public void deleteById(long id) {
         cascadeDeleteService.deleteExamByExamId(id);
     }
 
+    // deleteById(List<Long> ids)는 Interface에 정의되어 있다면 구현 유지
+    @Transactional
+    @Override
+    public void deleteById(List<Long> ids) {
+        ids.forEach(this::deleteById);
+    }
 }

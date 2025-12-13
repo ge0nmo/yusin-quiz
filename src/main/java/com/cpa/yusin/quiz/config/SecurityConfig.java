@@ -114,12 +114,12 @@ public class SecurityConfig
                                 .failureUrl("/admin/login?error")
                                 .permitAll()
                 )
-                .logout(logout ->
-                        logout
-                                .logoutSuccessUrl("/admin/login")
-                                .invalidateHttpSession(true)
-                                .deleteCookies("JSESSIONID")
-                                .logoutSuccessUrl("/admin/login"))
+                .logout(logout -> logout
+                        .logoutUrl("/admin/logout")
+                        .logoutSuccessUrl("/admin/login")
+                        .invalidateHttpSession(true)
+                        .deleteCookies("JSESSIONID")
+                );
         ;
 
         http.authenticationProvider(formAuthenticationProvider());
