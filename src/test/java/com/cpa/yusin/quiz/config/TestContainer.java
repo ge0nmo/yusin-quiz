@@ -21,6 +21,8 @@ import com.cpa.yusin.quiz.exam.infrastructure.ExamValidatorImpl;
 import com.cpa.yusin.quiz.exam.service.ExamServiceImpl;
 import com.cpa.yusin.quiz.exam.service.port.ExamRepository;
 import com.cpa.yusin.quiz.exam.service.port.ExamValidator;
+import com.cpa.yusin.quiz.file.controller.port.FileService;
+import com.cpa.yusin.quiz.file.service.FileServiceImpl;
 import com.cpa.yusin.quiz.global.details.MemberDetailsService;
 import com.cpa.yusin.quiz.global.jwt.JwtService;
 import com.cpa.yusin.quiz.global.jwt.JwtServiceImpl;
@@ -124,8 +126,12 @@ public class TestContainer
     public final AnswerService answerService;
     public final AnswerChecker answerChecker;
 
+
+    public final FileService fileService;
+
     public TestContainer()
     {
+        this.fileService = new FileServiceImpl(null, null, null, null);
         this.clockHolder = new FakeClockHolder();
         this.merchantIdGenerator = new FakeMerchantIdGenerator();
 
@@ -167,7 +173,7 @@ public class TestContainer
         this.problemMapper = new ProblemMapper(this.choiceMapper);
         problemValidator = new ProblemValidator(this.problemRepository);
         this.problemService = new ProblemServiceImpl(this.problemRepository, this.problemMapper,
-                this.examService, this.choiceService, this.problemValidator);
+                this.examService, this.choiceService, this.problemValidator, this.fileService);
 
         this.questionRepository = new FakeQuestionRepository();
         this.questionMapper = new QuestionMapper();

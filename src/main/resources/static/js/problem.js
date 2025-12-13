@@ -20,7 +20,21 @@ const problemApp = {
         ],
         callbacks: {
             onImageUpload: function(files) {
-                problemApp.uploadImageToServer(files[0], $(this));
+                // 다중 파일 업로드 지원
+                for (let i = 0; i < files.length; i++) {
+                    problemApp.uploadImageToServer(files[i], $(this));
+                }
+            },
+            onPaste: function(e) {
+                var clipboardData = (e.originalEvent || e).clipboardData;
+                if (clipboardData && clipboardData.items && clipboardData.items.length) {
+                    var item = clipboardData.items[0];
+                    if (item.kind === 'file' && item.type.indexOf('image/') !== -1) {
+                        e.preventDefault();
+                        var file = item.getAsFile();
+                        problemApp.uploadImageToServer(file, $(this));
+                    }
+                }
             }
         }
     },
@@ -85,7 +99,7 @@ const problemApp = {
     },
 
     async loadYears() {
-        if(!this.selectedSubjectId) return;
+        if (!this.selectedSubjectId) return;
         try {
             const years = await this.getJSON(`/admin/exam/year?subjectId=${this.selectedSubjectId}`);
             const dropdown = document.getElementById('year-content');
@@ -157,7 +171,6 @@ const problemApp = {
         const contentPreview = strip(problem.content);
         const dataJson = JSON.stringify(problem).replace(/"/g, '&quot;');
 
-        // [수정] text-truncate 제거하고, d-flex + choice-text-wrap 적용
         const choicesHtml = (problem.choices || []).map(c =>
             `<div class="d-flex align-items-start mb-2 ${c.isAnswer ? 'text-success fw-bold' : 'text-secondary'}">
                 <span class="badge ${c.isAnswer ? 'bg-success' : 'bg-light text-dark border'} me-2 mt-1" style="min-width: 24px;">${c.number}</span>
@@ -183,7 +196,7 @@ const problemApp = {
         `;
     },
 
-    // --- 3. 모달 제어 ---
+    // --- 3. 모달 제어 (getOrCreateInstance 사용) ---
     openCreateModal() {
         if(!this.selectedExamId) return alert("시험을 먼저 선택해주세요.");
 
@@ -248,7 +261,7 @@ const problemApp = {
         document.getElementById('choicesContainer').insertAdjacentHTML('beforeend', html);
     },
 
-    // --- 4. 저장 ---
+    // --- 4. 저장 및 백드롭 해결 ---
     async saveProblem() {
         const modalEl = document.getElementById('add-problem-modal');
         const mode = modalEl.getAttribute('data-mode');
