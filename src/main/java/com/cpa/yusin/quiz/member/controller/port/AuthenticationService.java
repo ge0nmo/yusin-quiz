@@ -11,5 +11,6 @@ public interface AuthenticationService
 
     LoginResponse login(LoginRequest loginRequest);
 
-    LoginResponse login(String email, String password);
+    LoginResponse loginAsAdmin(String email, String password);
+
 }

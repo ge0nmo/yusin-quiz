@@ -39,10 +39,16 @@ public class AuthenticationServiceImpl implements AuthenticationService
         return processLogin(request.getEmail(), request.getPassword());
     }
 
-    @Override
-    public LoginResponse login(String email, String password)
+    public LoginResponse loginAsAdmin(String email, String password)
     {
-        return processLogin(email, password);
+        LoginResponse response = processLogin(email, password);
+
+        if (!"ADMIN".equals(response.getRole().toString())) {
+            log.warn("일반 유저가 관리자 페이지 접속 시도: {}", email);
+            throw new RuntimeException("관리자 권한이 없습니다.");
+        }
+
+        return response;
     }
 
     private LoginResponse processLogin(String email, String password)

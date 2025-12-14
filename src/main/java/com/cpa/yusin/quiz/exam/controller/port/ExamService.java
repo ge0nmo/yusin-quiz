@@ -11,6 +11,7 @@ import java.util.List;
 public interface ExamService
 {
     ExamCreateResponse save(long subjectId, ExamCreateRequest request);
+    long saveAsAdmin(long subjectId, ExamCreateRequest request);
 
     void update(long examId, ExamUpdateRequest request);
 

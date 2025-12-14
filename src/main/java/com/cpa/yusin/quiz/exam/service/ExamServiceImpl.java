@@ -48,6 +48,16 @@ public class ExamServiceImpl implements ExamService {
 
     @Transactional
     @Override
+    public long saveAsAdmin(long subjectId, ExamCreateRequest request) {
+        Subject subject = subjectService.findById(subjectId);
+        examValidator.validate(subjectId, request.getName(), request.getYear());
+
+        Exam exam = Exam.from(request, subject.getId());
+        return examRepository.save(exam).getId();
+    }
+
+    @Transactional
+    @Override
     public void update(long examId, ExamUpdateRequest request) {
         Exam domain = findById(examId);
         examValidator.validate(examId, domain.getId(), request.getName(), request.getYear());

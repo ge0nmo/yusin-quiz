@@ -16,10 +16,13 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 
@@ -31,6 +34,26 @@ public class SecurityFilter extends OncePerRequestFilter
 {
     private final MemberDetailsService memberDetailsService;
     private final JwtService jwtService;
+
+    // 경로 매칭을 위한 유틸리티
+    private final AntPathMatcher pathMatcher = new AntPathMatcher();
+
+    // [추가] JWT 검사를 건너뛸 화이트리스트 경로 정의
+    private static final List<String> EXCLUDE_URLS = Arrays.asList(
+            "/api/admin/login",
+            "/api/v1/oauth2/**",
+            "/favicon.ico",
+            "/error"
+    );
+
+    @Override
+    protected boolean shouldNotFilter(@NonNull HttpServletRequest request) throws ServletException {
+        String requestPath = request.getServletPath();
+
+        // 요청 경로가 화이트리스트에 포함되는지 확인
+        return EXCLUDE_URLS.stream()
+                .anyMatch(pattern -> pathMatcher.match(pattern, requestPath));
+    }
 
     @Override
     protected void doFilterInternal(@NonNull HttpServletRequest request,

@@ -101,7 +101,7 @@ public class FileServiceImpl implements FileService {
         try {
             // 요청 객체 생성 (유효기간 60분)
             GetObjectPresignRequest presignRequest = GetObjectPresignRequest.builder()
-                    .signatureDuration(Duration.ofMinutes(60))
+                    .signatureDuration(Duration.ofMinutes(180))
                     .getObjectRequest(req -> req.bucket(bucket).key(objectKey))
                     .build();
 

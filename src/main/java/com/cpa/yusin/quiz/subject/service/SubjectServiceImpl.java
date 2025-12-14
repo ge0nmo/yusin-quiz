@@ -44,6 +44,15 @@ public class SubjectServiceImpl implements SubjectService
         return subjectMapper.toSubjectCreateResponse(subject);
     }
 
+    @Override
+    public long saveAsAdmin(SubjectCreateRequest request)
+    {
+        subjectValidator.validateName(request.getName());
+        Subject subject = subjectMapper.toSubjectEntity(request);
+
+        return subjectRepository.save(subject).getId();
+    }
+
     @Transactional
     @Override
     public void update(long id, SubjectUpdateRequest request)

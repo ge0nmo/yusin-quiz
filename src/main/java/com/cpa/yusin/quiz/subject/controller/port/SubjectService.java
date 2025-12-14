@@ -14,6 +14,8 @@ public interface SubjectService
 {
     SubjectCreateResponse save(SubjectCreateRequest request);
 
+    long saveAsAdmin(SubjectCreateRequest request);
+
     void update(long id, SubjectUpdateRequest request);
 
     SubjectDTO getById(long id);
