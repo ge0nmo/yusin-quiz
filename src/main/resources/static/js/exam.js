@@ -102,7 +102,7 @@ const examApp = {
             <tr>
                 <td><span class="badge bg-light text-dark border">${exam.year}</span></td>
                 <td>
-                    <a href="javascript:void(0);" onclick="examApp.goToProblem(${exam.id}, '${exam.name}')" class="fw-bold text-decoration-none">
+                    <a href="javascript:void(0);" onclick="examApp.goToProblem(${exam.id}, '${exam.name}', ${exam.year})" class="fw-bold text-decoration-none">
                         ${exam.name}
                     </a>
                 </td>
@@ -181,9 +181,10 @@ const examApp = {
         } catch(e) { alert("삭제 실패"); }
     },
 
-    goToProblem(id, name) {
+    goToProblem(id, name, year) {
         sessionStorage.setItem("examId", id);
         sessionStorage.setItem("examName", name);
+        sessionStorage.setItem("examYear", year);
         location.href = "/admin/problem";
     }
 };

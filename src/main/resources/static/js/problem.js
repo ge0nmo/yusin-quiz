@@ -47,6 +47,42 @@ const problemApp = {
 
         this.initEventListeners();
         await this.loadSubjects();
+
+        // [추가] 2. 세션 스토리지 확인 및 자동 로딩 로직 (Exam 페이지에서 넘어온 경우)
+        const storedSubjectId = sessionStorage.getItem("subjectId");
+        const storedSubjectName = sessionStorage.getItem("subjectName");
+        const storedExamId = sessionStorage.getItem("examId");
+        const storedExamName = sessionStorage.getItem("examName");
+        const storedExamYear = sessionStorage.getItem("examYear");
+
+        // 과목 정보가 있으면 과목 선택 상태로 세팅
+        if (storedSubjectId && storedSubjectName) {
+            await this.selectSubject(storedSubjectId, storedSubjectName);
+
+            // 시험 정보와 연도 정보까지 있으면 문제 목록 자동 조회
+            if (storedExamId && storedExamYear) {
+                // 2-1. 연도 선택 (내부적으로 loadExams 호출됨)
+                await this.selectYear(storedExamYear);
+
+                // 2-2. 시험 드롭다운 값 강제 세팅 (UI 동기화)
+                const examSelect = document.getElementById('examList');
+                if(examSelect) {
+                    examSelect.value = storedExamId;
+                }
+
+                // 2-3. 내부 상태값 세팅
+                this.selectedExamId = storedExamId;
+                this.selectedExamName = storedExamName;
+
+                // 2-4. 문제 조회 실행
+                this.searchProblems();
+
+                // (선택사항) 자동 조회 후 세션 스토리지의 시험 정보 삭제
+                // sessionStorage.removeItem("examId");
+                // sessionStorage.removeItem("examName");
+                // sessionStorage.removeItem("examYear");
+            }
+        }
     },
 
     initEventListeners() {
@@ -155,11 +191,16 @@ const problemApp = {
 
     renderProblems(list) {
         const container = document.getElementById('examTable');
-        if(!list || list.length === 0) {
+        // 응답 구조에 따라 list가 { data: [...] } 형태일 수 있음. 확인 필요.
+        // 기존 코드에서는 바로 list 매핑 중이었으므로 그대로 유지.
+        // 만약 GlobalResponse를 사용한다면 list.data로 접근해야 함.
+        const problems = list.data || list;
+
+        if(!problems || problems.length === 0) {
             container.innerHTML = `<div class="text-center py-5 w-100 text-muted">등록된 문제가 없습니다.</div>`;
             return;
         }
-        container.innerHTML = list.map(p => this.createCardHTML(p)).join('');
+        container.innerHTML = problems.map(p => this.createCardHTML(p)).join('');
     },
 
     createCardHTML(problem) {
