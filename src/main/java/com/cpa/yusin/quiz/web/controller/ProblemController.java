@@ -6,6 +6,7 @@ import com.cpa.yusin.quiz.global.utils.DateUtils;
 import com.cpa.yusin.quiz.problem.controller.dto.request.ProblemCreateRequest;
 import com.cpa.yusin.quiz.problem.controller.dto.request.ProblemRequest;
 import com.cpa.yusin.quiz.problem.controller.dto.response.ProblemDTO;
+import com.cpa.yusin.quiz.problem.controller.port.DeleteProblemService;
 import com.cpa.yusin.quiz.problem.controller.port.ProblemService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,6 +24,7 @@ import java.util.List;
 public class ProblemController
 {
     private final ProblemService problemService;
+    private final DeleteProblemService deleteProblemService;
     private final DateUtils dateUtils;
 
     @GetMapping("/problem")
@@ -61,6 +63,6 @@ public class ProblemController
     @DeleteMapping("/problem/{problemId}")
     public void delete(@PathVariable("problemId") long problemId)
     {
-        problemService.deleteProblem(problemId);
+        deleteProblemService.execute(problemId);
     }
 }

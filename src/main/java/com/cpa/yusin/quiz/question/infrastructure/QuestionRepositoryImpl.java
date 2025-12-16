@@ -25,7 +25,7 @@ public class QuestionRepositoryImpl implements QuestionRepository
     @Override
     public Optional<Question> findById(long id)
     {
-        return questionJpaRepository.findById(id);
+        return questionJpaRepository.findByIdAndIsRemovedFalse(id);
     }
 
     @Override

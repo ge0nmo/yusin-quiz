@@ -1,15 +1,10 @@
-package com.cpa.yusin.quiz.admin.presentation.answer.controller;
+package com.cpa.yusin.quiz.answer.controller;
 
 import com.cpa.yusin.quiz.answer.controller.dto.response.AnswerDTO;
 import com.cpa.yusin.quiz.answer.controller.port.AnswerService;
-import com.cpa.yusin.quiz.choice.controller.port.ChoiceService;
-import com.cpa.yusin.quiz.choice.domain.Choice;
 import com.cpa.yusin.quiz.common.controller.dto.response.GlobalResponse;
 import com.cpa.yusin.quiz.common.controller.dto.response.PageInfo;
 import com.cpa.yusin.quiz.global.details.MemberDetails;
-import com.cpa.yusin.quiz.problem.domain.Problem;
-import com.cpa.yusin.quiz.question.controller.port.QuestionService;
-import com.cpa.yusin.quiz.question.domain.Question;
 import com.cpa.yusin.quiz.web.dto.AdminAnswerRegisterRequest;
 import com.cpa.yusin.quiz.web.dto.AdminAnswerUpdateRequest;
 import lombok.RequiredArgsConstructor;
@@ -19,8 +14,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -50,11 +43,8 @@ public class AdminAnswerController
 
     @PatchMapping("/answer/{answerId}")
     public ResponseEntity<?> updateAnswer(@PathVariable("answerId") long answerId,
-                                          @Validated @RequestBody AdminAnswerUpdateRequest request,
-                                          Principal principal)
+                                          @Validated @RequestBody AdminAnswerUpdateRequest request)
     {
-        MemberDetails memberDetails = (MemberDetails) ((Authentication) principal).getPrincipal();
-
         answerService.updateInAdminPage(request, answerId);
 
         return ResponseEntity.ok(new GlobalResponse<>());

@@ -25,37 +25,13 @@
         @Override
         public Optional<Subject> findById(long id)
         {
-            return subjectJpaRepository.findById(id);
+            return subjectJpaRepository.findByIdAndIsRemovedFalse(id);
         }
 
         @Override
         public List<Subject> findAll()
         {
-            return subjectJpaRepository.findAll();
-        }
-
-        @Override
-        public Page<Subject> findAll(Pageable pageable)
-        {
-            return subjectJpaRepository.findAll(pageable);
-        }
-
-        @Override
-        public List<Subject> findByName(String name)
-        {
-            return subjectJpaRepository.findAllByName(name);
-        }
-
-        @Override
-        public boolean existsById(long id)
-        {
-            return subjectJpaRepository.existsById(id);
-        }
-
-        @Override
-        public void deleteById(long id)
-        {
-            subjectJpaRepository.deleteById(id);
+            return subjectJpaRepository.findAllByIsRemovedFalseOrderByNameAsc();
         }
 
         @Override

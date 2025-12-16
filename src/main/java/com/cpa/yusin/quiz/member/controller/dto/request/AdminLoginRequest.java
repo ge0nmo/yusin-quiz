@@ -1,4 +1,4 @@
-package com.cpa.yusin.quiz.admin.presentation.auth.dto;
+package com.cpa.yusin.quiz.member.controller.dto.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

@@ -5,6 +5,7 @@ import com.cpa.yusin.quiz.common.controller.dto.response.PageInfo;
 import com.cpa.yusin.quiz.question.controller.dto.request.QuestionRegisterRequest;
 import com.cpa.yusin.quiz.question.controller.dto.request.QuestionUpdateRequest;
 import com.cpa.yusin.quiz.question.controller.dto.response.QuestionDTO;
+import com.cpa.yusin.quiz.question.controller.port.DeleteQuestionService;
 import com.cpa.yusin.quiz.question.controller.port.QuestionService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +26,7 @@ import java.util.List;
 public class QuestionController
 {
     private final QuestionService questionService;
+    private final DeleteQuestionService deleteQuestionService;
 
     @PostMapping("/problem/{problemId}/question")
     public ResponseEntity<GlobalResponse<Long>> saveQuestion(@PathVariable("problemId") long problemId,
@@ -74,7 +76,7 @@ public class QuestionController
     @DeleteMapping("/question/{questionId}")
     public ResponseEntity<?> deleteById(@PathVariable("questionId") long questionId)
     {
-        questionService.deleteById(questionId);
+        deleteQuestionService.execute(questionId);
 
         return new ResponseEntity<>(new GlobalResponse<>(true), HttpStatus.NO_CONTENT);
     }

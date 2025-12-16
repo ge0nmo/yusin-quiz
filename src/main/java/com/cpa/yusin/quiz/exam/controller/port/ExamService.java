@@ -21,11 +21,5 @@ public interface ExamService
 
     List<ExamDTO> getAllBySubjectId(long subjectId, Integer year);
 
-    List<Exam> getAllBySubjectId(long subjectId);
-
-    void deleteById(List<Long> ids);
-
-    void deleteById(long id);
-
     List<Integer> getAllYearsBySubjectId(long subjectId);
 }

@@ -29,11 +29,13 @@ public class Exam extends BaseEntity
     @Column(nullable = false, updatable = false)
     private Long subjectId;
 
-    public static Exam from(ExamCreateRequest request, long subjectId)
+    private boolean isRemoved;
+
+    public static Exam from(String name, int year, long subjectId)
     {
         return Exam.builder()
-                .name(request.getName())
-                .year(request.getYear())
+                .name(name)
+                .year(year)
                 .subjectId(subjectId)
                 .build();
     }
@@ -42,5 +44,11 @@ public class Exam extends BaseEntity
     {
         this.name = request.getName();
         this.year = request.getYear();
+    }
+
+    public void delete()
+    {
+        this.isRemoved = true;
+        this.name = name + "_deleted_" + System.currentTimeMillis();
     }
 }

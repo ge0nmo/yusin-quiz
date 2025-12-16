@@ -8,23 +8,31 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface SubjectJpaRepository extends JpaRepository<Subject, Long>
 {
     @Query("SELECT CASE WHEN COUNT(s) > 0 THEN TRUE ELSE FALSE END " +
-            "FROM Subject s WHERE s.name = :name ")
+            "FROM Subject s WHERE s.name = :name AND s.isRemoved = false ")
     boolean existsByName(@Param("name") String name);
 
     @Query("SELECT CASE WHEN COUNT(s) > 0 THEN TRUE ELSE FALSE END " +
             "FROM Subject s " +
-            "WHERE s.id != :id AND s.name = :name ")
+            "WHERE s.id != :id AND s.name = :name AND s.isRemoved = false ")
     boolean existsByNameAndIdNot(@Param("id") long id, @Param("name") String name);
 
-    @Query("SELECT s FROM Subject s ORDER BY s.name ASC ")
+    @Query("SELECT s FROM Subject s " +
+            "WHERE s.isRemoved = false " +
+            "ORDER BY s.name ASC ")
     Page<Subject> findAllOrderByNameAsc(Pageable pageable);
 
     @Query("SELECT s FROM Subject s " +
-            "WHERE s.name LIKE CONCAT('%', :name, '%') " +
-            "ORDER BY s.name ")
-    List<Subject> findAllByName(@Param("name") String name);
+            "WHERE s.isRemoved = false " +
+            "ORDER BY s.name ASC ")
+    List<Subject> findAllByIsRemovedFalseOrderByNameAsc();
+
+    @Query("SELECT s FROM Subject s " +
+            "WHERE s.id = :id " +
+            "AND s.isRemoved = false ")
+    Optional<Subject> findByIdAndIsRemovedFalse(@Param("id") long id);
 }

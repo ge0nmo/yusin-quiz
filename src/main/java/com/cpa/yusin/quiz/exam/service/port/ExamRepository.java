@@ -15,12 +15,6 @@ public interface ExamRepository
 
     List<Exam> findAllBySubjectId(long subjectId);
 
-    void deleteById(long id);
-
-    void deleteAllBySubjectId(long subjectId);
-
-    boolean existsById(long id);
-
     boolean existsBySubjectIdAndNameAndYear(long subjectId, String name, int year);
 
     boolean existsByIdNotAndSubjectIdAndNameAndYear(long examId, long subjectId, String name, int year);

@@ -25,5 +25,4 @@ public interface QuestionService
 
     boolean verifyPassword(long questionId, String password);
 
-    void deleteById(long id);
 }

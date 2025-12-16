@@ -18,4 +18,6 @@ public class QuestionDTO
     private final int answerCount;
     private final boolean answeredByAdmin;
     private final LocalDateTime createdAt;
+
+    private final long problemId;
 }

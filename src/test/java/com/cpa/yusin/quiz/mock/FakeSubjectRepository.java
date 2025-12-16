@@ -46,37 +46,6 @@ public class FakeSubjectRepository implements SubjectRepository
         return data;
     }
 
-    @Override
-    public Page<Subject> findAll(Pageable pageable)
-    {
-        List<Subject> result = data.stream()
-                .limit(pageable.getPageSize())
-                .skip(pageable.getOffset())
-                .toList();
-
-        return new PageImpl<>(result, pageable, data.size());
-    }
-
-    @Override
-    public List<Subject> findByName(String name)
-    {
-        return data.stream()
-                .filter(data -> data.getName().contains(name))
-                .toList();
-    }
-
-    @Override
-    public boolean existsById(long id)
-    {
-        return data.stream()
-                .anyMatch(item -> item.getId().equals(id));
-    }
-
-    @Override
-    public void deleteById(long id)
-    {
-        data.removeIf(item -> item.getId().equals(id));
-    }
 
     @Override
     public boolean existsByName(String name)

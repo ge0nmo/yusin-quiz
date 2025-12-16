@@ -1,6 +1,5 @@
 package com.cpa.yusin.quiz.exam.service;
 
-import com.cpa.yusin.quiz.common.service.CascadeDeleteService;
 import com.cpa.yusin.quiz.exam.controller.dto.request.ExamCreateRequest;
 import com.cpa.yusin.quiz.exam.controller.dto.request.ExamUpdateRequest;
 import com.cpa.yusin.quiz.exam.controller.dto.response.ExamCreateResponse;
@@ -31,7 +30,6 @@ public class ExamServiceImpl implements ExamService {
     private final ExamRepository examRepository;
     private final ExamMapper examMapper;
     private final SubjectService subjectService;
-    private final CascadeDeleteService cascadeDeleteService;
     private final ExamValidator examValidator;
 
     @Transactional
@@ -40,7 +38,7 @@ public class ExamServiceImpl implements ExamService {
         Subject subject = subjectService.findById(subjectId);
         examValidator.validate(subjectId, request.getName(), request.getYear());
 
-        Exam exam = Exam.from(request, subject.getId());
+        Exam exam = Exam.from(request.getName(), request.getYear(), subject.getId());
         exam = examRepository.save(exam);
 
         return examMapper.toCreateResponse(exam);
@@ -52,7 +50,7 @@ public class ExamServiceImpl implements ExamService {
         Subject subject = subjectService.findById(subjectId);
         examValidator.validate(subjectId, request.getName(), request.getYear());
 
-        Exam exam = Exam.from(request, subject.getId());
+        Exam exam = Exam.from(request.getName(), request.getYear(), subject.getId());
         return examRepository.save(exam).getId();
     }
 
@@ -84,12 +82,8 @@ public class ExamServiceImpl implements ExamService {
 
         List<Exam> exams;
 
-        // year가 null이면 전체 조회, 있으면 필터링 조회
         if (year == null) {
-            // Repository에 findAllBySubjectIdOrderByYearDesc 메서드가 있다고 가정 (또는 JPA naming convention)
             exams = examRepository.findAllBySubjectId(subjectId);
-            // 만약 Repository가 정렬을 지원하지 않는다면 여기서 Java Sorting을 해도 되지만,
-            // 가능하다면 Repository 쿼리 메서드를 `findAllBySubjectIdOrderByYearDesc(subjectId)`로 만드는 것을 추천함.
         } else {
             exams = examRepository.findAllBySubjectId(subjectId, year);
         }
@@ -113,21 +107,4 @@ public class ExamServiceImpl implements ExamService {
         return examRepository.getYearsBySubjectId(subjectId);
     }
 
-    @Override
-    public List<Exam> getAllBySubjectId(long subjectId) {
-        return examRepository.findAllBySubjectId(subjectId);
-    }
-
-    @Transactional
-    @Override
-    public void deleteById(long id) {
-        cascadeDeleteService.deleteExamByExamId(id);
-    }
-
-    // deleteById(List<Long> ids)는 Interface에 정의되어 있다면 구현 유지
-    @Transactional
-    @Override
-    public void deleteById(List<Long> ids) {
-        ids.forEach(this::deleteById);
-    }
 }

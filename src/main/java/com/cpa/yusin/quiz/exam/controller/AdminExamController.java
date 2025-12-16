@@ -1,16 +1,15 @@
-package com.cpa.yusin.quiz.admin.presentation.exam.controller;
+package com.cpa.yusin.quiz.exam.controller;
 
 import com.cpa.yusin.quiz.common.controller.dto.response.GlobalResponse;
 import com.cpa.yusin.quiz.exam.controller.dto.request.ExamCreateRequest;
 import com.cpa.yusin.quiz.exam.controller.dto.request.ExamUpdateRequest;
-import com.cpa.yusin.quiz.exam.controller.dto.response.ExamCreateResponse;
 import com.cpa.yusin.quiz.exam.controller.dto.response.ExamDTO;
+import com.cpa.yusin.quiz.exam.controller.port.DeleteExamService;
 import com.cpa.yusin.quiz.exam.controller.port.ExamService;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,6 +22,7 @@ import java.util.List;
 public class AdminExamController
 {
     private final ExamService examService;
+    private final DeleteExamService deleteExamService;
 
     @GetMapping("/subject/{subjectId}/exam")
     public ResponseEntity<GlobalResponse<List<ExamDTO>>> getExamList(@PathVariable("subjectId") long subjectId,
@@ -53,7 +53,7 @@ public class AdminExamController
     @DeleteMapping("/exam/{examId}")
     public ResponseEntity<?> deleteExam(@PathVariable("examId") long examId)
     {
-        examService.deleteById(examId);
+        deleteExamService.execute(examId);
 
         return ResponseEntity.noContent().build();
     }

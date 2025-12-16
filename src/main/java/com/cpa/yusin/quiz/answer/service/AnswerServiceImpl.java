@@ -28,7 +28,7 @@ import java.util.List;
 @Transactional
 @RequiredArgsConstructor
 @Service
-public class AnswerServiceImpl implements AnswerService, AnswerChecker
+public class AnswerServiceImpl implements AnswerService
 {
     private final AnswerRepository answerRepository;
     private final AnswerMapper answerMapper;
@@ -122,10 +122,4 @@ public class AnswerServiceImpl implements AnswerService, AnswerChecker
         answerRepository.deleteById(answerId);
     }
 
-    @Override
-    public void hasAnswer(long questionId) {
-        if(answerRepository.hasAnswers(questionId)){
-            throw new QuestionException(ExceptionMessage.QUESTION_HAS_ANSWERS);
-        }
-    }
 }

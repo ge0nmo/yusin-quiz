@@ -15,14 +15,6 @@ public interface SubjectRepository
 
     List<Subject> findAll();
 
-    Page<Subject> findAll(Pageable pageable);
-
-    List<Subject> findByName(String name);
-
-    boolean existsById(long id);
-
-    void deleteById(long id);
-
     boolean existsByName(String name);
 
     boolean existsByNameAndIdNot(long id, String name);

@@ -1,8 +1,5 @@
 package com.cpa.yusin.quiz.subject.service;
 
-import com.cpa.yusin.quiz.common.controller.dto.response.GlobalResponse;
-import com.cpa.yusin.quiz.common.controller.dto.response.PageInfo;
-import com.cpa.yusin.quiz.common.service.CascadeDeleteService;
 import com.cpa.yusin.quiz.global.exception.ExceptionMessage;
 import com.cpa.yusin.quiz.global.exception.SubjectException;
 import com.cpa.yusin.quiz.subject.controller.dto.request.SubjectCreateRequest;
@@ -30,8 +27,6 @@ public class SubjectServiceImpl implements SubjectService
     private final SubjectRepository subjectRepository;
     private final SubjectMapper subjectMapper;
     private final SubjectValidator subjectValidator;
-    private final CascadeDeleteService cascadeDeleteService;
-
     @Transactional
     @Override
     public SubjectCreateResponse save(SubjectCreateRequest request)
@@ -44,6 +39,7 @@ public class SubjectServiceImpl implements SubjectService
         return subjectMapper.toSubjectCreateResponse(subject);
     }
 
+    @Transactional
     @Override
     public long saveAsAdmin(SubjectCreateRequest request)
     {
@@ -60,7 +56,7 @@ public class SubjectServiceImpl implements SubjectService
         Subject subject = findById(id);
         subjectValidator.validateName(subject.getId(), request.getName());
 
-        subject.update(request);
+        subject.update(request.getName());
         subjectRepository.save(subject);
     }
 
@@ -70,13 +66,6 @@ public class SubjectServiceImpl implements SubjectService
         return subjectRepository.findById(id)
                 .orElseThrow(() -> new SubjectException(ExceptionMessage.SUBJECT_NOT_FOUND));
     }
-
-    @Override
-    public List<Subject> findAllByName(String name)
-    {
-        return subjectRepository.findByName(name);
-    }
-
 
     @Override
     public SubjectDTO getById(long id)
@@ -100,13 +89,4 @@ public class SubjectServiceImpl implements SubjectService
                 .toList();
     }
 
-    @Override
-    @Transactional
-    public boolean deleteById(long id)
-    {
-        findById(id);
-        cascadeDeleteService.deleteSubjectBySubjectId(id);
-
-        return !subjectRepository.existsById(id);
-    }
 }

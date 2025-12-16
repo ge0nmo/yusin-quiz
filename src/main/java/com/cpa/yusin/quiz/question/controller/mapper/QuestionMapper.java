@@ -31,6 +31,7 @@ public class QuestionMapper
                 .createdAt(question.getCreatedAt())
                 .answerCount(question.getAnswerCount())
                 .answeredByAdmin(question.isAnsweredByAdmin())
+                .problemId(question.getProblem().getId())
                 .build();
     }
 }

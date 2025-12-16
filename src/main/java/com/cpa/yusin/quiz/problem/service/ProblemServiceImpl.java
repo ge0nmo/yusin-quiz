@@ -114,14 +114,6 @@ public class ProblemServiceImpl implements ProblemService
         return problemMapper.mapToProblemDTO(problem, choices);
     }
 
-    @Transactional
-    @Override
-    public void deleteProblem(long problemId)
-    {
-        choiceService.deleteAllByProblemId(problemId);
-        problemRepository.deleteById(problemId);
-    }
-
     @Override
     public GlobalResponse<List<ProblemDTO>> getAllByExamId(long examId)
     {

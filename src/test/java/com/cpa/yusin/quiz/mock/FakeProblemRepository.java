@@ -32,14 +32,6 @@ public class FakeProblemRepository implements ProblemRepository
     }
 
     @Override
-    public List<Problem> saveAll(List<Problem> problems)
-    {
-        return problems.stream()
-                .map(this::save)
-                .toList();
-    }
-
-    @Override
     public List<Problem> findAllByExamId(long examId)
     {
         return data.stream()
@@ -55,36 +47,6 @@ public class FakeProblemRepository implements ProblemRepository
                 .findAny();
     }
 
-    @Override
-    public void deleteById(long id)
-    {
-        data.removeIf(item -> item.getId().equals(id));
-    }
-
-    @Override
-    public void deleteAllByIdInBatch(List<Long> ids)
-    {
-        data.removeIf(item -> ids.contains(item.getId()));
-    }
-
-    @Override
-    public boolean existsById(long id)
-    {
-        return data.stream()
-                .anyMatch(item -> item.getId().equals(id));
-    }
-
-    @Override
-    public void deleteAllByExamId(long examId)
-    {
-        data.removeIf(item -> item.getExam().getId().equals(examId));
-    }
-
-    @Override
-    public void deleteAllBySubjectId(long subjectId)
-    {
-        data.removeIf(item -> item.getExam().getSubjectId().equals(subjectId));
-    }
 
     @Override
     public boolean existsByExamIdAndNumber(Long examId, int number)

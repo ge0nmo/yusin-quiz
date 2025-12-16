@@ -2,7 +2,6 @@ package com.cpa.yusin.quiz.config;
 
 import com.cpa.yusin.quiz.answer.controller.mapper.AnswerMapper;
 import com.cpa.yusin.quiz.answer.controller.port.AnswerService;
-import com.cpa.yusin.quiz.answer.service.AnswerChecker;
 import com.cpa.yusin.quiz.answer.service.AnswerServiceImpl;
 import com.cpa.yusin.quiz.answer.service.port.AnswerRepository;
 import com.cpa.yusin.quiz.choice.controller.mapper.ChoiceMapper;
@@ -10,8 +9,6 @@ import com.cpa.yusin.quiz.choice.controller.mapper.ChoiceMapperImpl;
 import com.cpa.yusin.quiz.choice.controller.port.ChoiceService;
 import com.cpa.yusin.quiz.choice.service.ChoiceServiceImpl;
 import com.cpa.yusin.quiz.choice.service.port.ChoiceRepository;
-import com.cpa.yusin.quiz.common.infrastructure.CascadeDeleteServiceImpl;
-import com.cpa.yusin.quiz.common.service.CascadeDeleteService;
 import com.cpa.yusin.quiz.common.service.ClockHolder;
 import com.cpa.yusin.quiz.common.service.MerchantIdGenerator;
 import com.cpa.yusin.quiz.exam.controller.ExamController;
@@ -116,7 +113,6 @@ public class TestContainer
     public final QuestionService questionService;
     public final QuestionAnswerService questionAnswerService;
 
-    public final CascadeDeleteService cascadeDeleteService;
 
     /**
      * answer
@@ -124,7 +120,6 @@ public class TestContainer
     public final AnswerRepository answerRepository;
     public final AnswerMapper answerMapper;
     public final AnswerService answerService;
-    public final AnswerChecker answerChecker;
 
 
     public final FileService fileService;
@@ -141,8 +136,6 @@ public class TestContainer
         this.problemRepository = new FakeProblemRepository();
         this.choiceRepository = new FakeChoiceRepository();
 
-        cascadeDeleteService = new CascadeDeleteServiceImpl(this.subjectRepository, this.examRepository, this.problemRepository, this.choiceRepository);
-
         this.memberMapper = new MemberMapper();
         this.memberService = new MemberServiceImpl(this.memberRepository, this.memberMapper);
         this.memberDetailsService = new MemberDetailsService(this.memberRepository);
@@ -158,13 +151,13 @@ public class TestContainer
 
         this.subjectValidator = new SubjectValidatorImpl(this.subjectRepository);
         this.subjectMapper = new SubjectMapper();
-        this.subjectService = new SubjectServiceImpl(this.subjectRepository, this.subjectMapper, this.subjectValidator, this.cascadeDeleteService);
+        this.subjectService = new SubjectServiceImpl(this.subjectRepository, this.subjectMapper, this.subjectValidator);
         this.subjectController = new SubjectController(subjectService);
 
 
         this.examMapper = new ExamMapper();
         this.examValidator = new ExamValidatorImpl(this.examRepository);
-        this.examService = new ExamServiceImpl(this.examRepository, this.examMapper, this.subjectService, this.cascadeDeleteService, this.examValidator);
+        this.examService = new ExamServiceImpl(this.examRepository, this.examMapper, this.subjectService, this.examValidator);
         this.examController = new ExamController(examService);
 
         this.choiceMapper = new ChoiceMapperImpl();
@@ -185,9 +178,8 @@ public class TestContainer
         this.questionAnswerService = new QuestionAnswerService(questionRepository);
 
         this.answerService = new AnswerServiceImpl(this.answerRepository, this.answerMapper, this.questionAnswerService);
-        this.answerChecker = new AnswerServiceImpl(this.answerRepository, this.answerMapper, this.questionAnswerService);
 
-        this.questionService = new QuestionServiceImpl(questionRepository, problemService, questionMapper, answerChecker);
+        this.questionService = new QuestionServiceImpl(questionRepository, problemService, questionMapper);
     }
 
 }

@@ -1,8 +1,9 @@
-package com.cpa.yusin.quiz.admin.presentation.question;
+package com.cpa.yusin.quiz.question.controller;
 
 import com.cpa.yusin.quiz.common.controller.dto.response.GlobalResponse;
 import com.cpa.yusin.quiz.common.controller.dto.response.PageInfo;
 import com.cpa.yusin.quiz.question.controller.dto.response.QuestionDTO;
+import com.cpa.yusin.quiz.question.controller.port.DeleteQuestionService;
 import com.cpa.yusin.quiz.question.controller.port.QuestionService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 public class AdminQuestionController
 {
     private final QuestionService questionService;
+    private final DeleteQuestionService deleteQuestionService;
 
     @GetMapping
     public ResponseEntity<?> getQuestions(@PageableDefault Pageable pageable)
@@ -40,7 +42,7 @@ public class AdminQuestionController
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteQuestion(@PathVariable long id)
     {
-        questionService.deleteById(id);
+        deleteQuestionService.execute(id);
 
         return ResponseEntity.noContent().build();
     }

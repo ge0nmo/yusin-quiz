@@ -23,13 +23,12 @@ public class ExamRepositoryImpl implements ExamRepository
     @Override
     public Optional<Exam> findById(long id)
     {
-        return examJpaRepository.findById(id);
+        return examJpaRepository.findByIdAndIsRemovedFalse(id);
     }
 
     @Override
     public List<Exam> findAllBySubjectId(long subjectId, Integer year)
     {
-        // [수정] JpaRepository에서 이름 변경한 메서드를 호출
         return examJpaRepository.findExamsBySubjectIdAndYear(subjectId, year);
     }
 
@@ -37,24 +36,6 @@ public class ExamRepositoryImpl implements ExamRepository
     public List<Exam> findAllBySubjectId(long subjectId)
     {
         return examJpaRepository.findAllBySubjectId(subjectId);
-    }
-
-    @Override
-    public void deleteById(long id)
-    {
-        examJpaRepository.deleteById(id);
-    }
-
-    @Override
-    public void deleteAllBySubjectId(long subjectId)
-    {
-        examJpaRepository.deleteAllBySubjectId(subjectId);
-    }
-
-    @Override
-    public boolean existsById(long id)
-    {
-        return examJpaRepository.existsById(id);
     }
 
     @Override

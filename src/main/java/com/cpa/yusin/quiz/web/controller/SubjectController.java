@@ -1,20 +1,18 @@
 package com.cpa.yusin.quiz.web.controller;
 
 import com.cpa.yusin.quiz.common.controller.dto.request.DataTableRequest;
-import com.cpa.yusin.quiz.common.controller.dto.response.GlobalResponse;
 import com.cpa.yusin.quiz.subject.controller.dto.request.SubjectCreateRequest;
 import com.cpa.yusin.quiz.subject.controller.dto.request.SubjectUpdateRequest;
 import com.cpa.yusin.quiz.subject.controller.dto.response.SubjectCreateResponse;
 import com.cpa.yusin.quiz.subject.controller.dto.response.SubjectDTO;
 import com.cpa.yusin.quiz.subject.controller.port.SubjectService;
+import com.cpa.yusin.quiz.subject.controller.port.DeleteSubjectService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -28,6 +26,7 @@ import java.util.List;
 public class SubjectController
 {
     private final SubjectService subjectService;
+    private final DeleteSubjectService deleteSubjectService;
 
     @GetMapping
     public String subject(Model model, @ModelAttribute("params")DataTableRequest request)
@@ -67,6 +66,6 @@ public class SubjectController
     @DeleteMapping("/{id}")
     public void deleteSubject(@PathVariable("id") long id)
     {
-        subjectService.deleteById(id);
+        deleteSubjectService.execute(id);
     }
 }

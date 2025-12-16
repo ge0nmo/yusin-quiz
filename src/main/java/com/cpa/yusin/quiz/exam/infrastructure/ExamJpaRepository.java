@@ -7,31 +7,32 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface ExamJpaRepository extends JpaRepository<Exam, Long>
 {
-    // [변경] 메서드 이름을 변경하여 오버로딩 충돌 방지 및 명확성 확보
-    // (:year IS NULL OR e.year = :year) 로직 덕분에 year가 null이면 전체 조회가 됩니다.
     @Query("SELECT e " +
             "FROM Exam e " +
             "WHERE e.subjectId = :subjectId " +
             "AND (:year IS NULL OR e.year = :year) " +
+            "AND e.isRemoved = false " +
             "ORDER BY e.year DESC ")
     List<Exam> findExamsBySubjectIdAndYear(@Param("subjectId") long subjectId, @Param("year") Integer year);
 
-    // 1개 인자 조회 메서드 (이름 유지)
     @Query("SELECT e " +
             "FROM Exam e " +
-            "WHERE e.subjectId = :subjectId")
+            "WHERE e.subjectId = :subjectId " +
+            "AND e.isRemoved = false ")
     List<Exam> findAllBySubjectId(@Param("subjectId") long subjectId);
 
-    @Modifying
-    @Query("DELETE FROM Exam e WHERE e.subjectId = :subjectId")
-    void deleteAllBySubjectId(@Param("subjectId") long subjectId);
+    @Query("SELECT e FROM Exam e WHERE e.id = :id AND e.isRemoved = false ")
+    Optional<Exam> findByIdAndIsRemovedFalse(long id);
+
 
     @Query("SELECT CASE WHEN COUNT(e) > 0 THEN TRUE ELSE FALSE END " +
             "FROM Exam e " +
             "WHERE e.subjectId = :subjectId " +
+            "AND e.isRemoved = false " +
             "AND e.name = :name " +
             "AND e.year = :year")
     boolean existsBySubjectIdAndNameAndYear(@Param("subjectId") long subjectId,
@@ -41,6 +42,7 @@ public interface ExamJpaRepository extends JpaRepository<Exam, Long>
     @Query("SELECT CASE WHEN COUNT(e) > 0 THEN TRUE ELSE FALSE END " +
             "FROM Exam e " +
             "WHERE e.id != :examId " +
+            "AND e.isRemoved = false " +
             "AND e.subjectId = :subjectId " +
             "AND e.name = :name " +
             "AND e.year = :year")
@@ -51,6 +53,7 @@ public interface ExamJpaRepository extends JpaRepository<Exam, Long>
 
     @Query("SELECT DISTINCT e.year FROM Exam e " +
             "WHERE e.subjectId = :subjectId " +
+            "AND e.isRemoved = false " +
             "ORDER BY e.year DESC ")
     List<Integer> getYearsBySubjectId(@Param("subjectId") long subjectId);
 }

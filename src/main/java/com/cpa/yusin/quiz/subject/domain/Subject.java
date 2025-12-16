@@ -23,8 +23,16 @@ public class Subject extends BaseEntity
     @Column(nullable = false, unique = true)
     private String name;
 
-    public void update(SubjectUpdateRequest request)
+    private boolean isRemoved;
+
+    public void update(String name)
     {
-        this.name = request.getName();
+        this.name = name;
+    }
+
+    public void delete()
+    {
+        this.name = name + "_deleted_" + System.currentTimeMillis();
+        this.isRemoved = true;
     }
 }

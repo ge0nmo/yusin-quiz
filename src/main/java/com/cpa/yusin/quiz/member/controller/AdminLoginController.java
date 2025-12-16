@@ -1,6 +1,6 @@
-package com.cpa.yusin.quiz.admin.presentation.auth.controller;
+package com.cpa.yusin.quiz.member.controller;
 
-import com.cpa.yusin.quiz.admin.presentation.auth.dto.AdminLoginRequest;
+import com.cpa.yusin.quiz.member.controller.dto.request.AdminLoginRequest;
 import com.cpa.yusin.quiz.common.controller.dto.response.GlobalResponse;
 import com.cpa.yusin.quiz.member.controller.dto.response.LoginResponse;
 import com.cpa.yusin.quiz.member.controller.port.AuthenticationService;

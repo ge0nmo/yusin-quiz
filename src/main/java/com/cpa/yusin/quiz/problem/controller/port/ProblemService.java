@@ -15,10 +15,7 @@ public interface ProblemService
 
     ProblemDTO processSaveOrUpdate(ProblemRequest request, long examId);
 
-
     void update(long problemId, ProblemUpdateRequest request, long examId);
-
-    void deleteProblem(long problemId);
 
     GlobalResponse<List<ProblemDTO>> getAllByExamId(long examId);
 

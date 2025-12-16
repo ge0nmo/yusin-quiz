@@ -1,9 +1,10 @@
-package com.cpa.yusin.quiz.admin.presentation.problem.controller;
+package com.cpa.yusin.quiz.problem.controller;
 
 import com.cpa.yusin.quiz.common.controller.dto.response.GlobalResponse;
 import com.cpa.yusin.quiz.problem.controller.dto.request.ProblemCreateRequest;
 import com.cpa.yusin.quiz.problem.controller.dto.request.ProblemRequest;
 import com.cpa.yusin.quiz.problem.controller.dto.response.ProblemDTO;
+import com.cpa.yusin.quiz.problem.controller.port.DeleteProblemService;
 import com.cpa.yusin.quiz.problem.controller.port.ProblemService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,6 +21,7 @@ import java.util.List;
 public class AdminProblemController
 {
     private final ProblemService problemService;
+    private final DeleteProblemService deleteProblemService;
 
     @GetMapping
     public ResponseEntity<GlobalResponse<List<ProblemDTO>>> get(@RequestParam("examId") long examId)
@@ -42,10 +44,18 @@ public class AdminProblemController
         problemService.processSaveOrUpdate(request, examId);
     }
 
+    @GetMapping("/{problemId}")
+    public ResponseEntity<GlobalResponse<ProblemDTO>> getById(@PathVariable("problemId") long problemId)
+    {
+        ProblemDTO response = problemService.getById(problemId);
+
+        return ResponseEntity.ok(new GlobalResponse<>(response));
+    }
+
     @DeleteMapping("/{problemId}")
     public ResponseEntity<Void> delete(@PathVariable("problemId") long problemId)
     {
-        problemService.deleteProblem(problemId);
+        deleteProblemService.execute(problemId);
 
         return ResponseEntity.noContent().build();
     }

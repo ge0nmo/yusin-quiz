@@ -12,12 +12,6 @@ import lombok.NoArgsConstructor;
 
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "problem",
-    uniqueConstraints = @UniqueConstraint(
-            name = "uk_problem_exam_id_number",
-            columnNames = {"exam_id", "number"}
-    )
-)
 @Entity
 @Getter
 @Builder
@@ -40,6 +34,8 @@ public class Problem
     @JoinColumn(name = "exam_id", nullable = false)
     private Exam exam;
 
+    private boolean isRemoved;
+
     public static Problem fromSaveOrUpdate(ProblemRequest request, Exam exam)
     {
         return Problem.builder()
@@ -58,4 +54,10 @@ public class Problem
         this.explanation = explanation;
     }
 
+
+    public void delete()
+    {
+        this.isRemoved = true;
+
+    }
 }

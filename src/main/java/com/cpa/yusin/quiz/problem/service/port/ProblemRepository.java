@@ -9,21 +9,10 @@ public interface ProblemRepository
 {
     Problem save(Problem problem);
 
-    List<Problem> saveAll(List<Problem> problems);
 
     List<Problem> findAllByExamId(long examId);
 
     Optional<Problem> findById(long id);
-
-    void deleteById(long id);
-
-    void deleteAllByIdInBatch(List<Long> ids);
-
-    boolean existsById(long id);
-
-    void deleteAllByExamId(long examId);
-
-    void deleteAllBySubjectId(long subjectId);
 
     boolean existsByExamIdAndNumber(Long examId, int number);
 }

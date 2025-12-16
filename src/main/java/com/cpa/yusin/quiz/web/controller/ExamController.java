@@ -4,6 +4,7 @@ import com.cpa.yusin.quiz.exam.controller.dto.request.ExamCreateRequest;
 import com.cpa.yusin.quiz.exam.controller.dto.request.ExamUpdateRequest;
 import com.cpa.yusin.quiz.exam.controller.dto.response.ExamCreateResponse;
 import com.cpa.yusin.quiz.exam.controller.dto.response.ExamDTO;
+import com.cpa.yusin.quiz.exam.controller.port.DeleteExamService;
 import com.cpa.yusin.quiz.exam.controller.port.ExamService;
 import com.cpa.yusin.quiz.subject.controller.port.SubjectService;
 import jakarta.validation.constraints.Positive;
@@ -22,8 +23,8 @@ import java.util.List;
 @Controller("webExamController")
 public class ExamController
 {
-    private final SubjectService subjectService;
     private final ExamService examService;
+    private final DeleteExamService deleteExamService;
 
     // View 반환
     @GetMapping("/exam")
@@ -66,7 +67,7 @@ public class ExamController
     @DeleteMapping("/exam/{examId}")
     public void deleteExam(@PathVariable("examId") long examId)
     {
-        examService.deleteById(examId);
+        deleteExamService.execute(examId);
     }
 
     // [추가됨] 5. 연도 목록 조회 API

@@ -22,11 +22,9 @@ public interface SubjectService
 
     Subject findById(long id);
 
-    List<Subject> findAllByName(String name);
 
     Page<SubjectDTO> getAll(Pageable pageable);
 
     List<SubjectDTO> getAll();
 
-    boolean deleteById(long id);
 }

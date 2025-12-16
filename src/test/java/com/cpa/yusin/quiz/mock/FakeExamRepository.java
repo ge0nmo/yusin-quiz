@@ -56,25 +56,6 @@ public class FakeExamRepository implements ExamRepository
     }
 
     @Override
-    public void deleteById(long id)
-    {
-        data.removeIf(item -> item.getId().equals(id));
-    }
-
-    @Override
-    public void deleteAllBySubjectId(long subjectId)
-    {
-        data.removeIf(item -> item.getSubjectId().equals(subjectId));
-    }
-
-    @Override
-    public boolean existsById(long id)
-    {
-        return data.stream()
-                .anyMatch(item -> item.getId().equals(id));
-    }
-
-    @Override
     public boolean existsBySubjectIdAndNameAndYear(long subjectId, String name, int year)
     {
         return data.stream()

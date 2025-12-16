@@ -37,11 +37,11 @@ public class Question extends BaseEntity
     @Column(nullable = false)
     private Integer answerCount;
 
-    @OnDelete(action = OnDeleteAction.CASCADE)
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "problem_id", nullable = false)
     private Problem problem;
 
+    private boolean isRemoved;
 
     public void update(String title, String content)
     {
@@ -59,6 +59,11 @@ public class Question extends BaseEntity
     {
         int newCount = this.answerCount + count;
         this.answerCount = Math.max(newCount, 0);
+    }
+
+    public void delete()
+    {
+        this.isRemoved = true;
     }
 
     public boolean verify(String inputPassword)
