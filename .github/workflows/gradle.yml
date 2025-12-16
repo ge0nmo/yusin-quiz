@@ -1,10 +1,3 @@
-# This workflow uses actions that are not certified by GitHub.
-# They are provided by a third-party and are governed by
-# separate terms of service, privacy policy, and support
-# documentation.
-# This workflow will build a Java project with Gradle and cache/restore any dependencies to improve the workflow execution time
-# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-java-with-gradle
-
 name: Java CI with Gradle
 
 on:
@@ -14,7 +7,6 @@ on:
     branches: [ "main" ]
 
 jobs:
-
   test:
     runs-on: ubuntu-latest
     services:
@@ -37,13 +29,11 @@ jobs:
         run: chmod +x gradlew
 
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@af1da67850ed9a4cedd57bfd976089dd991e2582 # v4.0.0
+        uses: gradle/actions/setup-gradle@v4
 
       - name: Move test.properties
         run: |
           printf "%s" "${{ secrets.TEST_PROPERTIES }}" | base64 --decode > ./src/test/resources/application-test.properties
-          
-          cat ./src/test/resources/application-test.properties
 
       - name: Test with Gradle
         run: ./gradlew clean test --info
@@ -62,18 +52,15 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
 
-      # Configure Gradle for optimal use in GitHub Actions, including caching of downloaded dependencies.
-      # See: https://github.com/gradle/actions/blob/main/setup-gradle/README.md
       - name: add permission
         run: chmod +x gradlew
 
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@af1da67850ed9a4cedd57bfd976089dd991e2582 # v4.0.0
+        uses: gradle/actions/setup-gradle@v4
 
       - name: Build with Gradle
         run: |
-          echo ${{ secrets.APPLICATION_SECRET }} | base64 --decode > ./src/main/resources/application-secret.yml
-          cat ./src/main/resources/application-secret.yml
+          echo "${{ secrets.APPLICATION_SECRET }}" | base64 --decode > ./src/main/resources/application-secret.yml
           ./gradlew clean build -x test
 
       - name: Build & push Docker image
@@ -86,25 +73,25 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-
   deploy:
     needs: build
     runs-on: ubuntu-latest
     steps:
       - name: Set Target IP
         run: |
-          STATUS=$(curl -o /dev/null -w "%{http_code}" "http://${{ secrets.EC2_SERVER_IP }}/api/v1/env" )
-          echo $STATUS
+          # 로컬 Nginx를 통해 현재 배포된 환경(blue/green) 확인
+          STATUS=$(curl -o /dev/null -w "%{http_code}" "http://${{ secrets.EC2_SERVER_IP }}/api/v1/env")
+          echo "Status: $STATUS"
           
-          if [ $STATUS = 200 ]; then
+          if [ "$STATUS" = "200" ]; then
             CURRENT_UPSTREAM=$(curl -s "http://${{ secrets.EC2_SERVER_IP }}/api/v1/env")
           else
             CURRENT_UPSTREAM=green
           fi
           
-          echo CURRENT_UPSTREAM=$CURRENT_UPSTREAM >> $GITHUB_ENV
+          echo "CURRENT_UPSTREAM=$CURRENT_UPSTREAM" >> $GITHUB_ENV
           
-          if [ $CURRENT_UPSTREAM = blue ]; then
+          if [ "$CURRENT_UPSTREAM" = "blue" ]; then
             echo "CURRENT_PORT=8080" >> $GITHUB_ENV
             echo "STOPPED_PORT=8081" >> $GITHUB_ENV
             echo "TARGET_UPSTREAM=green" >> $GITHUB_ENV
@@ -114,80 +101,55 @@ jobs:
             echo "TARGET_UPSTREAM=blue" >> $GITHUB_ENV
           fi
 
-      - name: Set SSH Key
-        run: |
-          echo "${{ secrets.EC2_PEM }}" > private_key.pem
-          chmod 600 private_key.pem
-
-      - name: Docker compose
+      - name: Docker 배포 (새 버전 실행)
         uses: appleboy/ssh-action@master
         with:
           username: ubuntu
           host: ${{ secrets.EC2_SERVER_IP }}
-          key_path: private_key.pem
+          key: ${{ secrets.EC2_PEM }}
           script_stop: true
           script: |
             sudo docker pull ${{ secrets.DOCKER_USERNAME }}/yusin-quiz:latest
-            sudo docker compose -f docker-compose-${{env.TARGET_UPSTREAM }}.yml up -d
+            # 서버의 /home/ubuntu에 있는 docker-compose 파일을 활용
+            sudo docker compose -f /home/ubuntu/docker-compose-${{ env.TARGET_UPSTREAM }}.yml up -d
 
-      - name: Check deploy server URL
+      - name: 새 서버 헬스 체크
         uses: jtalk/url-health-check-action@v3
         with:
           url: http://${{ secrets.EC2_SERVER_IP }}:${{ env.STOPPED_PORT }}/api/v1/env
           max-attempts: 5
           retry-delay: 10s
 
-      - name: Change nginx upstream
+      - name: 로컬 Nginx Upstream 교체 (Blue-Green 전환)
         uses: appleboy/ssh-action@master
         with:
           username: ubuntu
           host: ${{ secrets.EC2_SERVER_IP }}
-          key_path: private_key.pem
+          key: ${{ secrets.EC2_PEM }}
           script_stop: true
           script: |
-            sudo docker exec -i nginx-server bash -c 'echo "set \$service_url ${{ env.TARGET_UPSTREAM }};" > /etc/nginx/conf.d/service-env.inc && nginx -s reload'
+            # 로컬 Nginx 설정 파일 수정 (docker exec 제거됨)
+            echo "set \$service_url ${{ env.TARGET_UPSTREAM }};" | sudo tee /etc/nginx/conf.d/service-env.inc
+            # Nginx 설정 다시 로드
+            sudo systemctl reload nginx
 
-      - name: Stop current server
+      - name: 구버전 서버 중단 및 삭제
         uses: appleboy/ssh-action@master
         with:
           username: ubuntu
           host: ${{ secrets.EC2_SERVER_IP }}
-          key_path: private_key.pem
+          key: ${{ secrets.EC2_PEM }}
           script_stop: true
           script: |
             sudo docker stop ${{ env.CURRENT_UPSTREAM }} || true
             sudo docker rm ${{ env.CURRENT_UPSTREAM }} || true
 
-      - name: Remove old Docker images
+      - name: Docker 이미지 정리 (Prune)
         if: success()
         uses: appleboy/ssh-action@master
         with:
           username: ubuntu
           host: ${{ secrets.EC2_SERVER_IP }}
-          key_path: private_key.pem
-          script_stop: true
+          key: ${{ secrets.EC2_PEM }}
           script: |
-            echo "Starting Docker image prune..."
             sudo docker image prune -f
-            echo "Docker image prune completed..."
-
-
-
-  dependency-submission:
-
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-
-    steps:
-      - uses: actions/checkout@v4
-      - name: Set up JDK 17
-        uses: actions/setup-java@v4
-        with:
-          java-version: '17'
-          distribution: 'temurin'
-
-      # Generates and submits a dependency graph, enabling Dependabot Alerts for all project dependencies.
-      # See: https://github.com/gradle/actions/blob/main/dependency-submission/README.md
-      - name: Generate and submit dependency graph
-        uses: gradle/actions/dependency-submission@af1da67850ed9a4cedd57bfd976089dd991e2582 # v4.0.0
