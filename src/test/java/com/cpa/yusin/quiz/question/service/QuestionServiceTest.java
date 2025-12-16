@@ -117,6 +117,7 @@ class QuestionServiceTest
                 .title("title")
                 .content("content")
                 .answerCount(0)
+                .problem(problem)
                 .password("123").build());
 
         // when

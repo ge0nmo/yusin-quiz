@@ -189,6 +189,7 @@ class QuestionTest
                                 fieldWithPath("data.content").type(JsonFieldType.STRING).description("질문 내용"),
                                 fieldWithPath("data.answerCount").type(JsonFieldType.NUMBER).description("질문의 답변 수"),
                                 fieldWithPath("data.answeredByAdmin").type(JsonFieldType.BOOLEAN).description("질문 답변 여부"),
+                                fieldWithPath("data.problemId").type(JsonFieldType.NUMBER).description("문제 ID"),
                                 fieldWithPath("data.createdAt").type(JsonFieldType.STRING).description("질문 등록 시간")
 
                         )
@@ -222,6 +223,7 @@ class QuestionTest
                                 fieldWithPath("data.content").type(JsonFieldType.STRING).description("질문 내용"),
                                 fieldWithPath("data.answerCount").type(JsonFieldType.NUMBER).description("질문의 답변 수"),
                                 fieldWithPath("data.answeredByAdmin").type(JsonFieldType.BOOLEAN).description("질문 답변 여부"),
+                                fieldWithPath("data.problemId").type(JsonFieldType.NUMBER).description("문제 ID"),
                                 fieldWithPath("data.createdAt").type(JsonFieldType.STRING).description("질문 등록 시간")
                         )
 
@@ -265,6 +267,7 @@ class QuestionTest
                                 fieldWithPath("data[].content").type(JsonFieldType.STRING).description("질문 내용"),
                                 fieldWithPath("data[].answerCount").type(JsonFieldType.NUMBER).description("질문의 답변 수"),
                                 fieldWithPath("data[].answeredByAdmin").type(JsonFieldType.BOOLEAN).description("질문 답변 여부"),
+                                fieldWithPath("data[].problemId").type(JsonFieldType.NUMBER).description("문제 ID"),
                                 fieldWithPath("data[].createdAt").type(JsonFieldType.STRING).description("질문 등록 시간"),
 
 
