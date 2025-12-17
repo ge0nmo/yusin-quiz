@@ -117,4 +117,19 @@ public class ExceptionAdvice
         // 필요한 경우, 로그를 남기고, 404 상태 코드와 함께 응답
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body("요청한 경로를 찾을 수 없습니다.");
     }
+
+    // ExceptionAdvice.java에 추가
+    @ExceptionHandler(io.jsonwebtoken.ExpiredJwtException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public ErrorResponse handleExpiredJwtException(io.jsonwebtoken.ExpiredJwtException e) {
+        log.error("토큰 만료 예외 발생", e);
+        return ErrorResponse.of(HttpStatus.UNAUTHORIZED, "토큰이 만료되었습니다.");
+    }
+
+    @ExceptionHandler(io.jsonwebtoken.JwtException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public ErrorResponse handleJwtException(io.jsonwebtoken.JwtException e) {
+        log.error("JWT 예외 발생", e);
+        return ErrorResponse.of(HttpStatus.UNAUTHORIZED, "유효하지 않은 토큰입니다.");
+    }
 }
