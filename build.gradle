@@ -73,6 +73,9 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
     implementation 'io.micrometer:micrometer-registry-prometheus'
     implementation 'io.prometheus:prometheus-metrics-exposition-formats:1.2.1'
+
+    implementation("com.google.api-client:google-api-client:2.8.1")
+    implementation 'com.google.oauth-client:google-oauth-client-jetty:1.39.0'
 }
 
 tasks.named('test') {

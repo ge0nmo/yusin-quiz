@@ -1,7 +1,6 @@
 package com.cpa.yusin.quiz.member.service;
 
 import com.cpa.yusin.quiz.global.details.MemberDetails;
-import com.cpa.yusin.quiz.global.details.MemberDetailsService;
 import com.cpa.yusin.quiz.global.jwt.JwtService;
 import com.cpa.yusin.quiz.global.security.CustomAuthenticationProvider;
 import com.cpa.yusin.quiz.member.controller.dto.request.LoginRequest;
@@ -11,14 +10,21 @@ import com.cpa.yusin.quiz.member.controller.dto.response.MemberCreateResponse;
 import com.cpa.yusin.quiz.member.controller.mapper.MemberMapper;
 import com.cpa.yusin.quiz.member.controller.port.AuthenticationService;
 import com.cpa.yusin.quiz.member.domain.Member;
+import com.cpa.yusin.quiz.member.domain.type.Role;
+import com.cpa.yusin.quiz.member.service.dto.SocialProfile;
 import com.cpa.yusin.quiz.member.service.port.MemberRepository;
 import com.cpa.yusin.quiz.member.service.port.MemberValidator;
+import com.cpa.yusin.quiz.member.service.port.SocialTokenVerifier;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.UUID;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -31,7 +37,6 @@ public class AuthenticationServiceImpl implements AuthenticationService
     private final CustomAuthenticationProvider authenticationProvider;
     private final MemberMapper memberMapper;
     private final MemberValidator memberValidator;
-
 
     @Override
     public LoginResponse login(LoginRequest request)
@@ -75,6 +80,27 @@ public class AuthenticationServiceImpl implements AuthenticationService
         return memberMapper.toMemberCreateResponse(member);
     }
 
+    @Override
+    @Transactional
+    public LoginResponse socialLogin(SocialProfile socialProfile)
+    {
+        Member member = memberRepository.findByEmail(socialProfile.getEmail())
+                .orElseGet(() -> registerSocialMember(socialProfile));
 
+        String accessToken = jwtService.createAccessToken(member.getEmail());
+
+        return LoginResponse.from(member.getId(), member.getEmail(), member.getRole(), accessToken);
+    }
+
+    private Member registerSocialMember(SocialProfile profile) {
+        Member newMember = Member.builder()
+                .email(profile.getEmail())
+                .username(profile.getName()) // 이름 저장
+                .password(passwordEncoder.encode(UUID.randomUUID().toString())) // 랜덤 비번
+                .role(Role.USER)
+                .platform(profile.getPlatform())
+                .build();
+        return memberRepository.save(newMember);
+    }
 }
 

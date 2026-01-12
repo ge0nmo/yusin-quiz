@@ -1,10 +1,8 @@
 package com.cpa.yusin.quiz.member.domain;
 
 import com.cpa.yusin.quiz.common.infrastructure.BaseEntity;
-import com.cpa.yusin.quiz.common.service.UuidHolder;
 import com.cpa.yusin.quiz.global.exception.ExceptionMessage;
 import com.cpa.yusin.quiz.global.exception.MemberException;
-import com.cpa.yusin.quiz.global.security.oauth2.user.OAuth2UserInfo;
 import com.cpa.yusin.quiz.member.controller.dto.request.MemberCreateRequest;
 import com.cpa.yusin.quiz.member.controller.dto.request.MemberUpdateRequest;
 import com.cpa.yusin.quiz.member.domain.type.Platform;
@@ -53,16 +51,6 @@ public class Member extends BaseEntity
                 .build();
     }
 
-    public static Member fromOAuth2(OAuth2UserInfo oAuth2UserInfo, UuidHolder uuidHolder)
-    {
-        return Member.builder()
-                .email(oAuth2UserInfo.getEmail())
-                .password(uuidHolder.getRandom())
-                .username(oAuth2UserInfo.getName())
-                .platform(oAuth2UserInfo.getPlatform())
-                .role(Role.USER)
-                .build();
-    }
 
     public void updateFromOauth2(String newUsername) {
         this.username = newUsername;

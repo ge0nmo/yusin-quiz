@@ -15,15 +15,6 @@ spring:
   config:
     activate:
       on-profile: local
-  security:
-    oauth2:
-      client:
-        registration:
-          google:
-            redirect-uri: http://localhost:8080/oauth2/callback
-          github:
-            redirect-uri: http://localhost:8080/oauth2/callback
-
 
 server:
   port: 8080
@@ -37,14 +28,6 @@ spring:
   config:
     activate:
       on-profile: blue
-  security:
-    oauth2:
-      client:
-        registration:
-          google:
-            redirect-uri: 13.124.70.40/oauth2/callback/google
-          github:
-            redirect-uri: 13.124.70.40/oauth2/callback/github
 
 server:
   port: 8080
@@ -58,14 +41,6 @@ spring:
   config:
     activate:
       on-profile: green
-  security:
-    oauth2:
-      client:
-        registration:
-          google:
-            redirect-uri: 13.124.70.40/oauth2/callback/google
-          github:
-            redirect-uri: 13.124.70.40/oauth2/callback/github
 
 server:
   port: 8081

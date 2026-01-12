@@ -6,7 +6,6 @@ import com.cpa.yusin.quiz.member.controller.dto.request.MemberCreateRequest;
 import com.cpa.yusin.quiz.member.controller.dto.request.MemberUpdateRequest;
 import com.cpa.yusin.quiz.member.domain.type.Platform;
 import com.cpa.yusin.quiz.member.domain.type.Role;
-import com.cpa.yusin.quiz.mock.FakeOAuth2UserInfo;
 import com.cpa.yusin.quiz.mock.FakeUuidHolder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -60,25 +59,6 @@ class MemberTest
         assertThat(member.getUsername()).isEqualTo("John Doe");
         assertThat(passwordEncoder.matches(rawPassword, member.getPassword())).isTrue();
 
-    }
-
-
-    @Test
-    void createDomainWithOAuth2Attributes()
-    {
-        // given
-        FakeOAuth2UserInfo oAuth2UserInfo = new FakeOAuth2UserInfo(new HashMap<>(), "google", "test user", "test@gmail.com", Platform.GOOGLE);
-        FakeUuidHolder uuidHolder = new FakeUuidHolder("randomPassword");
-
-        // when
-        Member member = Member.fromOAuth2(oAuth2UserInfo, uuidHolder);
-
-        // then
-        assertThat(member.getRole()).isEqualTo(Role.USER);
-        assertThat(member.getPlatform()).isEqualTo(Platform.GOOGLE);
-        assertThat(member.getPassword()).isEqualTo("randomPassword");
-        assertThat(member.getEmail()).isEqualTo("test@gmail.com");
-        assertThat(member.getUsername()).isEqualTo("test user");
     }
 
     @Test

@@ -4,6 +4,7 @@ import com.cpa.yusin.quiz.member.controller.dto.request.LoginRequest;
 import com.cpa.yusin.quiz.member.controller.dto.request.MemberCreateRequest;
 import com.cpa.yusin.quiz.member.controller.dto.response.LoginResponse;
 import com.cpa.yusin.quiz.member.controller.dto.response.MemberCreateResponse;
+import com.cpa.yusin.quiz.member.service.dto.SocialProfile;
 
 public interface AuthenticationService
 {
@@ -13,4 +14,6 @@ public interface AuthenticationService
 
     LoginResponse loginAsAdmin(String email, String password);
 
+
+    LoginResponse socialLogin(SocialProfile socialProfile);
 }
