@@ -113,12 +113,38 @@ jobs:
             # 서버의 /home/ubuntu에 있는 docker-compose 파일을 활용
             sudo docker compose -f /home/ubuntu/docker-compose-${{ env.TARGET_UPSTREAM }}.yml up -d
 
-      - name: 새 서버 헬스 체크
-        uses: jtalk/url-health-check-action@v3
+      # [수정된 코드] 내부에서 체크 + 부팅 대기 시간 추가
+      - name: 새 서버 헬스 체크 (Internal Health Check)
+        uses: appleboy/ssh-action@master
         with:
-          url: http://${{ secrets.EC2_SERVER_IP }}:${{ env.STOPPED_PORT }}/api/v1/env
-          max-attempts: 5
-          retry-delay: 10s
+          username: ubuntu
+          host: ${{ secrets.EC2_SERVER_IP }}
+          key: ${{ secrets.EC2_PEM }}
+          script_stop: true
+          script: |
+            echo "Spring Boot가 구동될 때까지 15초 대기..."
+            sleep 15
+            
+            echo "Checking health for port ${{ env.STOPPED_PORT }}..."
+            
+            # 5초 간격으로 10번 시도 (총 50초+알파)
+            for i in {1..10}; do
+              # 127.0.0.1(내부)로 접속 시도
+              RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:${{ env.STOPPED_PORT }}/api/v1/env)
+            
+              if [ "$RESPONSE" = "200" ]; then
+                echo "Health Check Success! (Status: 200)"
+                exit 0
+              fi
+            
+              echo "Attempt $i failed (Status: $RESPONSE). Retrying in 5s..."
+              sleep 5
+            done
+            
+            echo "Health Check Failed after multiple attempts."
+            # 실패 시 로그를 보여줘서 원인 파악 (컨테이너 이름은 환경변수에 따라 blue/green)
+            sudo docker logs ${{ env.TARGET_UPSTREAM }} --tail 50
+            exit 1
 
       - name: 로컬 Nginx Upstream 교체 (Blue-Green 전환)
         uses: appleboy/ssh-action@master
