@@ -55,4 +55,14 @@ public class AuthenticationController
 
         return ResponseEntity.ok(new GlobalResponse<>(response));
     }
+
+    public record RefreshRequest(String refreshToken) {}
+
+    @PostMapping("/auth/refresh")
+    public ResponseEntity<GlobalResponse<String>> refresh(@RequestBody RefreshRequest request)
+    {
+        String newAccessToken = authenticationService.refreshAccessToken(request.refreshToken());
+
+        return ResponseEntity.ok(new GlobalResponse<>(newAccessToken));
+    }
 }

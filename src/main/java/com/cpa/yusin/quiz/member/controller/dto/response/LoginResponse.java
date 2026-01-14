@@ -12,14 +12,16 @@ public class LoginResponse
     private String email;
     private Role role;
     private String accessToken;
+    private String refreshToken;
 
-    public static LoginResponse from(long id, String email, Role role, String accessToken)
+    public static LoginResponse from(long id, String email, Role role, String accessToken, String refreshToken)
     {
         return LoginResponse.builder()
                 .id(id)
                 .email(email)
                 .role(role)
                 .accessToken(accessToken)
+                .refreshToken(refreshToken)
                 .build();
     }
 }

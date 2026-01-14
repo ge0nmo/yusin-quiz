@@ -64,8 +64,9 @@ public class AuthenticationServiceImpl implements AuthenticationService
         Member member = memberDetails.getMember();
 
         String accessToken = jwtService.createAccessToken(member.getEmail());
+        String refreshToken = jwtService.createRefreshToken(member.getEmail());
 
-        return LoginResponse.from(member.getId(), member.getEmail(), member.getRole(), accessToken);
+        return LoginResponse.from(member.getId(), member.getEmail(), member.getRole(), accessToken, refreshToken);
     }
 
 
@@ -88,8 +89,9 @@ public class AuthenticationServiceImpl implements AuthenticationService
                 .orElseGet(() -> registerSocialMember(socialProfile));
 
         String accessToken = jwtService.createAccessToken(member.getEmail());
+        String refreshToken = jwtService.createRefreshToken(member.getEmail());
 
-        return LoginResponse.from(member.getId(), member.getEmail(), member.getRole(), accessToken);
+        return LoginResponse.from(member.getId(), member.getEmail(), member.getRole(), accessToken, refreshToken);
     }
 
     private Member registerSocialMember(SocialProfile profile) {
@@ -101,6 +103,18 @@ public class AuthenticationServiceImpl implements AuthenticationService
                 .platform(profile.getPlatform())
                 .build();
         return memberRepository.save(newMember);
+    }
+
+    public String refreshAccessToken(String refreshToken)
+    {
+        // 1. Refresh Token 만료 여부 확인
+        if (jwtService.isTokenExpired(refreshToken)) {
+            throw new RuntimeException("Refresh Token이 만료되었습니다. 다시 로그인해주세요.");
+        }
+
+        // 2. 이메일 추출 후 새로운 Access Token 생성
+        String email = jwtService.extractSubject(refreshToken);
+        return jwtService.createAccessToken(email);
     }
 }
 

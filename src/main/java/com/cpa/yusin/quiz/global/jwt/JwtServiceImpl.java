@@ -2,6 +2,7 @@ package com.cpa.yusin.quiz.global.jwt;
 
 import com.cpa.yusin.quiz.global.details.MemberDetails;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import lombok.extern.slf4j.Slf4j;
@@ -39,6 +40,16 @@ public class JwtServiceImpl implements JwtService
         return createToken(claims, email, accessTokenExpiration);
     }
 
+    @Override
+    public String createRefreshToken(String email) {
+        return Jwts.builder()
+                .subject(email)
+                .issuedAt(new Date(System.currentTimeMillis()))
+                .expiration(new Date(System.currentTimeMillis() + refreshTokenExpiration))
+                .signWith(key)
+                .compact();
+    }
+
 
     private String createToken(Map<String, Object> claims, String email, long expiration)
     {
@@ -58,6 +69,17 @@ public class JwtServiceImpl implements JwtService
         String email = extractSubject(token);
 
         return !expirationDate.before(new Date()) && memberDetails.getUsername().equals(email);
+    }
+
+    // 토큰 만료 여부만 따로 확인하는 메서드 추가
+    @Override
+    public boolean isTokenExpired(String token)
+    {
+        try {
+            return extractClaim(token, Claims::getExpiration).before(new Date());
+        } catch (ExpiredJwtException e) {
+            return true;
+        }
     }
 
 

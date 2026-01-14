@@ -9,6 +9,10 @@ public interface JwtService
 {
     String createAccessToken(String email);
 
+    String createRefreshToken(String email);
+
+    boolean isTokenExpired(String token);
+
     boolean isValidToken(String token, MemberDetails memberDetails);
 
     <T> T extractClaim(String token, Function<Claims, T> claimsResolver);

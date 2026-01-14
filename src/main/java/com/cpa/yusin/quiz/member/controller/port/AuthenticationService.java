@@ -16,4 +16,6 @@ public interface AuthenticationService
 
 
     LoginResponse socialLogin(SocialProfile socialProfile);
+
+    String refreshAccessToken(String refreshToken);
 }
