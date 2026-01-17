@@ -265,6 +265,7 @@ class MemberTest
                                 fieldWithPath("data.email").type(JsonFieldType.STRING).description("이메일"),
                                 fieldWithPath("data.role").type(JsonFieldType.STRING).description("회원 권한"),
                                 fieldWithPath("data.accessToken").type(JsonFieldType.STRING).description("액세스 토큰"),
+                                fieldWithPath("data.refreshToken").type(JsonFieldType.STRING).description("리프레시 토큰"),
 
                                 fieldWithPath("pageInfo").type(JsonFieldType.OBJECT).description("페이지 정보").optional()
                         )

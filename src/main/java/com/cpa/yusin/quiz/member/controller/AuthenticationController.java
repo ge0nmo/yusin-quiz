@@ -6,6 +6,8 @@ import com.cpa.yusin.quiz.member.controller.dto.request.LoginRequest;
 import com.cpa.yusin.quiz.member.controller.dto.request.MemberCreateRequest;
 import com.cpa.yusin.quiz.member.controller.dto.response.LoginResponse;
 import com.cpa.yusin.quiz.member.controller.dto.response.MemberCreateResponse;
+import com.cpa.yusin.quiz.member.controller.dto.request.RefreshRequest;
+import com.cpa.yusin.quiz.member.controller.dto.response.TokenResponse;
 import com.cpa.yusin.quiz.member.controller.port.AuthenticationService;
 import com.cpa.yusin.quiz.member.domain.type.Platform;
 import com.cpa.yusin.quiz.member.service.SocialLoadService;
@@ -56,13 +58,12 @@ public class AuthenticationController
         return ResponseEntity.ok(new GlobalResponse<>(response));
     }
 
-    public record RefreshRequest(String refreshToken) {}
 
     @PostMapping("/auth/refresh")
-    public ResponseEntity<GlobalResponse<String>> refresh(@RequestBody RefreshRequest request)
+    public ResponseEntity<GlobalResponse<TokenResponse>> refresh(@RequestBody RefreshRequest request)
     {
-        String newAccessToken = authenticationService.refreshAccessToken(request.refreshToken());
+        TokenResponse response = authenticationService.refreshAccessToken(request.refreshToken());
 
-        return ResponseEntity.ok(new GlobalResponse<>(newAccessToken));
+        return ResponseEntity.ok(new GlobalResponse<>(response));
     }
 }

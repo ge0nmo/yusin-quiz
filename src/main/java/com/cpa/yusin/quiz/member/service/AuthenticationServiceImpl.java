@@ -7,6 +7,7 @@ import com.cpa.yusin.quiz.member.controller.dto.request.LoginRequest;
 import com.cpa.yusin.quiz.member.controller.dto.request.MemberCreateRequest;
 import com.cpa.yusin.quiz.member.controller.dto.response.LoginResponse;
 import com.cpa.yusin.quiz.member.controller.dto.response.MemberCreateResponse;
+import com.cpa.yusin.quiz.member.controller.dto.response.TokenResponse;
 import com.cpa.yusin.quiz.member.controller.mapper.MemberMapper;
 import com.cpa.yusin.quiz.member.controller.port.AuthenticationService;
 import com.cpa.yusin.quiz.member.domain.Member;
@@ -105,7 +106,7 @@ public class AuthenticationServiceImpl implements AuthenticationService
         return memberRepository.save(newMember);
     }
 
-    public String refreshAccessToken(String refreshToken)
+    public TokenResponse refreshAccessToken(String refreshToken)
     {
         // 1. Refresh Token 만료 여부 확인
         if (jwtService.isTokenExpired(refreshToken)) {
@@ -114,7 +115,10 @@ public class AuthenticationServiceImpl implements AuthenticationService
 
         // 2. 이메일 추출 후 새로운 Access Token 생성
         String email = jwtService.extractSubject(refreshToken);
-        return jwtService.createAccessToken(email);
+        String accessToken = jwtService.createAccessToken(email);
+        String newRefreshToken = jwtService.createRefreshToken(email);
+
+        return new TokenResponse(accessToken, newRefreshToken);
     }
 }
 
