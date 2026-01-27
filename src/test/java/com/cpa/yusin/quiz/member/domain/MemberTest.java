@@ -1,12 +1,11 @@
 package com.cpa.yusin.quiz.member.domain;
 
-
 import com.cpa.yusin.quiz.global.exception.MemberException;
 import com.cpa.yusin.quiz.member.controller.dto.request.MemberCreateRequest;
 import com.cpa.yusin.quiz.member.controller.dto.request.MemberUpdateRequest;
 import com.cpa.yusin.quiz.member.domain.type.Platform;
 import com.cpa.yusin.quiz.member.domain.type.Role;
-import com.cpa.yusin.quiz.mock.FakeUuidHolder;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -14,27 +13,22 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import java.util.HashMap;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.Mockito.when;
 
-class MemberTest
-{
+class MemberTest {
     @Mock
     PasswordEncoder passwordEncoder;
 
     @BeforeEach
-    void setUp()
-    {
+    void setUp() {
         MockitoAnnotations.openMocks(this);
     }
 
     @Test
-    void createDomainWithMemberCreateRequest()
-    {
+    void createDomainWithMemberCreateRequest() {
         // given
         String rawPassword = "123123";
         String encodedPassword = "encodedPassword123";
@@ -49,7 +43,7 @@ class MemberTest
         when(passwordEncoder.matches(rawPassword, encodedPassword)).thenReturn(true);
 
         // when
-        Member member = Member.fromHome(johnDoe, passwordEncoder);
+        Member member = Member.fromHome(johnDoe.getEmail(), encodedPassword, johnDoe.getUsername());
 
         // then
         assertThat(member.getRole()).isEqualTo(Role.USER);
@@ -62,8 +56,7 @@ class MemberTest
     }
 
     @Test
-    void updateMemberDomainFromOAuthLogin()
-    {
+    void updateMemberDomainFromOAuthLogin() {
         // given
         Member member = Member.builder()
                 .id(1L)
@@ -87,8 +80,7 @@ class MemberTest
     }
 
     @Test
-    void update()
-    {
+    void update() {
         // given
         Member member = Member.builder()
                 .id(1L)
@@ -104,7 +96,7 @@ class MemberTest
                 .build();
 
         // when
-        member.update(request);
+        member.update(request.getUsername());
 
         // then
         assertThat(member.getUsername()).isEqualTo("Mike");
@@ -112,8 +104,7 @@ class MemberTest
 
     @DisplayName("validateMember - ADMIN can pass validation")
     @Test
-    void validateMember1()
-    {
+    void validateMember1() {
         // given
         Member member = Member.builder()
                 .id(1L)
@@ -130,8 +121,7 @@ class MemberTest
 
     @DisplayName("validateMember - memberId should be the same if it's USER")
     @Test
-    void validateMember2()
-    {
+    void validateMember2() {
         // given
         Member member = Member.builder()
                 .id(1L)

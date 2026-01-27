@@ -11,22 +11,21 @@ import java.util.TreeMap;
 
 @RequestMapping("/api/v1")
 @RestController
-public class HealthCheckController
-{
-    @Value("${server.env}")
+public class HealthCheckController {
+    @Value("${server.env:local}")
     private String env;
 
-    @Value("${server.port}")
+    @Value("${server.port:8080}")
     private String serverPort;
 
-    @Value("${server.serverAddress}")
+    @Value("${server.serverAddress:localhost}")
     private String serverAddress;
 
-    @Value("${serverName}")
+    @Value("${serverName:yusin-quiz}")
     private String serverName;
 
     @GetMapping(value = "/hc", produces = "application/json")
-    public ResponseEntity<?> healthCheck(){
+    public ResponseEntity<?> healthCheck() {
         Map<String, String> responseData = new TreeMap<>();
         responseData.put("serverName", serverName);
         responseData.put("serverAddress", serverAddress);
@@ -37,8 +36,7 @@ public class HealthCheckController
     }
 
     @GetMapping(value = "/env", produces = "application/json")
-    public ResponseEntity<?> env()
-    {
+    public ResponseEntity<?> env() {
         return ResponseEntity.ok(env);
     }
 
