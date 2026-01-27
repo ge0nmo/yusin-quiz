@@ -59,7 +59,7 @@ public class ExamServiceImpl implements ExamService {
     public void update(long examId, ExamUpdateRequest request) {
         Exam domain = findById(examId);
         examValidator.validate(examId, domain.getId(), request.getName(), request.getYear());
-        domain.update(request);
+        domain.update(request.getName(), request.getYear());
         examRepository.save(domain);
     }
 
@@ -80,24 +80,14 @@ public class ExamServiceImpl implements ExamService {
         // 과목 존재 확인
         subjectService.findById(subjectId);
 
-        List<Exam> exams;
-
-        if (year == null) {
-            exams = examRepository.findAllBySubjectId(subjectId);
-        } else {
-            exams = examRepository.findAllBySubjectId(subjectId, year);
-        }
+        List<Exam> exams = year == null ? examRepository.findAllBySubjectId(subjectId)
+                : examRepository.findAllBySubjectId(subjectId, year);
 
         if (exams.isEmpty()) {
             return Collections.emptyList();
         }
 
         return exams.stream()
-                .sorted((e1, e2) -> {
-                    int yearCompare = Integer.compare(e2.getYear(), e1.getYear()); // 내림차순
-                    if (yearCompare != 0) return yearCompare;
-                    return e1.getName().compareTo(e2.getName()); // 이름은 오름차순
-                })
                 .map(examMapper::toExamDTO)
                 .toList();
     }

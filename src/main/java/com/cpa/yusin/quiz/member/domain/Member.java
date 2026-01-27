@@ -3,13 +3,10 @@ package com.cpa.yusin.quiz.member.domain;
 import com.cpa.yusin.quiz.common.infrastructure.BaseEntity;
 import com.cpa.yusin.quiz.global.exception.ExceptionMessage;
 import com.cpa.yusin.quiz.global.exception.MemberException;
-import com.cpa.yusin.quiz.member.controller.dto.request.MemberCreateRequest;
-import com.cpa.yusin.quiz.member.controller.dto.request.MemberUpdateRequest;
 import com.cpa.yusin.quiz.member.domain.type.Platform;
 import com.cpa.yusin.quiz.member.domain.type.Role;
 import jakarta.persistence.*;
 import lombok.*;
-import org.springframework.security.crypto.password.PasswordEncoder;
 
 @ToString
 @Entity
@@ -17,8 +14,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Builder
 @Getter
-public class Member extends BaseEntity
-{
+public class Member extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -40,38 +36,33 @@ public class Member extends BaseEntity
     @Enumerated(EnumType.STRING)
     private Role role;
 
-    public static Member fromHome(MemberCreateRequest request, PasswordEncoder passwordEncoder)
-    {
+    public static Member fromHome(String email, String encodedPassword, String username) {
         return Member.builder()
-                .email(request.getEmail())
-                .password(passwordEncoder.encode(request.getPassword()))
-                .username(request.getUsername())
+                .email(email)
+                .password(encodedPassword)
+                .username(username)
                 .platform(Platform.HOME)
                 .role(Role.USER)
                 .build();
     }
 
-
     public void updateFromOauth2(String newUsername) {
         this.username = newUsername;
     }
 
-    public void update(MemberUpdateRequest request)
-    {
-        this.username = request.getUsername();
+    public void update(String username) {
+        this.username = username;
     }
 
-    public void validateMember(long memberId, Member member)
-    {
-        if(member.getId().equals(memberId) || Role.ADMIN.equals(member.getRole())){
+    public void validateMember(long memberId, Member member) {
+        if (member.getId().equals(memberId) || Role.ADMIN.equals(member.getRole())) {
             return;
         }
 
         throw new MemberException(ExceptionMessage.NO_AUTHORIZATION);
     }
 
-    public void changeRole(Role role)
-    {
+    public void changeRole(Role role) {
         this.role = role;
     }
 }

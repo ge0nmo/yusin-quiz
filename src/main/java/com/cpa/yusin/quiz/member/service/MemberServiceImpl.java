@@ -20,34 +20,29 @@ import org.springframework.util.StringUtils;
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 @Service
-public class MemberServiceImpl implements MemberService
-{
+public class MemberServiceImpl implements MemberService {
     private final MemberRepository memberRepository;
     private final MemberMapper memberMapper;
 
-
     @Transactional
     @Override
-    public void update(long memberId, MemberUpdateRequest request, Member loggedInMember)
-    {
+    public void update(long memberId, MemberUpdateRequest request, Member loggedInMember) {
         loggedInMember.validateMember(memberId, loggedInMember);
 
         Member targetMember = findById(memberId);
-        targetMember.update(request);
+        targetMember.update(request.getUsername());
 
         memberRepository.save(targetMember);
     }
 
     @Override
-    public MemberDTO getById(long id)
-    {
+    public MemberDTO getById(long id) {
         return memberMapper.toMemberDTO(findById(id));
     }
 
     @Override
-    public Page<MemberDTO> getAll(String keyword, Pageable pageable)
-    {
-        if(StringUtils.hasLength(keyword))
+    public Page<MemberDTO> getAll(String keyword, Pageable pageable) {
+        if (StringUtils.hasLength(keyword))
             keyword = keyword.toLowerCase();
 
         return memberRepository.findAllByKeyword(keyword, pageable)
@@ -55,25 +50,22 @@ public class MemberServiceImpl implements MemberService
     }
 
     @Override
-    public Page<Member> getAllAdminNot(String keyword, Pageable pageable)
-    {
-        if(StringUtils.hasLength(keyword))
+    public Page<Member> getAllAdminNot(String keyword, Pageable pageable) {
+        if (StringUtils.hasLength(keyword))
             keyword = keyword.toLowerCase();
 
         return memberRepository.findAllByKeywordAndAdminNot(keyword, pageable);
     }
 
     @Override
-    public Member findById(long id)
-    {
+    public Member findById(long id) {
         return memberRepository.findById(id)
                 .orElseThrow(() -> new MemberException(ExceptionMessage.USER_NOT_FOUND));
     }
 
     @Transactional
     @Override
-    public void deleteById(long id, Member loggedInMember)
-    {
+    public void deleteById(long id, Member loggedInMember) {
         Member targetMember = findById(id);
 
         targetMember.validateMember(id, loggedInMember);

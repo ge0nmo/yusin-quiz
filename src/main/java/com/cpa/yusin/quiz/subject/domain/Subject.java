@@ -1,8 +1,6 @@
 package com.cpa.yusin.quiz.subject.domain;
 
 import com.cpa.yusin.quiz.common.infrastructure.BaseEntity;
-import com.cpa.yusin.quiz.subject.controller.dto.request.SubjectCreateRequest;
-import com.cpa.yusin.quiz.subject.controller.dto.request.SubjectUpdateRequest;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -14,8 +12,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 @Getter
-public class Subject extends BaseEntity
-{
+public class Subject extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -25,13 +22,11 @@ public class Subject extends BaseEntity
 
     private boolean isRemoved;
 
-    public void update(String name)
-    {
+    public void update(String name) {
         this.name = name;
     }
 
-    public void delete()
-    {
+    public void delete() {
         this.name = name + "_deleted_" + System.currentTimeMillis();
         this.isRemoved = true;
     }

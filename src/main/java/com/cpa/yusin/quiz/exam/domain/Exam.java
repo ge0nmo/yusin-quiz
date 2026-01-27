@@ -1,8 +1,8 @@
 package com.cpa.yusin.quiz.exam.domain;
 
 import com.cpa.yusin.quiz.common.infrastructure.BaseEntity;
+
 import com.cpa.yusin.quiz.exam.controller.dto.request.ExamCreateRequest;
-import com.cpa.yusin.quiz.exam.controller.dto.request.ExamUpdateRequest;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -14,8 +14,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor()
 @Entity
 @Getter
-public class Exam extends BaseEntity
-{
+public class Exam extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -31,8 +30,7 @@ public class Exam extends BaseEntity
 
     private boolean isRemoved;
 
-    public static Exam from(String name, int year, long subjectId)
-    {
+    public static Exam from(String name, int year, long subjectId) {
         return Exam.builder()
                 .name(name)
                 .year(year)
@@ -40,14 +38,12 @@ public class Exam extends BaseEntity
                 .build();
     }
 
-    public void update(ExamUpdateRequest request)
-    {
-        this.name = request.getName();
-        this.year = request.getYear();
+    public void update(String name, int year) {
+        this.name = name;
+        this.year = year;
     }
 
-    public void delete()
-    {
+    public void delete() {
         this.isRemoved = true;
         this.name = name + "_deleted_" + System.currentTimeMillis();
     }
