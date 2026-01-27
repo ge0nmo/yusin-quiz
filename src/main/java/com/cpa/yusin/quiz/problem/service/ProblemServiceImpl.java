@@ -39,8 +39,7 @@ import java.util.UUID;
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 @Service
-public class ProblemServiceImpl implements ProblemService
-{
+public class ProblemServiceImpl implements ProblemService {
     private final ProblemRepository problemRepository;
     private final ProblemMapper problemMapper;
     private final ExamService examService;
@@ -53,8 +52,7 @@ public class ProblemServiceImpl implements ProblemService
 
     @Transactional
     @Override
-    public void save(long examId, ProblemCreateRequest request)
-    {
+    public void save(long examId, ProblemCreateRequest request) {
         Exam exam = examService.findById(examId);
         problemValidator.validateUniqueProblemNumber(examId, request.getNumber());
 
@@ -74,8 +72,7 @@ public class ProblemServiceImpl implements ProblemService
 
     @Transactional
     @Override
-    public void update(long problemId, ProblemUpdateRequest request, long examId)
-    {
+    public void update(long problemId, ProblemUpdateRequest request, long examId) {
         Problem problem = findById(problemId);
 
         // [수정] 문제 내용과 해설만 이미지 처리
@@ -88,8 +85,7 @@ public class ProblemServiceImpl implements ProblemService
 
     @Transactional
     @Override
-    public ProblemDTO processSaveOrUpdate(ProblemRequest request, long examId)
-    {
+    public ProblemDTO processSaveOrUpdate(ProblemRequest request, long examId) {
         // [수정] 통합 로직에서도 문제/해설만 처리
         request.setContent(processHtmlImages(request.getContent()));
         request.setExplanation(processHtmlImages(request.getExplanation()));
@@ -98,15 +94,15 @@ public class ProblemServiceImpl implements ProblemService
         return request.isNew() ? save(request, exam) : update(request);
     }
 
-    private ProblemDTO save(ProblemRequest request, Exam exam){
-        Problem problem = Problem.fromSaveOrUpdate(request, exam);
+    private ProblemDTO save(ProblemRequest request, Exam exam) {
+        Problem problem = Problem.fromSaveOrUpdate(request.getContent(), request.getExplanation(), request.getNumber(),
+                exam);
         problem = problemRepository.save(problem);
         List<Choice> choices = choiceService.saveOrUpdate(request.getChoices(), problem);
         return problemMapper.mapToProblemDTO(problem, choices);
     }
 
-    private ProblemDTO update(ProblemRequest request)
-    {
+    private ProblemDTO update(ProblemRequest request) {
         Problem problem = findById(request.getId());
         problem.update(request.getContent(), request.getNumber(), request.getExplanation());
         problem = problemRepository.save(problem);
@@ -115,8 +111,7 @@ public class ProblemServiceImpl implements ProblemService
     }
 
     @Override
-    public GlobalResponse<List<ProblemDTO>> getAllByExamId(long examId)
-    {
+    public GlobalResponse<List<ProblemDTO>> getAllByExamId(long examId) {
         List<Problem> problems = problemRepository.findAllByExamId(examId);
         Map<Long, List<ChoiceResponse>> choiceMap = choiceService.findAllByExamId(examId);
 
@@ -142,8 +137,7 @@ public class ProblemServiceImpl implements ProblemService
     }
 
     @Override
-    public ProblemDTO getById(long id)
-    {
+    public ProblemDTO getById(long id) {
         Problem problem = findById(id);
         List<ChoiceResponse> choices = choiceService.getAllByProblemId(problem.getId());
 
@@ -161,8 +155,7 @@ public class ProblemServiceImpl implements ProblemService
     }
 
     @Override
-    public Problem findById(long id)
-    {
+    public Problem findById(long id) {
         return problemRepository.findById(id)
                 .orElseThrow(() -> new ProblemException(ExceptionMessage.PROBLEM_NOT_FOUND));
     }
@@ -171,7 +164,8 @@ public class ProblemServiceImpl implements ProblemService
     // 1. [저장용] Base64 -> S3 Upload & URL 변환
     // ---------------------------------------------------------
     private String processHtmlImages(String htmlContent) {
-        if (htmlContent == null || htmlContent.isEmpty()) return htmlContent;
+        if (htmlContent == null || htmlContent.isEmpty())
+            return htmlContent;
 
         Document doc = Jsoup.parseBodyFragment(htmlContent);
         Elements imgs = doc.select("img[src^=data:image]");
@@ -205,7 +199,8 @@ public class ProblemServiceImpl implements ProblemService
     // 2. [조회용] S3 URL -> Presigned URL 변환
     // ---------------------------------------------------------
     private String replaceImageSrcWithPresignedUrl(String htmlContent) {
-        if (htmlContent == null || htmlContent.isEmpty()) return htmlContent;
+        if (htmlContent == null || htmlContent.isEmpty())
+            return htmlContent;
 
         Document doc = Jsoup.parseBodyFragment(htmlContent);
         Elements imgs = doc.select("img");
@@ -230,7 +225,8 @@ public class ProblemServiceImpl implements ProblemService
     private String extractObjectKeyFromUrl(String fullUrl) {
         URI uri = URI.create(fullUrl);
         String path = uri.getPath();
-        if (path.startsWith("/")) path = path.substring(1);
+        if (path.startsWith("/"))
+            path = path.substring(1);
         return URLDecoder.decode(path, StandardCharsets.UTF_8);
     }
 }

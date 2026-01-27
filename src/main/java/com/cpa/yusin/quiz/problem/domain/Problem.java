@@ -3,7 +3,6 @@ package com.cpa.yusin.quiz.problem.domain;
 import com.cpa.yusin.quiz.exam.domain.Exam;
 import com.cpa.yusin.quiz.global.exception.ExamException;
 import com.cpa.yusin.quiz.global.exception.ExceptionMessage;
-import com.cpa.yusin.quiz.problem.controller.dto.request.ProblemRequest;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -15,8 +14,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @Builder
-public class Problem
-{
+public class Problem {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -36,27 +34,22 @@ public class Problem
 
     private boolean isRemoved;
 
-    public static Problem fromSaveOrUpdate(ProblemRequest request, Exam exam)
-    {
+    public static Problem fromSaveOrUpdate(String content, String explanation, int number, Exam exam) {
         return Problem.builder()
-                .content(request.getContent())
-                .explanation(request.getExplanation())
-                .number(request.getNumber())
+                .content(content)
+                .explanation(explanation)
+                .number(number)
                 .exam(exam)
                 .build();
     }
 
-
-    public void update(String content, int number, String explanation)
-    {
+    public void update(String content, int number, String explanation) {
         this.content = content;
         this.number = number;
         this.explanation = explanation;
     }
 
-
-    public void delete()
-    {
+    public void delete() {
         this.isRemoved = true;
 
     }

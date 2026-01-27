@@ -30,7 +30,4 @@ public interface ChoiceService
 
     Map<Long, List<ChoiceResponse>> findAllByExamId(long examId);
 
-
-    void deleteAllByProblemId(long problemId);
-
 }

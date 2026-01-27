@@ -47,24 +47,10 @@ public class FakeChoiceRepository implements ChoiceRepository
     }
 
     @Override
-    public List<Choice> findAllByProblemIds(List<Long> problemIds)
-    {
-        return data.stream()
-                .filter(choice -> problemIds.contains(choice.getId()))
-                .collect(toList());
-    }
-
-    @Override
     public List<Choice> findAllByExamId(long examId) {
         return data.stream()
                 .filter(choice -> choice.getProblem().getExam().getId() == examId)
                 .collect(toList());
-    }
-
-    @Override
-    public boolean existsById(long id)
-    {
-        return data.stream().anyMatch(item -> Objects.equals(item.getId(), id));
     }
 
     @Override
@@ -79,21 +65,4 @@ public class FakeChoiceRepository implements ChoiceRepository
         data.removeIf(item -> item.getId() == id);
     }
 
-    @Override
-    public void deleteAllByIdInBatch(List<Long> ids)
-    {
-        data.removeIf(item -> ids.contains(item.getId()));
-    }
-
-    @Override
-    public void deleteAllBySubjectId(long subjectId)
-    {
-        data.removeIf(item -> item.getProblem().getExam().getSubjectId().equals(subjectId));
-    }
-
-    @Override
-    public void deleteAllByExamId(long examId)
-    {
-        data.removeIf(item -> item.getProblem().getExam().getId().equals(examId));
-    }
 }

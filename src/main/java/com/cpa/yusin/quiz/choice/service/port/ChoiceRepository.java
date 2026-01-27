@@ -13,19 +13,10 @@ public interface ChoiceRepository
 
     List<Choice> findAllByProblemId(long problemId);
 
-    List<Choice> findAllByProblemIds(List<Long> problemIds);
-
     List<Choice> findAllByExamId(long examId);
-
-    boolean existsById(long id);
 
     Optional<Choice> findById(long id);
 
     void deleteById(long id);
 
-    void deleteAllByIdInBatch(List<Long> ids);
-
-    void deleteAllBySubjectId(long subjectId);
-
-    void deleteAllByExamId(long examId);
 }

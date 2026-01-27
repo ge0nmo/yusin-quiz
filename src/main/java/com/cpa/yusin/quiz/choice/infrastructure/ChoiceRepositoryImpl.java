@@ -33,21 +33,9 @@ public class ChoiceRepositoryImpl implements ChoiceRepository
     }
 
     @Override
-    public List<Choice> findAllByProblemIds(List<Long> problemIds)
-    {
-        return choiceJpaRepository.findAllByProblemIds(problemIds);
-    }
-
-    @Override
     public List<Choice> findAllByExamId(long examId)
     {
         return choiceJpaRepository.findAllByExamId(examId);
-    }
-
-    @Override
-    public boolean existsById(long id)
-    {
-        return choiceJpaRepository.existsById(id);
     }
 
     @Override
@@ -60,24 +48,6 @@ public class ChoiceRepositoryImpl implements ChoiceRepository
     public void deleteById(long id)
     {
         choiceJpaRepository.deleteById(id);
-    }
-
-    @Override
-    public void deleteAllByIdInBatch(List<Long> ids)
-    {
-        choiceJpaRepository.deleteAllByIdInBatch(ids);
-    }
-
-    @Override
-    public void deleteAllBySubjectId(long subjectId)
-    {
-        choiceJpaRepository.deleteAllByProblemExamSubjectId(subjectId);
-    }
-
-    @Override
-    public void deleteAllByExamId(long examId)
-    {
-        choiceJpaRepository.deleteAllByProblemExamId(examId);
     }
 
 }

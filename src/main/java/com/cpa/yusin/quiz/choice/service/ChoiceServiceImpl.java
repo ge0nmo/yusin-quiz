@@ -28,16 +28,15 @@ import static java.util.stream.Collectors.*;
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 @Service
-public class ChoiceServiceImpl implements ChoiceService
-{
+public class ChoiceServiceImpl implements ChoiceService {
     private final ChoiceRepository choiceRepository;
     private final ChoiceMapper choiceMapper;
 
     @Transactional
     @Override
-    public void save(Problem problem, List<ChoiceCreateRequest> requests)
-    {
-        List<Choice> choiceRequests = requests.stream().map(request -> choiceMapper.fromCreateRequestToChoice(request, problem))
+    public void save(Problem problem, List<ChoiceCreateRequest> requests) {
+        List<Choice> choiceRequests = requests.stream()
+                .map(request -> choiceMapper.fromCreateRequestToChoice(request, problem))
                 .toList();
 
         choiceRepository.saveAll(choiceRequests);
@@ -45,32 +44,31 @@ public class ChoiceServiceImpl implements ChoiceService
 
     @Transactional
     @Override
-    public long save(Choice choice)
-    {
+    public long save(Choice choice) {
         return choiceRepository.save(choice).getId();
     }
 
     @Transactional
     @Override
-    public List<Choice> saveOrUpdate(List<ChoiceRequest> requests, Problem problem)
-    {
+    public List<Choice> saveOrUpdate(List<ChoiceRequest> requests, Problem problem) {
         List<Choice> choices = new ArrayList<>();
-        for(ChoiceRequest request : requests)
-        {
-            Choice choice = request.isNew() ? Choice.fromSaveOrUpdate(request, problem) : update(request);
-            if(choice != null) choices.add(choice);
+        for (ChoiceRequest request : requests) {
+            Choice choice = request.isNew()
+                    ? Choice.fromSaveOrUpdate(request.getContent(), request.getNumber(), request.getIsAnswer(), problem)
+                    : update(request);
+            if (choice != null)
+                choices.add(choice);
         }
 
-        if(!choices.isEmpty())
+        if (!choices.isEmpty())
             return choiceRepository.saveAll(choices);
 
         return Collections.emptyList();
     }
 
-    private Choice update(ChoiceRequest request)
-    {
+    private Choice update(ChoiceRequest request) {
         Choice choice = findById(request.getId());
-        if(request.isRemovedYn()){
+        if (request.isRemovedYn()) {
             choiceRepository.deleteById(choice.getId());
             return null;
         }
@@ -81,8 +79,7 @@ public class ChoiceServiceImpl implements ChoiceService
 
     @Transactional
     @Override
-    public void update(long choiceId, ChoiceUpdateRequest request)
-    {
+    public void update(long choiceId, ChoiceUpdateRequest request) {
         Choice choice = findById(choiceId);
 
         choice.update(request.getNumber(), request.getContent(), request.getIsAnswer());
@@ -92,54 +89,38 @@ public class ChoiceServiceImpl implements ChoiceService
 
     @Transactional
     @Override
-    public void deleteById(long choiceId)
-    {
+    public void deleteById(long choiceId) {
         Choice choice = findById(choiceId);
 
         choiceRepository.deleteById(choice.getId());
     }
 
     @Override
-    public Choice findById(long id)
-    {
+    public Choice findById(long id) {
         return choiceRepository.findById(id)
                 .orElseThrow(() -> new ChoiceException(ExceptionMessage.CHOICE_NOT_FOUND));
     }
 
     @Override
-    public List<Choice> findAllByProblemId(long problemId)
-    {
+    public List<Choice> findAllByProblemId(long problemId) {
         return choiceRepository.findAllByProblemId(problemId);
     }
 
     @Override
-    public List<ChoiceResponse> getAllByProblemId(long problemId)
-    {
+    public List<ChoiceResponse> getAllByProblemId(long problemId) {
         List<Choice> choices = findAllByProblemId(problemId);
 
         return choiceMapper.toResponses(choices);
     }
 
     @Override
-    public Map<Long, List<ChoiceResponse>> findAllByExamId(long examId)
-    {
+    public Map<Long, List<ChoiceResponse>> findAllByExamId(long examId) {
         List<Choice> choices = choiceRepository.findAllByExamId(examId);
 
         return choices.stream()
                 .collect(groupingBy(
                         choice -> choice.getProblem().getId(),
                         mapping(choiceMapper::toResponse, toList())));
-    }
-
-
-    @Override
-    public void deleteAllByProblemId(long problemId)
-    {
-        List<Long> choiceList = choiceRepository.findAllByProblemId(problemId).stream()
-                .map(Choice::getId)
-                .toList();
-
-        choiceRepository.deleteAllByIdInBatch(choiceList);
     }
 
 }
