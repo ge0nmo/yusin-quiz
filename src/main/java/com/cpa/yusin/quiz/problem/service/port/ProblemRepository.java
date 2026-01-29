@@ -9,6 +9,7 @@ public interface ProblemRepository
 {
     Problem save(Problem problem);
 
+    List<Problem> findAll();
 
     List<Problem> findAllByExamId(long examId);
 
