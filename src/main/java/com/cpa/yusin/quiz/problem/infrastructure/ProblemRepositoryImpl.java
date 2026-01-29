@@ -21,6 +21,12 @@ public class ProblemRepositoryImpl implements ProblemRepository
         return problemJpaRepository.save(problem);
     }
 
+    @Override
+    public List<Problem> findAll()
+    {
+        return problemJpaRepository.findAll();
+    }
+
 
     @Override
     public List<Problem> findAllByExamId(long examId)

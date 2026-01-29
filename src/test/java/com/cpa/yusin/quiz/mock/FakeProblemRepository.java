@@ -32,6 +32,12 @@ public class FakeProblemRepository implements ProblemRepository
     }
 
     @Override
+    public List<Problem> findAll()
+    {
+        return List.of();
+    }
+
+    @Override
     public List<Problem> findAllByExamId(long examId)
     {
         return data.stream()
