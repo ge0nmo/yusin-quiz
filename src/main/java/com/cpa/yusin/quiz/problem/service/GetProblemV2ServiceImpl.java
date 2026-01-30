@@ -86,8 +86,7 @@ public class GetProblemV2ServiceImpl implements GetProblemV2Service
         }
 
         return blocks.stream().map(block -> {
-            if (block instanceof ImageBlock) {
-                ImageBlock imgBlock = (ImageBlock) block;
+            if (block instanceof ImageBlock imgBlock) {
                 String originalSrc = imgBlock.getSrc();
 
                 // S3 URL인 경우에만 서명된 URL로 교체

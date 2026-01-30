@@ -1,6 +1,5 @@
 package com.cpa.yusin.quiz.problem.controller.port;
 
-import com.cpa.yusin.quiz.problem.controller.dto.response.ProblemResponse;
 import com.cpa.yusin.quiz.problem.controller.dto.response.ProblemV2Response;
 
 import java.util.List;
