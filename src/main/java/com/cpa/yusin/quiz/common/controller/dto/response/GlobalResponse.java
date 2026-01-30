@@ -17,6 +17,11 @@ public class GlobalResponse<T> {
     public GlobalResponse(T data) {
         this.data = data;
     }
+
+    public static <T> GlobalResponse<T> success(T data)
+    {
+        return new GlobalResponse<>(data);
+    }
 }
 
 
