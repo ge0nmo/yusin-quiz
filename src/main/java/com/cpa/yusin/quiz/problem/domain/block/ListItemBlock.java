@@ -1,5 +1,4 @@
 package com.cpa.yusin.quiz.problem.domain.block;
-
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 import java.util.ArrayList;
@@ -10,9 +9,8 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)
-public class TextBlock extends Block
+public class ListItemBlock extends Block
 {
     @Builder.Default
-    private List<Span> spans = new ArrayList<>();
-    private String tag;
+    private List<Block> children = new ArrayList<>();
 }
