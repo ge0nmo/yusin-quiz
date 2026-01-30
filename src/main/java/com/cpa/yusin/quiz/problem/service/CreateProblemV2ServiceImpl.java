@@ -18,9 +18,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 @Transactional
-public class CreateProblemV2V2ServiceImpl implements CreateProblemV2Service
+public class CreateProblemV2ServiceImpl implements CreateProblemV2Service
 {
-
     private final ProblemRepository problemRepository;
     private final ExamService examService;
     private final ChoiceService choiceService;
@@ -34,10 +33,10 @@ public class CreateProblemV2V2ServiceImpl implements CreateProblemV2Service
             Exam exam = examService.findById(examId);
             problemValidator.validateUniqueProblemNumber(examId, request.getNumber());
 
-            // 정적 팩토리 메서드 호출 (V2용)
+            // [Factory 호출] 프론트에서 넘어온 Block 리스트(URL 포함)를 그대로 저장
             Problem problem = Problem.fromSaveOrUpdate(
-                    request.getContent(),
-                    request.getExplanation(),
+                    request.getContent(),      // List<Block>
+                    request.getExplanation(),  // List<Block>
                     request.getNumber(),
                     exam
             );
@@ -52,14 +51,14 @@ public class CreateProblemV2V2ServiceImpl implements CreateProblemV2Service
             Problem problem = problemRepository.findById(request.getId())
                     .orElseThrow(() -> new ProblemException(ExceptionMessage.PROBLEM_NOT_FOUND));
 
-            // 더티 체킹(Dirty Checking)으로 업데이트
+            // [Update 호출] 더티 체킹을 통해 JSON 데이터 갱신
             problem.update(
-                    request.getContent(),
+                    request.getContent(),      // List<Block>
                     request.getNumber(),
-                    request.getExplanation()
+                    request.getExplanation()   // List<Block>
             );
 
-            // Choice 업데이트 로직 위임
+            // Choice 업데이트 위임
             choiceService.saveOrUpdate(request.getChoices(), problem);
 
             log.info("V2 Updated Problem: ID={}", problem.getId());
