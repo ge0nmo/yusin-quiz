@@ -29,5 +29,4 @@ public interface ChoiceService
     List<ChoiceResponse> getAllByProblemId(long problemId);
 
     Map<Long, List<ChoiceResponse>> findAllByExamId(long examId);
-
 }

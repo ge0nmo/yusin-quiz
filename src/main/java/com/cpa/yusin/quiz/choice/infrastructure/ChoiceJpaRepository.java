@@ -16,6 +16,7 @@ public interface ChoiceJpaRepository extends JpaRepository<Choice, Long>
     @Query("SELECT c FROM Choice c " +
             "JOIN Problem p ON p.id = c.problem.id " +
             "JOIN Exam e ON e.id = p.exam.id " +
-            "WHERE e.id = :examId ")
+            "WHERE e.id = :examId " +
+            "AND p.isRemoved = false ")
     List<Choice> findAllByExamId(@Param("examId") long examId);
 }

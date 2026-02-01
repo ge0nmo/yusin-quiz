@@ -23,14 +23,6 @@ public class AdminProblemController
     private final ProblemService problemService;
     private final DeleteProblemService deleteProblemService;
 
-    @GetMapping
-    public ResponseEntity<GlobalResponse<List<ProblemDTO>>> get(@RequestParam("examId") long examId)
-    {
-        GlobalResponse<List<ProblemDTO>> response = problemService.getAllByExamId(examId);
-
-        return ResponseEntity.ok(response);
-    }
-
     @PostMapping
     public void save(@RequestParam("examId") long examId, @Validated @RequestBody ProblemCreateRequest request)
     {
@@ -42,14 +34,6 @@ public class AdminProblemController
                        @RequestParam("examId") long examId)
     {
         problemService.processSaveOrUpdate(request, examId);
-    }
-
-    @GetMapping("/{problemId}")
-    public ResponseEntity<GlobalResponse<ProblemDTO>> getById(@PathVariable("problemId") long problemId)
-    {
-        ProblemDTO response = problemService.getById(problemId);
-
-        return ResponseEntity.ok(new GlobalResponse<>(response));
     }
 
     @DeleteMapping("/{problemId}")
