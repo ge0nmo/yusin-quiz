@@ -1,9 +1,10 @@
 package com.cpa.yusin.quiz.exam.controller.dto.response;
 
 import lombok.Builder;
+import lombok.Data;
 import lombok.Getter;
 
-@Getter
+@Data
 @Builder
 public class ExamDTO
 {
