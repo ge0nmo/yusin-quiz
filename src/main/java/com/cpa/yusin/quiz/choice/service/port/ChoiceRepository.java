@@ -5,8 +5,7 @@ import com.cpa.yusin.quiz.choice.domain.Choice;
 import java.util.List;
 import java.util.Optional;
 
-public interface ChoiceRepository
-{
+public interface ChoiceRepository {
     Choice save(Choice domain);
 
     List<Choice> saveAll(List<Choice> domains);
@@ -18,5 +17,7 @@ public interface ChoiceRepository
     Optional<Choice> findById(long id);
 
     void deleteById(long id);
+
+    List<Choice> findAllByProblemIds(List<Long> problemIds);
 
 }

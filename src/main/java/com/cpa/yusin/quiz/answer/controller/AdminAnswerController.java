@@ -20,20 +20,17 @@ import org.springframework.web.bind.annotation.*;
 import java.security.Principal;
 import java.util.List;
 
-
 @Slf4j
 @RequiredArgsConstructor
 @RequestMapping("/api/admin")
 @RestController
-public class AdminAnswerController
-{
+public class AdminAnswerController {
     private final AnswerService answerService;
 
     @PostMapping("/question/{questionId}/answer")
     public ResponseEntity<GlobalResponse<Long>> createAnswer(@PathVariable("questionId") long questionId,
-                                                       @Validated @RequestBody AdminAnswerRegisterRequest request,
-                                                       Principal principal)
-    {
+            @Validated @RequestBody AdminAnswerRegisterRequest request,
+            Principal principal) {
         MemberDetails memberDetails = (MemberDetails) ((Authentication) principal).getPrincipal();
 
         long response = answerService.save(request, questionId, memberDetails.getMember());
@@ -43,8 +40,7 @@ public class AdminAnswerController
 
     @PatchMapping("/answer/{answerId}")
     public ResponseEntity<?> updateAnswer(@PathVariable("answerId") long answerId,
-                                          @Validated @RequestBody AdminAnswerUpdateRequest request)
-    {
+            @Validated @RequestBody AdminAnswerUpdateRequest request) {
         answerService.updateInAdminPage(request, answerId);
 
         return ResponseEntity.ok(new GlobalResponse<>());
@@ -52,16 +48,15 @@ public class AdminAnswerController
 
     @GetMapping("/question/{questionId}/answer")
     public ResponseEntity<GlobalResponse<List<AnswerDTO>>> getAnswers(@PathVariable("questionId") long questionId,
-                                                                      @PageableDefault Pageable pageable)
-    {
+            @PageableDefault Pageable pageable) {
         Page<AnswerDTO> response = answerService.getAnswersByQuestionId(questionId, pageable);
 
         return ResponseEntity.ok(new GlobalResponse<>(response.getContent(), PageInfo.of(response)));
     }
 
     @DeleteMapping("/answer/{answerId}")
-    public void deleteAnswer(@PathVariable("answerId") long answerId)
-    {
-        answerService.deleteAnswer(answerId);
+    public void deleteAnswer(@PathVariable("answerId") long answerId, Principal principal) {
+        MemberDetails memberDetails = (MemberDetails) ((Authentication) principal).getPrincipal();
+        answerService.deleteAnswer(answerId, memberDetails.getMember());
     }
 }

@@ -10,44 +10,42 @@ import java.util.Optional;
 
 @RequiredArgsConstructor
 @Repository
-public class ChoiceRepositoryImpl implements ChoiceRepository
-{
+public class ChoiceRepositoryImpl implements ChoiceRepository {
     private final ChoiceJpaRepository choiceJpaRepository;
 
     @Override
-    public Choice save(Choice choice)
-    {
+    public Choice save(Choice choice) {
         return choiceJpaRepository.save(choice);
     }
 
     @Override
-    public List<Choice> saveAll(List<Choice> choices)
-    {
+    public List<Choice> saveAll(List<Choice> choices) {
         return choiceJpaRepository.saveAll(choices);
     }
 
     @Override
-    public List<Choice> findAllByProblemId(long problemId)
-    {
+    public List<Choice> findAllByProblemId(long problemId) {
         return choiceJpaRepository.findAllByProblemId(problemId);
     }
 
     @Override
-    public List<Choice> findAllByExamId(long examId)
-    {
+    public List<Choice> findAllByExamId(long examId) {
         return choiceJpaRepository.findAllByExamId(examId);
     }
 
     @Override
-    public Optional<Choice> findById(long id)
-    {
+    public Optional<Choice> findById(long id) {
         return choiceJpaRepository.findById(id);
     }
 
     @Override
-    public void deleteById(long id)
-    {
+    public void deleteById(long id) {
         choiceJpaRepository.deleteById(id);
+    }
+
+    @Override
+    public List<Choice> findAllByProblemIds(List<Long> problemIds) {
+        return choiceJpaRepository.findAllByProblemIds(problemIds);
     }
 
 }

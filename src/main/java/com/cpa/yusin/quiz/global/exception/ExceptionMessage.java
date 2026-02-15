@@ -3,8 +3,7 @@ package com.cpa.yusin.quiz.global.exception;
 import lombok.Getter;
 
 @Getter
-public enum ExceptionMessage
-{
+public enum ExceptionMessage {
     INVALID_LOGIN_INFORMATION("로그인 정보가 일치하지 않습니다."),
 
     EMAIL_EXISTS("사용중인 이메일입니다."),
@@ -30,7 +29,6 @@ public enum ExceptionMessage
 
     INVALID_DATA("유효하지 않은 데이터입니다."),
 
-
     ANSWER_NOT_FOUND("해당 답변 정보를 찾을 수 없습니다."),
 
     /**
@@ -44,7 +42,7 @@ public enum ExceptionMessage
     QUESTION_HAS_ANSWERS("답글이 달린 질문은 삭제할 수 없습니다"),
 
     /**
-     *  answer
+     * answer
      */
     INVALID_ANSWER_PASSWORD("비밀번호가 일치하지 않습니다"),
 
@@ -70,12 +68,17 @@ public enum ExceptionMessage
      */
     SUBSCRIPTION_NOT_FOUND("구독 데이터를 찾을 수 없습니다."),
     SUBSCRIPTION_EXISTS("이미 구독 중입니다."),
+
+    /**
+     * bookmark
+     */
+    BOOKMARK_NOT_FOUND("해당 북마크 정보를 찾을 수 없습니다."),
+    BOOKMARK_ALREADY_EXISTS("이미 북마크된 문제입니다."),
     ;
 
     private final String message;
 
-    ExceptionMessage(String message)
-    {
+    ExceptionMessage(String message) {
         this.message = message;
     }
 }

@@ -6,6 +6,7 @@ import com.cpa.yusin.quiz.global.security.FormAuthenticationProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -20,18 +21,14 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.Arrays;
 
-import static com.cpa.yusin.quiz.global.utils.ApplicationConstants.FORM_ENDPOINT_WHITELIST;
-
 @Configuration
 @EnableWebSecurity
-public class SecurityConfig
-{
+public class SecurityConfig {
     private final MemberDetailsService memberDetailsService;
     private final SecurityFilter securityFilter;
 
     public SecurityConfig(MemberDetailsService memberDetailsService,
-                          SecurityFilter securityFilter)
-    {
+            SecurityFilter securityFilter) {
         this.memberDetailsService = memberDetailsService;
         this.securityFilter = securityFilter;
     }
@@ -46,14 +43,15 @@ public class SecurityConfig
                 .securityMatcher("/api/v1/**")
                 .csrf(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
-                .headers((headers) ->
-                        headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable))
+                .headers((headers) -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable))
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .sessionManagement((session) -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // JWT 사용하므로 Stateless
 
                 .authorizeHttpRequests(auth -> auth
-                        .anyRequest().permitAll());
+                        .requestMatchers("/api/v1/bookmarks/**").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/**").permitAll()
+                        .requestMatchers("/api/v1/**").authenticated());
 
         http.addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class);
 
@@ -71,7 +69,7 @@ public class SecurityConfig
                 .csrf(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable) // 폼 로그인 사용 안 함
-                .logout(AbstractHttpConfigurer::disable)    // 세션 로그아웃 사용 안 함
+                .logout(AbstractHttpConfigurer::disable) // 세션 로그아웃 사용 안 함
 
                 .headers((headers) -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable))
 

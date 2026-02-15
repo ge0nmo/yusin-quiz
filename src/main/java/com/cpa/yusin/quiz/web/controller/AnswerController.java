@@ -22,7 +22,6 @@ import org.springframework.web.bind.annotation.*;
 import java.security.Principal;
 import java.util.List;
 
-
 @Slf4j
 @RequiredArgsConstructor
 @RequestMapping("/admin")
@@ -34,8 +33,7 @@ public class AnswerController {
 
     @GetMapping("/question/{questionId}/answer")
     public String getPage(@PathVariable Long questionId,
-                          Model model)
-    {
+            Model model) {
         Question question = questionService.findById(questionId);
         Problem problem = question.getProblem();
 
@@ -54,9 +52,8 @@ public class AnswerController {
     @ResponseBody
     @PostMapping("/question/{questionId}/answer")
     public ResponseEntity<?> createAnswer(@PathVariable("questionId") long questionId,
-                                          @Validated @RequestBody AdminAnswerRegisterRequest request,
-                                          Principal principal)
-    {
+            @Validated @RequestBody AdminAnswerRegisterRequest request,
+            Principal principal) {
         MemberDetails memberDetails = (MemberDetails) ((Authentication) principal).getPrincipal();
 
         long response = answerService.save(request, questionId, memberDetails.getMember());
@@ -67,9 +64,8 @@ public class AnswerController {
     @ResponseBody
     @PatchMapping("/answer/{answerId}")
     public ResponseEntity<?> updateAnswer(@PathVariable("answerId") long answerId,
-                                          @Validated @RequestBody AdminAnswerUpdateRequest request,
-                                          Principal principal)
-    {
+            @Validated @RequestBody AdminAnswerUpdateRequest request,
+            Principal principal) {
         MemberDetails memberDetails = (MemberDetails) ((Authentication) principal).getPrincipal();
 
         answerService.updateInAdminPage(request, answerId);
@@ -79,8 +75,9 @@ public class AnswerController {
 
     @ResponseBody
     @DeleteMapping("/answer/{answerId}")
-    public void deleteAnswer(@PathVariable("answerId") long answerId)
-    {
-        answerService.deleteAnswer(answerId);
+    public void deleteAnswer(@PathVariable("answerId") long answerId,
+            Principal principal) {
+        MemberDetails memberDetails = (MemberDetails) ((Authentication) principal).getPrincipal();
+        answerService.deleteAnswer(answerId, memberDetails.getMember());
     }
 }

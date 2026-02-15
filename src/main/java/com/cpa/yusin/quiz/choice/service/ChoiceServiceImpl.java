@@ -124,4 +124,18 @@ public class ChoiceServiceImpl implements ChoiceService {
                         mapping(choiceMapper::toResponse, toList())));
     }
 
+    @Override
+    public Map<Long, List<ChoiceResponse>> findAllByProblemIds(List<Long> problemIds) {
+        if (problemIds == null || problemIds.isEmpty()) {
+            return Collections.emptyMap();
+        }
+
+        List<Choice> choices = choiceRepository.findAllByProblemIds(problemIds);
+
+        return choices.stream()
+                .collect(groupingBy(
+                        choice -> choice.getProblem().getId(),
+                        mapping(choiceMapper::toResponse, toList())));
+    }
+
 }

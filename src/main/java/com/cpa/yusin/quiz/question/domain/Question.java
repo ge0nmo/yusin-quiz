@@ -1,30 +1,25 @@
 package com.cpa.yusin.quiz.question.domain;
 
 import com.cpa.yusin.quiz.common.infrastructure.BaseEntity;
-import com.cpa.yusin.quiz.global.exception.ExceptionMessage;
-import com.cpa.yusin.quiz.global.exception.QuestionException;
+import com.cpa.yusin.quiz.member.domain.Member;
+import com.cpa.yusin.quiz.member.domain.type.Role;
 import com.cpa.yusin.quiz.problem.domain.Problem;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Builder
 @AllArgsConstructor
 @Getter
 @Entity
-public class Question extends BaseEntity
-{
+public class Question extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, updatable = false)
-    private String username;
-
-    @Column(nullable = false, updatable = false)
-    private String password;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "member_id", nullable = false, updatable = false)
+    private Member member;
 
     @Column(nullable = false)
     private String title;
@@ -43,31 +38,32 @@ public class Question extends BaseEntity
 
     private boolean isRemoved;
 
-    public void update(String title, String content)
-    {
+    public void update(String title, String content) {
         this.title = title;
         this.content = content;
     }
 
-    public void answerByAdmin()
-    {
+    public void answerByAdmin() {
         this.answeredByAdmin = true;
         updateAnswerCount(1);
     }
 
-    public void updateAnswerCount(int count)
-    {
+    public void updateAnswerCount(int count) {
         int newCount = this.answerCount + count;
         this.answerCount = Math.max(newCount, 0);
     }
 
-    public void delete()
-    {
+    public void delete() {
         this.isRemoved = true;
     }
 
-    public boolean verify(String inputPassword)
-    {
-        return this.password.equals(inputPassword);
+    /**
+     * 작성자 본인 또는 관리자인지 확인
+     */
+    public boolean isOwner(Member requestMember) {
+        if (requestMember == null)
+            return false;
+        return this.member.getId().equals(requestMember.getId())
+                || Role.ADMIN.equals(requestMember.getRole());
     }
 }

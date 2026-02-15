@@ -10,14 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 @Data
-public class AnswerRegisterRequest
-{
-    @NotBlank(message = "이름을 입력해주세요")
-    private String username;
-
-    @NotBlank(message = "비밀번호를 입력해주세요")
-    private String password;
-
+public class AnswerRegisterRequest {
     @NotBlank(message = "내용을 입력해주세요")
     private String content;
 }

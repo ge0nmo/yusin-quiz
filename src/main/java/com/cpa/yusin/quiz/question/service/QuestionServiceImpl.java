@@ -1,7 +1,9 @@
 package com.cpa.yusin.quiz.question.service;
 
 import com.cpa.yusin.quiz.global.exception.ExceptionMessage;
+import com.cpa.yusin.quiz.global.exception.MemberException;
 import com.cpa.yusin.quiz.global.exception.QuestionException;
+import com.cpa.yusin.quiz.member.domain.Member;
 import com.cpa.yusin.quiz.problem.controller.port.ProblemService;
 import com.cpa.yusin.quiz.problem.domain.Problem;
 import com.cpa.yusin.quiz.question.controller.dto.request.QuestionRegisterRequest;
@@ -22,19 +24,17 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 @Service
-public class QuestionServiceImpl implements QuestionService
-{
+public class QuestionServiceImpl implements QuestionService {
     private final QuestionRepository questionRepository;
     private final ProblemService problemService;
     private final QuestionMapper questionMapper;
 
     @Transactional
     @Override
-    public long save(QuestionRegisterRequest request, long problemId)
-    {
+    public long save(QuestionRegisterRequest request, long problemId, Member member) {
         Problem problem = problemService.findById(problemId);
 
-        Question question = questionMapper.toQuestionEntity(request, problem);
+        Question question = questionMapper.toQuestionEntity(request, problem, member);
 
         question = questionRepository.save(question);
 
@@ -49,45 +49,41 @@ public class QuestionServiceImpl implements QuestionService
 
     @Transactional
     @Override
-    public void update(QuestionUpdateRequest request, long questionId)
-    {
+    public void update(QuestionUpdateRequest request, long questionId, Member member) {
         Question question = findById(questionId);
+
+        validateOwnership(question, member);
 
         question.update(request.getTitle(), request.getContent());
     }
 
     @Override
-    public Question findById(long id)
-    {
+    public Question findById(long id) {
         return questionRepository.findById(id)
                 .orElseThrow(() -> new QuestionException(ExceptionMessage.QUESTION_NOT_FOUND));
     }
 
     @Override
-    public QuestionDTO getById(long id)
-    {
+    public QuestionDTO getById(long id) {
         Question question = findById(id);
         return questionMapper.toQuestionDTO(question);
     }
 
     @Override
-    public Page<QuestionDTO> findAllQuestions(Pageable pageable)
-    {
+    public Page<QuestionDTO> findAllQuestions(Pageable pageable) {
         return questionRepository.findAllQuestions(pageable)
                 .map(questionMapper::toQuestionDTO);
     }
 
     @Override
-    public Page<QuestionDTO> getAllByProblemId(Pageable pageable, long problemId)
-    {
+    public Page<QuestionDTO> getAllByProblemId(Pageable pageable, long problemId) {
         return questionRepository.findAllByProblemId(problemId, pageable)
                 .map(questionMapper::toQuestionDTO);
     }
 
-    @Override
-    public boolean verifyPassword(long questionId, String password)
-    {
-        Question question = findById(questionId);
-        return question.verify(password);
+    private void validateOwnership(Question question, Member member) {
+        if (!question.isOwner(member)) {
+            throw new MemberException(ExceptionMessage.NO_AUTHORIZATION);
+        }
     }
 }

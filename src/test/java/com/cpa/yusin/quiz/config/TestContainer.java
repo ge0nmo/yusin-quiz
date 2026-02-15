@@ -4,6 +4,13 @@ import com.cpa.yusin.quiz.answer.controller.mapper.AnswerMapper;
 import com.cpa.yusin.quiz.answer.controller.port.AnswerService;
 import com.cpa.yusin.quiz.answer.service.AnswerServiceImpl;
 import com.cpa.yusin.quiz.answer.service.port.AnswerRepository;
+import com.cpa.yusin.quiz.bookmark.controller.port.CreateBookmarkService;
+import com.cpa.yusin.quiz.bookmark.controller.port.DeleteBookmarkService;
+import com.cpa.yusin.quiz.bookmark.controller.port.GetBookmarkedProblemsService;
+import com.cpa.yusin.quiz.bookmark.service.CreateBookmarkServiceImpl;
+import com.cpa.yusin.quiz.bookmark.service.DeleteBookmarkServiceImpl;
+import com.cpa.yusin.quiz.bookmark.service.GetBookmarkedProblemsServiceImpl;
+import com.cpa.yusin.quiz.bookmark.service.port.BookmarkRepository;
 import com.cpa.yusin.quiz.choice.controller.mapper.ChoiceMapper;
 import com.cpa.yusin.quiz.choice.controller.mapper.ChoiceMapperImpl;
 import com.cpa.yusin.quiz.choice.controller.port.ChoiceService;
@@ -54,8 +61,7 @@ import com.cpa.yusin.quiz.subject.service.port.SubjectValidator;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-public class TestContainer
-{
+public class TestContainer {
     private static final String FAKE_SECRET_KEY = "thisIsATestSecretKeyUsedOnlyForTesasdfeefsdfewdfesredfesfwqewdasdqrewtingPurposes";
 
     public final ClockHolder clockHolder;
@@ -73,7 +79,7 @@ public class TestContainer
     public final MemberController memberController;
 
     /**
-     *  subject
+     * subject
      */
     public final SubjectRepository subjectRepository;
     public final SubjectValidator subjectValidator;
@@ -82,7 +88,7 @@ public class TestContainer
     public final SubjectController subjectController;
 
     /**
-     *  exam
+     * exam
      */
     public final ExamRepository examRepository;
     public final ExamMapper examMapper;
@@ -91,14 +97,14 @@ public class TestContainer
     public final ExamController examController;
 
     /**
-     *  choice
+     * choice
      */
     public final ChoiceMapper choiceMapper;
     public final ChoiceRepository choiceRepository;
     public final ChoiceService choiceService;
 
     /**
-     *  problem
+     * problem
      */
     public final ProblemMapper problemMapper;
     public final ProblemRepository problemRepository;
@@ -113,7 +119,6 @@ public class TestContainer
     public final QuestionService questionService;
     public final QuestionAnswerService questionAnswerService;
 
-
     /**
      * answer
      */
@@ -121,11 +126,17 @@ public class TestContainer
     public final AnswerMapper answerMapper;
     public final AnswerService answerService;
 
+    /**
+     * bookmark
+     */
+    public final BookmarkRepository bookmarkRepository;
+    public final CreateBookmarkService createBookmarkService;
+    public final DeleteBookmarkService deleteBookmarkService;
+    public final GetBookmarkedProblemsService getBookmarkedProblemsService;
 
     public final FileService fileService;
 
-    public TestContainer()
-    {
+    public TestContainer() {
         this.fileService = new FileServiceImpl(null, null, null, null, null);
         this.clockHolder = new FakeClockHolder();
         this.merchantIdGenerator = new FakeMerchantIdGenerator();
@@ -135,6 +146,7 @@ public class TestContainer
         this.examRepository = new FakeExamRepository();
         this.problemRepository = new FakeProblemRepository();
         this.choiceRepository = new FakeChoiceRepository();
+        this.bookmarkRepository = new FakeBookmarkRepository();
 
         this.memberMapper = new MemberMapper();
         this.memberService = new MemberServiceImpl(this.memberRepository, this.memberMapper);
@@ -147,17 +159,15 @@ public class TestContainer
                 this.memberRepository, this.authenticationProvider, this.memberMapper, this.memberValidator);
         this.memberController = new MemberController(this.memberService);
 
-
-
         this.subjectValidator = new SubjectValidatorImpl(this.subjectRepository);
         this.subjectMapper = new SubjectMapper();
         this.subjectService = new SubjectServiceImpl(this.subjectRepository, this.subjectMapper, this.subjectValidator);
         this.subjectController = new SubjectController(subjectService);
 
-
         this.examMapper = new ExamMapper();
         this.examValidator = new ExamValidatorImpl(this.examRepository);
-        this.examService = new ExamServiceImpl(this.examRepository, this.examMapper, this.subjectService, this.examValidator);
+        this.examService = new ExamServiceImpl(this.examRepository, this.examMapper, this.subjectService,
+                this.examValidator);
         this.examController = new ExamController(examService);
 
         this.choiceMapper = new ChoiceMapperImpl();
@@ -171,15 +181,22 @@ public class TestContainer
         this.questionRepository = new FakeQuestionRepository();
         this.questionMapper = new QuestionMapper();
 
-
         this.answerRepository = new FakeAnswerRepository();
         this.answerMapper = new AnswerMapper();
 
         this.questionAnswerService = new QuestionAnswerService(questionRepository);
 
-        this.answerService = new AnswerServiceImpl(this.answerRepository, this.answerMapper, this.questionAnswerService);
+        this.answerService = new AnswerServiceImpl(this.answerRepository, this.answerMapper,
+                this.questionAnswerService);
 
         this.questionService = new QuestionServiceImpl(questionRepository, problemService, questionMapper);
+
+        // bookmark
+        this.createBookmarkService = new CreateBookmarkServiceImpl(
+                this.bookmarkRepository, this.memberRepository, this.problemRepository);
+        this.deleteBookmarkService = new DeleteBookmarkServiceImpl(this.bookmarkRepository);
+        this.getBookmarkedProblemsService = new GetBookmarkedProblemsServiceImpl(
+                this.bookmarkRepository, this.choiceService);
     }
 
 }
