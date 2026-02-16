@@ -43,6 +43,7 @@ import com.cpa.yusin.quiz.member.service.port.MemberValidator;
 import com.cpa.yusin.quiz.mock.*;
 import com.cpa.yusin.quiz.problem.controller.mapper.ProblemMapper;
 import com.cpa.yusin.quiz.problem.controller.port.ProblemService;
+import com.cpa.yusin.quiz.problem.service.ProblemContentProcessor;
 import com.cpa.yusin.quiz.problem.service.ProblemServiceImpl;
 import com.cpa.yusin.quiz.problem.service.ProblemValidator;
 import com.cpa.yusin.quiz.problem.service.port.ProblemRepository;
@@ -62,141 +63,147 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 public class TestContainer {
-    private static final String FAKE_SECRET_KEY = "thisIsATestSecretKeyUsedOnlyForTesasdfeefsdfewdfesredfesfwqewdasdqrewtingPurposes";
+        private static final String FAKE_SECRET_KEY = "thisIsATestSecretKeyUsedOnlyForTesasdfeefsdfewdfesredfesfwqewdasdqrewtingPurposes";
 
-    public final ClockHolder clockHolder;
-    public final MerchantIdGenerator merchantIdGenerator;
+        public final ClockHolder clockHolder;
+        public final MerchantIdGenerator merchantIdGenerator;
 
-    public final MemberRepository memberRepository;
-    public final MemberService memberService;
-    public final MemberDetailsService memberDetailsService;
-    public final CustomAuthenticationProvider authenticationProvider;
-    public final PasswordEncoder passwordEncoder;
-    public final JwtService jwtService;
-    public final AuthenticationService authenticationService;
-    public final MemberMapper memberMapper;
-    public final MemberValidator memberValidator;
-    public final MemberController memberController;
+        public final MemberRepository memberRepository;
+        public final MemberService memberService;
+        public final MemberDetailsService memberDetailsService;
+        public final CustomAuthenticationProvider authenticationProvider;
+        public final PasswordEncoder passwordEncoder;
+        public final JwtService jwtService;
+        public final AuthenticationService authenticationService;
+        public final MemberMapper memberMapper;
+        public final MemberValidator memberValidator;
+        public final MemberController memberController;
 
-    /**
-     * subject
-     */
-    public final SubjectRepository subjectRepository;
-    public final SubjectValidator subjectValidator;
-    public final SubjectService subjectService;
-    public final SubjectMapper subjectMapper;
-    public final SubjectController subjectController;
+        /**
+         * subject
+         */
+        public final SubjectRepository subjectRepository;
+        public final SubjectValidator subjectValidator;
+        public final SubjectService subjectService;
+        public final SubjectMapper subjectMapper;
+        public final SubjectController subjectController;
 
-    /**
-     * exam
-     */
-    public final ExamRepository examRepository;
-    public final ExamMapper examMapper;
-    public final ExamService examService;
-    public final ExamValidator examValidator;
-    public final ExamController examController;
+        /**
+         * exam
+         */
+        public final ExamRepository examRepository;
+        public final ExamMapper examMapper;
+        public final ExamService examService;
+        public final ExamValidator examValidator;
+        public final ExamController examController;
 
-    /**
-     * choice
-     */
-    public final ChoiceMapper choiceMapper;
-    public final ChoiceRepository choiceRepository;
-    public final ChoiceService choiceService;
+        /**
+         * choice
+         */
+        public final ChoiceMapper choiceMapper;
+        public final ChoiceRepository choiceRepository;
+        public final ChoiceService choiceService;
 
-    /**
-     * problem
-     */
-    public final ProblemMapper problemMapper;
-    public final ProblemRepository problemRepository;
-    public final ProblemService problemService;
-    public final ProblemValidator problemValidator;
+        /**
+         * problem
+         */
+        public final ProblemMapper problemMapper;
+        public final ProblemRepository problemRepository;
+        public final ProblemService problemService;
+        public final ProblemValidator problemValidator;
 
-    /**
-     * question
-     */
-    public final QuestionRepository questionRepository;
-    public final QuestionMapper questionMapper;
-    public final QuestionService questionService;
-    public final QuestionAnswerService questionAnswerService;
+        /**
+         * question
+         */
+        public final QuestionRepository questionRepository;
+        public final QuestionMapper questionMapper;
+        public final QuestionService questionService;
+        public final QuestionAnswerService questionAnswerService;
 
-    /**
-     * answer
-     */
-    public final AnswerRepository answerRepository;
-    public final AnswerMapper answerMapper;
-    public final AnswerService answerService;
+        /**
+         * answer
+         */
+        public final AnswerRepository answerRepository;
+        public final AnswerMapper answerMapper;
+        public final AnswerService answerService;
 
-    /**
-     * bookmark
-     */
-    public final BookmarkRepository bookmarkRepository;
-    public final CreateBookmarkService createBookmarkService;
-    public final DeleteBookmarkService deleteBookmarkService;
-    public final GetBookmarkedProblemsService getBookmarkedProblemsService;
+        /**
+         * bookmark
+         */
+        public final BookmarkRepository bookmarkRepository;
+        public final CreateBookmarkService createBookmarkService;
+        public final DeleteBookmarkService deleteBookmarkService;
+        public final GetBookmarkedProblemsService getBookmarkedProblemsService;
 
-    public final FileService fileService;
+        public final FileService fileService;
 
-    public TestContainer() {
-        this.fileService = new FileServiceImpl(null, null, null, null, null);
-        this.clockHolder = new FakeClockHolder();
-        this.merchantIdGenerator = new FakeMerchantIdGenerator();
+        public TestContainer() {
+                this.fileService = new FileServiceImpl(null, null, null, null, null);
+                this.clockHolder = new FakeClockHolder();
+                this.merchantIdGenerator = new FakeMerchantIdGenerator();
 
-        this.memberRepository = new FakeMemberRepository();
-        this.subjectRepository = new FakeSubjectRepository();
-        this.examRepository = new FakeExamRepository();
-        this.problemRepository = new FakeProblemRepository();
-        this.choiceRepository = new FakeChoiceRepository();
-        this.bookmarkRepository = new FakeBookmarkRepository();
+                this.memberRepository = new FakeMemberRepository();
+                this.subjectRepository = new FakeSubjectRepository();
+                this.examRepository = new FakeExamRepository();
+                this.problemRepository = new FakeProblemRepository();
+                this.choiceRepository = new FakeChoiceRepository();
+                this.bookmarkRepository = new FakeBookmarkRepository();
 
-        this.memberMapper = new MemberMapper();
-        this.memberService = new MemberServiceImpl(this.memberRepository, this.memberMapper);
-        this.memberDetailsService = new MemberDetailsService(this.memberRepository);
-        this.passwordEncoder = new BCryptPasswordEncoder();
-        this.authenticationProvider = new CustomAuthenticationProvider(this.memberDetailsService, this.passwordEncoder);
-        this.jwtService = new JwtServiceImpl(FAKE_SECRET_KEY);
-        this.memberValidator = new MemberValidatorImpl(this.memberRepository);
-        this.authenticationService = new AuthenticationServiceImpl(this.passwordEncoder, this.jwtService,
-                this.memberRepository, this.authenticationProvider, this.memberMapper, this.memberValidator);
-        this.memberController = new MemberController(this.memberService);
+                this.memberMapper = new MemberMapper();
+                this.memberService = new MemberServiceImpl(this.memberRepository, this.memberMapper);
+                this.memberDetailsService = new MemberDetailsService(this.memberRepository);
+                this.passwordEncoder = new BCryptPasswordEncoder();
+                this.authenticationProvider = new CustomAuthenticationProvider(this.memberDetailsService,
+                                this.passwordEncoder);
+                this.jwtService = new JwtServiceImpl(FAKE_SECRET_KEY);
+                this.memberValidator = new MemberValidatorImpl(this.memberRepository);
+                this.authenticationService = new AuthenticationServiceImpl(this.passwordEncoder, this.jwtService,
+                                this.memberRepository, this.authenticationProvider, this.memberMapper,
+                                this.memberValidator);
+                this.memberController = new MemberController(this.memberService);
 
-        this.subjectValidator = new SubjectValidatorImpl(this.subjectRepository);
-        this.subjectMapper = new SubjectMapper();
-        this.subjectService = new SubjectServiceImpl(this.subjectRepository, this.subjectMapper, this.subjectValidator);
-        this.subjectController = new SubjectController(subjectService);
+                this.subjectValidator = new SubjectValidatorImpl(this.subjectRepository);
+                this.subjectMapper = new SubjectMapper();
+                this.subjectService = new SubjectServiceImpl(this.subjectRepository, this.subjectMapper,
+                                this.subjectValidator);
+                this.subjectController = new SubjectController(subjectService);
 
-        this.examMapper = new ExamMapper();
-        this.examValidator = new ExamValidatorImpl(this.examRepository);
-        this.examService = new ExamServiceImpl(this.examRepository, this.examMapper, this.subjectService,
-                this.examValidator);
-        this.examController = new ExamController(examService);
+                this.examMapper = new ExamMapper();
+                this.examValidator = new ExamValidatorImpl(this.examRepository);
+                this.examService = new ExamServiceImpl(this.examRepository, this.examMapper, this.subjectService,
+                                this.examValidator);
+                this.examController = new ExamController(examService);
 
-        this.choiceMapper = new ChoiceMapperImpl();
-        this.choiceService = new ChoiceServiceImpl(this.choiceRepository, this.choiceMapper);
+                this.choiceMapper = new ChoiceMapperImpl();
+                this.choiceService = new ChoiceServiceImpl(this.choiceRepository, this.choiceMapper);
 
-        this.problemMapper = new ProblemMapper(this.choiceMapper);
-        problemValidator = new ProblemValidator(this.problemRepository);
-        this.problemService = new ProblemServiceImpl(this.problemRepository, this.problemMapper,
-                this.examService, this.choiceService, this.problemValidator, this.fileService);
+                this.problemMapper = new ProblemMapper(this.choiceMapper);
+                problemValidator = new ProblemValidator(this.problemRepository);
+                ProblemContentProcessor problemContentProcessor = new ProblemContentProcessor(this.fileService,
+                                "test-prefix");
+                this.problemService = new ProblemServiceImpl(this.problemRepository, this.problemMapper,
+                                this.examService, this.choiceService, this.problemValidator, this.fileService,
+                                problemContentProcessor);
 
-        this.questionRepository = new FakeQuestionRepository();
-        this.questionMapper = new QuestionMapper();
+                this.questionRepository = new FakeQuestionRepository();
+                this.questionMapper = new QuestionMapper();
 
-        this.answerRepository = new FakeAnswerRepository();
-        this.answerMapper = new AnswerMapper();
+                this.answerRepository = new FakeAnswerRepository();
+                this.answerMapper = new AnswerMapper();
 
-        this.questionAnswerService = new QuestionAnswerService(questionRepository);
+                this.questionAnswerService = new QuestionAnswerService(questionRepository);
 
-        this.answerService = new AnswerServiceImpl(this.answerRepository, this.answerMapper,
-                this.questionAnswerService);
+                this.answerService = new AnswerServiceImpl(this.answerRepository, this.answerMapper,
+                                this.questionAnswerService);
 
-        this.questionService = new QuestionServiceImpl(questionRepository, problemService, questionMapper);
+                this.questionService = new QuestionServiceImpl(questionRepository, problemService, questionMapper);
 
-        // bookmark
-        this.createBookmarkService = new CreateBookmarkServiceImpl(
-                this.bookmarkRepository, this.memberRepository, this.problemRepository);
-        this.deleteBookmarkService = new DeleteBookmarkServiceImpl(this.bookmarkRepository);
-        this.getBookmarkedProblemsService = new GetBookmarkedProblemsServiceImpl(
-                this.bookmarkRepository, this.choiceService);
-    }
+                // bookmark
+                this.createBookmarkService = new CreateBookmarkServiceImpl(
+                                this.bookmarkRepository, this.memberRepository, this.problemRepository);
+                this.deleteBookmarkService = new DeleteBookmarkServiceImpl(this.bookmarkRepository);
+                this.getBookmarkedProblemsService = new GetBookmarkedProblemsServiceImpl(
+                                this.bookmarkRepository, this.choiceService, problemContentProcessor);
+        }
 
 }

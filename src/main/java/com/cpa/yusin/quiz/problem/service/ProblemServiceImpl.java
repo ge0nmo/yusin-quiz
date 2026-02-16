@@ -27,9 +27,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.net.URI;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.List;
 import java.util.Map;
@@ -46,6 +43,7 @@ public class ProblemServiceImpl implements ProblemService {
     private final ChoiceService choiceService;
     private final ProblemValidator problemValidator;
     private final FileService fileService;
+    private final ProblemContentProcessor problemContentProcessor; // [Refactor] Add processor
 
     @Value("${cloud.aws.s3.prefix}")
     private String s3Prefix;
@@ -117,9 +115,10 @@ public class ProblemServiceImpl implements ProblemService {
 
         List<ProblemDTO> response = problems.stream()
                 .map(problem -> {
-                    // [수정] 조회 시에도 문제/해설만 Presigned URL 변환
-                    String signedContent = replaceImageSrcWithPresignedUrl(problem.getContent());
-                    String signedExplanation = replaceImageSrcWithPresignedUrl(problem.getExplanation());
+                    // [Refactor] Use processor
+                    String signedContent = problemContentProcessor.processHtmlWithPresignedUrl(problem.getContent());
+                    String signedExplanation = problemContentProcessor
+                            .processHtmlWithPresignedUrl(problem.getExplanation());
 
                     // Choice는 텍스트이므로 변환 로직 제거됨
 
@@ -141,9 +140,9 @@ public class ProblemServiceImpl implements ProblemService {
         Problem problem = findById(id);
         List<ChoiceResponse> choices = choiceService.getAllByProblemId(problem.getId());
 
-        // [수정] 단건 조회 시 문제/해설만 변환
-        String signedContent = replaceImageSrcWithPresignedUrl(problem.getContent());
-        String signedExplanation = replaceImageSrcWithPresignedUrl(problem.getExplanation());
+        // [Refactor] Use processor
+        String signedContent = problemContentProcessor.processHtmlWithPresignedUrl(problem.getContent());
+        String signedExplanation = problemContentProcessor.processHtmlWithPresignedUrl(problem.getExplanation());
 
         return ProblemDTO.builder()
                 .id(problem.getId())
@@ -193,40 +192,5 @@ public class ProblemServiceImpl implements ProblemService {
             }
         }
         return doc.body().html();
-    }
-
-    // ---------------------------------------------------------
-    // 2. [조회용] S3 URL -> Presigned URL 변환
-    // ---------------------------------------------------------
-    private String replaceImageSrcWithPresignedUrl(String htmlContent) {
-        if (htmlContent == null || htmlContent.isEmpty())
-            return htmlContent;
-
-        Document doc = Jsoup.parseBodyFragment(htmlContent);
-        Elements imgs = doc.select("img");
-
-        for (Element img : imgs) {
-            String src = img.attr("src");
-            if (src.contains("amazonaws.com") && src.contains(s3Prefix)) {
-                try {
-                    String objectKey = extractObjectKeyFromUrl(src);
-                    String presignedUrl = fileService.generatePresignedUrl(objectKey);
-                    if (presignedUrl != null && !presignedUrl.isEmpty()) {
-                        img.attr("src", presignedUrl);
-                    }
-                } catch (Exception e) {
-                    log.error("이미지 변환 실패: {}", src, e);
-                }
-            }
-        }
-        return doc.body().html();
-    }
-
-    private String extractObjectKeyFromUrl(String fullUrl) {
-        URI uri = URI.create(fullUrl);
-        String path = uri.getPath();
-        if (path.startsWith("/"))
-            path = path.substring(1);
-        return URLDecoder.decode(path, StandardCharsets.UTF_8);
     }
 }
