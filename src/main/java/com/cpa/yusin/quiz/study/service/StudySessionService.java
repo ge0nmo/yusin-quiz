@@ -106,7 +106,7 @@ public class StudySessionService {
     /**
      * Complete the session.
      * Calculates score server-side.
-     * Records activity log.
+     * Records activity log (Batch update for Exam Mode).
      */
     @Transactional
     public int completeSession(Long sessionId) {
@@ -115,18 +115,32 @@ public class StudySessionService {
         // Calculate Score
         List<SubmittedAnswer> answers = submittedAnswerRepository.findAllByStudySessionId(sessionId);
         int correctCount = (int) answers.stream().filter(SubmittedAnswer::isCorrect).count();
-        // Simple scoring: (Correct / Total * 100)? Or just count?
-        // Assuming 20 questions * 5 points = 100. Or we can just store the raw score.
-        // Ideally we know total problems in exam.
-        // For now, let's just return correctCount * 5 (assuming 20 problems) OR just
-        // correctCount if exam size varies.
-        // User prompt implies "score". Let's calculate as (Correct Count * 5).
         int score = correctCount * 5;
 
         session.complete(score);
 
         // Record Activity (Jandi)
-        studyLogService.recordActivity(session.getMember());
+        // Optimization: Batch Update for Exam Mode
+        // Practice mode updates incrementally in saveAnswer, so we might skip here or
+        // double check.
+        // Requirement: "Real Mode ... POST /finish ... Update DailyStudyLog at once +N"
+        // Requirement: "Practice Mode ... POST /answer ... Update ... immediately +1"
+
+        if (session.getMode() == ExamMode.EXAM) {
+            // For Exam Mode, we count the number of distinct questions solved in this
+            // session.
+            // 'answers' contains all answers.
+            // We should increment by the number of answers submitted (or correct ones?
+            // Prompt says "solvedCount").
+            // Usually "solved" means correctly answered, but "Contribution Graph" often
+            // just means "Attempted".
+            // Prompt: "currently... 100 Update queries... load concern" -> implies counting
+            // attempts.
+            // Let's count *attempts* (answers.size()).
+            int solvedCount = answers.size();
+            studyLogService.recordActivity(session.getMember(), solvedCount);
+        }
+        // Practice Mode: Already updated incrementally in saveAnswer.
 
         return score;
     }

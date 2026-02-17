@@ -27,25 +27,39 @@ public class StudyLogService {
      * Handles race conditions where multiple requests try to create the record
      * simultaneously.
      */
+    /**
+     * Record activity for the given member on the current date (Increments by 1).
+     */
     public void recordActivity(Member member) {
+        recordActivity(member, 1);
+    }
+
+    /**
+     * Record activity with specific count.
+     * Uses atomic increment if record exists, or creates new one with initial
+     * count.
+     */
+    public void recordActivity(Member member, int count) {
+        if (count <= 0)
+            return;
+
         LocalDate today = LocalDate.now();
 
-        // 1. Check if record already exists for today
-        // Optimization: If exists, we don't need to do anything (User already studied
-        // today)
-        if (dailyStudyLogRepository.findByMemberIdAndDate(member.getId(), today).isPresent()) {
-            return;
+        // 1. Try atomic update first (Optimistic assumption: Log exists)
+        int updatedRows = dailyStudyLogRepository.increaseSolvedCount(member.getId(), today, count);
+
+        if (updatedRows > 0) {
+            return; // Successfully updated
         }
 
-        // 2. If not exists, try to create new one
+        // 2. If no rows updated, it means no log exists -> Create new one
         try {
-            DailyStudyLog newLog = DailyStudyLog.createFirst(member, today);
+            DailyStudyLog newLog = DailyStudyLog.createWithCount(member, today, count);
             dailyStudyLogRepository.save(newLog);
         } catch (DataIntegrityViolationException e) {
             // 3. Race condition: Another thread created it just now.
-            // Since we only care about "Studied or Not" (count 1 is enough), we can ignore
-            // this.
-            log.debug("Activity already recorded for member {} on {}", member.getId(), today);
+            // Retry update explicitly
+            dailyStudyLogRepository.increaseSolvedCount(member.getId(), today, count);
         }
     }
 

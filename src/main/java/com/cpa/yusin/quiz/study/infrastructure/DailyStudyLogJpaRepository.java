@@ -19,4 +19,9 @@ public interface DailyStudyLogJpaRepository extends JpaRepository<DailyStudyLog,
     @Modifying(clearAutomatically = true)
     @Query("UPDATE DailyStudyLog d SET d.solvedCount = d.solvedCount + 1 WHERE d.member.id = :memberId AND d.date = :date")
     int increaseSolvedCount(@Param("memberId") Long memberId, @Param("date") LocalDate date);
+
+    @Modifying(clearAutomatically = true)
+    @Query("UPDATE DailyStudyLog d SET d.solvedCount = d.solvedCount + :amount WHERE d.member.id = :memberId AND d.date = :date")
+    int increaseSolvedCount(@Param("memberId") Long memberId, @Param("date") LocalDate date,
+            @Param("amount") int amount);
 }

@@ -124,6 +124,9 @@ class StudySessionServiceTest {
                 assertThat(session.getLastIndex()).isEqualTo(index);
                 // 3. Insert 호출 Check
                 verify(submittedAnswerRepository).save(any(SubmittedAnswer.class));
+
+                // Optimization Check: Exam mode should NOT record activity here
+                verify(studyLogService, org.mockito.Mockito.never()).recordActivity(any());
         }
 
         @Test
@@ -196,11 +199,11 @@ class StudySessionServiceTest {
         }
 
         @Test
-        @DisplayName("시험 종료 - 점수 계산 및 잔디 기록")
-        void completeSession_shouldCalculateScoreAndLog() {
+        @DisplayName("시험 종료 - 점수 계산 및 잔디 기록 (실전 모드)")
+        void completeSession_exam_shouldCalculateScoreAndLog() {
                 // given
                 Long sessionId = 1L;
-                StudySession session = StudySession.builder().id(sessionId).member(member).build();
+                StudySession session = StudySession.builder().id(sessionId).mode(ExamMode.EXAM).member(member).build();
 
                 // 2 Correct Answers
                 List<SubmittedAnswer> answers = List.of(
@@ -216,7 +219,32 @@ class StudySessionServiceTest {
 
                 // then
                 assertThat(finalScore).isEqualTo(10); // 2 * 5
-                verify(studyLogService).recordActivity(member);
+                // Optimization Check: recordActivity called with count 3 (size of answers)
+                verify(studyLogService).recordActivity(member, 3);
                 assertThat(session.getStatus()).isEqualTo(StudySessionStatus.COMPLETED);
+        }
+
+        @Test
+        @DisplayName("시험 종료 - 연습 모드는 잔디 기록 스킵 (이미 건별 기록됨)")
+        void completeSession_practice_shouldNotLog() {
+                // given
+                Long sessionId = 1L;
+                StudySession session = StudySession.builder().id(sessionId).mode(ExamMode.PRACTICE).member(member)
+                                .build();
+
+                given(studySessionRepository.findById(sessionId)).willReturn(Optional.of(session));
+                given(submittedAnswerRepository.findAllByStudySessionId(sessionId)).willReturn(List.of()); // Answers
+                                                                                                           // don't
+                                                                                                           // matter for
+                                                                                                           // this check
+
+                // when
+                studySessionService.completeSession(sessionId);
+
+                // then
+                // Optimization Check: recordActivity SHOULD NOT be called
+                verify(studyLogService, org.mockito.Mockito.never()).recordActivity(any());
+                verify(studyLogService, org.mockito.Mockito.never()).recordActivity(any(),
+                                org.mockito.ArgumentMatchers.anyInt());
         }
 }

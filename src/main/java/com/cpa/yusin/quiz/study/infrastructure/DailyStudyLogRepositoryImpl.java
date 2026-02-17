@@ -48,7 +48,13 @@ public class DailyStudyLogRepositoryImpl implements DailyStudyLogRepository {
     // Let's rely on JPA's dirty checking or explicit save for now.
     // For high concurrency increment, I'll add the method to the interface.
 
+    @Override
     public int increaseSolvedCount(Long memberId, LocalDate date) {
         return dailyStudyLogJpaRepository.increaseSolvedCount(memberId, date);
+    }
+
+    @Override
+    public int increaseSolvedCount(Long memberId, LocalDate date, int amount) {
+        return dailyStudyLogJpaRepository.increaseSolvedCount(memberId, date, amount);
     }
 }

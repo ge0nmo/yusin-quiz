@@ -50,4 +50,12 @@ public class DailyStudyLog extends BaseEntity {
                 .solvedCount(1)
                 .build();
     }
+
+    public static DailyStudyLog createWithCount(Member member, LocalDate date, int count) {
+        return DailyStudyLog.builder()
+                .member(member)
+                .date(date)
+                .solvedCount(count)
+                .build();
+    }
 }
