@@ -78,11 +78,12 @@ public class ExceptionAdvice {
     }
 
     @ExceptionHandler
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleCustomException(CustomException e) {
+    public ResponseEntity<ErrorResponse> handleCustomException(CustomException e) {
         log.error("비즈니스 예외 발생: {}", e.getMessage(), e);
 
-        return ErrorResponse.of(HttpStatus.BAD_REQUEST, e.getMessage());
+        return ResponseEntity
+                .status(e.getHttpStatus())
+                .body(ErrorResponse.of(e.getHttpStatus(), e.getMessage()));
     }
 
     @ExceptionHandler
@@ -128,5 +129,14 @@ public class ExceptionAdvice {
     public ErrorResponse handleJwtException(io.jsonwebtoken.JwtException e) {
         log.error("JWT 예외 발생", e);
         return ErrorResponse.of(HttpStatus.UNAUTHORIZED, "유효하지 않은 토큰입니다.");
+    }
+
+    @ExceptionHandler(org.springframework.security.core.userdetails.UsernameNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleUsernameNotFoundException(
+            org.springframework.security.core.userdetails.UsernameNotFoundException e) {
+        log.error("회원 정보를 찾을 수 없습니다.", e);
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(ErrorResponse.of(HttpStatus.NOT_FOUND, e.getMessage()));
     }
 }

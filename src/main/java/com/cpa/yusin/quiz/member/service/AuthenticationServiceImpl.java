@@ -1,5 +1,7 @@
 package com.cpa.yusin.quiz.member.service;
 
+import com.cpa.yusin.quiz.global.exception.ExceptionMessage;
+import com.cpa.yusin.quiz.global.exception.MemberException;
 import com.cpa.yusin.quiz.global.details.MemberDetails;
 import com.cpa.yusin.quiz.global.jwt.JwtService;
 import com.cpa.yusin.quiz.global.security.CustomAuthenticationProvider;
@@ -47,7 +49,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
         if (!"ADMIN".equals(response.getRole().toString())) {
             log.warn("일반 유저가 관리자 페이지 접속 시도: {}", email);
-            throw new RuntimeException("관리자 권한이 없습니다.");
+            throw new MemberException(ExceptionMessage.NO_AUTHORIZATION);
         }
 
         return response;
@@ -103,7 +105,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     public TokenResponse refreshAccessToken(String refreshToken) {
         // 1. Refresh Token 만료 여부 확인
         if (jwtService.isTokenExpired(refreshToken)) {
-            throw new RuntimeException("Refresh Token이 만료되었습니다. 다시 로그인해주세요.");
+            throw new MemberException(ExceptionMessage.INVALID_LOGIN_INFORMATION);
         }
 
         // 2. 이메일 추출 후 새로운 Access Token 생성

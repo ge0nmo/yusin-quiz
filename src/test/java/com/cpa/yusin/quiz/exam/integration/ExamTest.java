@@ -41,263 +41,251 @@ import static org.springframework.restdocs.payload.PayloadDocumentation.*;
 import static org.springframework.restdocs.request.RequestDocumentation.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@ExtendWith({RestDocumentationExtension.class, TeardownExtension.class})
+@ExtendWith({ RestDocumentationExtension.class, TeardownExtension.class })
 @AutoConfigureMockMvc
 @SpringBootTest
 @AutoConfigureRestDocs
-class ExamTest
-{
-    @Autowired
-    private MockMvc mvc;
+class ExamTest {
+        @Autowired
+        private MockMvc mvc;
 
-    @Autowired
-    private SubjectRepository subjectRepository;
+        @Autowired
+        private SubjectRepository subjectRepository;
 
-    @Autowired
-    private ExamRepository examRepository;
+        @Autowired
+        private ExamRepository examRepository;
 
-    @Autowired
-    private MemberRepository memberRepository;
+        @Autowired
+        private MemberRepository memberRepository;
 
-    private final ObjectMapper mapper = new ObjectMapper();
+        private final ObjectMapper mapper = new ObjectMapper();
 
-    Subject economics;
+        Subject economics;
 
-    Member admin;
+        Member admin;
 
-    @BeforeEach
-    void setUp(WebApplicationContext webApplicationContext, RestDocumentationContextProvider restDocumentation) {
-        this.mvc = MockMvcBuilders.webAppContextSetup(webApplicationContext)
-                .apply(documentationConfiguration(restDocumentation))
-                .build();
+        @BeforeEach
+        void setUp(WebApplicationContext webApplicationContext, RestDocumentationContextProvider restDocumentation) {
+                this.mvc = MockMvcBuilders.webAppContextSetup(webApplicationContext)
+                                .apply(documentationConfiguration(restDocumentation))
+                                .build();
 
-        admin = memberRepository.save(Member.builder()
-                .email("John@gmail.com")
-                .password("12341234")
-                .username("John")
-                .platform(Platform.HOME)
-                .role(Role.ADMIN)
-                .build());
+                admin = memberRepository.save(Member.builder()
+                                .email("John@gmail.com")
+                                .password("12341234")
+                                .username("John")
+                                .platform(Platform.HOME)
+                                .role(Role.ADMIN)
+                                .build());
 
+                economics = subjectRepository.save(Subject.builder()
+                                .id(1L)
+                                .name("경제학")
+                                .build());
+        }
 
-        economics = subjectRepository.save(Subject.builder()
-                .id(1L)
-                .name("경제학")
-                .build());
-    }
+        @WithUserDetails(value = "John@gmail.com", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+        @Test
+        void getById_success() throws Exception {
+                // given
+                Exam exam = examRepository.save(Exam.builder()
+                                .id(1L)
+                                .name("1차")
+                                .year(2024)
+                                .subjectId(economics.getId())
+                                .build());
 
+                // when
+                ResultActions resultActions = mvc.perform(get("/api/v1/exam/" + exam.getId())
 
-    @WithUserDetails(value = "John@gmail.com", setupBefore = TestExecutionEvent.TEST_EXECUTION)
-    @Test
-    void getById_success() throws Exception
-    {
-        // given
-        Exam exam = examRepository.save(Exam.builder()
-                .id(1L)
-                .name("1차")
-                .year(2024)
-                .subjectId(economics.getId())
-                .build());
-
-        // when
-        ResultActions resultActions = mvc.perform(get("/api/v1/exam/" + exam.getId())
-
-        );
-
-        // then
-        resultActions
-                .andExpect(status().isOk())
-                .andDo(document("getExamById",
-                        preprocessRequest(prettyPrint()),
-                        preprocessResponse(prettyPrint()),
-
-
-                        responseFields(
-                                fieldWithPath("data.id").type(JsonFieldType.NUMBER).description("시험 고유 식별자"),
-                                fieldWithPath("data.name").type(JsonFieldType.STRING).description("시험 이름"),
-                                fieldWithPath("data.year").type(JsonFieldType.NUMBER).description("시험 연도")
-                        ))
                 );
 
-    }
+                // then
+                resultActions
+                                .andExpect(status().isOk())
+                                .andDo(document("getExamById",
+                                                preprocessRequest(prettyPrint()),
+                                                preprocessResponse(prettyPrint()),
 
-    @WithUserDetails(value = "John@gmail.com", setupBefore = TestExecutionEvent.TEST_EXECUTION)
-    @Test
-    void getById_ExamNotFound() throws Exception
-    {
-        // given
+                                                responseFields(
+                                                                fieldWithPath("data.id").type(JsonFieldType.NUMBER)
+                                                                                .description("시험 고유 식별자"),
+                                                                fieldWithPath("data.name").type(JsonFieldType.STRING)
+                                                                                .description("시험 이름"),
+                                                                fieldWithPath("data.year").type(JsonFieldType.NUMBER)
+                                                                                .description("시험 연도"))));
 
-        // when
-        ResultActions resultActions = mvc.perform(get("/api/v1/exam/" + 1L)
+        }
 
-        );
+        @WithUserDetails(value = "John@gmail.com", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+        @Test
+        void getById_ExamNotFound() throws Exception {
+                // given
 
-        // then
-        resultActions
-                .andExpect(status().isInternalServerError())
-                .andDo(document("getExamById",
-                        preprocessRequest(prettyPrint()),
-                        preprocessResponse(prettyPrint()),
+                // when
+                ResultActions resultActions = mvc.perform(get("/api/v1/exam/" + 1L)
 
-
-                        responseFields(
-                                fieldWithPath("status").type(JsonFieldType.NUMBER).description("상태"),
-                                fieldWithPath("message").type(JsonFieldType.STRING).description("메세지")
-                        ))
                 );
 
-    }
+                // then
+                resultActions
+                                .andExpect(status().isNotFound())
+                                .andDo(document("getExamById",
+                                                preprocessRequest(prettyPrint()),
+                                                preprocessResponse(prettyPrint()),
 
-    @WithUserDetails(value = "John@gmail.com", setupBefore = TestExecutionEvent.TEST_EXECUTION)
-    @Test
-    void getBySubjectIdAndYear_success() throws Exception
-    {
-        // given
-        examRepository.save(Exam.builder()
-                .id(1L)
-                .name("1차")
-                .year(2024)
-                .subjectId(economics.getId())
-                .build());
+                                                responseFields(
+                                                                fieldWithPath("status").type(JsonFieldType.NUMBER)
+                                                                                .description("상태"),
+                                                                fieldWithPath("message").type(JsonFieldType.STRING)
+                                                                                .description("메세지"))));
 
-        examRepository.save(Exam.builder()
-                .id(2L)
-                .name("2차")
-                .year(2024)
-                .subjectId(economics.getId())
-                .build());
+        }
 
-        examRepository.save(Exam.builder()
-                .id(3L)
-                .name("3차")
-                .year(2024)
-                .subjectId(economics.getId())
-                .build());
+        @WithUserDetails(value = "John@gmail.com", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+        @Test
+        void getBySubjectIdAndYear_success() throws Exception {
+                // given
+                examRepository.save(Exam.builder()
+                                .id(1L)
+                                .name("1차")
+                                .year(2024)
+                                .subjectId(economics.getId())
+                                .build());
 
-        // when
-        ResultActions resultActions = mvc.perform(get("/api/v1/exam")
-                .param("subjectId", economics.getId().toString())
-                .param("year", String.valueOf(2024))
-        );
+                examRepository.save(Exam.builder()
+                                .id(2L)
+                                .name("2차")
+                                .year(2024)
+                                .subjectId(economics.getId())
+                                .build());
 
-        // then
-        resultActions
-                .andExpect(status().isOk())
-                .andDo(document("getExamsBySubjectIdAndYear",
-                        preprocessRequest(prettyPrint()),
-                        preprocessResponse(prettyPrint()),
+                examRepository.save(Exam.builder()
+                                .id(3L)
+                                .name("3차")
+                                .year(2024)
+                                .subjectId(economics.getId())
+                                .build());
 
-                        queryParameters(
-                                parameterWithName("subjectId").description("과목 고유 식별자"),
-                                parameterWithName("year").description("시험 연도")
-                        ),
+                // when
+                ResultActions resultActions = mvc.perform(get("/api/v1/exam")
+                                .param("subjectId", economics.getId().toString())
+                                .param("year", String.valueOf(2024)));
 
-                        responseFields(
-                                fieldWithPath("data[].id").type(JsonFieldType.NUMBER).description("시험 고유 식별자"),
-                                fieldWithPath("data[].name").type(JsonFieldType.STRING).description("시험 이름"),
-                                fieldWithPath("data[].year").type(JsonFieldType.NUMBER).description("시험 연도")
-                        ))
-                );
+                // then
+                resultActions
+                                .andExpect(status().isOk())
+                                .andDo(document("getExamsBySubjectIdAndYear",
+                                                preprocessRequest(prettyPrint()),
+                                                preprocessResponse(prettyPrint()),
 
-    }
+                                                queryParameters(
+                                                                parameterWithName("subjectId").description("과목 고유 식별자"),
+                                                                parameterWithName("year").description("시험 연도")),
 
-    @WithUserDetails(value = "John@gmail.com", setupBefore = TestExecutionEvent.TEST_EXECUTION)
-    @Test
-    void getBySubjectIdAndYear_withoutYear() throws Exception
-    {
-        // given
-        examRepository.save(Exam.builder()
-                .id(1L)
-                .name("1차")
-                .year(2024)
-                .subjectId(economics.getId())
-                .build());
+                                                responseFields(
+                                                                fieldWithPath("data[].id").type(JsonFieldType.NUMBER)
+                                                                                .description("시험 고유 식별자"),
+                                                                fieldWithPath("data[].name").type(JsonFieldType.STRING)
+                                                                                .description("시험 이름"),
+                                                                fieldWithPath("data[].year").type(JsonFieldType.NUMBER)
+                                                                                .description("시험 연도"))));
 
-        examRepository.save(Exam.builder()
-                .id(2L)
-                .name("2차")
-                .year(2024)
-                .subjectId(economics.getId())
-                .build());
+        }
 
-        examRepository.save(Exam.builder()
-                .id(3L)
-                .name("1차")
-                .year(2023)
-                .subjectId(economics.getId())
-                .build());
+        @WithUserDetails(value = "John@gmail.com", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+        @Test
+        void getBySubjectIdAndYear_withoutYear() throws Exception {
+                // given
+                examRepository.save(Exam.builder()
+                                .id(1L)
+                                .name("1차")
+                                .year(2024)
+                                .subjectId(economics.getId())
+                                .build());
 
-        // when
-        ResultActions resultActions = mvc.perform(get("/api/v1/exam")
-                .param("subjectId", economics.getId().toString())
-        );
+                examRepository.save(Exam.builder()
+                                .id(2L)
+                                .name("2차")
+                                .year(2024)
+                                .subjectId(economics.getId())
+                                .build());
 
-        // then
-        resultActions
-                .andExpect(status().isOk())
-                .andDo(document("getExamsBySubjectIdWithoutYear",
-                        preprocessRequest(prettyPrint()),
-                        preprocessResponse(prettyPrint()),
+                examRepository.save(Exam.builder()
+                                .id(3L)
+                                .name("1차")
+                                .year(2023)
+                                .subjectId(economics.getId())
+                                .build());
 
-                        queryParameters(
-                                parameterWithName("subjectId").description("과목 고유 식별자"),
-                                parameterWithName("year").description("시험 연도").optional()
-                        ),
+                // when
+                ResultActions resultActions = mvc.perform(get("/api/v1/exam")
+                                .param("subjectId", economics.getId().toString()));
 
-                        responseFields(
-                                fieldWithPath("data[].id").type(JsonFieldType.NUMBER).description("시험 고유 식별자"),
-                                fieldWithPath("data[].name").type(JsonFieldType.STRING).description("시험 이름"),
-                                fieldWithPath("data[].year").type(JsonFieldType.NUMBER).description("시험 연도")
-                        ))
-                );
+                // then
+                resultActions
+                                .andExpect(status().isOk())
+                                .andDo(document("getExamsBySubjectIdWithoutYear",
+                                                preprocessRequest(prettyPrint()),
+                                                preprocessResponse(prettyPrint()),
 
-    }
+                                                queryParameters(
+                                                                parameterWithName("subjectId").description("과목 고유 식별자"),
+                                                                parameterWithName("year").description("시험 연도")
+                                                                                .optional()),
 
-    @Test
-    void getYears() throws Exception
-    {
-        // given
-        examRepository.save(Exam.builder()
-                .id(1L)
-                .name("1차")
-                .year(2024)
-                .subjectId(economics.getId())
-                .build());
+                                                responseFields(
+                                                                fieldWithPath("data[].id").type(JsonFieldType.NUMBER)
+                                                                                .description("시험 고유 식별자"),
+                                                                fieldWithPath("data[].name").type(JsonFieldType.STRING)
+                                                                                .description("시험 이름"),
+                                                                fieldWithPath("data[].year").type(JsonFieldType.NUMBER)
+                                                                                .description("시험 연도"))));
 
-        examRepository.save(Exam.builder()
-                .id(2L)
-                .name("1차")
-                .year(2023)
-                .subjectId(economics.getId())
-                .build());
+        }
 
-        examRepository.save(Exam.builder()
-                .id(3L)
-                .name("1차")
-                .year(2022)
-                .subjectId(economics.getId())
-                .build());
+        @Test
+        void getYears() throws Exception {
+                // given
+                examRepository.save(Exam.builder()
+                                .id(1L)
+                                .name("1차")
+                                .year(2024)
+                                .subjectId(economics.getId())
+                                .build());
 
-        // when
-        ResultActions resultActions = mvc.perform(get("/api/v1/exam/year")
-                .param("subjectId", economics.getId().toString())
-        );
+                examRepository.save(Exam.builder()
+                                .id(2L)
+                                .name("1차")
+                                .year(2023)
+                                .subjectId(economics.getId())
+                                .build());
 
-        // then
-        resultActions
-                .andExpect(status().isOk())
-                .andDo(document("getYearBySubjectId",
-                        preprocessRequest(prettyPrint()),
-                        preprocessResponse(prettyPrint()),
+                examRepository.save(Exam.builder()
+                                .id(3L)
+                                .name("1차")
+                                .year(2022)
+                                .subjectId(economics.getId())
+                                .build());
 
-                        queryParameters(
-                                parameterWithName("subjectId").description("과목 고유 식별자")
-                        ),
+                // when
+                ResultActions resultActions = mvc.perform(get("/api/v1/exam/year")
+                                .param("subjectId", economics.getId().toString()));
 
-                        responseFields(
-                                fieldWithPath("data[]").type(JsonFieldType.ARRAY).description("시험 연도 정보")
-                        ))
-                );
+                // then
+                resultActions
+                                .andExpect(status().isOk())
+                                .andDo(document("getYearBySubjectId",
+                                                preprocessRequest(prettyPrint()),
+                                                preprocessResponse(prettyPrint()),
 
-    }
+                                                queryParameters(
+                                                                parameterWithName("subjectId")
+                                                                                .description("과목 고유 식별자")),
+
+                                                responseFields(
+                                                                fieldWithPath("data[]").type(JsonFieldType.ARRAY)
+                                                                                .description("시험 연도 정보"))));
+
+        }
 }
