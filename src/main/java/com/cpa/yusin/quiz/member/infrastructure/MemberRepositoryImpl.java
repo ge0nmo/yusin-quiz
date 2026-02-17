@@ -11,49 +11,46 @@ import java.util.Optional;
 
 @RequiredArgsConstructor
 @Repository
-public class MemberRepositoryImpl implements MemberRepository
-{
+public class MemberRepositoryImpl implements MemberRepository {
     private final MemberJpaRepository memberJpaRepository;
 
     @Override
-    public Optional<Member> findByEmail(String email)
-    {
+    public Optional<Member> findByEmail(String email) {
         return memberJpaRepository.findByEmail(email);
     }
 
     @Override
-    public Page<Member> findAllByKeyword(String keyword, Pageable pageable)
-    {
+    public Page<Member> findAllByKeyword(String keyword, Pageable pageable) {
         return memberJpaRepository.findAllByKeyword(keyword, pageable);
     }
 
     @Override
-    public Page<Member> findAllByKeywordAndAdminNot(String keyword, Pageable pageable)
-    {
+    public Page<Member> findAllByKeywordAndAdminNot(String keyword, Pageable pageable) {
         return memberJpaRepository.findAllByKeywordAndAdminNot(keyword, pageable);
     }
 
     @Override
-    public boolean existsByEmail(String email)
-    {
+    public boolean existsByEmail(String email) {
         return memberJpaRepository.existsByEmail(email);
     }
 
     @Override
-    public Member save(Member member)
-    {
+    public Member save(Member member) {
         return memberJpaRepository.save(member);
     }
 
     @Override
-    public Optional<Member> findById(long id)
-    {
+    public Optional<Member> findById(long id) {
         return memberJpaRepository.findById(id);
     }
 
     @Override
-    public void deleteById(long id)
-    {
+    public void deleteById(long id) {
         memberJpaRepository.deleteById(id);
+    }
+
+    @Override
+    public Member getReferenceById(long id) {
+        return memberJpaRepository.getReferenceById(id);
     }
 }

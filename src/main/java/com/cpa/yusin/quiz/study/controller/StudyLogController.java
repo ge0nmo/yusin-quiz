@@ -1,11 +1,9 @@
 package com.cpa.yusin.quiz.study.controller;
 
-import com.cpa.yusin.quiz.member.domain.Member;
+import com.cpa.yusin.quiz.global.details.MemberDetails;
 import com.cpa.yusin.quiz.study.controller.dto.StudyLogResponse;
 import com.cpa.yusin.quiz.study.domain.DailyStudyLog;
 import com.cpa.yusin.quiz.study.service.StudyLogService;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -14,7 +12,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.List;
 
@@ -27,21 +24,20 @@ public class StudyLogController {
 
     @GetMapping("/monthly")
     public List<StudyLogResponse> getMonthlyLog(
-            @AuthenticationPrincipal Member member,
+            @AuthenticationPrincipal MemberDetails memberDetails,
             @RequestParam("yearMonth") @DateTimeFormat(pattern = "yyyy-MM") YearMonth yearMonth) {
 
-        List<DailyStudyLog> logs = studyLogService.getMonthlyLog(member, yearMonth);
+        List<DailyStudyLog> logs = studyLogService.getMonthlyLog(memberDetails.getMember().getId(), yearMonth);
         return logs.stream().map(StudyLogResponse::from).toList();
     }
 
     @GetMapping("/yearly")
     public List<StudyLogResponse> getYearlyLog(
-            @AuthenticationPrincipal Member member,
+            @AuthenticationPrincipal MemberDetails memberDetails,
             @RequestParam("year") int year) {
 
-        List<DailyStudyLog> logs = studyLogService.getYearlyLog(member, year);
+        List<DailyStudyLog> logs = studyLogService.getYearlyLog(memberDetails.getMember().getId(), year);
         return logs.stream().map(StudyLogResponse::from).toList();
     }
-
 
 }

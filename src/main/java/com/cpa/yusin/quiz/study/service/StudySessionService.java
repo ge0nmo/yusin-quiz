@@ -3,6 +3,7 @@ package com.cpa.yusin.quiz.study.service;
 import com.cpa.yusin.quiz.global.exception.ExceptionMessage;
 import com.cpa.yusin.quiz.global.exception.StudySessionException;
 import com.cpa.yusin.quiz.member.domain.Member;
+import com.cpa.yusin.quiz.member.service.port.MemberRepository;
 import com.cpa.yusin.quiz.study.controller.dto.response.ExamAnswerResponse;
 import com.cpa.yusin.quiz.study.domain.*;
 import com.cpa.yusin.quiz.study.service.port.StudySessionRepository;
@@ -27,6 +28,7 @@ public class StudySessionService {
     private final SubmittedAnswerRepository submittedAnswerRepository;
     private final StudyLogService studyLogService; // Inject for activity recording
     private final ChoiceRepository choiceRepository;
+    private final MemberRepository memberRepository;
 
     /**
      * Start a study session.
@@ -35,15 +37,17 @@ public class StudySessionService {
      * Otherwise, create a new session.
      */
     @Transactional
-    public StudySession startSession(Member member, Long examId, ExamMode mode) {
+    public StudySession startSession(Long memberId, Long examId, ExamMode mode) {
         Optional<StudySession> existingSession = studySessionRepository.findByMemberIdAndExamIdAndStatusAndMode(
-                member.getId(), examId, StudySessionStatus.IN_PROGRESS, mode);
+                memberId, examId, StudySessionStatus.IN_PROGRESS, mode);
 
         if (existingSession.isPresent()) {
             return existingSession.get();
         }
 
-        StudySession newSession = StudySession.start(member, examId, mode);
+        // Retrieve Member Reference for creation
+        Member memberRef = memberRepository.getReferenceById(memberId);
+        StudySession newSession = StudySession.start(memberRef, examId, mode);
         return studySessionRepository.save(newSession);
     }
 
@@ -87,7 +91,7 @@ public class StudySessionService {
 
         // Record activity if in Practice Mode
         if (session.getMode() == ExamMode.PRACTICE) {
-            studyLogService.recordActivity(session.getMember());
+            studyLogService.recordActivity(session.getMember().getId());
 
             // Fetch Explanation for Practice Mode
             // N+1 issue potential, but single request per answer.
@@ -138,7 +142,7 @@ public class StudySessionService {
             // attempts.
             // Let's count *attempts* (answers.size()).
             int solvedCount = answers.size();
-            studyLogService.recordActivity(session.getMember(), solvedCount);
+            studyLogService.recordActivity(session.getMember().getId(), solvedCount);
         }
         // Practice Mode: Already updated incrementally in saveAnswer.
 
