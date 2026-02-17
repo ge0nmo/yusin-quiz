@@ -64,6 +64,12 @@ public enum ExceptionMessage {
 
     PAYMENT_PRICE_ERROR("결제 금액이 일치하지 않습니다.", HttpStatus.BAD_REQUEST),
 
+    // Study Session
+    SESSION_NOT_FOUND("세션을 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
+
+    // Server
+    INTERNAL_SERVER_ERROR("서버 내부 오류가 발생했습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
+
     /**
      * subscription
      */
