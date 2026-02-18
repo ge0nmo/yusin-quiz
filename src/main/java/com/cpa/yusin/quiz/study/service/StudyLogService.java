@@ -24,19 +24,7 @@ public class StudyLogService {
 
     private final DailyStudyLogRepository dailyStudyLogRepository;
 
-    private final MemberRepository memberRepository; // Needed for getReferenceById
-
-    @Autowired
-    @Lazy
-    private StudyLogService self;
-
-    /**
-     * Record activity for the given memberId on the current date (Increments by 1).
-     */
-    @Transactional
-    public void recordActivity(Long memberId) {
-        recordActivity(memberId, 1);
-    }
+    private final DailyStudyLogManager dailyStudyLogManager;
 
     /**
      * Record activity with specific count.
@@ -63,7 +51,7 @@ public class StudyLogService {
         // as rollback-only if a DataIntegrityViolationException occurs (race
         // condition).
         try {
-            self.createLog(memberId, today, count);
+            dailyStudyLogManager.createLog(memberId, today, count);
         } catch (DataIntegrityViolationException e) {
             // 3. Race condition: Another thread created it just now.
             // Creation failed, but we know the row exists now. Retry update in the current
@@ -72,18 +60,7 @@ public class StudyLogService {
         }
     }
 
-    /**
-     * Helper method to create log in a separate transaction.
-     * This ensures that if it fails (due to constraint), the main transaction isn't
-     * affected.
-     */
-    @Transactional(propagation = org.springframework.transaction.annotation.Propagation.REQUIRES_NEW)
-    public void createLog(Long memberId, LocalDate date, int count) {
-        // Use getReferenceById to avoid unnecessary SELECT
-        Member memberRef = memberRepository.getReferenceById(memberId);
-        DailyStudyLog newLog = DailyStudyLog.createWithCount(memberRef, date, count);
-        dailyStudyLogRepository.save(newLog);
-    }
+    // createLog moved to DailyStudyLogManager
 
     public List<DailyStudyLog> getMonthlyLog(Long memberId, YearMonth yearMonth) {
         LocalDate startDate = yearMonth.atDay(1);

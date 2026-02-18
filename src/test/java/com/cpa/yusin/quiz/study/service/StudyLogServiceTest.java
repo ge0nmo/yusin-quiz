@@ -34,7 +34,7 @@ class StudyLogServiceTest {
     private MemberRepository memberRepository;
 
     @Mock
-    private StudyLogService self; // Mock the self-injected service
+    private DailyStudyLogManager dailyStudyLogManager;
 
     @Test
     @DisplayName("활동 기록 - 로그가 이미 존재하면 업데이트만 수행 (Update Success)")
@@ -52,7 +52,7 @@ class StudyLogServiceTest {
 
         // then
         verify(dailyStudyLogRepository).increaseSolvedCount(eq(memberId), eq(today), eq(count));
-        verify(self, never()).createLog(any(), any(), anyInt());
+        verify(dailyStudyLogManager, never()).createLog(any(), any(), anyInt());
     }
 
     @Test
@@ -67,18 +67,15 @@ class StudyLogServiceTest {
         given(dailyStudyLogRepository.increaseSolvedCount(eq(memberId), eq(today), eq(count)))
                 .willReturn(0);
 
-        // Inject mock for self
-        ReflectionTestUtils.setField(studyLogService, "self", self);
-
         // 2. Create succeeds
-        doNothing().when(self).createLog(eq(memberId), eq(today), eq(count));
+        doNothing().when(dailyStudyLogManager).createLog(eq(memberId), eq(today), eq(count));
 
         // when
         studyLogService.recordActivity(memberId, count);
 
         // then
         verify(dailyStudyLogRepository).increaseSolvedCount(eq(memberId), eq(today), eq(count));
-        verify(self).createLog(eq(memberId), eq(today), eq(count));
+        verify(dailyStudyLogManager).createLog(eq(memberId), eq(today), eq(count));
     }
 
     @Test
@@ -94,11 +91,9 @@ class StudyLogServiceTest {
                 .willReturn(0)
                 .willReturn(1); // 3. Second update succeeds (after race)
 
-        // Inject mock for self
-        ReflectionTestUtils.setField(studyLogService, "self", self);
-
         // 2. Create fails with DataIntegrityViolationException (Race condition)
-        doThrow(DataIntegrityViolationException.class).when(self).createLog(eq(memberId), eq(today), eq(count));
+        doThrow(DataIntegrityViolationException.class).when(dailyStudyLogManager).createLog(eq(memberId), eq(today),
+                eq(count));
 
         // when
         studyLogService.recordActivity(memberId, count);
@@ -107,6 +102,6 @@ class StudyLogServiceTest {
         // Verify update called twice
         verify(dailyStudyLogRepository, times(2)).increaseSolvedCount(eq(memberId), eq(today), eq(count));
         // Verify create called once
-        verify(self).createLog(eq(memberId), eq(today), eq(count));
+        verify(dailyStudyLogManager).createLog(eq(memberId), eq(today), eq(count));
     }
 }
