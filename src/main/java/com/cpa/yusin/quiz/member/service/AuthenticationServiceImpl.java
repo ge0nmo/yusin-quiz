@@ -38,6 +38,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final CustomAuthenticationProvider authenticationProvider;
     private final MemberMapper memberMapper;
     private final MemberValidator memberValidator;
+    private final RandomNicknameGenerator randomNicknameGenerator;
 
     @Override
     public LoginResponse login(LoginRequest request) {
@@ -92,14 +93,31 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
 
     private Member registerSocialMember(SocialProfile profile) {
+        String nickname = generateUniqueNickname();
+
         Member newMember = Member.builder()
                 .email(profile.getEmail())
-                .username(profile.getName()) // 이름 저장
+                .username(nickname) // 랜덤 닉네임 저장
                 .password(passwordEncoder.encode(UUID.randomUUID().toString())) // 랜덤 비번
                 .role(Role.USER)
                 .platform(profile.getPlatform())
                 .build();
         return memberRepository.save(newMember);
+    }
+
+    private String generateUniqueNickname() {
+        String nickname = randomNicknameGenerator.generate();
+        int maxRetries = 20;
+
+        for (int i = 0; i < maxRetries; i++) {
+            if (!memberRepository.existsByUsername(nickname)) {
+                return nickname;
+            }
+            nickname = randomNicknameGenerator.generate();
+        }
+
+        // Final fallback: append random suffix if failed 20 times (very unlikely)
+        return nickname + UUID.randomUUID().toString().substring(0, 5);
     }
 
     public TokenResponse refreshAccessToken(String refreshToken) {

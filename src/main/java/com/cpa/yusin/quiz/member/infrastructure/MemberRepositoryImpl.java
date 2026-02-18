@@ -35,6 +35,11 @@ public class MemberRepositoryImpl implements MemberRepository {
     }
 
     @Override
+    public boolean existsByUsername(String username) {
+        return memberJpaRepository.existsByUsername(username);
+    }
+
+    @Override
     public Member save(Member member) {
         return memberJpaRepository.save(member);
     }

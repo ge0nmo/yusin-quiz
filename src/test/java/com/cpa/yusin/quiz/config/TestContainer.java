@@ -38,6 +38,7 @@ import com.cpa.yusin.quiz.member.controller.port.MemberService;
 import com.cpa.yusin.quiz.member.infrastructure.MemberValidatorImpl;
 import com.cpa.yusin.quiz.member.service.AuthenticationServiceImpl;
 import com.cpa.yusin.quiz.member.service.MemberServiceImpl;
+import com.cpa.yusin.quiz.member.service.RandomNicknameGenerator;
 import com.cpa.yusin.quiz.member.service.port.MemberRepository;
 import com.cpa.yusin.quiz.member.service.port.MemberValidator;
 import com.cpa.yusin.quiz.mock.*;
@@ -159,7 +160,7 @@ public class TestContainer {
                 this.memberValidator = new MemberValidatorImpl(this.memberRepository);
                 this.authenticationService = new AuthenticationServiceImpl(this.passwordEncoder, this.jwtService,
                                 this.memberRepository, this.authenticationProvider, this.memberMapper,
-                                this.memberValidator);
+                                this.memberValidator, new RandomNicknameGenerator());
                 this.memberController = new MemberController(this.memberService);
 
                 this.subjectValidator = new SubjectValidatorImpl(this.subjectRepository);

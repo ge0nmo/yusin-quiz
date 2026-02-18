@@ -57,6 +57,11 @@ public class FakeMemberRepository implements MemberRepository {
     }
 
     @Override
+    public boolean existsByUsername(String username) {
+        return data.stream().anyMatch(item -> item.getUsername().equals(username));
+    }
+
+    @Override
     public Member save(Member member) {
         if (member.getId() == null || member.getId() == 0) {
             Member newMember = Member.builder()
