@@ -66,7 +66,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         String accessToken = jwtService.createAccessToken(member.getEmail());
         String refreshToken = jwtService.createRefreshToken(member.getEmail());
 
-        return LoginResponse.from(member.getId(), member.getEmail(), member.getRole(), accessToken, refreshToken);
+        return LoginResponse.from(member.getId(), member.getEmail(), member.getUsername(), member.getRole(),
+                accessToken, refreshToken);
     }
 
     @Override
@@ -89,7 +90,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         String accessToken = jwtService.createAccessToken(member.getEmail());
         String refreshToken = jwtService.createRefreshToken(member.getEmail());
 
-        return LoginResponse.from(member.getId(), member.getEmail(), member.getRole(), accessToken, refreshToken);
+        return LoginResponse.from(member.getId(), member.getEmail(), member.getUsername(), member.getRole(),
+                accessToken, refreshToken);
     }
 
     private Member registerSocialMember(SocialProfile profile) {
