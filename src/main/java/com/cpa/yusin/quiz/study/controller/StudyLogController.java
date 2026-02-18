@@ -3,6 +3,7 @@ package com.cpa.yusin.quiz.study.controller;
 import com.cpa.yusin.quiz.common.controller.dto.response.GlobalResponse;
 import com.cpa.yusin.quiz.global.details.MemberDetails;
 import com.cpa.yusin.quiz.study.controller.dto.StudyLogResponse;
+import com.cpa.yusin.quiz.study.controller.dto.response.StudyStreakResponse;
 import com.cpa.yusin.quiz.study.domain.DailyStudyLog;
 import com.cpa.yusin.quiz.study.service.StudyLogService;
 import lombok.RequiredArgsConstructor;
@@ -22,17 +23,18 @@ import java.util.List;
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/study-logs")
 @RestController
-public class StudyLogController {
+public class StudyLogController
+{
 
     private final StudyLogService studyLogService;
 
     @GetMapping("/monthly")
     public ResponseEntity<GlobalResponse<List<StudyLogResponse>>> getMonthlyLog(
             @AuthenticationPrincipal MemberDetails memberDetails,
-            @RequestParam("yearMonth") @DateTimeFormat(pattern = "yyyy-MM") YearMonth yearMonth) {
+            @RequestParam("yearMonth") @DateTimeFormat(pattern = "yyyy-MM") YearMonth yearMonth)
+    {
 
         List<DailyStudyLog> logs = studyLogService.getMonthlyLog(memberDetails.getMember().getId(), yearMonth);
-
 
         List<StudyLogResponse> response = logs.stream().map(StudyLogResponse::from).toList();
         return ResponseEntity.ok(GlobalResponse.success(response));
@@ -41,12 +43,20 @@ public class StudyLogController {
     @GetMapping("/yearly")
     public ResponseEntity<GlobalResponse<List<StudyLogResponse>>> getYearlyLog(
             @AuthenticationPrincipal MemberDetails memberDetails,
-            @RequestParam("year") int year) {
+            @RequestParam("year") int year)
+    {
 
         List<DailyStudyLog> logs = studyLogService.getYearlyLog(memberDetails.getMember().getId(), year);
         List<StudyLogResponse> response = logs.stream().map(StudyLogResponse::from).toList();
 
         return ResponseEntity.ok(GlobalResponse.success(response));
+    }
+
+    @GetMapping("/streak")
+    public ResponseEntity<GlobalResponse<StudyStreakResponse>> getStreak (@AuthenticationPrincipal MemberDetails memberDetails)
+    {
+        int streak = studyLogService.calculateCurrentStreak(memberDetails.getMember().getId());
+        return ResponseEntity.ok(GlobalResponse.success(new StudyStreakResponse(streak)));
     }
 
 }

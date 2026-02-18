@@ -70,4 +70,37 @@ public class StudyLogService {
         LocalDate endDate = LocalDate.of(year, 12, 31);
         return dailyStudyLogRepository.findByMemberIdAndDateBetween(memberId, startDate, endDate);
     }
+
+    public int calculateCurrentStreak(Long memberId) {
+        // Fetch logs for the last 365 days to cover enough ground for a streak
+        LocalDate today = LocalDate.now();
+        LocalDate oneYearAgo = today.minusDays(365);
+        List<DailyStudyLog> logs = dailyStudyLogRepository.findByMemberIdAndDateBetween(memberId, oneYearAgo, today);
+
+        // Sort by date descending (Newest first)
+        logs.sort((a, b) -> b.getDate().compareTo(a.getDate()));
+
+        int streak = 0;
+        LocalDate expectedDate = today;
+
+        // If user hasn't studied today yet, check if they studied yesterday to keep the
+        // streak alive
+        if (logs.isEmpty() || !logs.get(0).getDate().equals(today)) {
+            expectedDate = today.minusDays(1);
+        }
+
+        for (DailyStudyLog log : logs) {
+            if (log.getDate().equals(expectedDate)) {
+                streak++;
+                expectedDate = expectedDate.minusDays(1);
+            } else if (log.getDate().isBefore(expectedDate)) {
+                // Streak broken
+                break;
+            }
+            // If log.getDate() is after expectedDate (which shouldn't happen with sorted
+            // list and logic above), ignore
+        }
+
+        return streak;
+    }
 }
