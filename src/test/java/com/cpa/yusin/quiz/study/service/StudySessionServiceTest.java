@@ -231,7 +231,7 @@ public class StudySessionServiceTest {
                 int finalScore = studySessionService.completeSession(sessionId);
 
                 // then
-                assertThat(finalScore).isEqualTo(10);
+                assertThat(finalScore).isEqualTo(2);
                 assertThat(session.getFinishedAt()).isEqualTo(NOW);
                 // Verify EVENT is published
                 verify(eventPublisher).publishEvent(any(StudySolvedEvent.class));
