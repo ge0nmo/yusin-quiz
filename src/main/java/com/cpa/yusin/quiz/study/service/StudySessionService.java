@@ -117,8 +117,7 @@ public class StudySessionService {
 
         // Calculate Score
         List<SubmittedAnswer> answers = submittedAnswerRepository.findAllByStudySessionId(sessionId);
-        int correctCount = (int) answers.stream().filter(SubmittedAnswer::isCorrect).count();
-        int score = correctCount * 5;
+        int score = (int) answers.stream().filter(SubmittedAnswer::isCorrect).count();
 
         LocalDateTime now = clockHolder.getCurrentDateTime();
         session.complete(score, now);

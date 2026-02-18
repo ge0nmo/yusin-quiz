@@ -1,15 +1,12 @@
 package com.cpa.yusin.quiz.study.service;
 
-import com.cpa.yusin.quiz.member.domain.Member;
-import com.cpa.yusin.quiz.member.service.port.MemberRepository;
 import com.cpa.yusin.quiz.study.domain.DailyStudyLog;
 import com.cpa.yusin.quiz.study.service.port.DailyStudyLogRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
@@ -31,7 +28,7 @@ public class StudyLogService {
      * Uses atomic increment if record exists, or creates new one with initial
      * count.
      */
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void recordActivity(Long memberId, int count) {
         if (count <= 0)
             return;
