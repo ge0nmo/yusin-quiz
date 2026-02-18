@@ -11,6 +11,8 @@ public interface StudySessionRepository {
 
     Optional<StudySession> findById(Long id);
 
+    Optional<StudySession> findByIdWithLock(Long id);
+
     Optional<StudySession> findByMemberIdAndExamIdAndStatusAndMode(
             Long memberId, Long examId, StudySessionStatus status, ExamMode mode);
 }

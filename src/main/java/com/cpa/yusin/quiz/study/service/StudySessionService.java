@@ -67,7 +67,8 @@ public class StudySessionService {
      */
     @Transactional
     public ExamAnswerResponse saveAnswer(Long sessionId, Long problemId, Long choiceId, int index) {
-        StudySession session = getSession(sessionId);
+        StudySession session = studySessionRepository.findByIdWithLock(sessionId)
+                .orElseThrow(() -> new StudySessionException(ExceptionMessage.SESSION_NOT_FOUND));
 
         // Update Session Index
         session.updateLastIndex(index);
@@ -91,17 +92,24 @@ public class StudySessionService {
 
         // Record activity if in Practice Mode
         if (session.getMode() == ExamMode.PRACTICE) {
-            studyLogService.recordActivity(session.getMember().getId());
+            try {
+                studyLogService.recordActivity(session.getMember().getId());
+            } catch (Exception e) {
+                log.error("Failed to record activity for member {}", session.getMember().getId(), e);
+                // Do not throw, continue to return response
+            }
 
             // Fetch Explanation for Practice Mode
-            // N+1 issue potential, but single request per answer.
-            // Problem entity access needed.
-            String explanation = choice.getProblem().getExplanation(); // Assuming legacy string for now, or V2 logic
-            // If V2 JSON blocks are used, we might need to serialize or return raw blocks.
-            // For simplicity/legacy compatibility requested in prompt, assuming basic
-            // string or empty if V2.
-
-            return ExamAnswerResponse.practice(isCorrect, explanation);
+            try {
+                // N+1 issue potential, but single request per answer.
+                // Problem entity access needed.
+                String explanation = choice.getProblem().getExplanation(); // Assuming legacy string for now, or V2
+                                                                           // logic
+                return ExamAnswerResponse.practice(isCorrect, explanation);
+            } catch (Exception e) {
+                log.error("Failed to fetch explanation for choice {}", choiceId, e);
+                return ExamAnswerResponse.practice(isCorrect, "해설을 불러올 수 없습니다.");
+            }
         }
 
         return ExamAnswerResponse.exam();
@@ -114,7 +122,8 @@ public class StudySessionService {
      */
     @Transactional
     public int completeSession(Long sessionId) {
-        StudySession session = getSession(sessionId);
+        StudySession session = studySessionRepository.findByIdWithLock(sessionId)
+                .orElseThrow(() -> new StudySessionException(ExceptionMessage.SESSION_NOT_FOUND));
 
         // Calculate Score
         List<SubmittedAnswer> answers = submittedAnswerRepository.findAllByStudySessionId(sessionId);

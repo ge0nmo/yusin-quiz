@@ -1,13 +1,13 @@
 package com.cpa.yusin.quiz.study.controller.dto.request;
 
 import jakarta.validation.constraints.NotNull;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
-@Getter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class ExamSubmitRequest {
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class ExamSubmitRequest
+{
     @NotNull(message = "세션 ID는 필수입니다.")
     private Long sessionId;
 

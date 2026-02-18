@@ -26,6 +26,11 @@ public class StudySessionRepositoryImpl implements StudySessionRepository {
     }
 
     @Override
+    public Optional<StudySession> findByIdWithLock(Long id) {
+        return studySessionJpaRepository.findByIdWithLock(id);
+    }
+
+    @Override
     public Optional<StudySession> findByMemberIdAndExamIdAndStatusAndMode(Long memberId, Long examId,
             StudySessionStatus status, ExamMode mode) {
         return studySessionJpaRepository.findByMemberIdAndExamIdAndStatusAndMode(memberId, examId, status, mode);

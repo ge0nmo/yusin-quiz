@@ -25,7 +25,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
-class StudySessionServiceTest {
+public class StudySessionServiceTest {
 
         @InjectMocks
         private StudySessionService studySessionService;
@@ -118,7 +118,8 @@ class StudySessionServiceTest {
                 int index = 5;
 
                 StudySession session = StudySession.builder().id(sessionId).mode(ExamMode.EXAM).build();
-                given(studySessionRepository.findById(sessionId)).willReturn(Optional.of(session));
+                // Use findByIdWithLock for locking
+                given(studySessionRepository.findByIdWithLock(sessionId)).willReturn(Optional.of(session));
 
                 // Choice Mock
                 Choice choice = Choice.builder()
@@ -132,17 +133,10 @@ class StudySessionServiceTest {
                 ExamAnswerResponse response = studySessionService.saveAnswer(sessionId, problemId, choiceId, index);
 
                 // then
-                // 1. Check Response
                 assertThat(response.isSuccess()).isTrue();
-                // Exam Mode -> isCorrect null
                 assertThat(response.getIsCorrect()).isNull();
-
-                // 2. Session Index 업데이트 Check
                 assertThat(session.getLastIndex()).isEqualTo(index);
-                // 3. Insert 호출 Check
                 verify(submittedAnswerRepository).save(any(SubmittedAnswer.class));
-
-                // Optimization Check: Exam mode should NOT record activity here
                 verify(studyLogService, org.mockito.Mockito.never()).recordActivity(any());
         }
 
@@ -156,16 +150,13 @@ class StudySessionServiceTest {
                 boolean correct = false;
 
                 StudySession session = StudySession.builder().id(sessionId).mode(ExamMode.PRACTICE)
-                                .member(member).build(); // Needs member for log recording
+                                .member(member).build();
 
-                given(studySessionRepository.findById(sessionId)).willReturn(Optional.of(session));
+                // Use findByIdWithLock
+                given(studySessionRepository.findByIdWithLock(sessionId)).willReturn(Optional.of(session));
 
-                // Choice & Problem Mock for Explanation
-                Problem problem = Problem.builder()
-                                .explanation("Test Explanation").build();
-
-                Choice choice = Choice.builder()
-                                .id(choiceId).isAnswer(correct).problem(problem).build();
+                Problem problem = Problem.builder().explanation("Test Explanation").build();
+                Choice choice = Choice.builder().id(choiceId).isAnswer(correct).problem(problem).build();
 
                 given(choiceRepository.findById(choiceId)).willReturn(Optional.of(choice));
 
@@ -175,7 +166,6 @@ class StudySessionServiceTest {
                 // then
                 assertThat(response.getIsCorrect()).isFalse();
                 assertThat(response.getExplanation()).isEqualTo("Test Explanation");
-                // Verify call with ID
                 verify(studyLogService).recordActivity(member.getId());
         }
 
@@ -185,7 +175,7 @@ class StudySessionServiceTest {
                 // given
                 Long sessionId = 1L;
                 Long problemId = 10L;
-                Long choiceId = 400L; // New choice ID
+                Long choiceId = 400L;
                 boolean correct = false;
                 int index = 6;
 
@@ -193,11 +183,10 @@ class StudySessionServiceTest {
                 SubmittedAnswer existingAnswer = SubmittedAnswer.builder()
                                 .id(50L).choiceId(100L).isCorrect(true).build();
 
-                given(studySessionRepository.findById(sessionId)).willReturn(Optional.of(session));
+                // Use findByIdWithLock
+                given(studySessionRepository.findByIdWithLock(sessionId)).willReturn(Optional.of(session));
 
-                // Choice Mock
-                Choice choice = Choice.builder()
-                                .id(choiceId).isAnswer(correct).build();
+                Choice choice = Choice.builder().id(choiceId).isAnswer(correct).build();
                 given(choiceRepository.findById(choiceId)).willReturn(Optional.of(choice));
 
                 given(submittedAnswerRepository.findByStudySessionIdAndProblemId(sessionId, problemId))
@@ -208,12 +197,8 @@ class StudySessionServiceTest {
 
                 // then
                 assertThat(session.getLastIndex()).isEqualTo(index);
-                assertThat(existingAnswer.getChoiceId()).isEqualTo(choiceId); // Value updated
+                assertThat(existingAnswer.getChoiceId()).isEqualTo(choiceId);
                 assertThat(existingAnswer.isCorrect()).isEqualTo(correct);
-                // Save 호출 안함 (Dirty Checking) - But RepositoryImpl implementation might vary.
-                // Logic says "updateAnswer" method on Entity. JPA dirty check handles it.
-                // verify(submittedAnswerRepository).save(...) -> No, strictly speaking we don't
-                // call save on update in service (relying on transaction).
         }
 
         @Test
@@ -223,22 +208,20 @@ class StudySessionServiceTest {
                 Long sessionId = 1L;
                 StudySession session = StudySession.builder().id(sessionId).mode(ExamMode.EXAM).member(member).build();
 
-                // 2 Correct Answers
                 List<SubmittedAnswer> answers = List.of(
                                 SubmittedAnswer.builder().isCorrect(true).build(),
                                 SubmittedAnswer.builder().isCorrect(true).build(),
                                 SubmittedAnswer.builder().isCorrect(false).build());
 
-                given(studySessionRepository.findById(sessionId)).willReturn(Optional.of(session));
+                // Use findByIdWithLock
+                given(studySessionRepository.findByIdWithLock(sessionId)).willReturn(Optional.of(session));
                 given(submittedAnswerRepository.findAllByStudySessionId(sessionId)).willReturn(answers);
 
                 // when
                 int finalScore = studySessionService.completeSession(sessionId);
 
                 // then
-                assertThat(finalScore).isEqualTo(10); // 2 * 5
-                // Optimization Check: recordActivity called with count 3 (size of answers) and
-                // memberID
+                assertThat(finalScore).isEqualTo(10);
                 verify(studyLogService).recordActivity(member.getId(), 3);
                 assertThat(session.getStatus()).isEqualTo(StudySessionStatus.COMPLETED);
         }
@@ -251,17 +234,14 @@ class StudySessionServiceTest {
                 StudySession session = StudySession.builder().id(sessionId).mode(ExamMode.PRACTICE).member(member)
                                 .build();
 
-                given(studySessionRepository.findById(sessionId)).willReturn(Optional.of(session));
-                given(submittedAnswerRepository.findAllByStudySessionId(sessionId)).willReturn(List.of()); // Answers
-                                                                                                           // don't
-                                                                                                           // matter for
-                                                                                                           // this check
+                // Use findByIdWithLock
+                given(studySessionRepository.findByIdWithLock(sessionId)).willReturn(Optional.of(session));
+                given(submittedAnswerRepository.findAllByStudySessionId(sessionId)).willReturn(List.of());
 
                 // when
                 studySessionService.completeSession(sessionId);
 
                 // then
-                // Optimization Check: recordActivity SHOULD NOT be called
                 verify(studyLogService, org.mockito.Mockito.never()).recordActivity(any());
                 verify(studyLogService, org.mockito.Mockito.never()).recordActivity(any(),
                                 org.mockito.ArgumentMatchers.anyInt());

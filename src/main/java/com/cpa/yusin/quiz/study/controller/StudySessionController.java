@@ -1,5 +1,6 @@
 package com.cpa.yusin.quiz.study.controller;
 
+import com.cpa.yusin.quiz.common.controller.dto.response.GlobalResponse;
 import com.cpa.yusin.quiz.global.details.MemberDetails;
 import com.cpa.yusin.quiz.study.controller.dto.request.ExamFinishRequest;
 import com.cpa.yusin.quiz.study.controller.dto.request.ExamStartRequest;
@@ -31,7 +32,7 @@ public class StudySessionController {
 
         // 1. 시험 시작 (또는 이어풀기)
         @PostMapping("/exam/start")
-        public ResponseEntity<ExamStartResponse> startExam(
+        public ResponseEntity<GlobalResponse<ExamStartResponse>> startExam(
                         @AuthenticationPrincipal MemberDetails memberDetails,
                         @RequestBody ExamStartRequest request) {
 
@@ -44,12 +45,12 @@ public class StudySessionController {
                                 .map(SubmittedAnswerResponse::from)
                                 .toList();
 
-                return ResponseEntity.ok(ExamStartResponse.of(session, answerResponses));
+                return ResponseEntity.ok(GlobalResponse.success(ExamStartResponse.of(session, answerResponses)));
         }
 
         // 2. 답안 제출 (실시간 저장)
         @PostMapping("/answer")
-        public ResponseEntity<ExamAnswerResponse> saveAnswer(
+        public ResponseEntity<GlobalResponse<ExamAnswerResponse>> saveAnswer(
                         @AuthenticationPrincipal MemberDetails memberDetails,
                         @RequestBody @Valid ExamSubmitRequest request) {
 
@@ -66,17 +67,17 @@ public class StudySessionController {
                                 request.getChoiceId(),
                                 request.getIndex());
 
-                return ResponseEntity.ok(response);
+                return ResponseEntity.ok(GlobalResponse.success(response));
         }
 
         // 3. 시험 종료
         @PostMapping("/finish")
-        public ResponseEntity<ExamFinishResponse> finishExam(
+        public ResponseEntity<GlobalResponse<ExamFinishResponse>> finishExam(
                         @AuthenticationPrincipal MemberDetails memberDetails,
                         @RequestBody @Valid ExamFinishRequest request) {
 
                 int finalScore = studySessionService.completeSession(request.getSessionId());
 
-                return ResponseEntity.ok(new ExamFinishResponse(finalScore));
+                return ResponseEntity.ok(GlobalResponse.success(new ExamFinishResponse(finalScore)));
         }
 }
