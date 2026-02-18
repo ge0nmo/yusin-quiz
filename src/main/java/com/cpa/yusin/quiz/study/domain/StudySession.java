@@ -46,25 +46,25 @@ public class StudySession extends BaseEntity {
         this.lastIndex = index;
     }
 
-    public void complete(int score) {
+    public void complete(int score, LocalDateTime finishedAt) {
         this.status = StudySessionStatus.COMPLETED;
         this.currentScore = score;
-        this.finishedAt = LocalDateTime.now();
+        this.finishedAt = finishedAt;
     }
 
-    public void complete() {
+    public void complete(LocalDateTime finishedAt) {
         this.status = StudySessionStatus.COMPLETED;
-        this.finishedAt = LocalDateTime.now();
+        this.finishedAt = finishedAt;
     }
 
-    public static StudySession start(Member member, Long examId, ExamMode mode) {
+    public static StudySession start(Member member, Long examId, ExamMode mode, LocalDateTime startedAt) {
         return StudySession.builder()
                 .member(member)
                 .examId(examId)
                 .mode(mode)
                 .status(StudySessionStatus.IN_PROGRESS)
                 .lastIndex(0)
-                .startedAt(LocalDateTime.now())
+                .startedAt(startedAt)
                 .build();
     }
 }

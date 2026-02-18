@@ -2,12 +2,14 @@ package com.cpa.yusin.quiz.study.service;
 
 import com.cpa.yusin.quiz.choice.domain.Choice;
 import com.cpa.yusin.quiz.choice.service.port.ChoiceRepository;
+import com.cpa.yusin.quiz.common.service.ClockHolder;
 import com.cpa.yusin.quiz.member.domain.Member;
 import com.cpa.yusin.quiz.member.domain.type.Role;
 import com.cpa.yusin.quiz.member.service.port.MemberRepository;
 import com.cpa.yusin.quiz.problem.domain.Problem;
 import com.cpa.yusin.quiz.study.controller.dto.response.ExamAnswerResponse;
 import com.cpa.yusin.quiz.study.domain.*;
+import com.cpa.yusin.quiz.study.event.StudySolvedEvent;
 import com.cpa.yusin.quiz.study.service.port.StudySessionRepository;
 import com.cpa.yusin.quiz.study.service.port.SubmittedAnswerRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -17,6 +19,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
+
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -36,8 +41,12 @@ public class StudySessionServiceTest {
         @Mock
         private SubmittedAnswerRepository submittedAnswerRepository;
 
+        // Use ApplicationEventPublisher instead of StudyLogService
         @Mock
-        private StudyLogService studyLogService;
+        private ApplicationEventPublisher eventPublisher;
+
+        @Mock
+        private ClockHolder clockHolder;
 
         @Mock
         private ChoiceRepository choiceRepository;
@@ -46,6 +55,7 @@ public class StudySessionServiceTest {
         private MemberRepository memberRepository;
 
         private Member member;
+        private final LocalDateTime NOW = LocalDateTime.of(2025, 1, 1, 12, 0, 0);
 
         @BeforeEach
         void setUp() {
@@ -93,6 +103,7 @@ public class StudySessionServiceTest {
                                 .willReturn(Optional.empty());
 
                 given(memberRepository.getReferenceById(memberId)).willReturn(member);
+                given(clockHolder.getCurrentDateTime()).willReturn(NOW);
 
                 given(studySessionRepository.save(any(StudySession.class)))
                                 .willAnswer(invocation -> invocation.getArgument(0));
@@ -103,6 +114,7 @@ public class StudySessionServiceTest {
                 // then
                 assertThat(session.getExamId()).isEqualTo(examId);
                 assertThat(session.getMode()).isEqualTo(mode);
+                assertThat(session.getStartedAt()).isEqualTo(NOW);
                 verify(memberRepository).getReferenceById(memberId);
                 verify(studySessionRepository).save(any(StudySession.class));
         }
@@ -118,10 +130,8 @@ public class StudySessionServiceTest {
                 int index = 5;
 
                 StudySession session = StudySession.builder().id(sessionId).mode(ExamMode.EXAM).build();
-                // Use findByIdWithLock for locking
                 given(studySessionRepository.findByIdWithLock(sessionId)).willReturn(Optional.of(session));
 
-                // Choice Mock
                 Choice choice = Choice.builder()
                                 .id(choiceId).isAnswer(correct).build();
                 given(choiceRepository.findById(choiceId)).willReturn(Optional.of(choice));
@@ -137,7 +147,8 @@ public class StudySessionServiceTest {
                 assertThat(response.getIsCorrect()).isNull();
                 assertThat(session.getLastIndex()).isEqualTo(index);
                 verify(submittedAnswerRepository).save(any(SubmittedAnswer.class));
-                verify(studyLogService, org.mockito.Mockito.never()).recordActivity(any());
+                // Verify EVENT is NOT published for EXAM mode answer save
+                verify(eventPublisher, org.mockito.Mockito.never()).publishEvent(any());
         }
 
         @Test
@@ -152,7 +163,6 @@ public class StudySessionServiceTest {
                 StudySession session = StudySession.builder().id(sessionId).mode(ExamMode.PRACTICE)
                                 .member(member).build();
 
-                // Use findByIdWithLock
                 given(studySessionRepository.findByIdWithLock(sessionId)).willReturn(Optional.of(session));
 
                 Problem problem = Problem.builder().explanation("Test Explanation").build();
@@ -166,7 +176,8 @@ public class StudySessionServiceTest {
                 // then
                 assertThat(response.getIsCorrect()).isFalse();
                 assertThat(response.getExplanation()).isEqualTo("Test Explanation");
-                verify(studyLogService).recordActivity(member.getId());
+                // Verify EVENT is published
+                verify(eventPublisher).publishEvent(any(StudySolvedEvent.class));
         }
 
         @Test
@@ -183,7 +194,6 @@ public class StudySessionServiceTest {
                 SubmittedAnswer existingAnswer = SubmittedAnswer.builder()
                                 .id(50L).choiceId(100L).isCorrect(true).build();
 
-                // Use findByIdWithLock
                 given(studySessionRepository.findByIdWithLock(sessionId)).willReturn(Optional.of(session));
 
                 Choice choice = Choice.builder().id(choiceId).isAnswer(correct).build();
@@ -213,16 +223,18 @@ public class StudySessionServiceTest {
                                 SubmittedAnswer.builder().isCorrect(true).build(),
                                 SubmittedAnswer.builder().isCorrect(false).build());
 
-                // Use findByIdWithLock
                 given(studySessionRepository.findByIdWithLock(sessionId)).willReturn(Optional.of(session));
                 given(submittedAnswerRepository.findAllByStudySessionId(sessionId)).willReturn(answers);
+                given(clockHolder.getCurrentDateTime()).willReturn(NOW);
 
                 // when
                 int finalScore = studySessionService.completeSession(sessionId);
 
                 // then
                 assertThat(finalScore).isEqualTo(10);
-                verify(studyLogService).recordActivity(member.getId(), 3);
+                assertThat(session.getFinishedAt()).isEqualTo(NOW);
+                // Verify EVENT is published
+                verify(eventPublisher).publishEvent(any(StudySolvedEvent.class));
                 assertThat(session.getStatus()).isEqualTo(StudySessionStatus.COMPLETED);
         }
 
@@ -234,16 +246,15 @@ public class StudySessionServiceTest {
                 StudySession session = StudySession.builder().id(sessionId).mode(ExamMode.PRACTICE).member(member)
                                 .build();
 
-                // Use findByIdWithLock
                 given(studySessionRepository.findByIdWithLock(sessionId)).willReturn(Optional.of(session));
                 given(submittedAnswerRepository.findAllByStudySessionId(sessionId)).willReturn(List.of());
+                given(clockHolder.getCurrentDateTime()).willReturn(NOW);
 
                 // when
                 studySessionService.completeSession(sessionId);
 
                 // then
-                verify(studyLogService, org.mockito.Mockito.never()).recordActivity(any());
-                verify(studyLogService, org.mockito.Mockito.never()).recordActivity(any(),
-                                org.mockito.ArgumentMatchers.anyInt());
+                assertThat(session.getFinishedAt()).isEqualTo(NOW);
+                verify(eventPublisher, org.mockito.Mockito.never()).publishEvent(any());
         }
 }
