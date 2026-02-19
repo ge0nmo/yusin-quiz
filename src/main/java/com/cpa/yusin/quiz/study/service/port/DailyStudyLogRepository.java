@@ -16,4 +16,5 @@ public interface DailyStudyLogRepository {
     int increaseSolvedCount(Long memberId, LocalDate date);
 
     int increaseSolvedCount(Long memberId, LocalDate date, int amount);
+
 }

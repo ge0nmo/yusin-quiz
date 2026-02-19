@@ -1,12 +1,14 @@
 package com.cpa.yusin.quiz.study.service;
 
+import com.cpa.yusin.quiz.member.domain.Member;
+import com.cpa.yusin.quiz.member.service.port.MemberRepository;
 import com.cpa.yusin.quiz.study.domain.DailyStudyLog;
 import com.cpa.yusin.quiz.study.service.port.DailyStudyLogRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.dao.DataIntegrityViolationException;
+
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
+
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
@@ -20,41 +22,28 @@ import java.util.List;
 public class StudyLogService {
 
     private final DailyStudyLogRepository dailyStudyLogRepository;
-
-    private final DailyStudyLogManager dailyStudyLogManager;
+    private final MemberRepository memberRepository;
 
     /**
      * Record activity with specific count.
      * Uses atomic increment if record exists, or creates new one with initial
      * count.
      */
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Transactional
     public void recordActivity(Long memberId, int count) {
         if (count <= 0)
             return;
 
         LocalDate today = LocalDate.now();
 
-        // 1. Try atomic update first (Optimistic assumption: Log exists)
-        int updatedRows = dailyStudyLogRepository.increaseSolvedCount(memberId, today, count);
-
-        if (updatedRows > 0) {
-            return; // Successfully updated
-        }
-
-        // 2. If no rows updated, it means no log exists -> Create new one
-        // We use a separate transaction (REQUIRES_NEW) for creation to avoid marking
-        // the outer transaction
-        // as rollback-only if a DataIntegrityViolationException occurs (race
-        // condition).
-        try {
-            dailyStudyLogManager.createLog(memberId, today, count);
-        } catch (DataIntegrityViolationException e) {
-            // 3. Race condition: Another thread created it just now.
-            // Creation failed, but we know the row exists now. Retry update in the current
-            // transaction.
-            dailyStudyLogRepository.increaseSolvedCount(memberId, today, count);
-        }
+        dailyStudyLogRepository.findByMemberIdAndDate(memberId, today)
+                .ifPresentOrElse(
+                        log -> log.increaseSolvedCount(count),
+                        () -> {
+                            Member member = memberRepository.getReferenceById(memberId);
+                            DailyStudyLog newLog = DailyStudyLog.createWithCount(member, today, count);
+                            dailyStudyLogRepository.save(newLog);
+                        });
     }
 
     // createLog moved to DailyStudyLogManager

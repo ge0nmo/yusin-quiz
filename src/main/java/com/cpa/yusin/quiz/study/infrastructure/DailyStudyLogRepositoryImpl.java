@@ -57,4 +57,5 @@ public class DailyStudyLogRepositoryImpl implements DailyStudyLogRepository {
     public int increaseSolvedCount(Long memberId, LocalDate date, int amount) {
         return dailyStudyLogJpaRepository.increaseSolvedCount(memberId, date, amount);
     }
+
 }
