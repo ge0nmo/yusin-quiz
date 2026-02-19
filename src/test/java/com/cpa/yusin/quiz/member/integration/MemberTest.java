@@ -264,6 +264,8 @@ class MemberTest {
                                                                                 .description("이메일"),
                                                                 fieldWithPath("data.role").type(JsonFieldType.STRING)
                                                                                 .description("회원 권한"),
+                                                                fieldWithPath("data.username").type(JsonFieldType.STRING)
+                                                                        .description("회원 이름"),
                                                                 fieldWithPath("data.accessToken")
                                                                                 .type(JsonFieldType.STRING)
                                                                                 .description("액세스 토큰"),
