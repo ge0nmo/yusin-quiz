@@ -12,16 +12,17 @@ import java.util.Optional;
 
 public interface DailyStudyLogJpaRepository extends JpaRepository<DailyStudyLog, Long> {
 
-    Optional<DailyStudyLog> findByMemberIdAndDate(Long memberId, LocalDate date);
+        Optional<DailyStudyLog> findByMemberIdAndDate(Long memberId, LocalDate date);
 
-    List<DailyStudyLog> findByMemberIdAndDateBetween(Long memberId, LocalDate startDate, LocalDate endDate);
+        List<DailyStudyLog> findByMemberIdAndDateBetween(Long memberId, LocalDate startDate, LocalDate endDate);
 
-    @Modifying(clearAutomatically = true)
-    @Query("UPDATE DailyStudyLog d SET d.solvedCount = d.solvedCount + 1 WHERE d.member.id = :memberId AND d.date = :date")
-    int increaseSolvedCount(@Param("memberId") Long memberId, @Param("date") LocalDate date);
+        @Modifying(clearAutomatically = true)
+        @Query("UPDATE DailyStudyLog d SET d.solvedCount = d.solvedCount + 1 WHERE d.member.id = :memberId AND d.date = :date")
+        int increaseSolvedCount(@Param("memberId") Long memberId, @Param("date") LocalDate date);
 
-    @Modifying(clearAutomatically = true)
-    @Query("UPDATE DailyStudyLog d SET d.solvedCount = d.solvedCount + :amount WHERE d.member.id = :memberId AND d.date = :date")
-    int increaseSolvedCount(@Param("memberId") Long memberId, @Param("date") LocalDate date,
-            @Param("amount") int amount);
+        @Modifying(clearAutomatically = true)
+        @Query("UPDATE DailyStudyLog d SET d.solvedCount = d.solvedCount + :amount WHERE d.member.id = :memberId AND d.date = :date")
+        int increaseSolvedCount(@Param("memberId") Long memberId, @Param("date") LocalDate date,
+                        @Param("amount") int amount);
+
 }

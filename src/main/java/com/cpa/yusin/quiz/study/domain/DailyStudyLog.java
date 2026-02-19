@@ -35,6 +35,10 @@ public class DailyStudyLog extends BaseEntity {
         this.solvedCount++;
     }
 
+    public void increaseSolvedCount(int count) {
+        this.solvedCount += count;
+    }
+
     public static DailyStudyLog create(Member member, LocalDate date) {
         return DailyStudyLog.builder()
                 .member(member)
