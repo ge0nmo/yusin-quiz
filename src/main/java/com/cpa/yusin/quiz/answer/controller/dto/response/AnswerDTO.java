@@ -9,10 +9,13 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Data
 @Builder
-public class AnswerDTO
-{
+public class AnswerDTO {
     private final long id;
-    private final String username;
     private final String content;
     private final LocalDateTime createdAt;
+
+    // 회원 정보
+    private final long memberId;
+    private final String email;
+    private final String username;
 }

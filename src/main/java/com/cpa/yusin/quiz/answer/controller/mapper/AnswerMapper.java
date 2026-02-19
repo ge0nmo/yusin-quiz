@@ -9,35 +9,33 @@ import com.cpa.yusin.quiz.web.dto.AdminAnswerRegisterRequest;
 import org.springframework.stereotype.Component;
 
 @Component
-public class AnswerMapper
-{
-    public Answer toAnswerEntity(AnswerRegisterRequest request, Question question)
-    {
+public class AnswerMapper {
+    public Answer toAnswerEntity(AnswerRegisterRequest request, Question question, Member member) {
         return Answer.builder()
-                .username(request.getUsername())
-                .password(request.getPassword())
+                .member(member)
                 .content(request.getContent())
                 .question(question)
                 .build();
     }
 
-    public Answer toAnswerEntity(AdminAnswerRegisterRequest request, Member member, Question question)
-    {
+    public Answer toAnswerEntity(AdminAnswerRegisterRequest request, Member member, Question question) {
         return Answer.builder()
-                .username(member.getUsername())
-                .password(member.getUsername())
+                .member(member)
                 .content(request.getContent())
                 .question(question)
                 .build();
     }
 
-    public AnswerDTO toAnswerDTO(Answer answer)
-    {
+    public AnswerDTO toAnswerDTO(Answer answer) {
+        Member member = answer.getMember();
+
         return AnswerDTO.builder()
                 .id(answer.getId())
-                .username(answer.getUsername())
                 .content(answer.getContent())
                 .createdAt(answer.getCreatedAt())
+                .memberId(member.getId())
+                .email(member.getEmail())
+                .username(member.getUsername())
                 .build();
     }
 }

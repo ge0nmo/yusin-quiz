@@ -1,6 +1,8 @@
 package com.cpa.yusin.quiz.answer.domain;
 
 import com.cpa.yusin.quiz.common.infrastructure.BaseEntity;
+import com.cpa.yusin.quiz.member.domain.Member;
+import com.cpa.yusin.quiz.member.domain.type.Role;
 import com.cpa.yusin.quiz.question.domain.Question;
 import jakarta.persistence.*;
 import lombok.*;
@@ -12,17 +14,14 @@ import org.hibernate.annotations.OnDeleteAction;
 @AllArgsConstructor
 @Getter
 @Entity
-public class Answer extends BaseEntity
-{
+public class Answer extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, updatable = false)
-    private String username;
-
-    @Column(nullable = false, updatable = false)
-    private String password;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "member_id", nullable = false, updatable = false)
+    private Member member;
 
     @Column(nullable = false)
     private String content;
@@ -32,13 +31,17 @@ public class Answer extends BaseEntity
     @JoinColumn(name = "question_id", nullable = false, updatable = false)
     private Question question;
 
-    public void update(String content)
-    {
+    public void update(String content) {
         this.content = content;
     }
 
-    public boolean verifyPassword(String password)
-    {
-        return this.password.equals(password);
+    /**
+     * 작성자 본인 또는 관리자인지 확인
+     */
+    public boolean isOwner(Member requestMember) {
+        if (requestMember == null)
+            return false;
+        return this.member.getId().equals(requestMember.getId())
+                || Role.ADMIN.equals(requestMember.getRole());
     }
 }

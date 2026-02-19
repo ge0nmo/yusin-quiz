@@ -1,5 +1,7 @@
 package com.cpa.yusin.quiz.member.service;
 
+import com.cpa.yusin.quiz.global.exception.ExceptionMessage;
+import com.cpa.yusin.quiz.global.exception.MemberException;
 import com.cpa.yusin.quiz.global.details.MemberDetails;
 import com.cpa.yusin.quiz.global.jwt.JwtService;
 import com.cpa.yusin.quiz.global.security.CustomAuthenticationProvider;
@@ -36,6 +38,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final CustomAuthenticationProvider authenticationProvider;
     private final MemberMapper memberMapper;
     private final MemberValidator memberValidator;
+    private final RandomNicknameGenerator randomNicknameGenerator;
 
     @Override
     public LoginResponse login(LoginRequest request) {
@@ -47,7 +50,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
         if (!"ADMIN".equals(response.getRole().toString())) {
             log.warn("일반 유저가 관리자 페이지 접속 시도: {}", email);
-            throw new RuntimeException("관리자 권한이 없습니다.");
+            throw new MemberException(ExceptionMessage.NO_AUTHORIZATION);
         }
 
         return response;
@@ -63,7 +66,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         String accessToken = jwtService.createAccessToken(member.getEmail());
         String refreshToken = jwtService.createRefreshToken(member.getEmail());
 
-        return LoginResponse.from(member.getId(), member.getEmail(), member.getRole(), accessToken, refreshToken);
+        return LoginResponse.from(member.getId(), member.getEmail(), member.getUsername(), member.getRole(),
+                accessToken, refreshToken);
     }
 
     @Override
@@ -86,13 +90,16 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         String accessToken = jwtService.createAccessToken(member.getEmail());
         String refreshToken = jwtService.createRefreshToken(member.getEmail());
 
-        return LoginResponse.from(member.getId(), member.getEmail(), member.getRole(), accessToken, refreshToken);
+        return LoginResponse.from(member.getId(), member.getEmail(), member.getUsername(), member.getRole(),
+                accessToken, refreshToken);
     }
 
     private Member registerSocialMember(SocialProfile profile) {
+        String nickname = generateUniqueNickname();
+
         Member newMember = Member.builder()
                 .email(profile.getEmail())
-                .username(profile.getName()) // 이름 저장
+                .username(nickname) // 랜덤 닉네임 저장
                 .password(passwordEncoder.encode(UUID.randomUUID().toString())) // 랜덤 비번
                 .role(Role.USER)
                 .platform(profile.getPlatform())
@@ -100,10 +107,25 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         return memberRepository.save(newMember);
     }
 
+    private String generateUniqueNickname() {
+        String nickname = randomNicknameGenerator.generate();
+        int maxRetries = 20;
+
+        for (int i = 0; i < maxRetries; i++) {
+            if (!memberRepository.existsByUsername(nickname)) {
+                return nickname;
+            }
+            nickname = randomNicknameGenerator.generate();
+        }
+
+        // Final fallback: append random suffix if failed 20 times (very unlikely)
+        return nickname + UUID.randomUUID().toString().substring(0, 5);
+    }
+
     public TokenResponse refreshAccessToken(String refreshToken) {
         // 1. Refresh Token 만료 여부 확인
         if (jwtService.isTokenExpired(refreshToken)) {
-            throw new RuntimeException("Refresh Token이 만료되었습니다. 다시 로그인해주세요.");
+            throw new MemberException(ExceptionMessage.INVALID_LOGIN_INFORMATION);
         }
 
         // 2. 이메일 추출 후 새로운 Access Token 생성

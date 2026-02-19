@@ -20,12 +20,10 @@ import java.util.NoSuchElementException;
 
 @Slf4j
 @RestControllerAdvice
-public class ExceptionAdvice
-{
+public class ExceptionAdvice {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleMethodArgumentNotValidException(MethodArgumentNotValidException e)
-    {
+    public ErrorResponse handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
         log.error("컨트롤러 메서드 인자가 올바르지 않습니다.", e);
 
         return ErrorResponse.of(e.getBindingResult());
@@ -33,8 +31,7 @@ public class ExceptionAdvice
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleMethod(MethodArgumentTypeMismatchException e)
-    {
+    public ErrorResponse handleMethod(MethodArgumentTypeMismatchException e) {
         log.error("컨트롤러 메서드 인자의 타입이 맞지 않습니다.", e);
 
         return ErrorResponse.of(HttpStatus.BAD_REQUEST, e.getMessage());
@@ -42,8 +39,7 @@ public class ExceptionAdvice
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleConstraintViolationException(ConstraintViolationException e)
-    {
+    public ErrorResponse handleConstraintViolationException(ConstraintViolationException e) {
         log.error("검증 대상 객체가 제약을 위반했습니다.", e);
 
         return ErrorResponse.of(e);
@@ -51,8 +47,7 @@ public class ExceptionAdvice
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.METHOD_NOT_ALLOWED)
-    public ErrorResponse handleHttpRequestMethodNotSupportedException(HttpRequestMethodNotSupportedException e)
-    {
+    public ErrorResponse handleHttpRequestMethodNotSupportedException(HttpRequestMethodNotSupportedException e) {
         log.error("지원하지 않는 HTTP 메서드입니다.", e);
 
         return ErrorResponse.of(HttpStatus.METHOD_NOT_ALLOWED);
@@ -60,8 +55,7 @@ public class ExceptionAdvice
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleHttpMessageNotReadableException(HttpMessageNotReadableException e)
-    {
+    public ErrorResponse handleHttpMessageNotReadableException(HttpMessageNotReadableException e) {
         log.error("요청에 필요한 body 가 없습니다.", e);
 
         return ErrorResponse.of(HttpStatus.BAD_REQUEST, "Required request body is missing");
@@ -69,26 +63,32 @@ public class ExceptionAdvice
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleMissingServletRequestParameterException(MissingServletRequestParameterException e)
-    {
-        log.error("요청에 필요한 파라미터가 없습니다: " + e.getMessage() , e);
+    public ErrorResponse handleMissingServletRequestParameterException(MissingServletRequestParameterException e) {
+        log.error("요청에 필요한 파라미터가 없습니다: " + e.getMessage(), e);
 
         return ErrorResponse.of(HttpStatus.BAD_REQUEST, e.getMessage());
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ErrorResponse handleNoSuchElementException(NoSuchElementException e)
-    {
+    public ErrorResponse handleNoSuchElementException(NoSuchElementException e) {
         log.error("요소를 찾을 수 없습니다: " + e.getMessage(), e);
 
         return ErrorResponse.of(HttpStatus.NOT_FOUND, e.getMessage());
     }
 
     @ExceptionHandler
+    public ResponseEntity<ErrorResponse> handleCustomException(CustomException e) {
+        log.error("비즈니스 예외 발생: {}", e.getMessage(), e);
+
+        return ResponseEntity
+                .status(e.getHttpStatus())
+                .body(ErrorResponse.of(e.getHttpStatus(), e.getMessage()));
+    }
+
+    @ExceptionHandler
     @ResponseStatus(HttpStatus.CONFLICT)
-    public ErrorResponse handleDuplicateKeyException(DuplicateKeyException e)
-    {
+    public ErrorResponse handleDuplicateKeyException(DuplicateKeyException e) {
         log.error("해당 키가 중복입니다: " + e.getMessage(), e);
 
         return ErrorResponse.of(HttpStatus.CONFLICT, e.getMessage());
@@ -96,8 +96,7 @@ public class ExceptionAdvice
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public ErrorResponse handleException(Exception e)
-    {
+    public ErrorResponse handleException(Exception e) {
         log.error("예외가 발생했습니다.", e);
 
         return ErrorResponse.of(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
@@ -105,8 +104,7 @@ public class ExceptionAdvice
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleIOException(IOException e)
-    {
+    public ErrorResponse handleIOException(IOException e) {
         log.error("입출력 예외가 발생했습니다.", e);
 
         return ErrorResponse.of(HttpStatus.BAD_REQUEST, e.getMessage());
@@ -131,5 +129,14 @@ public class ExceptionAdvice
     public ErrorResponse handleJwtException(io.jsonwebtoken.JwtException e) {
         log.error("JWT 예외 발생", e);
         return ErrorResponse.of(HttpStatus.UNAUTHORIZED, "유효하지 않은 토큰입니다.");
+    }
+
+    @ExceptionHandler(org.springframework.security.core.userdetails.UsernameNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleUsernameNotFoundException(
+            org.springframework.security.core.userdetails.UsernameNotFoundException e) {
+        log.error("회원 정보를 찾을 수 없습니다.", e);
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(ErrorResponse.of(HttpStatus.NOT_FOUND, e.getMessage()));
     }
 }

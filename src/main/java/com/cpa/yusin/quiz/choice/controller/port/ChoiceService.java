@@ -10,8 +10,7 @@ import com.cpa.yusin.quiz.problem.domain.Problem;
 import java.util.List;
 import java.util.Map;
 
-public interface ChoiceService
-{
+public interface ChoiceService {
     void save(Problem problem, List<ChoiceCreateRequest> requests);
 
     long save(Choice choice);
@@ -29,4 +28,6 @@ public interface ChoiceService
     List<ChoiceResponse> getAllByProblemId(long problemId);
 
     Map<Long, List<ChoiceResponse>> findAllByExamId(long examId);
+
+    Map<Long, List<ChoiceResponse>> findAllByProblemIds(List<Long> problemIds);
 }

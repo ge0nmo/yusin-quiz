@@ -12,23 +12,22 @@ import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
-public interface AnswerService
-{
-    long save(AnswerRegisterRequest request, long questionId);
+public interface AnswerService {
+    long save(AnswerRegisterRequest request, long questionId, Member member);
 
     long save(AdminAnswerRegisterRequest request, long questionId, Member admin);
 
-    void update(AnswerUpdateRequest request, long answerId);
+    void update(AnswerUpdateRequest request, long answerId, Member member);
 
     void updateInAdminPage(AdminAnswerUpdateRequest request, long answer);
 
     Answer findById(long id);
 
     AnswerDTO getAnswerById(long id);
+
     Page<AnswerDTO> getAnswersByQuestionId(long questionId, Pageable pageable);
+
     List<AnswerDTO> getAnswersByQuestionId(long questionId);
 
-    boolean verifyPassword(long answerId, String password);
-
-    void deleteAnswer(long answerId);
+    void deleteAnswer(long answerId, Member member);
 }

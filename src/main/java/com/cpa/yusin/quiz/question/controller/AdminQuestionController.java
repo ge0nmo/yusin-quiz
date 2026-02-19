@@ -2,6 +2,7 @@ package com.cpa.yusin.quiz.question.controller;
 
 import com.cpa.yusin.quiz.common.controller.dto.response.GlobalResponse;
 import com.cpa.yusin.quiz.common.controller.dto.response.PageInfo;
+import com.cpa.yusin.quiz.global.details.MemberDetails;
 import com.cpa.yusin.quiz.question.controller.dto.response.QuestionDTO;
 import com.cpa.yusin.quiz.question.controller.port.DeleteQuestionService;
 import com.cpa.yusin.quiz.question.controller.port.QuestionService;
@@ -11,38 +12,37 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+
+import java.security.Principal;
 
 @Slf4j
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/admin/question")
-public class AdminQuestionController
-{
+public class AdminQuestionController {
     private final QuestionService questionService;
     private final DeleteQuestionService deleteQuestionService;
 
     @GetMapping
-    public ResponseEntity<?> getQuestions(@PageableDefault Pageable pageable)
-    {
+    public ResponseEntity<?> getQuestions(@PageableDefault Pageable pageable) {
         Page<QuestionDTO> response = questionService.findAllQuestions(pageable);
 
         return ResponseEntity.ok(new GlobalResponse<>(response.getContent(), PageInfo.of(response)));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> getQuestion(@PathVariable long id)
-    {
+    public ResponseEntity<?> getQuestion(@PathVariable long id) {
         QuestionDTO response = questionService.getById(id);
 
         return ResponseEntity.ok(new GlobalResponse<>(response));
     }
 
-
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteQuestion(@PathVariable long id)
-    {
-        deleteQuestionService.execute(id);
+    public ResponseEntity<?> deleteQuestion(@PathVariable long id, Principal principal) {
+        MemberDetails memberDetails = (MemberDetails) ((Authentication) principal).getPrincipal();
+        deleteQuestionService.execute(id, memberDetails.getMember());
 
         return ResponseEntity.noContent().build();
     }

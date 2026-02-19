@@ -9,7 +9,7 @@ import com.cpa.yusin.quiz.answer.domain.Answer;
 import com.cpa.yusin.quiz.answer.service.port.AnswerRepository;
 import com.cpa.yusin.quiz.global.exception.AnswerException;
 import com.cpa.yusin.quiz.global.exception.ExceptionMessage;
-import com.cpa.yusin.quiz.global.exception.QuestionException;
+import com.cpa.yusin.quiz.global.exception.MemberException;
 import com.cpa.yusin.quiz.member.domain.Member;
 import com.cpa.yusin.quiz.question.domain.Question;
 import com.cpa.yusin.quiz.question.service.QuestionAnswerService;
@@ -28,18 +28,16 @@ import java.util.List;
 @Transactional
 @RequiredArgsConstructor
 @Service
-public class AnswerServiceImpl implements AnswerService
-{
+public class AnswerServiceImpl implements AnswerService {
     private final AnswerRepository answerRepository;
     private final AnswerMapper answerMapper;
     private final QuestionAnswerService questionAnswerService;
 
     @Transactional
     @Override
-    public long save(AnswerRegisterRequest request, long questionId)
-    {
+    public long save(AnswerRegisterRequest request, long questionId, Member member) {
         Question question = questionAnswerService.getQuestion(questionId);
-        Answer answer = answerMapper.toAnswerEntity(request, question);
+        Answer answer = answerMapper.toAnswerEntity(request, question, member);
         questionAnswerService.updateAnswerCount(question, 1);
 
         return answerRepository.save(answer).getId();
@@ -60,17 +58,18 @@ public class AnswerServiceImpl implements AnswerService
 
     @Transactional
     @Override
-    public void update(AnswerUpdateRequest request, long answerId)
-    {
+    public void update(AnswerUpdateRequest request, long answerId, Member member) {
         Answer answer = findById(answerId);
+
+        validateOwnership(answer, member);
+
         answer.update(request.getContent());
         answerRepository.save(answer);
     }
 
     @Transactional
     @Override
-    public void updateInAdminPage(AdminAnswerUpdateRequest request, long answerId)
-    {
+    public void updateInAdminPage(AdminAnswerUpdateRequest request, long answerId) {
         Answer answer = findById(answerId);
         answer.update(request.content());
 
@@ -78,22 +77,19 @@ public class AnswerServiceImpl implements AnswerService
     }
 
     @Override
-    public Answer findById(long id)
-    {
+    public Answer findById(long id) {
         return answerRepository.findById(id)
                 .orElseThrow(() -> new AnswerException(ExceptionMessage.ANSWER_NOT_FOUND));
     }
 
     @Override
-    public AnswerDTO getAnswerById(long id)
-    {
+    public AnswerDTO getAnswerById(long id) {
         Answer answer = findById(id);
         return answerMapper.toAnswerDTO(answer);
     }
 
     @Override
-    public Page<AnswerDTO> getAnswersByQuestionId(long questionId, Pageable pageable)
-    {
+    public Page<AnswerDTO> getAnswersByQuestionId(long questionId, Pageable pageable) {
         return answerRepository.findByQuestionId(questionId, pageable)
                 .map(answerMapper::toAnswerDTO);
     }
@@ -105,21 +101,22 @@ public class AnswerServiceImpl implements AnswerService
                 .toList();
     }
 
-    @Override
-    public boolean verifyPassword(long answerId, String password)
-    {
-        Answer answer = findById(answerId);
-        return answer.verifyPassword(password);
-    }
-
     @Transactional
     @Override
-    public void deleteAnswer(long answerId) {
+    public void deleteAnswer(long answerId, Member member) {
         Answer answer = findById(answerId);
+
+        validateOwnership(answer, member);
+
         Question question = answer.getQuestion();
         questionAnswerService.updateAnswerCount(question, -1);
 
         answerRepository.deleteById(answerId);
     }
 
+    private void validateOwnership(Answer answer, Member member) {
+        if (!answer.isOwner(member)) {
+            throw new MemberException(ExceptionMessage.NO_AUTHORIZATION);
+        }
+    }
 }
