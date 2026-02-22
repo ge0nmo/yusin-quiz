@@ -81,6 +81,8 @@ public class ExceptionAdvice {
     public ResponseEntity<ErrorResponse> handleCustomException(CustomException e) {
         log.error("비즈니스 예외 발생: {}", e.getMessage(), e);
 
+        // CustomException의 ExceptionMessage enum 이름을 코드(code)로 내려주기 위해
+        // ErrorResponse.of(...) 확장 사용
         return ResponseEntity
                 .status(e.getHttpStatus())
                 .body(ErrorResponse.of(e.getHttpStatus(), e.getMessage()));
