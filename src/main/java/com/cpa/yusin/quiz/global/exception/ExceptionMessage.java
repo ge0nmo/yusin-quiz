@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus;
 @Getter
 public enum ExceptionMessage {
     INVALID_LOGIN_INFORMATION("로그인 정보가 일치하지 않습니다.", HttpStatus.UNAUTHORIZED),
+    REFRESH_TOKEN_EXPIRED("리프레시 토큰이 만료되었습니다. 다시 로그인해주세요.", HttpStatus.UNAUTHORIZED),
 
     EMAIL_EXISTS("사용중인 이메일입니다.", HttpStatus.CONFLICT),
 

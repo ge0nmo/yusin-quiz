@@ -125,7 +125,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     public TokenResponse refreshAccessToken(String refreshToken) {
         // 1. Refresh Token 만료 여부 확인
         if (jwtService.isTokenExpired(refreshToken)) {
-            throw new MemberException(ExceptionMessage.INVALID_LOGIN_INFORMATION);
+            throw new MemberException(ExceptionMessage.REFRESH_TOKEN_EXPIRED);
         }
 
         // 2. 이메일 추출 후 새로운 Access Token 생성
