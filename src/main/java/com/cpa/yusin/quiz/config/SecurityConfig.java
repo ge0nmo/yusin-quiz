@@ -20,6 +20,7 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.Arrays;
+import java.util.List;
 
 @Configuration
 @EnableWebSecurity
@@ -28,7 +29,7 @@ public class SecurityConfig {
     private final SecurityFilter securityFilter;
 
     public SecurityConfig(MemberDetailsService memberDetailsService,
-            SecurityFilter securityFilter) {
+                          SecurityFilter securityFilter) {
         this.memberDetailsService = memberDetailsService;
         this.securityFilter = securityFilter;
     }
@@ -104,11 +105,16 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.addAllowedHeader("*");
-        configuration.addAllowedMethod("*");
-        // JWT 관련 헤더 노출
+
+        // 실제 운영 환경에서는 아래를 특정 도메인으로 제한하는 것이 좋으나,
+        // 403 에러 해결을 위해 우선 유연하게 설정 후 credentials 허용
+        configuration.setAllowedOriginPatterns(List.of("*"));
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
+        configuration.setAllowedHeaders(List.of("*"));
+        configuration.setAllowCredentials(true);
+
+        // JWT 및 주요 헤더 노출
         configuration.setExposedHeaders(Arrays.asList("Authorization", "Cache-Control", "Content-Type"));
-        configuration.addAllowedOrigin("*"); // 실제 배포 시에는 프론트엔드 도메인으로 제한하는 것 권장
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
