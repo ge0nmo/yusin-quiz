@@ -8,7 +8,6 @@ import com.cpa.yusin.quiz.study.domain.DailyStudyLog;
 import com.cpa.yusin.quiz.study.service.StudyLogService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,7 +15,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.time.YearMonth;
 import java.util.List;
 
 @Slf4j
@@ -27,18 +25,6 @@ public class StudyLogController
 {
 
     private final StudyLogService studyLogService;
-
-    @GetMapping("/monthly")
-    public ResponseEntity<GlobalResponse<List<StudyLogResponse>>> getMonthlyLog(
-            @AuthenticationPrincipal MemberDetails memberDetails,
-            @RequestParam("yearMonth") @DateTimeFormat(pattern = "yyyy-MM") YearMonth yearMonth)
-    {
-
-        List<DailyStudyLog> logs = studyLogService.getMonthlyLog(memberDetails.getMember().getId(), yearMonth);
-
-        List<StudyLogResponse> response = logs.stream().map(StudyLogResponse::from).toList();
-        return ResponseEntity.ok(GlobalResponse.success(response));
-    }
 
     @GetMapping("/yearly")
     public ResponseEntity<GlobalResponse<List<StudyLogResponse>>> getYearlyLog(

@@ -1,5 +1,6 @@
 package com.cpa.yusin.quiz.problem.domain;
 
+import com.cpa.yusin.quiz.common.infrastructure.BaseEntity;
 import com.cpa.yusin.quiz.exam.domain.Exam;
 import com.cpa.yusin.quiz.global.converter.BlockListConverter;
 import com.cpa.yusin.quiz.problem.domain.block.Block;
@@ -17,7 +18,8 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class Problem {
+public class Problem extends BaseEntity
+{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

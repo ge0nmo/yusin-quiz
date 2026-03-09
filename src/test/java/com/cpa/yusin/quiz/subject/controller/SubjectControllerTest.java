@@ -2,9 +2,6 @@ package com.cpa.yusin.quiz.subject.controller;
 
 import com.cpa.yusin.quiz.common.controller.dto.response.GlobalResponse;
 import com.cpa.yusin.quiz.config.TestContainer;
-import com.cpa.yusin.quiz.subject.controller.dto.request.SubjectCreateRequest;
-import com.cpa.yusin.quiz.subject.controller.dto.request.SubjectUpdateRequest;
-import com.cpa.yusin.quiz.subject.controller.dto.response.SubjectCreateResponse;
 import com.cpa.yusin.quiz.subject.controller.dto.response.SubjectDTO;
 import com.cpa.yusin.quiz.subject.domain.Subject;
 import org.junit.jupiter.api.BeforeEach;
@@ -28,24 +25,6 @@ class SubjectControllerTest
         testContainer = new TestContainer();
     }
 
-
-    @Test
-    void getById()
-    {
-        // given
-        testContainer.subjectRepository.save(Subject.builder().id(1L).name("English").build());
-
-        // when
-        ResponseEntity<GlobalResponse<SubjectDTO>> result = testContainer.subjectController.getById(1L);
-
-        // then
-        assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(result.getBody()).isNotNull();
-
-        SubjectDTO response = result.getBody().getData();
-        assertThat(response.getId()).isEqualTo(1L);
-        assertThat(response.getName()).isEqualTo("English");
-    }
 
     @Test
     void getAll()

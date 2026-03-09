@@ -1,12 +1,12 @@
 package com.cpa.yusin.quiz.answer.controller;
 
+import com.cpa.yusin.quiz.answer.controller.dto.request.AdminAnswerRegisterRequest;
+import com.cpa.yusin.quiz.answer.controller.dto.request.AdminAnswerUpdateRequest;
 import com.cpa.yusin.quiz.answer.controller.dto.response.AnswerDTO;
 import com.cpa.yusin.quiz.answer.controller.port.AnswerService;
 import com.cpa.yusin.quiz.common.controller.dto.response.GlobalResponse;
 import com.cpa.yusin.quiz.common.controller.dto.response.PageInfo;
 import com.cpa.yusin.quiz.global.details.MemberDetails;
-import com.cpa.yusin.quiz.web.dto.AdminAnswerRegisterRequest;
-import com.cpa.yusin.quiz.web.dto.AdminAnswerUpdateRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;

@@ -1,12 +1,12 @@
 package com.cpa.yusin.quiz.answer.controller.port;
 
+import com.cpa.yusin.quiz.answer.controller.dto.request.AdminAnswerRegisterRequest;
+import com.cpa.yusin.quiz.answer.controller.dto.request.AdminAnswerUpdateRequest;
 import com.cpa.yusin.quiz.answer.controller.dto.request.AnswerRegisterRequest;
 import com.cpa.yusin.quiz.answer.controller.dto.request.AnswerUpdateRequest;
 import com.cpa.yusin.quiz.answer.controller.dto.response.AnswerDTO;
 import com.cpa.yusin.quiz.answer.domain.Answer;
 import com.cpa.yusin.quiz.member.domain.Member;
-import com.cpa.yusin.quiz.web.dto.AdminAnswerRegisterRequest;
-import com.cpa.yusin.quiz.web.dto.AdminAnswerUpdateRequest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 

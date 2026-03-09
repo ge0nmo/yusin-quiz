@@ -5,8 +5,6 @@ import com.cpa.yusin.quiz.member.domain.Member;
 import com.cpa.yusin.quiz.member.domain.type.Platform;
 import com.cpa.yusin.quiz.member.domain.type.Role;
 import com.cpa.yusin.quiz.member.service.port.MemberRepository;
-import com.cpa.yusin.quiz.subject.controller.dto.request.SubjectCreateRequest;
-import com.cpa.yusin.quiz.subject.controller.dto.request.SubjectUpdateRequest;
 import com.cpa.yusin.quiz.subject.domain.Subject;
 import com.cpa.yusin.quiz.subject.service.port.SubjectRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -16,7 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.MediaType;
 import org.springframework.restdocs.RestDocumentationContextProvider;
 import org.springframework.restdocs.RestDocumentationExtension;
 import org.springframework.restdocs.payload.JsonFieldType;
@@ -26,7 +23,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
-import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.documentationConfiguration;
@@ -52,8 +48,6 @@ public class SubjectTest
     @Autowired
     private MemberRepository memberRepository;
 
-    ObjectMapper objectMapper;
-
     Member admin;
 
     @BeforeEach
@@ -71,38 +65,6 @@ public class SubjectTest
                 .platform(Platform.HOME)
                 .role(Role.ADMIN)
                 .build());
-
-        objectMapper = new ObjectMapper();
-    }
-
-
-    @WithUserDetails(value = "admin@gmail.com", setupBefore = TestExecutionEvent.TEST_EXECUTION)
-    @Test
-    void getById_success() throws Exception
-    {
-        // given
-        Subject subject = subjectRepository.save(Subject.builder()
-                .id(1L)
-                .name("회계학")
-                .build());
-
-
-        // when
-        ResultActions resultActions = mvc
-                .perform(get("/api/v1/subject/" + subject.getId()));
-
-        // then
-        resultActions
-                .andExpect(status().isOk())
-                .andDo(document("과목 1개 조회",
-                        preprocessRequest(prettyPrint()),
-                        preprocessResponse(prettyPrint()),
-
-                        responseFields(
-                                fieldWithPath("data.id").type(JsonFieldType.NUMBER).description("과목 ID"),
-                                fieldWithPath("data.name").type(JsonFieldType.STRING).description("과목 이름")
-                        )
-                ));
     }
 
     @WithUserDetails(value = "admin@gmail.com", setupBefore = TestExecutionEvent.TEST_EXECUTION)

@@ -1,8 +1,6 @@
 package com.cpa.yusin.quiz.config;
 
-import com.cpa.yusin.quiz.global.details.MemberDetailsService;
 import com.cpa.yusin.quiz.global.filter.SecurityFilter;
-import com.cpa.yusin.quiz.global.security.FormAuthenticationProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
@@ -25,12 +23,9 @@ import java.util.List;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
-    private final MemberDetailsService memberDetailsService;
     private final SecurityFilter securityFilter;
 
-    public SecurityConfig(MemberDetailsService memberDetailsService,
-                          SecurityFilter securityFilter) {
-        this.memberDetailsService = memberDetailsService;
+    public SecurityConfig(SecurityFilter securityFilter) {
         this.securityFilter = securityFilter;
     }
 
@@ -122,8 +117,4 @@ public class SecurityConfig {
         return source;
     }
 
-    @Bean
-    public FormAuthenticationProvider formAuthenticationProvider() {
-        return new FormAuthenticationProvider(memberDetailsService, bCryptPasswordEncoder());
-    }
 }

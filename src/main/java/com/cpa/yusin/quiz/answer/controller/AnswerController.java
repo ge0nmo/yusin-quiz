@@ -1,7 +1,6 @@
 package com.cpa.yusin.quiz.answer.controller;
 
 import com.cpa.yusin.quiz.answer.controller.dto.request.AnswerRegisterRequest;
-import com.cpa.yusin.quiz.answer.controller.dto.request.AnswerUpdateRequest;
 import com.cpa.yusin.quiz.answer.controller.dto.response.AnswerDTO;
 import com.cpa.yusin.quiz.answer.controller.port.AnswerService;
 import com.cpa.yusin.quiz.common.controller.dto.response.GlobalResponse;
@@ -32,23 +31,6 @@ public class AnswerController {
         long response = answerService.save(request, questionId, memberDetails.getMember());
 
         return new ResponseEntity<>(new GlobalResponse<>(response), HttpStatus.CREATED);
-    }
-
-    @PatchMapping("/answer/{answerId}")
-    public ResponseEntity<GlobalResponse<AnswerDTO>> update(@PathVariable("answerId") Long answerId,
-            @Validated @RequestBody AnswerUpdateRequest request,
-            @AuthenticationPrincipal MemberDetails memberDetails) {
-        answerService.update(request, answerId, memberDetails.getMember());
-        AnswerDTO response = answerService.getAnswerById(answerId);
-
-        return ResponseEntity.ok(new GlobalResponse<>(response));
-    }
-
-    @GetMapping("/answer/{answerId}")
-    public ResponseEntity<GlobalResponse<AnswerDTO>> getAnswerById(@PathVariable("answerId") long answerId) {
-        AnswerDTO response = answerService.getAnswerById(answerId);
-
-        return ResponseEntity.ok(new GlobalResponse<>(response));
     }
 
     @GetMapping("/question/{questionId}/answer")

@@ -1,7 +1,6 @@
 package com.cpa.yusin.quiz.answer.integration;
 
 import com.cpa.yusin.quiz.answer.controller.dto.request.AnswerRegisterRequest;
-import com.cpa.yusin.quiz.answer.controller.dto.request.AnswerUpdateRequest;
 import com.cpa.yusin.quiz.answer.domain.Answer;
 import com.cpa.yusin.quiz.answer.service.port.AnswerRepository;
 import com.cpa.yusin.quiz.config.TeardownExtension;
@@ -171,91 +170,6 @@ class AnswerTest {
 
                                 ));
 
-        }
-
-        @Test
-        void update() throws Exception {
-                // given
-                AnswerUpdateRequest request = AnswerUpdateRequest.builder()
-                                .content("해당 링크를 참조해주세요.")
-                                .build();
-
-                // when
-                ResultActions resultActions = mvc
-                                .perform(patch("/api/v1/answer/{answerId}", answer.getId())
-                                                .with(user(memberDetails))
-                                                .contentType(MediaType.APPLICATION_JSON)
-                                                .content(mapper.writeValueAsString(request)));
-
-                // then
-                resultActions
-                                .andExpect(status().isOk())
-                                .andDo(document("updateAnswer",
-                                                preprocessRequest(prettyPrint()),
-                                                preprocessResponse(prettyPrint()),
-
-                                                requestFields(
-                                                                fieldWithPath("content").type(JsonFieldType.STRING)
-                                                                                .description("내용")
-
-                                                ),
-
-                                                responseFields(
-                                                                fieldWithPath("data.id").type(JsonFieldType.NUMBER)
-                                                                                .description("답변 고유 식별자"),
-                                                                fieldWithPath("data.memberId")
-                                                                                .type(JsonFieldType.NUMBER)
-                                                                                .description("작성자 회원 ID"),
-                                                                fieldWithPath("data.email").type(JsonFieldType.STRING)
-                                                                                .description("작성자 이메일"),
-                                                                fieldWithPath("data.username")
-                                                                                .type(JsonFieldType.STRING)
-                                                                                .description("답변 등록자 이름"),
-                                                                fieldWithPath("data.content").type(JsonFieldType.STRING)
-                                                                                .description("답변 내용"),
-                                                                fieldWithPath("data.createdAt")
-                                                                                .type(JsonFieldType.STRING)
-                                                                                .description("답변 등록 시간")
-
-                                                )
-
-                                ));
-        }
-
-        @Test
-        void getAnswerById() throws Exception {
-                // given
-                long answerId = answer.getId();
-
-                // when
-                ResultActions resultActions = mvc
-                                .perform(get("/api/v1/answer/{answerId}", answerId));
-
-                // then
-                resultActions
-                                .andExpect(status().isOk())
-                                .andDo(document("getAnswer",
-                                                preprocessRequest(prettyPrint()),
-                                                preprocessResponse(prettyPrint()),
-
-                                                responseFields(
-                                                                fieldWithPath("data.id").type(JsonFieldType.NUMBER)
-                                                                                .description("답변 고유 식별자"),
-                                                                fieldWithPath("data.memberId")
-                                                                                .type(JsonFieldType.NUMBER)
-                                                                                .description("작성자 회원 ID"),
-                                                                fieldWithPath("data.email").type(JsonFieldType.STRING)
-                                                                                .description("작성자 이메일"),
-                                                                fieldWithPath("data.username")
-                                                                                .type(JsonFieldType.STRING)
-                                                                                .description("답변 유저 이름"),
-                                                                fieldWithPath("data.content").type(JsonFieldType.STRING)
-                                                                                .description("답변 내용"),
-                                                                fieldWithPath("data.createdAt")
-                                                                                .type(JsonFieldType.STRING)
-                                                                                .description("답변 등록 시간"))
-
-                                ));
         }
 
         @Test

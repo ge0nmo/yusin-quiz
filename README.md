@@ -5,7 +5,6 @@
 ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-6DB33F?style=flat-square&logo=spring-boot&logoColor=white)
 ![JPA](https://img.shields.io/badge/JPA-59666C?style=flat-square)
 ![MySQL](https://img.shields.io/badge/MySQL-4479A1?style=flat-square&logo=mysql&logoColor=white)
-![Redis](https://img.shields.io/badge/Redis-DC382D?style=flat-square&logo=redis&logoColor=white)
 
 ### 🖥 Frontend
 
@@ -31,7 +30,7 @@
 
 | Area         | Technologies |
 |--------------|--------------|
-| Backend      | `Spring Boot`, `JPA`, `MySQL`, `Redis` |
+| Backend      | `Spring Boot`, `JPA`, `MySQL` |
 | Frontend     | `JavaScript`, `Thymeleaf`, `jQuery` |
 | Infrastructure | `AWS Lightsail`, `S3`, `IAM`, `Route53` |
 | DevOps       | `Docker`, `Nginx`, `GitHub Actions` |

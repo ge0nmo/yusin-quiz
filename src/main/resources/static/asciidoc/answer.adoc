@@ -20,28 +20,6 @@ include::{snippets}/saveAnswer/http-response.adoc[]
 include::{snippets}/saveAnswer/response-fields.adoc[]
 
 
-== 답변 수정
-==== HTTP Request
-include::{snippets}/updateAnswer/http-request.adoc[]
-
-==== HTTP Response
-include::{snippets}/updateAnswer/http-response.adoc[]
-
-==== Response Fields
-include::{snippets}/updateAnswer/response-fields.adoc[]
-
-
-== 답변 1개 조회
-==== HTTP Request
-include::{snippets}/getAnswer/http-request.adoc[]
-
-==== HTTP Response
-include::{snippets}/getAnswer/http-response.adoc[]
-
-==== Response Fields
-include::{snippets}/getAnswer/response-fields.adoc[]
-
-
 == 해당 질문의 모든 답변 조회
 ==== HTTP Request
 include::{snippets}/getAnswers/http-request.adoc[]
@@ -51,17 +29,6 @@ include::{snippets}/getAnswers/http-response.adoc[]
 
 ==== Response Fields
 include::{snippets}/getAnswers/response-fields.adoc[]
-
-
-== 답변 비밀번호 검증
-==== HTTP Request
-include::{snippets}/answerVerification/http-request.adoc[]
-
-==== HTTP Response
-include::{snippets}/answerVerification/http-response.adoc[]
-
-==== Response Fields
-include::{snippets}/answerVerification/response-fields.adoc[]
 
 == 답변 삭제
 ==== HTTP Request

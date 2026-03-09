@@ -3,9 +3,6 @@ package com.cpa.yusin.quiz.exam.controller;
 import com.cpa.yusin.quiz.common.controller.dto.response.GlobalResponse;
 import com.cpa.yusin.quiz.config.TestContainer;
 import com.cpa.yusin.quiz.exam.controller.dto.request.ExamCreateRequest;
-import com.cpa.yusin.quiz.exam.controller.dto.request.ExamDeleteRequest;
-import com.cpa.yusin.quiz.exam.controller.dto.request.ExamUpdateRequest;
-import com.cpa.yusin.quiz.exam.controller.dto.response.ExamCreateResponse;
 import com.cpa.yusin.quiz.exam.controller.dto.response.ExamDTO;
 import com.cpa.yusin.quiz.subject.domain.Subject;
 import org.junit.jupiter.api.BeforeEach;
@@ -32,29 +29,6 @@ class ExamControllerTest
                 .name("Physics")
                 .build());
     }
-
-
-    @Test
-    void getById()
-    {
-        // given
-        ExamCreateResponse savedExam = testContainer.examService.save(1L, ExamCreateRequest.builder()
-                .name("1차")
-                .year(2024)
-                .build());
-
-        // when
-        ResponseEntity<GlobalResponse<ExamDTO>> result = testContainer.examController.getById(savedExam.getId());
-
-        // then
-        assertThat(result.getStatusCode()).isEqualTo(HttpStatusCode.valueOf(200));
-        assertThat(result.getBody()).isNotNull();
-
-        ExamDTO response = result.getBody().getData();
-        assertThat(response.getYear()).isEqualTo(2024);
-        assertThat(response.getName()).isEqualTo("1차");
-    }
-
     @Test
     void getAllExamBySubjectId()
     {

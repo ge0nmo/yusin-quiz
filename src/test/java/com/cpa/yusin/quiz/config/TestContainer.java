@@ -31,7 +31,6 @@ import com.cpa.yusin.quiz.global.details.MemberDetailsService;
 import com.cpa.yusin.quiz.global.jwt.JwtService;
 import com.cpa.yusin.quiz.global.jwt.JwtServiceImpl;
 import com.cpa.yusin.quiz.global.security.CustomAuthenticationProvider;
-import com.cpa.yusin.quiz.member.controller.MemberController;
 import com.cpa.yusin.quiz.member.controller.mapper.MemberMapper;
 import com.cpa.yusin.quiz.member.controller.port.AuthenticationService;
 import com.cpa.yusin.quiz.member.controller.port.MemberService;
@@ -78,11 +77,6 @@ public class TestContainer {
         public final AuthenticationService authenticationService;
         public final MemberMapper memberMapper;
         public final MemberValidator memberValidator;
-        public final MemberController memberController;
-
-        /**
-         * subject
-         */
         public final SubjectRepository subjectRepository;
         public final SubjectValidator subjectValidator;
         public final SubjectService subjectService;
@@ -161,8 +155,6 @@ public class TestContainer {
                 this.authenticationService = new AuthenticationServiceImpl(this.passwordEncoder, this.jwtService,
                                 this.memberRepository, this.authenticationProvider, this.memberMapper,
                                 this.memberValidator, new RandomNicknameGenerator());
-                this.memberController = new MemberController(this.memberService);
-
                 this.subjectValidator = new SubjectValidatorImpl(this.subjectRepository);
                 this.subjectMapper = new SubjectMapper();
                 this.subjectService = new SubjectServiceImpl(this.subjectRepository, this.subjectMapper,

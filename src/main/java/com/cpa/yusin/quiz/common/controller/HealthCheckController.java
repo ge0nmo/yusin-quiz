@@ -39,5 +39,4 @@ public class HealthCheckController {
     public ResponseEntity<?> env() {
         return ResponseEntity.ok(env);
     }
-
 }

@@ -1,9 +1,6 @@
 package com.cpa.yusin.quiz.exam.integration;
 
 import com.cpa.yusin.quiz.config.TeardownExtension;
-import com.cpa.yusin.quiz.exam.controller.dto.request.ExamCreateRequest;
-import com.cpa.yusin.quiz.exam.controller.dto.request.ExamDeleteRequest;
-import com.cpa.yusin.quiz.exam.controller.dto.request.ExamUpdateRequest;
 import com.cpa.yusin.quiz.exam.domain.Exam;
 import com.cpa.yusin.quiz.exam.service.port.ExamRepository;
 import com.cpa.yusin.quiz.member.domain.Member;
@@ -19,7 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.MediaType;
 import org.springframework.restdocs.RestDocumentationContextProvider;
 import org.springframework.restdocs.RestDocumentationExtension;
 import org.springframework.restdocs.payload.JsonFieldType;
@@ -29,9 +25,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
-import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
-
-import java.util.List;
 
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.documentationConfiguration;
@@ -58,8 +51,6 @@ class ExamTest {
         @Autowired
         private MemberRepository memberRepository;
 
-        private final ObjectMapper mapper = new ObjectMapper();
-
         Subject economics;
 
         Member admin;
@@ -82,64 +73,6 @@ class ExamTest {
                                 .id(1L)
                                 .name("경제학")
                                 .build());
-        }
-
-        @WithUserDetails(value = "John@gmail.com", setupBefore = TestExecutionEvent.TEST_EXECUTION)
-        @Test
-        void getById_success() throws Exception {
-                // given
-                Exam exam = examRepository.save(Exam.builder()
-                                .id(1L)
-                                .name("1차")
-                                .year(2024)
-                                .subjectId(economics.getId())
-                                .build());
-
-                // when
-                ResultActions resultActions = mvc.perform(get("/api/v1/exam/" + exam.getId())
-
-                );
-
-                // then
-                resultActions
-                                .andExpect(status().isOk())
-                                .andDo(document("getExamById",
-                                                preprocessRequest(prettyPrint()),
-                                                preprocessResponse(prettyPrint()),
-
-                                                responseFields(
-                                                                fieldWithPath("data.id").type(JsonFieldType.NUMBER)
-                                                                                .description("시험 고유 식별자"),
-                                                                fieldWithPath("data.name").type(JsonFieldType.STRING)
-                                                                                .description("시험 이름"),
-                                                                fieldWithPath("data.year").type(JsonFieldType.NUMBER)
-                                                                                .description("시험 연도"))));
-
-        }
-
-        @WithUserDetails(value = "John@gmail.com", setupBefore = TestExecutionEvent.TEST_EXECUTION)
-        @Test
-        void getById_ExamNotFound() throws Exception {
-                // given
-
-                // when
-                ResultActions resultActions = mvc.perform(get("/api/v1/exam/" + 1L)
-
-                );
-
-                // then
-                resultActions
-                                .andExpect(status().isNotFound())
-                                .andDo(document("getExamById",
-                                                preprocessRequest(prettyPrint()),
-                                                preprocessResponse(prettyPrint()),
-
-                                                responseFields(
-                                                                fieldWithPath("status").type(JsonFieldType.NUMBER)
-                                                                                .description("상태"),
-                                                                fieldWithPath("message").type(JsonFieldType.STRING)
-                                                                                .description("메세지"))));
-
         }
 
         @WithUserDetails(value = "John@gmail.com", setupBefore = TestExecutionEvent.TEST_EXECUTION)

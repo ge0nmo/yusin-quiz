@@ -1,5 +1,7 @@
 package com.cpa.yusin.quiz.answer.service;
 
+import com.cpa.yusin.quiz.answer.controller.dto.request.AdminAnswerRegisterRequest;
+import com.cpa.yusin.quiz.answer.controller.dto.request.AdminAnswerUpdateRequest;
 import com.cpa.yusin.quiz.answer.controller.dto.request.AnswerRegisterRequest;
 import com.cpa.yusin.quiz.answer.controller.dto.request.AnswerUpdateRequest;
 import com.cpa.yusin.quiz.answer.controller.dto.response.AnswerDTO;
@@ -13,8 +15,6 @@ import com.cpa.yusin.quiz.global.exception.MemberException;
 import com.cpa.yusin.quiz.member.domain.Member;
 import com.cpa.yusin.quiz.question.domain.Question;
 import com.cpa.yusin.quiz.question.service.QuestionAnswerService;
-import com.cpa.yusin.quiz.web.dto.AdminAnswerRegisterRequest;
-import com.cpa.yusin.quiz.web.dto.AdminAnswerUpdateRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;

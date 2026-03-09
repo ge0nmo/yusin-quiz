@@ -22,17 +22,6 @@ include::{snippets}/getYearBySubjectId/http-response.adoc[]
 include::{snippets}/getYearBySubjectId/response-fields.adoc[]
 
 
-== 시험 1개 조회
-==== HTTP Request
-include::{snippets}/getExamById/http-request.adoc[]
-
-==== HTTP Response
-include::{snippets}/getExamById/http-response.adoc[]
-
-==== Response Fields
-include::{snippets}/getExamById/response-fields.adoc[]
-
-
 == 과목 & 연도별 시험 조회
 ==== HTTP Request
 include::{snippets}/getExamsBySubjectIdAndYear/http-request.adoc[]

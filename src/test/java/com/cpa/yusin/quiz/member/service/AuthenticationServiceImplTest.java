@@ -1,5 +1,8 @@
 package com.cpa.yusin.quiz.member.service;
 
+import com.cpa.yusin.quiz.global.details.MemberDetails;
+import com.cpa.yusin.quiz.global.exception.ExceptionMessage;
+import com.cpa.yusin.quiz.global.exception.MemberException;
 import com.cpa.yusin.quiz.global.jwt.JwtService;
 import com.cpa.yusin.quiz.global.security.CustomAuthenticationProvider;
 import com.cpa.yusin.quiz.member.controller.dto.response.LoginResponse;
@@ -16,11 +19,14 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
@@ -45,6 +51,62 @@ class AuthenticationServiceImplTest {
     private MemberValidator memberValidator;
     @Mock
     private RandomNicknameGenerator randomNicknameGenerator;
+
+    @Test
+    @DisplayName("관리자 로그인은 ADMIN 회원일 때만 성공해야 함")
+    void loginAsAdmin_AdminMember_Success() {
+        Member admin = Member.builder()
+                .id(10L)
+                .email("admin@test.com")
+                .username("admin")
+                .password("encoded-password")
+                .role(Role.ADMIN)
+                .platform(Platform.HOME)
+                .build();
+        MemberDetails memberDetails = new MemberDetails(admin, null);
+        Authentication authentication =
+                new UsernamePasswordAuthenticationToken(memberDetails, null, memberDetails.getAuthorities());
+
+        given(authenticationProvider.authenticate(any(UsernamePasswordAuthenticationToken.class)))
+                .willReturn(authentication);
+        given(jwtService.createAccessToken(admin.getEmail())).willReturn("access-token");
+        given(jwtService.createRefreshToken(admin.getEmail())).willReturn("refresh-token");
+
+        LoginResponse response = authenticationService.loginAsAdmin(admin.getEmail(), "password");
+
+        assertThat(response.getId()).isEqualTo(admin.getId());
+        assertThat(response.getEmail()).isEqualTo(admin.getEmail());
+        assertThat(response.getRole()).isEqualTo(Role.ADMIN);
+        assertThat(response.getAccessToken()).isEqualTo("access-token");
+        assertThat(response.getRefreshToken()).isEqualTo("refresh-token");
+        verify(authenticationProvider).authenticate(any(UsernamePasswordAuthenticationToken.class));
+    }
+
+    @Test
+    @DisplayName("일반 회원은 관리자 로그인에 실패해야 함")
+    void loginAsAdmin_UserMember_ThrowsNoAuthorization() {
+        Member user = Member.builder()
+                .id(11L)
+                .email("user@test.com")
+                .username("user")
+                .password("encoded-password")
+                .role(Role.USER)
+                .platform(Platform.HOME)
+                .build();
+        MemberDetails memberDetails = new MemberDetails(user, null);
+        Authentication authentication =
+                new UsernamePasswordAuthenticationToken(memberDetails, null, memberDetails.getAuthorities());
+
+        given(authenticationProvider.authenticate(any(UsernamePasswordAuthenticationToken.class)))
+                .willReturn(authentication);
+        given(jwtService.createAccessToken(user.getEmail())).willReturn("access-token");
+        given(jwtService.createRefreshToken(user.getEmail())).willReturn("refresh-token");
+
+        assertThatThrownBy(() -> authenticationService.loginAsAdmin(user.getEmail(), "password"))
+                .isInstanceOf(MemberException.class)
+                .satisfies(exception -> assertThat(((MemberException) exception).getExceptionMessage())
+                        .isEqualTo(ExceptionMessage.NO_AUTHORIZATION));
+    }
 
     @Test
     @DisplayName("소셜 로그인 시 신규 회원이면 랜덤 닉네임으로 저장된다")
