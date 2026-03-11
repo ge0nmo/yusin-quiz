@@ -1,6 +1,7 @@
 package com.cpa.yusin.quiz.problem.controller.dto.request;
 
 import com.cpa.yusin.quiz.choice.controller.dto.request.ChoiceRequest;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 
 import java.util.List;
@@ -19,6 +20,7 @@ public class ProblemRequest
     private String explanation;
     private List<ChoiceRequest> choices;
 
+    @JsonIgnore
     public boolean isNew()
     {
         return this.id == null || this.id.equals(-1L);

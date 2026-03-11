@@ -13,6 +13,7 @@ import com.cpa.yusin.quiz.problem.controller.dto.request.ProblemCreateRequest;
 import com.cpa.yusin.quiz.problem.controller.dto.request.ProblemRequest;
 import com.cpa.yusin.quiz.problem.controller.dto.request.ProblemUpdateRequest;
 import com.cpa.yusin.quiz.problem.controller.dto.response.ProblemDTO;
+import com.cpa.yusin.quiz.problem.controller.dto.response.ProblemLectureResponse;
 import com.cpa.yusin.quiz.problem.controller.mapper.ProblemMapper;
 import com.cpa.yusin.quiz.problem.controller.port.ProblemService;
 import com.cpa.yusin.quiz.problem.domain.Problem;
@@ -127,6 +128,7 @@ public class ProblemServiceImpl implements ProblemService {
                             .number(problem.getNumber())
                             .content(signedContent)
                             .explanation(signedExplanation)
+                            .lecture(ProblemLectureResponse.from(problem))
                             .choices(choiceMap.get(problem.getId()))
                             .build();
                 })
@@ -149,6 +151,7 @@ public class ProblemServiceImpl implements ProblemService {
                 .number(problem.getNumber())
                 .content(signedContent)
                 .explanation(signedExplanation)
+                .lecture(ProblemLectureResponse.from(problem))
                 .choices(choices)
                 .build();
     }

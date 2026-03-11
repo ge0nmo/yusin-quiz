@@ -1,5 +1,6 @@
 package com.cpa.yusin.quiz.choice.controller.dto.request;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
@@ -20,6 +21,7 @@ public class ChoiceRequest
 
     private boolean removedYn;
 
+    @JsonIgnore
     public boolean isNew()
     {
         return this.id == null || this.id.equals(-1L);

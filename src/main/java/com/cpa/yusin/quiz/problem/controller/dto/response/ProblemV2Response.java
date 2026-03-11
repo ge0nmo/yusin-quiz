@@ -18,5 +18,7 @@ public class ProblemV2Response
     private List<Block> content;
     private List<Block> explanation;
 
+    private ProblemLectureResponse lecture;
+
     private List<ChoiceResponse> choices;
 }

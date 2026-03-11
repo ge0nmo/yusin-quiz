@@ -9,10 +9,12 @@
 
 == 문제 & 선택지 API
 
-
-== 문제 1개 조회
+== Problem V1 문제 1개 조회
 ==== HTTP Request
 include::{snippets}/getProblemById/http-request.adoc[]
+
+==== Path Parameters
+include::{snippets}/getProblemById/path-parameters.adoc[]
 
 ==== HTTP Response
 include::{snippets}/getProblemById/http-response.adoc[]
@@ -21,12 +23,74 @@ include::{snippets}/getProblemById/http-response.adoc[]
 include::{snippets}/getProblemById/response-fields.adoc[]
 
 
-== 시험의 모든 문제 조회
+== Problem V1 시험의 모든 문제 조회
 ==== HTTP Request
 include::{snippets}/getAllProblemsByExamId/http-request.adoc[]
+
+==== Query Parameters
+include::{snippets}/getAllProblemsByExamId/query-parameters.adoc[]
 
 ==== HTTP Response
 include::{snippets}/getAllProblemsByExamId/http-response.adoc[]
 
 ==== Response Fields
 include::{snippets}/getAllProblemsByExamId/response-fields.adoc[]
+
+
+== Problem V2 사용자 시험의 모든 문제 조회
+==== HTTP Request
+include::{snippets}/getAllProblemsByExamIdV2/http-request.adoc[]
+
+==== Query Parameters
+include::{snippets}/getAllProblemsByExamIdV2/query-parameters.adoc[]
+
+==== HTTP Response
+include::{snippets}/getAllProblemsByExamIdV2/http-response.adoc[]
+
+==== Response Fields
+include::{snippets}/getAllProblemsByExamIdV2/response-fields.adoc[]
+
+
+== Problem V2 관리자 문제 1개 조회
+==== HTTP Request
+include::{snippets}/getAdminProblemByIdV2/http-request.adoc[]
+
+==== Path Parameters
+include::{snippets}/getAdminProblemByIdV2/path-parameters.adoc[]
+
+==== HTTP Response
+include::{snippets}/getAdminProblemByIdV2/http-response.adoc[]
+
+==== Response Fields
+include::{snippets}/getAdminProblemByIdV2/response-fields.adoc[]
+
+
+== Problem V2 관리자 시험의 모든 문제 조회
+==== HTTP Request
+include::{snippets}/getAdminProblemsByExamIdV2/http-request.adoc[]
+
+==== Query Parameters
+include::{snippets}/getAdminProblemsByExamIdV2/query-parameters.adoc[]
+
+==== HTTP Response
+include::{snippets}/getAdminProblemsByExamIdV2/http-response.adoc[]
+
+==== Response Fields
+include::{snippets}/getAdminProblemsByExamIdV2/response-fields.adoc[]
+
+
+== Problem V2 관리자 생성/수정
+==== HTTP Request
+include::{snippets}/saveOrUpdateProblemV2/http-request.adoc[]
+
+==== Query Parameters
+include::{snippets}/saveOrUpdateProblemV2/query-parameters.adoc[]
+
+==== Request Fields
+include::{snippets}/saveOrUpdateProblemV2/request-fields.adoc[]
+
+==== HTTP Response
+include::{snippets}/saveOrUpdateProblemV2/http-response.adoc[]
+
+==== Response Fields
+include::{snippets}/saveOrUpdateProblemV2/response-fields.adoc[]

@@ -125,6 +125,7 @@ class GetBookmarkedProblemsServiceTest extends MockSetup {
         void getBookmarkedProblems_withChoices() {
                 // given
                 Long memberId = member1.getId();
+                physicsProblem1.assignLecture("https://www.youtube.com/watch?v=abc123XYZ09", 430);
                 testContainer.createBookmarkService.create(memberId, physicsProblem1.getId());
 
                 // when
@@ -135,5 +136,8 @@ class GetBookmarkedProblemsServiceTest extends MockSetup {
                 assertThat(response.getContent()).hasSize(1);
                 assertThat(response.getContent().get(0).getChoices()).hasSize(3);
                 assertThat(response.getContent().get(0).getChoices().get(0).content()).isEqualTo("choice 1");
+                assertThat(response.getContent().get(0).getLecture()).isNotNull();
+                assertThat(response.getContent().get(0).getLecture().getPlaybackUrl())
+                                .isEqualTo("https://www.youtube.com/watch?v=abc123XYZ09&t=430s");
         }
 }

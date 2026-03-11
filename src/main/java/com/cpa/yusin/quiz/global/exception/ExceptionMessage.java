@@ -26,6 +26,8 @@ public enum ExceptionMessage {
 
     PROBLEM_NOT_FOUND("해당 문제 정보를 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
     PROBLEM_NUMBER_EXISTS("해당 문제 번호가 이미 존재합니다.", HttpStatus.CONFLICT),
+    INVALID_PROBLEM_LECTURE_URL("유효한 유튜브 해설 링크를 입력해야 합니다.", HttpStatus.BAD_REQUEST),
+    INVALID_PROBLEM_LECTURE_START_TIME("해설강의 시작 시간은 0 이상이어야 합니다.", HttpStatus.BAD_REQUEST),
 
     CHOICE_NOT_FOUND("해당 보기 정보를 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
 

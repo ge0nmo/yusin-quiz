@@ -1,0 +1,33 @@
+{
+  "data": {
+    "id": 31,
+    "number": 1,
+    "content": [
+      {
+        "type": "text",
+        "tag": "p",
+        "content": "문제 본문"
+      }
+    ],
+    "explanation": [
+      {
+        "type": "text",
+        "tag": "p",
+        "content": "해설 본문"
+      }
+    ],
+    "lecture": {
+      "youtubeUrl": "https://www.youtube.com/watch?v=abc123XYZ09",
+      "startTimeSecond": 430,
+      "playbackUrl": "https://www.youtube.com/watch?v=abc123XYZ09&t=430s"
+    },
+    "choices": [
+      {
+        "id": 41,
+        "number": 1,
+        "content": "A",
+        "isAnswer": true
+      }
+    ]
+  }
+}

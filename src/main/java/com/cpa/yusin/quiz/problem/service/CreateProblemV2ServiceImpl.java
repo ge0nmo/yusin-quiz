@@ -24,6 +24,7 @@ public class CreateProblemV2ServiceImpl implements CreateProblemV2Service
     private final ExamService examService;
     private final ChoiceService choiceService;
     private final ProblemValidator problemValidator;
+    private final YoutubeLectureUrlProcessor youtubeLectureUrlProcessor;
 
     @Override
     public void saveOrUpdateV2(long examId, ProblemSaveV2Request request)
@@ -40,6 +41,7 @@ public class CreateProblemV2ServiceImpl implements CreateProblemV2Service
                     request.getNumber(),
                     exam
             );
+            applyLecture(problem, request);
 
             problemRepository.save(problem);
             choiceService.saveOrUpdate(request.getChoices(), problem);
@@ -57,11 +59,27 @@ public class CreateProblemV2ServiceImpl implements CreateProblemV2Service
                     request.getNumber(),
                     request.getExplanation()   // List<Block>
             );
+            applyLecture(problem, request);
 
             // Choice 업데이트 위임
             choiceService.saveOrUpdate(request.getChoices(), problem);
 
             log.info("V2 Updated Problem: ID={}", problem.getId());
         }
+    }
+
+    private void applyLecture(Problem problem, ProblemSaveV2Request request) {
+        if (request.getLecture() == null) {
+            problem.clearLecture();
+            return;
+        }
+
+        YoutubeLectureUrlProcessor.NormalizedYoutubeLecture normalizedYoutubeLecture =
+                youtubeLectureUrlProcessor.normalize(request.getLecture());
+
+        problem.assignLecture(
+                normalizedYoutubeLecture.canonicalYoutubeUrl(),
+                normalizedYoutubeLecture.startTimeSecond()
+        );
     }
 }

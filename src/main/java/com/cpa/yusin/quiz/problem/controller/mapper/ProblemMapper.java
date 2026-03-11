@@ -8,6 +8,7 @@ import com.cpa.yusin.quiz.exam.domain.Exam;
 import com.cpa.yusin.quiz.problem.controller.dto.request.ProblemCreateRequest;
 import com.cpa.yusin.quiz.problem.controller.dto.response.ProblemCreateResponse;
 import com.cpa.yusin.quiz.problem.controller.dto.response.ProblemDTO;
+import com.cpa.yusin.quiz.problem.controller.dto.response.ProblemLectureResponse;
 import com.cpa.yusin.quiz.problem.domain.Problem;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -56,6 +57,7 @@ public class ProblemMapper
                 .content(problem.getContent())
                 .number(problem.getNumber())
                 .explanation(problem.getExplanation())
+                .lecture(ProblemLectureResponse.from(problem))
                 .choices(choices)
                 .build();
     }
@@ -70,6 +72,7 @@ public class ProblemMapper
                 .content(problem.getContent())
                 .number(problem.getNumber())
                 .explanation(problem.getExplanation())
+                .lecture(ProblemLectureResponse.from(problem))
                 .choices(choiceMapper.toResponses(choices))
                 .build();
     }

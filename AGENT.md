@@ -17,17 +17,23 @@
 - 관리자 파일 업로드는 `file` 도메인의 `AdminFileController`가 `/api/admin/file`로 제공.
 - 관리자 답변 요청 DTO는 `answer.controller.dto.request` 패키지에 위치.
 - `./gradlew test`는 현재 작업 환경에서 성공 확인됨.
+- `./gradlew test asciidoctor openapi3`로 REST Docs HTML과 OpenAPI 3 JSON까지 함께 생성할 수 있음.
 
 ## 실행 / 검증
 
 ### 핵심 명령
 
 - 테스트: `./gradlew test`
-- REST Docs 생성까지 포함한 빌드 흐름은 `build.gradle` 기준 `test -> asciidoctor` 의존 관계를 가짐.
+- 문서 생성 포함: `./gradlew test asciidoctor openapi3`
+- generated docs:
+  - `build/docs/asciidoc/*.html`
+  - `build/api-spec/openapi3.json`
+  - `docs/frontend-api/*.md`
 
 ### 실행 전 알아둘 점
 
 - 애플리케이션 기본 설정은 `src/main/resources/application.yml`에 존재.
+- Gradle 실행 JDK는 21을 기준으로 맞춰야 함. 로컬 기본 JDK가 더 높으면 `JAVA_HOME`을 Corretto 21 등으로 지정한 뒤 실행해야 함.
 - 현재 코드상 주요 외부 의존성 키는 아래와 같음.
   - `spring.datasource.*`
   - `jwt.token.*`
@@ -182,6 +188,8 @@
   - V2: `contentJson`, `explanationJson` JSON Block 리스트
 - V1 조회 응답은 `ProblemDTO`.
 - V2 조회 응답은 `ProblemV2Response`.
+- `Problem`은 공통 해설강의 필드 `lectureYoutubeUrl`, `lectureStartSecond`도 함께 가짐.
+- `ProblemDTO`, `ProblemV2Response`, 북마크 문제 응답은 모두 nullable `lecture` 객체를 포함할 수 있음.
 - 문제 관련 기능 수정 시 어느 API와 어느 저장 필드를 대상으로 하는지 먼저 분리해야 함.
 
 ### 소프트 삭제와 하드 삭제가 혼재
@@ -203,6 +211,22 @@
 - 페이징 정보는 `pageInfo`에 담기며 nullable.
 - 일부 관리자 조회 엔드포인트는 raw list를 직접 반환.
 - 예외는 `ExceptionAdvice`가 `ErrorResponse`로 변환.
+
+### Frontend Integration Contracts
+
+- 프론트 영향 API의 최종 권위는 integration test로 검증된 계약이어야 함.
+- 프론트 에이전트는 아래 순서로 읽어야 함.
+  - `docs/frontend-api/*.md`
+  - `build/docs/asciidoc/*.html`
+  - `build/api-spec/openapi3.json`
+  - Controller 주석 + DTO
+  - integration test
+- 프론트 영향 API 변경 시 아래를 같이 수정해야 함.
+  - integration test docs
+  - `docs/frontend-api/*.md`
+  - `AGENT.md`
+  - `quiz-admin` 타입 또는 매핑 레이어
+- nullable / optional 정책은 AGENT와 프론트 문서에 명시해야 함.
 
 ### Block JSON 스키마
 
@@ -230,6 +254,11 @@
 - 문제 본문과 해설의 Base64 이미지를 파싱해 S3 업로드 후 URL로 치환.
 - V2 문제 저장은 `CreateProblemV2ServiceImpl`이 담당.
 - V2는 클라이언트가 전달한 `List<Block>`을 그대로 저장하며 이미지 URL도 그대로 저장.
+- V2 저장 요청의 `lecture` 규칙은 아래와 같음.
+  - `lecture = null` 이면 기존 해설강의 링크 제거
+  - `lecture.youtubeUrl`만 있어도 저장 가능
+  - `lecture.startTimeSecond`는 nullable
+  - 저장 전 `YoutubeLectureUrlProcessor`가 canonical YouTube watch URL로 정규화
 
 ### 문제 조회 / Presigned URL 변환
 
@@ -237,6 +266,7 @@
 - V1은 HTML `<img src>`를 치환.
 - V2는 `ImageBlock.src`를 치환.
 - 관리자 파일 업로드는 `AdminFileController`가 raw S3 URL을 저장한 뒤, 프론트 즉시 사용을 위해 presigned URL을 반환.
+- 해설강의는 `ProblemLectureResponse`로 응답되며 `lecture.playbackUrl`을 프론트가 그대로 사용해야 함.
 
 ### 학습 세션
 
@@ -349,6 +379,12 @@
   - `ProblemV2Controller`
   - `AdminProblemV2Controller`
 - 이미지 처리 변경 시 `ProblemContentProcessor`, `FileServiceImpl`, `AdminFileController`까지 함께 볼 것.
+- 프론트 영향이 있는 API 변경이면 `docs/frontend-api`, REST Docs, OpenAPI 3 산출물 기준까지 함께 갱신해야 함.
+- lecture 계약 변경이면 아래도 함께 확인해야 함.
+  - `ProblemLectureResponse`
+  - `YoutubeLectureUrlProcessor`
+  - `src/test/java/com/cpa/yusin/quiz/problem/integration/ProblemTest.java`
+  - `src/test/java/com/cpa/yusin/quiz/bookmark/integration/BookmarkTest.java`
 
 ### 인증 / 보안 변경
 

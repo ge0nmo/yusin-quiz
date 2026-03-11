@@ -105,6 +105,19 @@ class ProblemServiceTest extends MockSetup
 
     }
 
+    @Test
+    void getById_whenProblemHasLecture_thenReturnsLectureResponse() {
+        physicsProblem1.assignLecture("https://www.youtube.com/watch?v=abc123XYZ09", 430);
+
+        ProblemDTO result = testContainer.problemService.getById(physicsProblem1.getId());
+
+        assertThat(result.lecture()).isNotNull();
+        assertThat(result.lecture().getYoutubeUrl()).isEqualTo("https://www.youtube.com/watch?v=abc123XYZ09");
+        assertThat(result.lecture().getStartTimeSecond()).isEqualTo(430);
+        assertThat(result.lecture().getPlaybackUrl())
+                .isEqualTo("https://www.youtube.com/watch?v=abc123XYZ09&t=430s");
+    }
+
     /*@Test
     void getAllByExamId()
     {

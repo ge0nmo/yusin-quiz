@@ -1,9 +1,21 @@
+buildscript {
+    repositories {
+        gradlePluginPortal()
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.epages:restdocs-api-spec-gradle-plugin:0.18.2'
+    }
+}
+
 plugins {
     id 'java'
     id 'org.springframework.boot' version '3.3.1'
     id 'io.spring.dependency-management' version '1.1.5'
     id 'org.asciidoctor.jvm.convert' version '3.3.2'
 }
+
+apply plugin: 'com.epages.restdocs-api-spec'
 
 group = 'cpa-yusin-quiz'
 version = '0.0.1-SNAPSHOT'
@@ -67,6 +79,7 @@ dependencies {
 
     //id 'org.asciidoctor.jvm.convert' version '4.0.2'
     testImplementation 'org.springframework.restdocs:spring-restdocs-mockmvc'
+    testImplementation 'com.epages:restdocs-api-spec-mockmvc:0.18.2'
 
     //s3
     implementation platform('software.amazon.awssdk:bom:2.40.6')
@@ -92,4 +105,25 @@ tasks.named('test') {
 tasks.named('asciidoctor') {
     inputs.dir snippetsDir
     dependsOn test
+    sourceDir file("src/main/resources/static/asciidoc")
+    outputDir file("$buildDir/docs/asciidoc")
+    baseDirFollowsSourceFile()
+    attributes 'snippets': snippetsDir
+}
+
+openapi3 {
+    title = 'Yusin Quiz API'
+    description = 'API contract generated from Spring REST Docs integration tests.'
+    server = 'http://localhost:8080'
+    version = project.version
+    format = 'json'
+    outputDirectory = file("$buildDir/api-spec")
+    outputFileNamePrefix = 'openapi3'
+    snippetsDirectory = snippetsDir
+}
+
+afterEvaluate {
+    tasks.named('openapi3') {
+        dependsOn test
+    }
 }

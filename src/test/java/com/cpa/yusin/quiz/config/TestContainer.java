@@ -42,10 +42,15 @@ import com.cpa.yusin.quiz.member.service.port.MemberRepository;
 import com.cpa.yusin.quiz.member.service.port.MemberValidator;
 import com.cpa.yusin.quiz.mock.*;
 import com.cpa.yusin.quiz.problem.controller.mapper.ProblemMapper;
+import com.cpa.yusin.quiz.problem.controller.port.CreateProblemV2Service;
+import com.cpa.yusin.quiz.problem.controller.port.GetProblemV2Service;
 import com.cpa.yusin.quiz.problem.controller.port.ProblemService;
 import com.cpa.yusin.quiz.problem.service.ProblemContentProcessor;
+import com.cpa.yusin.quiz.problem.service.CreateProblemV2ServiceImpl;
+import com.cpa.yusin.quiz.problem.service.GetProblemV2ServiceImpl;
 import com.cpa.yusin.quiz.problem.service.ProblemServiceImpl;
 import com.cpa.yusin.quiz.problem.service.ProblemValidator;
+import com.cpa.yusin.quiz.problem.service.YoutubeLectureUrlProcessor;
 import com.cpa.yusin.quiz.problem.service.port.ProblemRepository;
 import com.cpa.yusin.quiz.question.controller.mapper.QuestionMapper;
 import com.cpa.yusin.quiz.question.controller.port.QuestionService;
@@ -106,6 +111,9 @@ public class TestContainer {
         public final ProblemRepository problemRepository;
         public final ProblemService problemService;
         public final ProblemValidator problemValidator;
+        public final CreateProblemV2Service createProblemV2Service;
+        public final GetProblemV2Service getProblemV2Service;
+        public final YoutubeLectureUrlProcessor youtubeLectureUrlProcessor;
 
         /**
          * question
@@ -174,8 +182,19 @@ public class TestContainer {
                 problemValidator = new ProblemValidator(this.problemRepository);
                 ProblemContentProcessor problemContentProcessor = new ProblemContentProcessor(this.fileService,
                                 "test-prefix");
+                this.youtubeLectureUrlProcessor = new YoutubeLectureUrlProcessor();
                 this.problemService = new ProblemServiceImpl(this.problemRepository, this.problemMapper,
                                 this.examService, this.choiceService, this.problemValidator, this.fileService,
+                                problemContentProcessor);
+                this.createProblemV2Service = new CreateProblemV2ServiceImpl(
+                                this.problemRepository,
+                                this.examService,
+                                this.choiceService,
+                                this.problemValidator,
+                                this.youtubeLectureUrlProcessor);
+                this.getProblemV2Service = new GetProblemV2ServiceImpl(
+                                this.problemRepository,
+                                this.choiceService,
                                 problemContentProcessor);
 
                 this.questionRepository = new FakeQuestionRepository();

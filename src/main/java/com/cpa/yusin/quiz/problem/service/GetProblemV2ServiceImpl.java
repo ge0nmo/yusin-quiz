@@ -4,6 +4,7 @@ import com.cpa.yusin.quiz.choice.controller.dto.response.ChoiceResponse;
 import com.cpa.yusin.quiz.choice.controller.port.ChoiceService;
 import com.cpa.yusin.quiz.global.exception.ExceptionMessage;
 import com.cpa.yusin.quiz.global.exception.ProblemException;
+import com.cpa.yusin.quiz.problem.controller.dto.response.ProblemLectureResponse;
 import com.cpa.yusin.quiz.problem.controller.dto.response.ProblemV2Response;
 import com.cpa.yusin.quiz.problem.controller.port.GetProblemV2Service;
 import com.cpa.yusin.quiz.problem.domain.Problem;
@@ -47,12 +48,7 @@ public class GetProblemV2ServiceImpl implements GetProblemV2Service {
         }
 
         // 2. 조회된 문제들의 ID 리스트 추출
-        List<Long> problemIds = problems.stream()
-                .map(Problem::getId)
-                .toList();
-
-        // 3. 문제 ID들에 해당하는 모든 보기를 한 번에 조회하여 Map으로 변환 (Query #2)
-        // (기존에는 여기서 루프를 돌며 40번 쿼리를 날렸음 -> 이제 1번만 날림)
+        // 3. 문제들에 해당하는 모든 보기를 한 번에 조회하여 Map으로 변환 (Query #2)
         Map<Long, List<ChoiceResponse>> choicesMap = choiceService.findAllByExamId(examId);
 
         // 4. 메모리 매핑 (DB 접근 없음)
@@ -80,6 +76,7 @@ public class GetProblemV2ServiceImpl implements GetProblemV2Service {
                 .explanation(problemContentProcessor.processBlocksWithPresignedUrl(problem.getExplanationJson())) // [Refactor]
                                                                                                                   // Use
                                                                                                                   // processor
+                .lecture(ProblemLectureResponse.from(problem))
                 .choices(choices)
                 .build();
     }

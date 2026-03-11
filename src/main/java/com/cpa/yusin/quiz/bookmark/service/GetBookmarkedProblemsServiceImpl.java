@@ -6,6 +6,7 @@ import com.cpa.yusin.quiz.bookmark.domain.Bookmark;
 import com.cpa.yusin.quiz.bookmark.service.port.BookmarkRepository;
 import com.cpa.yusin.quiz.choice.controller.dto.response.ChoiceResponse;
 import com.cpa.yusin.quiz.choice.controller.port.ChoiceService;
+import com.cpa.yusin.quiz.problem.controller.dto.response.ProblemLectureResponse;
 import com.cpa.yusin.quiz.problem.controller.dto.response.ProblemV2Response;
 import com.cpa.yusin.quiz.problem.domain.Problem;
 import com.cpa.yusin.quiz.problem.service.ProblemContentProcessor;
@@ -70,6 +71,7 @@ public class GetBookmarkedProblemsServiceImpl implements GetBookmarkedProblemsSe
                                                                                         problem.getExplanationJson())) // [Refactor]
                                                                                                                        // Use
                                                                                                                        // processor
+                                                        .lecture(ProblemLectureResponse.from(problem))
                                                         .choices(choices)
                                                         .build();
                                 })

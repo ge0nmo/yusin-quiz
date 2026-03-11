@@ -53,6 +53,11 @@ public class Problem extends BaseEntity
     @Column(nullable = false)
     private boolean isRemoved;
 
+    @Column(length = 1000)
+    private String lectureYoutubeUrl;
+
+    private Integer lectureStartSecond;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "exam_id", nullable = false)
     private Exam exam;
@@ -110,6 +115,16 @@ public class Problem extends BaseEntity
     // =========================================================
     public void delete() {
         this.isRemoved = true;
+    }
+
+    public void assignLecture(String lectureYoutubeUrl, Integer lectureStartSecond) {
+        this.lectureYoutubeUrl = lectureYoutubeUrl;
+        this.lectureStartSecond = lectureStartSecond;
+    }
+
+    public void clearLecture() {
+        this.lectureYoutubeUrl = null;
+        this.lectureStartSecond = null;
     }
 
     // 마이그레이션 유틸리티

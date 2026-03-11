@@ -1,0 +1,23 @@
+= API Documentation
+:doctype: book
+:icons: font
+:toc: left
+:toc-title: 순서
+:sectnums:
+:sectnumlevels: 5
+:source-highlighter: highlightjs
+
+== 북마크 API
+
+== 북마크된 문제 Slice 조회
+==== HTTP Request
+include::{snippets}/getBookmarkedProblems/http-request.adoc[]
+
+==== Query Parameters
+include::{snippets}/getBookmarkedProblems/query-parameters.adoc[]
+
+==== HTTP Response
+include::{snippets}/getBookmarkedProblems/http-response.adoc[]
+
+==== Response Fields
+include::{snippets}/getBookmarkedProblems/response-fields.adoc[]

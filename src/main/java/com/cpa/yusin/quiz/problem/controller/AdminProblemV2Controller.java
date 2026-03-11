@@ -23,8 +23,22 @@ public class AdminProblemV2Controller
     private final GetProblemV2Service getProblemV2Service;
 
     /**
-     * [V2] JSON 기반 문제 생성 및 수정 (통합 엔드포인트)
-     * 프론트엔드 Tiptap JSON 저장 시 이 API를 호출합니다.
+     * 관리자 문제 편집 화면이 사용하는 생성/수정 통합 API.
+     *
+     * 왜 단일 엔드포인트로 유지하는가:
+     * - Next.js 관리자 화면은 문제 추가/수정 UI를 동일 폼으로 사용 중
+     * - 프론트는 id 유무만 보고 같은 요청 shape를 재사용하는 편이 구현 비용이 가장 낮음
+     *
+     * lecture 필드 규칙:
+     * - lecture = null 이면 해설강의 링크를 제거해야 함
+     * - lecture.youtubeUrl 만 있으면 "해설 링크만 노출" 상태로 저장해야 함
+     * - lecture.startTimeSecond 는 nullable 이며, 값이 있으면 프론트가 playbackUrl 또는 `&t=`를 사용해
+     *   특정 시점부터 재생 가능
+     *
+     * 프론트 구현 포인트:
+     * - 관리 화면은 저장 전에 유튜브 URL 원본을 그대로 보낼 수 있음
+     * - 서버가 canonical watch URL로 정규화해서 저장하므로 프론트는 별도 URL 정규화 로직을 가질 필요 없음
+     * - 잘못된 유튜브 도메인, video id 추출 실패, 음수 시작 시간은 400 Bad Request 로 처리됨
      */
     @PostMapping
     public ResponseEntity<GlobalResponse<String>> saveOrUpdateV2(@RequestParam("examId") long examId,
@@ -34,8 +48,15 @@ public class AdminProblemV2Controller
         return ResponseEntity.ok(new GlobalResponse<>("Saved Successfully (V2)"));
     }
 
-
-    // [New] 단건 조회
+    /**
+     * 관리자 문제 상세 조회 API.
+     *
+     * 프론트는 문제 편집 화면 최초 진입 시 이 응답 하나만으로
+     * - 본문/해설 block 데이터
+     * - 보기 목록
+     * - 해설강의 lecture 정보
+     * 를 모두 채울 수 있어야 함.
+     */
     @GetMapping("/{problemId}")
     public ResponseEntity<GlobalResponse<ProblemV2Response>> getById(@PathVariable Long problemId)
     {
@@ -43,7 +64,13 @@ public class AdminProblemV2Controller
         return ResponseEntity.ok(new GlobalResponse<>(response));
     }
 
-    // [New] 시험별 전체 조회
+    /**
+     * 시험별 문제 목록 조회 API.
+     *
+     * 관리자 문제 목록 화면은 각 문제 row에서 해설강의 존재 여부를 즉시 보여줘야 하므로
+     * lecture 객체를 함께 내려야 함.
+     * lecture 가 null 이면 아직 해설강의 링크가 연결되지 않은 문제라는 의미.
+     */
     @GetMapping
     public ResponseEntity<GlobalResponse<List<ProblemV2Response>>> getAllByExamId(@RequestParam Long examId)
     {
