@@ -54,6 +54,8 @@ public class PerformanceLoggingAspect {
             stopWatch.stop();
             long totalTime = stopWatch.getTotalTimeMillis();
 
+            // Result logging intentionally uses summarized output so large DTO payloads
+            // do not flood the logs or expose signed URLs/block content.
             String resultString = isSensitive ? "[PROTECTED]" : LogUtils.toSimpleString(result);
 
             if (totalTime > 1000) {

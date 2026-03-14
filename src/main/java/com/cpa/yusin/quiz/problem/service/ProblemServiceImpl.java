@@ -111,6 +111,10 @@ public class ProblemServiceImpl implements ProblemService {
 
     @Override
     public GlobalResponse<List<ProblemDTO>> getAllByExamId(long examId) {
+        // Fail fast on a deleted exam/subject so callers get the existing
+        // NOT_FOUND contract instead of an empty problem list that looks valid.
+        examService.findById(examId);
+
         List<Problem> problems = problemRepository.findAllByExamId(examId);
         Map<Long, List<ChoiceResponse>> choiceMap = choiceService.findAllByExamId(examId);
 

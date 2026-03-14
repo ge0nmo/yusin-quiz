@@ -94,6 +94,9 @@ public class ExamServiceImpl implements ExamService {
 
     @Override
     public List<Integer> getAllYearsBySubjectId(long subjectId) {
+        // Return 404 for a deleted subject instead of leaking an empty "valid" year
+        // list.
+        subjectService.findById(subjectId);
         return examRepository.getYearsBySubjectId(subjectId);
     }
 

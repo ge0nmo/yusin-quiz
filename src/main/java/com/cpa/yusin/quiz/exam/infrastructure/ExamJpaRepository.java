@@ -25,7 +25,20 @@ public interface ExamJpaRepository extends JpaRepository<Exam, Long> {
                         "ORDER BY e.year DESC, e.name ASC ")
         List<Exam> findAllBySubjectId(@Param("subjectId") long subjectId);
 
-        @Query("SELECT e FROM Exam e WHERE e.id = :id AND e.isRemoved = false ")
+        /**
+         * An exam is visible only while both the exam itself and its owning subject are
+         * active.
+         * This keeps subject-level soft delete from leaking stale exam IDs back into
+         * user/admin APIs.
+         */
+        @Query("SELECT e FROM Exam e " +
+                        "WHERE e.id = :id " +
+                        "AND e.isRemoved = false " +
+                        "AND EXISTS (" +
+                        "   SELECT s.id FROM Subject s " +
+                        "   WHERE s.id = e.subjectId " +
+                        "   AND s.isRemoved = false" +
+                        ")")
         Optional<Exam> findByIdAndIsRemovedFalse(long id);
 
         @Query("SELECT CASE WHEN COUNT(e) > 0 THEN TRUE ELSE FALSE END " +

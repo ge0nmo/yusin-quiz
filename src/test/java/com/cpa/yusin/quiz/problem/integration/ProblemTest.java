@@ -3,6 +3,7 @@ package com.cpa.yusin.quiz.problem.integration;
 import com.epages.restdocs.apispec.ResourceSnippetParameters;
 import com.cpa.yusin.quiz.choice.domain.Choice;
 import com.cpa.yusin.quiz.choice.service.port.ChoiceRepository;
+import com.cpa.yusin.quiz.common.service.ClockHolder;
 import com.cpa.yusin.quiz.config.TeardownExtension;
 import com.cpa.yusin.quiz.exam.domain.Exam;
 import com.cpa.yusin.quiz.exam.service.port.ExamRepository;
@@ -12,8 +13,9 @@ import com.cpa.yusin.quiz.member.domain.type.Role;
 import com.cpa.yusin.quiz.member.service.port.MemberRepository;
 import com.cpa.yusin.quiz.problem.controller.dto.request.ProblemLectureRequest;
 import com.cpa.yusin.quiz.problem.controller.dto.request.ProblemSaveV2Request;
-import com.cpa.yusin.quiz.problem.domain.block.TextBlock;
 import com.cpa.yusin.quiz.problem.domain.Problem;
+import com.cpa.yusin.quiz.problem.domain.block.Span;
+import com.cpa.yusin.quiz.problem.domain.block.TextBlock;
 import com.cpa.yusin.quiz.problem.service.port.ProblemRepository;
 import com.cpa.yusin.quiz.subject.domain.Subject;
 import com.cpa.yusin.quiz.subject.service.port.SubjectRepository;
@@ -24,6 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.restdocs.RestDocumentationContextProvider;
 import org.springframework.restdocs.RestDocumentationExtension;
@@ -37,10 +40,13 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static com.epages.restdocs.apispec.MockMvcRestDocumentationWrapper.document;
 import static com.epages.restdocs.apispec.ResourceDocumentation.resource;
+import static org.hamcrest.Matchers.nullValue;
+import static org.mockito.BDDMockito.given;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.documentationConfiguration;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
@@ -49,6 +55,7 @@ import static org.springframework.restdocs.payload.PayloadDocumentation.*;
 import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
 import static org.springframework.restdocs.request.RequestDocumentation.queryParameters;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith({RestDocumentationExtension.class, TeardownExtension.class})
@@ -74,6 +81,9 @@ public class ProblemTest
 
     @Autowired
     private ChoiceRepository choiceRepository;
+
+    @MockBean
+    private ClockHolder clockHolder;
 
     private final ObjectMapper mapper = new ObjectMapper();
 
@@ -107,6 +117,8 @@ public class ProblemTest
                 .name("1차")
                 .subjectId(english.getId())
                 .build());
+
+        given(clockHolder.getCurrentDateTime()).willReturn(LocalDateTime.of(2026, 3, 14, 10, 0));
     }
 
 
@@ -424,6 +436,149 @@ public class ProblemTest
                                 fieldWithPath("data[].choices[].isAnswer").description("정답 여부").type(JsonFieldType.BOOLEAN)
                         )
                 ));
+    }
+
+    @Transactional
+    @WithUserDetails(value = "John@gmail.com", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+    @Test
+    void searchAdminProblemsV2() throws Exception
+    {
+        Subject tax = subjectRepository.save(Subject.builder()
+                .name("세법")
+                .build());
+        Exam taxExam = examRepository.save(Exam.builder()
+                .year(2026)
+                .name("2차")
+                .subjectId(tax.getId())
+                .build());
+
+        Problem withoutLecture = problemRepository.save(Problem.builder()
+                .number(7)
+                .contentJson(List.of(TextBlock.builder()
+                        .type("text")
+                        .tag("p")
+                        .spans(List.of(Span.builder().text("강의가 아직 연결되지 않은 세법 문제입니다").build()))
+                        .build()))
+                .explanationJson(List.of())
+                .lectureYoutubeUrl("   ")
+                .exam(taxExam)
+                .build());
+
+        choiceRepository.saveAll(List.of(
+                Choice.builder().content("1번").number(1).isAnswer(true).problem(withoutLecture).build(),
+                Choice.builder().content("2번").number(2).isAnswer(false).problem(withoutLecture).build(),
+                Choice.builder().content("3번").number(3).isAnswer(false).problem(withoutLecture).build()
+        ));
+
+        Problem withoutLectureLegacy = problemRepository.save(Problem.builder()
+                .number(2)
+                .content("<p>영어 미연결 문제</p>")
+                .explanation("해설")
+                .exam(exam)
+                .build());
+
+        Problem withLecture = problemRepository.save(Problem.builder()
+                .number(8)
+                .content("강의 연결 문제")
+                .explanation("해설")
+                .lectureYoutubeUrl("https://www.youtube.com/watch?v=lecture-1")
+                .lectureStartSecond(120)
+                .exam(taxExam)
+                .build());
+
+        choiceRepository.saveAll(List.of(
+                Choice.builder().content("A").number(1).isAnswer(true).problem(withLecture).build(),
+                Choice.builder().content("B").number(2).isAnswer(false).problem(withLecture).build()
+        ));
+
+        Subject deletedSubject = subjectRepository.save(Subject.builder()
+                .name("삭제 과목")
+                .build());
+        Exam deletedExam = examRepository.save(Exam.builder()
+                .year(2027)
+                .name("삭제 시험")
+                .subjectId(deletedSubject.getId())
+                .build());
+        problemRepository.save(Problem.builder()
+                .number(99)
+                .content("삭제 계층 문제")
+                .explanation("해설")
+                .exam(deletedExam)
+                .build());
+        deletedSubject.delete();
+        subjectRepository.save(deletedSubject);
+
+        ResultActions resultActions = mvc.perform(get("/api/v2/admin/problem/search")
+                .queryParam("page", "0")
+                .queryParam("size", "20")
+                .queryParam("lectureStatus", "WITHOUT_LECTURE"));
+
+        resultActions
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.length()").value(2))
+                .andExpect(jsonPath("$.data[0].id").value(withoutLecture.getId()))
+                .andExpect(jsonPath("$.data[0].subjectId").value(tax.getId()))
+                .andExpect(jsonPath("$.data[0].subjectName").value("세법"))
+                .andExpect(jsonPath("$.data[0].examId").value(taxExam.getId()))
+                .andExpect(jsonPath("$.data[0].examName").value("2차"))
+                .andExpect(jsonPath("$.data[0].examYear").value(2026))
+                .andExpect(jsonPath("$.data[0].lecture").value(nullValue()))
+                .andExpect(jsonPath("$.data[0].choiceCount").value(3))
+                .andExpect(jsonPath("$.data[0].answerChoiceCount").value(1))
+                .andExpect(jsonPath("$.data[0].contentPreviewText").value("강의가 아직 연결되지 않은 세법 문제입니다"))
+                .andExpect(jsonPath("$.pageInfo.totalElements").value(2))
+                .andExpect(jsonPath("$.pageInfo.totalPages").value(1))
+                .andExpect(jsonPath("$.pageInfo.currentPage").value(1))
+                .andExpect(jsonPath("$.pageInfo.pageSize").value(20))
+                .andDo(document("searchAdminProblemsV2",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+                        resource(problemResource(
+                                "V2 관리자 문제 검색",
+                                "대시보드 카드 클릭 진입을 위해 active hierarchy 기준으로 관리자 문제 목록을 검색합니다."
+                        )),
+                        queryParameters(
+                                parameterWithName("page").description("0-based 페이지 번호").optional(),
+                                parameterWithName("size").description("페이지 크기").optional(),
+                                parameterWithName("lectureStatus").description("해설 강의 연결 상태. ALL, WITH_LECTURE, WITHOUT_LECTURE"),
+                                parameterWithName("subjectId").description("과목 ID 필터").optional(),
+                                parameterWithName("year").description("시험 연도 필터").optional(),
+                                parameterWithName("examId").description("시험 ID 필터").optional()
+                        ),
+                        responseFields(
+                                fieldWithPath("data[].id").description("문제 고유 식별자").type(JsonFieldType.NUMBER),
+                                fieldWithPath("data[].number").description("문제 번호").type(JsonFieldType.NUMBER),
+                                fieldWithPath("data[].subjectId").description("과목 ID").type(JsonFieldType.NUMBER),
+                                fieldWithPath("data[].subjectName").description("과목명").type(JsonFieldType.STRING),
+                                fieldWithPath("data[].examId").description("시험 ID").type(JsonFieldType.NUMBER),
+                                fieldWithPath("data[].examName").description("시험명").type(JsonFieldType.STRING),
+                                fieldWithPath("data[].examYear").description("시험 연도").type(JsonFieldType.NUMBER),
+                                fieldWithPath("data[].lecture").description("해설 강의 정보. WITHOUT_LECTURE 조회에서는 null").type(JsonFieldType.NULL).optional(),
+                                fieldWithPath("data[].choiceCount").description("선택지 수").type(JsonFieldType.NUMBER),
+                                fieldWithPath("data[].answerChoiceCount").description("정답 선택지 수").type(JsonFieldType.NUMBER),
+                                fieldWithPath("data[].contentPreviewText").description("짧은 문제 미리보기 텍스트").type(JsonFieldType.STRING),
+                                fieldWithPath("pageInfo.totalElements").description("전체 건수").type(JsonFieldType.NUMBER),
+                                fieldWithPath("pageInfo.totalPages").description("전체 페이지 수").type(JsonFieldType.NUMBER),
+                                fieldWithPath("pageInfo.currentPage").description("현재 페이지(1-based)").type(JsonFieldType.NUMBER),
+                                fieldWithPath("pageInfo.pageSize").description("페이지 크기").type(JsonFieldType.NUMBER)
+                        )
+                ));
+
+        mvc.perform(get("/api/v2/admin/problem/search")
+                        .queryParam("page", "0")
+                        .queryParam("size", "20")
+                        .queryParam("lectureStatus", "WITHOUT_LECTURE")
+                        .queryParam("subjectId", tax.getId().toString())
+                        .queryParam("year", "2026")
+                        .queryParam("examId", taxExam.getId().toString()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.length()").value(1))
+                .andExpect(jsonPath("$.data[0].id").value(withoutLecture.getId()))
+                .andExpect(jsonPath("$.pageInfo.totalElements").value(1));
+
+        mvc.perform(get("/api/admin/dashboard"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.operations.problemsWithoutLectureCount").value(2));
     }
 
     @Transactional

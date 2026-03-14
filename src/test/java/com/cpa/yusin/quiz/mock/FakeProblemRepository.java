@@ -1,7 +1,14 @@
 package com.cpa.yusin.quiz.mock;
 
 import com.cpa.yusin.quiz.problem.domain.Problem;
+import com.cpa.yusin.quiz.problem.service.dto.AdminProblemLectureStatus;
+import com.cpa.yusin.quiz.problem.service.dto.AdminProblemSearchCondition;
+import com.cpa.yusin.quiz.problem.service.dto.AdminProblemSearchProjection;
 import com.cpa.yusin.quiz.problem.service.port.ProblemRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+import org.springframework.util.StringUtils;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
@@ -65,5 +72,52 @@ public class FakeProblemRepository implements ProblemRepository
     {
         return data.stream()
                 .anyMatch(p -> p.getExam().getId().equals(examId) && p.getNumber() == number);
+    }
+
+    @Override
+    public Page<AdminProblemSearchProjection> searchAdminProblems(Pageable pageable,
+                                                                  AdminProblemSearchCondition searchCondition) {
+        List<AdminProblemSearchProjection> filtered = data.stream()
+                .filter(problem -> !problem.isRemoved())
+                .filter(problem -> matchesLectureStatus(problem, searchCondition.lectureStatus()))
+                .filter(problem -> searchCondition.subjectId() == null
+                        || Objects.equals(problem.getExam().getSubjectId(), searchCondition.subjectId()))
+                .filter(problem -> searchCondition.year() == null
+                        || problem.getExam().getYear() == searchCondition.year())
+                .filter(problem -> searchCondition.examId() == null
+                        || Objects.equals(problem.getExam().getId(), searchCondition.examId()))
+                .sorted(Comparator.comparing((Problem problem) -> problem.getExam().getYear()).reversed()
+                        .thenComparing(problem -> problem.getExam().getId(), Comparator.reverseOrder())
+                        .thenComparing(Problem::getNumber)
+                        .thenComparing(Problem::getId))
+                .map(problem -> new AdminProblemSearchProjection(
+                        problem,
+                        problem.getExam().getSubjectId(),
+                        "subject",
+                        problem.getExam().getId(),
+                        problem.getExam().getName(),
+                        problem.getExam().getYear(),
+                        0L,
+                        0L
+                ))
+                .toList();
+
+        int startIndex = Math.toIntExact(pageable.getOffset());
+        if (startIndex >= filtered.size()) {
+            return new PageImpl<>(Collections.emptyList(), pageable, filtered.size());
+        }
+
+        int endIndex = Math.min(startIndex + pageable.getPageSize(), filtered.size());
+        return new PageImpl<>(filtered.subList(startIndex, endIndex), pageable, filtered.size());
+    }
+
+    private boolean matchesLectureStatus(Problem problem, AdminProblemLectureStatus lectureStatus) {
+        boolean hasLecture = StringUtils.hasText(problem.getLectureYoutubeUrl());
+
+        return switch (lectureStatus) {
+            case ALL -> true;
+            case WITH_LECTURE -> hasLecture;
+            case WITHOUT_LECTURE -> !hasLecture;
+        };
     }
 }

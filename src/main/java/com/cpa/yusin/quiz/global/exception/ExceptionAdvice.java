@@ -6,6 +6,7 @@ import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.context.request.async.AsyncRequestNotUsableException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
@@ -16,11 +17,15 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 import org.springframework.web.servlet.NoHandlerFoundException;
 
 import java.io.IOException;
+import java.util.Locale;
 import java.util.NoSuchElementException;
 
 @Slf4j
 @RestControllerAdvice
 public class ExceptionAdvice {
+    private static final String BROKEN_PIPE = "broken pipe";
+    private static final String CONNECTION_RESET = "connection reset by peer";
+
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
@@ -104,12 +109,22 @@ public class ExceptionAdvice {
         return ErrorResponse.of(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
     }
 
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleIOException(IOException e) {
+    @ExceptionHandler(AsyncRequestNotUsableException.class)
+    public void handleAsyncRequestNotUsableException(AsyncRequestNotUsableException e) {
+        logClientAbort(e);
+    }
+
+    @ExceptionHandler(IOException.class)
+    public ResponseEntity<?> handleIOException(IOException e) {
+        if (isClientAbort(e)) {
+            logClientAbort(e);
+            return ResponseEntity.noContent().build();
+        }
+
         log.error("입출력 예외가 발생했습니다.", e);
 
-        return ErrorResponse.of(HttpStatus.BAD_REQUEST, e.getMessage());
+        return ResponseEntity.badRequest()
+                .body(ErrorResponse.of(HttpStatus.BAD_REQUEST, e.getMessage()));
     }
 
     @ExceptionHandler(NoHandlerFoundException.class)
@@ -140,5 +155,31 @@ public class ExceptionAdvice {
         return ResponseEntity
                 .status(HttpStatus.NOT_FOUND)
                 .body(ErrorResponse.of(HttpStatus.NOT_FOUND, e.getMessage()));
+    }
+
+    private boolean isClientAbort(Throwable throwable) {
+        Throwable current = throwable;
+        while (current != null) {
+            if (current instanceof AsyncRequestNotUsableException) {
+                return true;
+            }
+
+            String message = current.getMessage();
+            if (message != null) {
+                String normalizedMessage = message.toLowerCase(Locale.ROOT);
+                if (normalizedMessage.contains(BROKEN_PIPE) || normalizedMessage.contains(CONNECTION_RESET)) {
+                    return true;
+                }
+            }
+
+            current = current.getCause();
+        }
+
+        return false;
+    }
+
+    private void logClientAbort(Throwable throwable) {
+        String message = throwable.getMessage() == null ? throwable.getClass().getSimpleName() : throwable.getMessage();
+        log.debug("클라이언트가 응답 수신 중 연결을 종료했습니다: {}", message);
     }
 }

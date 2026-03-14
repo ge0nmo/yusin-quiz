@@ -1,8 +1,12 @@
 package com.cpa.yusin.quiz.problem.infrastructure;
 
 import com.cpa.yusin.quiz.problem.domain.Problem;
+import com.cpa.yusin.quiz.problem.service.dto.AdminProblemSearchCondition;
+import com.cpa.yusin.quiz.problem.service.dto.AdminProblemSearchProjection;
 import com.cpa.yusin.quiz.problem.service.port.ProblemRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -31,13 +35,13 @@ public class ProblemRepositoryImpl implements ProblemRepository
     @Override
     public List<Problem> findAllByExamId(long examId)
     {
-        return problemJpaRepository.findAllByExamId(examId);
+        return problemJpaRepository.findAllByExamIdWithActiveHierarchy(examId);
     }
 
     @Override
     public Optional<Problem> findById(long id)
     {
-        return problemJpaRepository.findById(id);
+        return problemJpaRepository.findByIdWithActiveHierarchy(id);
     }
 
 
@@ -45,5 +49,17 @@ public class ProblemRepositoryImpl implements ProblemRepository
     public boolean existsByExamIdAndNumber(Long examId, int number)
     {
         return problemJpaRepository.existsByExamIdAndNumberAndIsRemovedFalse(examId, number);
+    }
+
+    @Override
+    public Page<AdminProblemSearchProjection> searchAdminProblems(Pageable pageable,
+                                                                  AdminProblemSearchCondition searchCondition) {
+        return problemJpaRepository.searchAdminProblems(
+                searchCondition.lectureStatus().name(),
+                searchCondition.subjectId(),
+                searchCondition.year(),
+                searchCondition.examId(),
+                pageable
+        );
     }
 }

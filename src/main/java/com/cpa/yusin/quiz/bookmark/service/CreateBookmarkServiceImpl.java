@@ -26,18 +26,19 @@ public class CreateBookmarkServiceImpl implements CreateBookmarkService {
 
     @Override
     public void create(Long memberId, Long problemId) {
-        // 1. 중복 북마크 체크
-        if (bookmarkRepository.existsByMemberIdAndProblemId(memberId, problemId)) {
-            throw new BookmarkException(ExceptionMessage.BOOKMARK_ALREADY_EXISTS);
-        }
-
-        // 2. Member 존재 확인
+        // 1. Member 존재 확인
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new MemberException(ExceptionMessage.USER_NOT_FOUND));
 
-        // 3. Problem 존재 확인
+        // 2. Validate the active problem before duplicate check.
+        // This prevents deleted problems from leaking as "already bookmarked".
         Problem problem = problemRepository.findById(problemId)
                 .orElseThrow(() -> new ProblemException(ExceptionMessage.PROBLEM_NOT_FOUND));
+
+        // 3. 중복 북마크 체크
+        if (bookmarkRepository.existsByMemberIdAndProblemId(memberId, problemId)) {
+            throw new BookmarkException(ExceptionMessage.BOOKMARK_ALREADY_EXISTS);
+        }
 
         // 4. 북마크 저장
         Bookmark bookmark = Bookmark.create(member, problem);

@@ -6,6 +6,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -21,8 +22,10 @@ public class FakeQuestionRepository implements QuestionRepository {
                     .title(question.getTitle())
                     .content(question.getContent())
                     .member(question.getMember())
+                    .answeredByAdmin(question.isAnsweredByAdmin())
                     .answerCount(question.getAnswerCount())
                     .problem(question.getProblem())
+                    .isRemoved(question.isRemoved())
                     .build();
 
             data.add(newQuestion);
@@ -40,25 +43,92 @@ public class FakeQuestionRepository implements QuestionRepository {
     }
 
     @Override
-    public Page<Question> findAllQuestions(Pageable pageable) {
-        List<Question> response = data.stream()
-                .limit(pageable.getPageSize())
-                .sorted(Comparator.comparing(Question::getId).reversed())
+    public Page<Question> findAllQuestions(Pageable pageable, Boolean answeredByAdmin, String keyword) {
+        return findAllQuestions(pageable, answeredByAdmin, keyword, null, null);
+    }
+
+    @Override
+    public Page<Question> findAllQuestions(Pageable pageable,
+                                           Boolean answeredByAdmin,
+                                           String keyword,
+                                           LocalDateTime createdAtFrom,
+                                           LocalDateTime createdAtTo) {
+        String normalizedKeyword = normalizeKeyword(keyword);
+
+        List<Question> filteredQuestions = data.stream()
+                .filter(question -> !question.isRemoved())
+                .filter(question -> answeredByAdmin == null || question.isAnsweredByAdmin() == answeredByAdmin)
+                .filter(question -> matchesKeyword(question, normalizedKeyword))
+                .filter(question -> matchesCreatedAt(question, createdAtFrom, createdAtTo))
+                .sorted(Comparator.comparing(Question::getCreatedAt, Comparator.nullsLast(Comparator.reverseOrder()))
+                        .thenComparing(Question::getId, Comparator.nullsLast(Comparator.reverseOrder())))
                 .toList();
 
-        return new PageImpl<>(response, pageable, data.size());
+        return slice(filteredQuestions, pageable);
     }
 
     @Override
     public Page<Question> findAllByProblemId(long problemId, Pageable pageable) {
-        List<Question> questions = data.stream().filter(item -> Objects.equals(item.getProblem().getId(), problemId))
+        List<Question> questions = data.stream()
+                .filter(item -> !item.isRemoved())
+                .filter(item -> item.getProblem() != null && Objects.equals(item.getProblem().getId(), problemId))
                 .toList();
 
-        return new PageImpl<>(questions, pageable, data.size());
+        return slice(questions, pageable);
     }
 
     @Override
     public void deleteById(long id) {
         data.removeIf(item -> Objects.equals(item.getId(), id));
+    }
+
+    private Page<Question> slice(List<Question> source, Pageable pageable) {
+        int startIndex = Math.toIntExact(pageable.getOffset());
+
+        if (startIndex >= source.size()) {
+            return new PageImpl<>(Collections.emptyList(), pageable, source.size());
+        }
+
+        int endIndex = Math.min(startIndex + pageable.getPageSize(), source.size());
+        return new PageImpl<>(source.subList(startIndex, endIndex), pageable, source.size());
+    }
+
+    private boolean matchesKeyword(Question question, String keyword) {
+        if (keyword == null) {
+            return true;
+        }
+
+        return contains(question.getTitle(), keyword)
+                || contains(question.getContent(), keyword)
+                || contains(question.getMember() == null ? null : question.getMember().getUsername(), keyword)
+                || contains(question.getMember() == null ? null : question.getMember().getEmail(), keyword);
+    }
+
+    private String normalizeKeyword(String keyword) {
+        if (keyword == null) {
+            return null;
+        }
+
+        String trimmedKeyword = keyword.trim();
+        return trimmedKeyword.isEmpty() ? null : trimmedKeyword.toLowerCase(Locale.ROOT);
+    }
+
+    private boolean contains(String source, String keyword) {
+        return source != null && source.toLowerCase(Locale.ROOT).contains(keyword);
+    }
+
+    private boolean matchesCreatedAt(Question question, LocalDateTime createdAtFrom, LocalDateTime createdAtTo) {
+        if (createdAtFrom == null && createdAtTo == null) {
+            return true;
+        }
+
+        LocalDateTime createdAt = question.getCreatedAt();
+        if (createdAt == null) {
+            return false;
+        }
+
+        boolean afterStart = createdAtFrom == null || !createdAt.isBefore(createdAtFrom);
+        boolean beforeEnd = createdAtTo == null || createdAt.isBefore(createdAtTo);
+        return afterStart && beforeEnd;
     }
 }

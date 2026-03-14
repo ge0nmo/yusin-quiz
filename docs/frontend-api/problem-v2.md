@@ -8,12 +8,14 @@
 - `GET /api/v1/problem?examId={examId}`
 - `GET /api/v2/problem?examId={examId}`
 - `GET /api/v2/admin/problem?examId={examId}`
+- `GET /api/v2/admin/problem/search?page={page}&size={size}&lectureStatus={lectureStatus}`
 - `GET /api/v2/admin/problem/{problemId}`
 - `POST /api/v2/admin/problem?examId={examId}`
 
 ## 화면 기준 사용처
 
 - 관리자 문제 목록: `GET /api/v2/admin/problem?examId={examId}`
+- 관리자 대시보드 카드 진입용 문제 검색: `GET /api/v2/admin/problem/search?...`
 - 관리자 문제 수정 초기 로딩: `GET /api/v2/admin/problem/{problemId}`
 - 관리자 문제 생성/수정 저장: `POST /api/v2/admin/problem?examId={examId}`
 - 사용자 시험 화면: `GET /api/v2/problem?examId={examId}`
@@ -135,6 +137,8 @@
 - 유튜브 버튼/링크는 `lecture.playbackUrl`을 그대로 써야 함
 - 편집 화면에 canonical URL이 다시 표시될 수 있으므로, 입력 URL 원문 보존을 기대하면 안 됨
 - V1 / V2 / 북마크가 모두 같은 `lecture` shape를 쓰므로 공통 타입으로 관리해야 함
+- 대시보드 카드 클릭 진입용 목록은 `GET /api/v2/admin/problem` 이 아니라 `GET /api/v2/admin/problem/search` 를 써야 함
+- `GET /api/v2/admin/problem/search` 상세 계약은 `docs/frontend-api/dashboard-drilldown.md` 를 기준으로 구현하면 됨
 
 ## 관련 백엔드 소스
 

@@ -1,12 +1,20 @@
 package com.cpa.yusin.quiz.problem.controller;
 
 import com.cpa.yusin.quiz.common.controller.dto.response.GlobalResponse;
+import com.cpa.yusin.quiz.common.controller.dto.response.PageInfo;
 import com.cpa.yusin.quiz.problem.controller.dto.request.ProblemSaveV2Request;
+import com.cpa.yusin.quiz.problem.controller.dto.response.AdminProblemSearchResponse;
 import com.cpa.yusin.quiz.problem.controller.dto.response.ProblemV2Response;
 import com.cpa.yusin.quiz.problem.controller.port.CreateProblemV2Service;
 import com.cpa.yusin.quiz.problem.controller.port.GetProblemV2Service;
+import com.cpa.yusin.quiz.problem.controller.port.SearchAdminProblemV2Service;
+import com.cpa.yusin.quiz.problem.service.dto.AdminProblemLectureStatus;
+import com.cpa.yusin.quiz.problem.service.dto.AdminProblemSearchCondition;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -21,6 +29,7 @@ public class AdminProblemV2Controller
 {
     private final CreateProblemV2Service createProblemV2Service;
     private final GetProblemV2Service getProblemV2Service;
+    private final SearchAdminProblemV2Service searchAdminProblemV2Service;
 
     /**
      * 관리자 문제 편집 화면이 사용하는 생성/수정 통합 API.
@@ -76,5 +85,27 @@ public class AdminProblemV2Controller
     {
         List<ProblemV2Response> response = getProblemV2Service.getAllByExamId(examId);
         return ResponseEntity.ok(new GlobalResponse<>(response));
+    }
+
+    /**
+     * 대시보드 카드 클릭 진입용 관리자 문제 검색 API.
+     *
+     * 시험 단위 목록과 분리한 이유:
+     * - 대시보드의 "강의 미연결 문제"는 전역 집계이므로 examId 없이도 바로 조회 가능해야 함
+     * - subject/year/exam 보조 필터를 함께 받아도 active hierarchy 기준은 항상 동일해야 함
+     */
+    @GetMapping("/search")
+    public ResponseEntity<GlobalResponse<List<AdminProblemSearchResponse>>> search(
+            @PageableDefault(size = 20) Pageable pageable,
+            @RequestParam(defaultValue = "ALL") AdminProblemLectureStatus lectureStatus,
+            @RequestParam(required = false) Long subjectId,
+            @RequestParam(required = false) Integer year,
+            @RequestParam(required = false) Long examId) {
+        Page<AdminProblemSearchResponse> response = searchAdminProblemV2Service.search(
+                pageable,
+                AdminProblemSearchCondition.of(lectureStatus, subjectId, year, examId)
+        );
+
+        return ResponseEntity.ok(new GlobalResponse<>(response.getContent(), PageInfo.of(response)));
     }
 }

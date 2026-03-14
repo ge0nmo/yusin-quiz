@@ -25,7 +25,7 @@ public class ChoiceRepositoryImpl implements ChoiceRepository {
 
     @Override
     public List<Choice> findAllByProblemId(long problemId) {
-        return choiceJpaRepository.findAllByProblemId(problemId);
+        return choiceJpaRepository.findAllByProblemIdWithActiveHierarchy(problemId);
     }
 
     @Override
@@ -35,7 +35,7 @@ public class ChoiceRepositoryImpl implements ChoiceRepository {
 
     @Override
     public Optional<Choice> findById(long id) {
-        return choiceJpaRepository.findById(id);
+        return choiceJpaRepository.findByIdWithActiveHierarchy(id);
     }
 
     @Override
@@ -45,7 +45,7 @@ public class ChoiceRepositoryImpl implements ChoiceRepository {
 
     @Override
     public List<Choice> findAllByProblemIds(List<Long> problemIds) {
-        return choiceJpaRepository.findAllByProblemIds(problemIds);
+        return choiceJpaRepository.findAllByProblemIdsWithActiveHierarchy(problemIds);
     }
 
 }

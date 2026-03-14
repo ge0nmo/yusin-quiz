@@ -7,6 +7,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 @RequiredArgsConstructor
@@ -29,9 +30,18 @@ public class QuestionRepositoryImpl implements QuestionRepository
     }
 
     @Override
-    public Page<Question> findAllQuestions(Pageable pageable)
+    public Page<Question> findAllQuestions(Pageable pageable, Boolean answeredByAdmin, String keyword)
     {
-        return questionJpaRepository.findAllQuestions(pageable);
+        return findAllQuestions(pageable, answeredByAdmin, keyword, null, null);
+    }
+
+    @Override
+    public Page<Question> findAllQuestions(Pageable pageable,
+                                           Boolean answeredByAdmin,
+                                           String keyword,
+                                           LocalDateTime createdAtFrom,
+                                           LocalDateTime createdAtTo) {
+        return questionJpaRepository.findAllQuestions(answeredByAdmin, keyword, createdAtFrom, createdAtTo, pageable);
     }
 
     @Override

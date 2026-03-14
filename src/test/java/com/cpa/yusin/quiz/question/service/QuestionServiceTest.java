@@ -11,6 +11,8 @@ import com.cpa.yusin.quiz.question.controller.dto.request.QuestionRegisterReques
 import com.cpa.yusin.quiz.question.controller.dto.request.QuestionUpdateRequest;
 import com.cpa.yusin.quiz.question.controller.dto.response.QuestionDTO;
 import com.cpa.yusin.quiz.question.domain.Question;
+import com.cpa.yusin.quiz.question.service.dto.AdminQuestionSearchCondition;
+import com.cpa.yusin.quiz.question.service.dto.AdminQuestionStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Page;
@@ -178,5 +180,62 @@ class QuestionServiceTest {
                 assertThat(response).isNotNull();
                 assertThat(response.getTotalElements()).isEqualTo(2);
 
+        }
+
+        @Test
+        void findAllQuestions_shouldFilterByStatusAndTrimmedKeyword() {
+                // given
+                Member searchableMember = testContainer.memberRepository.save(Member.builder()
+                                .id(2L)
+                                .email("alpha@test.com")
+                                .username("alpha-user")
+                                .password("encodedPass")
+                                .role(Role.USER)
+                                .platform(Platform.HOME)
+                                .build());
+
+                testContainer.questionRepository.save(Question.builder()
+                                .id(1L)
+                                .title("세법 질문")
+                                .content("환급 관련 문의")
+                                .problem(problem)
+                                .member(member)
+                                .answeredByAdmin(true)
+                                .answerCount(1)
+                                .build());
+
+                testContainer.questionRepository.save(Question.builder()
+                                .id(2L)
+                                .title("기출 질문")
+                                .content("내용")
+                                .problem(problem)
+                                .member(searchableMember)
+                                .answeredByAdmin(false)
+                                .answerCount(0)
+                                .build());
+
+                testContainer.questionRepository.save(Question.builder()
+                                .id(3L)
+                                .title("다른 질문")
+                                .content("매칭되지 않는 내용")
+                                .problem(problem)
+                                .member(member)
+                                .answeredByAdmin(false)
+                                .answerCount(0)
+                                .build());
+
+                // when
+                Page<QuestionDTO> response = testContainer.questionService.findAllQuestions(
+                                PageRequest.of(0, 10),
+                                AdminQuestionSearchCondition.of(AdminQuestionStatus.UNANSWERED, "  alpha@test.com  "));
+
+                // then
+                assertThat(response.getTotalElements()).isEqualTo(1);
+                assertThat(response.getContent()).singleElement()
+                                .satisfies(question -> {
+                                        assertThat(question.getId()).isEqualTo(2L);
+                                        assertThat(question.isAnsweredByAdmin()).isFalse();
+                                        assertThat(question.getEmail()).isEqualTo("alpha@test.com");
+                                });
         }
 }

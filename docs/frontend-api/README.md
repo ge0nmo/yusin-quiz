@@ -37,5 +37,7 @@
 
 - `problem-v2.md`
 - `bookmark.md`
+- `dashboard.md`
+- `dashboard-drilldown.md`
 - `examples/problem-v2/*`
 - `changelog.md`

@@ -2,6 +2,7 @@ package com.cpa.yusin.quiz.problem.service;
 
 import com.cpa.yusin.quiz.choice.controller.dto.response.ChoiceResponse;
 import com.cpa.yusin.quiz.choice.controller.port.ChoiceService;
+import com.cpa.yusin.quiz.exam.controller.port.ExamService;
 import com.cpa.yusin.quiz.global.exception.ExceptionMessage;
 import com.cpa.yusin.quiz.global.exception.ProblemException;
 import com.cpa.yusin.quiz.problem.controller.dto.response.ProblemLectureResponse;
@@ -26,6 +27,7 @@ import java.util.stream.Collectors;
 public class GetProblemV2ServiceImpl implements GetProblemV2Service {
     private final ProblemRepository problemRepository;
     private final ChoiceService choiceService;
+    private final ExamService examService;
     private final ProblemContentProcessor problemContentProcessor; // [Refactor] Add processor
 
     @Override
@@ -40,6 +42,8 @@ public class GetProblemV2ServiceImpl implements GetProblemV2Service {
 
     @Override
     public List<ProblemV2Response> getAllByExamId(Long examId) {
+        examService.findById(examId);
+
         // 1. 문제 전체 조회 (Query #1)
         List<Problem> problems = problemRepository.findAllByExamId(examId);
 

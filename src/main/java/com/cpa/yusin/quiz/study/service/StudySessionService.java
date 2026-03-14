@@ -3,10 +3,13 @@ package com.cpa.yusin.quiz.study.service;
 import com.cpa.yusin.quiz.choice.domain.Choice;
 import com.cpa.yusin.quiz.choice.service.port.ChoiceRepository;
 import com.cpa.yusin.quiz.common.service.ClockHolder;
+import com.cpa.yusin.quiz.exam.controller.port.ExamService;
 import com.cpa.yusin.quiz.global.exception.ExceptionMessage;
 import com.cpa.yusin.quiz.global.exception.StudySessionException;
 import com.cpa.yusin.quiz.member.domain.Member;
 import com.cpa.yusin.quiz.member.service.port.MemberRepository;
+import com.cpa.yusin.quiz.problem.controller.port.ProblemService;
+import com.cpa.yusin.quiz.problem.domain.Problem;
 import com.cpa.yusin.quiz.study.controller.dto.response.ExamAnswerResponse;
 import com.cpa.yusin.quiz.study.domain.*;
 import com.cpa.yusin.quiz.study.event.StudySolvedEvent;
@@ -32,6 +35,8 @@ public class StudySessionService {
     private final SubmittedAnswerRepository submittedAnswerRepository;
     private final ChoiceRepository choiceRepository;
     private final MemberRepository memberRepository;
+    private final ExamService examService;
+    private final ProblemService problemService;
     private final ApplicationEventPublisher eventPublisher;
     private final ClockHolder clockHolder;
 
@@ -43,6 +48,10 @@ public class StudySessionService {
      */
     @Transactional
     public StudySession startSession(Long memberId, Long examId, ExamMode mode) {
+        // Query-gated soft delete means an exam under a removed subject must behave
+        // as non-existent for both fresh starts and resume flows.
+        examService.findById(examId);
+
         Optional<StudySession> existingSession = studySessionRepository.findByMemberIdAndExamIdAndStatusAndMode(
                 memberId, examId, StudySessionStatus.IN_PROGRESS, mode);
 
@@ -76,12 +85,22 @@ public class StudySessionService {
         StudySession session = studySessionRepository.findByIdWithLock(sessionId)
                 .orElseThrow(() -> new StudySessionException(ExceptionMessage.SESSION_NOT_FOUND));
 
+        // Block answer writes as soon as the session's exam becomes inactive.
+        examService.findById(session.getExamId());
+
         // Update Session Index
         session.updateLastIndex(index);
 
-        // Validate Choice and Get isCorrect
+        // The problem lookup already applies the active hierarchy rule. The extra
+        // exam check below closes the "valid problem from another exam" hole.
+        Problem problem = problemService.findById(problemId);
+        validateProblemBelongsToSession(problem, session.getExamId());
+
+        // Choice lookup is also query-gated. We still verify the problem match so a
+        // foreign choice ID cannot be attached to the requested problem.
         Choice choice = choiceRepository.findById(choiceId)
                 .orElseThrow(() -> new StudySessionException(ExceptionMessage.CHOICE_NOT_FOUND));
+        validateChoiceBelongsToProblem(choice, problemId);
 
         boolean isCorrect = choice.getIsAnswer();
 
@@ -130,6 +149,22 @@ public class StudySessionService {
         }
 
         return score;
+    }
+
+    private void validateProblemBelongsToSession(Problem problem, Long examId) {
+        // A session is scoped to one exam only, so mixing problems across exams is
+        // treated as invalid client data rather than a missing resource.
+        if (!problem.getExam().getId().equals(examId)) {
+            throw new StudySessionException(ExceptionMessage.INVALID_DATA);
+        }
+    }
+
+    private void validateChoiceBelongsToProblem(Choice choice, Long problemId) {
+        // Choices are not globally interchangeable; they must stay attached to the
+        // requested problem to prevent cross-problem submissions.
+        if (!choice.getProblem().getId().equals(problemId)) {
+            throw new StudySessionException(ExceptionMessage.INVALID_DATA);
+        }
     }
 
     private String getExplanationSafe(Choice choice) {

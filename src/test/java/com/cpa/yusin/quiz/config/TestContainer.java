@@ -195,6 +195,7 @@ public class TestContainer {
                 this.getProblemV2Service = new GetProblemV2ServiceImpl(
                                 this.problemRepository,
                                 this.choiceService,
+                                this.examService,
                                 problemContentProcessor);
 
                 this.questionRepository = new FakeQuestionRepository();
@@ -208,7 +209,8 @@ public class TestContainer {
                 this.answerService = new AnswerServiceImpl(this.answerRepository, this.answerMapper,
                                 this.questionAnswerService);
 
-                this.questionService = new QuestionServiceImpl(questionRepository, problemService, questionMapper);
+                this.questionService = new QuestionServiceImpl(questionRepository, problemService, questionMapper,
+                                clockHolder);
 
                 // bookmark
                 this.createBookmarkService = new CreateBookmarkServiceImpl(

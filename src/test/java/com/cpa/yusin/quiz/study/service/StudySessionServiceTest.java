@@ -3,10 +3,16 @@ package com.cpa.yusin.quiz.study.service;
 import com.cpa.yusin.quiz.choice.domain.Choice;
 import com.cpa.yusin.quiz.choice.service.port.ChoiceRepository;
 import com.cpa.yusin.quiz.common.service.ClockHolder;
+import com.cpa.yusin.quiz.exam.controller.port.ExamService;
+import com.cpa.yusin.quiz.exam.domain.Exam;
+import com.cpa.yusin.quiz.global.exception.ExceptionMessage;
+import com.cpa.yusin.quiz.global.exception.ProblemException;
+import com.cpa.yusin.quiz.global.exception.StudySessionException;
 import com.cpa.yusin.quiz.member.domain.Member;
 import com.cpa.yusin.quiz.member.domain.type.Role;
 import com.cpa.yusin.quiz.member.service.port.MemberRepository;
 import com.cpa.yusin.quiz.problem.domain.Problem;
+import com.cpa.yusin.quiz.problem.controller.port.ProblemService;
 import com.cpa.yusin.quiz.study.controller.dto.response.ExamAnswerResponse;
 import com.cpa.yusin.quiz.study.domain.*;
 import com.cpa.yusin.quiz.study.event.StudySolvedEvent;
@@ -24,9 +30,13 @@ import org.springframework.context.ApplicationEventPublisher;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
@@ -54,6 +64,12 @@ public class StudySessionServiceTest {
         @Mock
         private MemberRepository memberRepository;
 
+        @Mock
+        private ExamService examService;
+
+        @Mock
+        private ProblemService problemService;
+
         private Member member;
         private final LocalDateTime NOW = LocalDateTime.of(2025, 1, 1, 12, 0, 0);
 
@@ -78,6 +94,7 @@ public class StudySessionServiceTest {
                                 .id(1L).member(member).examId(examId).mode(mode).status(StudySessionStatus.IN_PROGRESS)
                                 .build();
 
+                given(examService.findById(examId)).willReturn(Exam.builder().id(examId).build());
                 given(studySessionRepository.findByMemberIdAndExamIdAndStatusAndMode(memberId, examId,
                                 StudySessionStatus.IN_PROGRESS, mode))
                                 .willReturn(Optional.of(existingSession));
@@ -98,6 +115,7 @@ public class StudySessionServiceTest {
                 Long examId = 100L;
                 ExamMode mode = ExamMode.EXAM;
 
+                given(examService.findById(examId)).willReturn(Exam.builder().id(examId).build());
                 given(studySessionRepository.findByMemberIdAndExamIdAndStatusAndMode(memberId, examId,
                                 StudySessionStatus.IN_PROGRESS, mode))
                                 .willReturn(Optional.empty());
@@ -129,11 +147,16 @@ public class StudySessionServiceTest {
                 boolean correct = true;
                 int index = 5;
 
-                StudySession session = StudySession.builder().id(sessionId).mode(ExamMode.EXAM).build();
+                Long examId = 100L;
+                StudySession session = StudySession.builder().id(sessionId).examId(examId).mode(ExamMode.EXAM).build();
                 given(studySessionRepository.findByIdWithLock(sessionId)).willReturn(Optional.of(session));
 
-                Choice choice = Choice.builder()
-                                .id(choiceId).isAnswer(correct).build();
+                Exam exam = Exam.builder().id(examId).build();
+                Problem problem = Problem.builder().id(problemId).exam(exam).build();
+                Choice choice = Choice.builder().id(choiceId).isAnswer(correct).problem(problem).build();
+
+                given(examService.findById(examId)).willReturn(exam);
+                given(problemService.findById(problemId)).willReturn(problem);
                 given(choiceRepository.findById(choiceId)).willReturn(Optional.of(choice));
 
                 given(submittedAnswerRepository.findByStudySessionIdAndProblemId(sessionId, problemId))
@@ -161,13 +184,18 @@ public class StudySessionServiceTest {
                 boolean correct = false;
 
                 StudySession session = StudySession.builder().id(sessionId).mode(ExamMode.PRACTICE)
-                                .member(member).build();
+                                .member(member)
+                                .examId(100L)
+                                .build();
 
                 given(studySessionRepository.findByIdWithLock(sessionId)).willReturn(Optional.of(session));
 
-                Problem problem = Problem.builder().explanation("Test Explanation").build();
+                Exam exam = Exam.builder().id(100L).build();
+                Problem problem = Problem.builder().id(problemId).exam(exam).explanation("Test Explanation").build();
                 Choice choice = Choice.builder().id(choiceId).isAnswer(correct).problem(problem).build();
 
+                given(examService.findById(100L)).willReturn(exam);
+                given(problemService.findById(problemId)).willReturn(problem);
                 given(choiceRepository.findById(choiceId)).willReturn(Optional.of(choice));
 
                 // when
@@ -190,13 +218,19 @@ public class StudySessionServiceTest {
                 boolean correct = false;
                 int index = 6;
 
-                StudySession session = StudySession.builder().id(sessionId).mode(ExamMode.EXAM).build();
+                Long examId = 200L;
+                StudySession session = StudySession.builder().id(sessionId).examId(examId).mode(ExamMode.EXAM).build();
                 SubmittedAnswer existingAnswer = SubmittedAnswer.builder()
                                 .id(50L).choiceId(100L).isCorrect(true).build();
 
                 given(studySessionRepository.findByIdWithLock(sessionId)).willReturn(Optional.of(session));
 
-                Choice choice = Choice.builder().id(choiceId).isAnswer(correct).build();
+                Exam exam = Exam.builder().id(examId).build();
+                Problem problem = Problem.builder().id(problemId).exam(exam).build();
+                Choice choice = Choice.builder().id(choiceId).isAnswer(correct).problem(problem).build();
+
+                given(examService.findById(examId)).willReturn(exam);
+                given(problemService.findById(problemId)).willReturn(problem);
                 given(choiceRepository.findById(choiceId)).willReturn(Optional.of(choice));
 
                 given(submittedAnswerRepository.findByStudySessionIdAndProblemId(sessionId, problemId))
@@ -233,6 +267,7 @@ public class StudySessionServiceTest {
                 // then
                 assertThat(finalScore).isEqualTo(2);
                 assertThat(session.getFinishedAt()).isEqualTo(NOW);
+                verify(examService, never()).findById(anyLong());
                 // Verify EVENT is published
                 verify(eventPublisher).publishEvent(any(StudySolvedEvent.class));
                 assertThat(session.getStatus()).isEqualTo(StudySessionStatus.COMPLETED);
@@ -255,6 +290,90 @@ public class StudySessionServiceTest {
 
                 // then
                 assertThat(session.getFinishedAt()).isEqualTo(NOW);
+                verify(examService, never()).findById(anyLong());
                 verify(eventPublisher, org.mockito.Mockito.never()).publishEvent(any());
+        }
+
+        @Test
+        @DisplayName("세션 시작 - 삭제된 시험이면 시작/이어풀기 모두 차단")
+        void startSession_whenExamIsDeleted_thenThrow() {
+                Long memberId = 1L;
+                Long examId = 100L;
+
+                given(examService.findById(examId))
+                                .willThrow(new com.cpa.yusin.quiz.global.exception.ExamException(ExceptionMessage.EXAM_NOT_FOUND));
+
+                assertThatThrownBy(() -> studySessionService.startSession(memberId, examId, ExamMode.EXAM))
+                                .isInstanceOf(com.cpa.yusin.quiz.global.exception.ExamException.class)
+                                .hasMessage(ExceptionMessage.EXAM_NOT_FOUND.getMessage());
+
+                verify(studySessionRepository, never())
+                                .findByMemberIdAndExamIdAndStatusAndMode(any(), any(), any(), any());
+        }
+
+        @Test
+        @DisplayName("답안 저장 - 요청 problemId 가 세션 exam 에 속하지 않으면 차단")
+        void saveAnswer_whenProblemDoesNotBelongToSessionExam_thenThrow() {
+                Long sessionId = 1L;
+                Long sessionExamId = 100L;
+                Long problemId = 10L;
+
+                StudySession session = StudySession.builder().id(sessionId).examId(sessionExamId).mode(ExamMode.EXAM)
+                                .build();
+                Exam sessionExam = Exam.builder().id(sessionExamId).build();
+                Exam otherExam = Exam.builder().id(999L).build();
+                Problem problem = Problem.builder().id(problemId).exam(otherExam).build();
+
+                given(studySessionRepository.findByIdWithLock(sessionId)).willReturn(Optional.of(session));
+                given(examService.findById(sessionExamId)).willReturn(sessionExam);
+                given(problemService.findById(problemId)).willReturn(problem);
+
+                assertThatThrownBy(() -> studySessionService.saveAnswer(sessionId, problemId, 1L, 0))
+                                .isInstanceOf(StudySessionException.class)
+                                .hasMessage(ExceptionMessage.INVALID_DATA.getMessage());
+        }
+
+        @Test
+        @DisplayName("답안 저장 - 요청 problemId 와 choice 소속 problem 이 다르면 차단")
+        void saveAnswer_whenChoiceDoesNotBelongToProblem_thenThrow() {
+                Long sessionId = 1L;
+                Long examId = 100L;
+                Long problemId = 10L;
+                Long choiceId = 300L;
+
+                StudySession session = StudySession.builder().id(sessionId).examId(examId).mode(ExamMode.EXAM).build();
+                Exam exam = Exam.builder().id(examId).build();
+                Problem requestedProblem = Problem.builder().id(problemId).exam(exam).build();
+                Problem otherProblem = Problem.builder().id(999L).exam(exam).build();
+                Choice choice = Choice.builder().id(choiceId).problem(otherProblem).isAnswer(true).build();
+
+                given(studySessionRepository.findByIdWithLock(sessionId)).willReturn(Optional.of(session));
+                given(examService.findById(examId)).willReturn(exam);
+                given(problemService.findById(problemId)).willReturn(requestedProblem);
+                given(choiceRepository.findById(choiceId)).willReturn(Optional.of(choice));
+
+                assertThatThrownBy(() -> studySessionService.saveAnswer(sessionId, problemId, choiceId, 1))
+                                .isInstanceOf(StudySessionException.class)
+                                .hasMessage(ExceptionMessage.INVALID_DATA.getMessage());
+        }
+
+        @Test
+        @DisplayName("답안 저장 - 삭제된 문제 체인이면 차단")
+        void saveAnswer_whenProblemHierarchyDeleted_thenThrow() {
+                Long sessionId = 1L;
+                Long examId = 100L;
+                Long problemId = 10L;
+
+                StudySession session = StudySession.builder().id(sessionId).examId(examId).mode(ExamMode.EXAM).build();
+                Exam exam = Exam.builder().id(examId).build();
+
+                given(studySessionRepository.findByIdWithLock(sessionId)).willReturn(Optional.of(session));
+                given(examService.findById(examId)).willReturn(exam);
+                given(problemService.findById(problemId))
+                                .willThrow(new ProblemException(ExceptionMessage.PROBLEM_NOT_FOUND));
+
+                assertThatThrownBy(() -> studySessionService.saveAnswer(sessionId, problemId, 1L, 0))
+                                .isInstanceOf(ProblemException.class)
+                                .hasMessage(ExceptionMessage.PROBLEM_NOT_FOUND.getMessage());
         }
 }

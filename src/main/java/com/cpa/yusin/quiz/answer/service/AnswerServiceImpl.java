@@ -90,12 +90,20 @@ public class AnswerServiceImpl implements AnswerService {
 
     @Override
     public Page<AnswerDTO> getAnswersByQuestionId(long questionId, Pageable pageable) {
+        // Re-check the question first so a deleted parent chain resolves to
+        // NOT_FOUND before we ever run the answer query.
+        questionAnswerService.getQuestion(questionId);
+
         return answerRepository.findByQuestionId(questionId, pageable)
                 .map(answerMapper::toAnswerDTO);
     }
 
     @Override
     public List<AnswerDTO> getAnswersByQuestionId(long questionId) {
+        // Keep the list endpoint consistent with the paged variant and with question
+        // detail visibility rules.
+        questionAnswerService.getQuestion(questionId);
+
         return answerRepository.findByQuestionId(questionId).stream()
                 .map(answerMapper::toAnswerDTO)
                 .toList();
