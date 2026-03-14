@@ -20,6 +20,7 @@ import com.cpa.yusin.quiz.problem.service.port.ProblemRepository;
 import com.cpa.yusin.quiz.subject.domain.Subject;
 import com.cpa.yusin.quiz.subject.service.port.SubjectRepository;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,11 +44,13 @@ import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static com.epages.restdocs.apispec.MockMvcRestDocumentationWrapper.document;
 import static com.epages.restdocs.apispec.ResourceDocumentation.resource;
 import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.documentationConfiguration;
+import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.delete;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.*;
@@ -579,6 +582,84 @@ public class ProblemTest
         mvc.perform(get("/api/admin/dashboard"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.operations.problemsWithoutLectureCount").value(2));
+    }
+
+    @Transactional
+    @WithUserDetails(value = "John@gmail.com", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+    @Test
+    @DisplayName("과거 soft delete 데이터가 같은 번호를 점유해도 새 문제를 등록할 수 있다")
+    void saveOrUpdateProblemV2_whenLegacyDeletedProblemHasSameExamNumber_thenRecreateSucceeds() throws Exception
+    {
+        Problem legacyDeletedProblem = problemRepository.save(Problem.builder()
+                .number(4)
+                .contentJson(List.of(TextBlock.builder().type("text").tag("p").build()))
+                .explanationJson(List.of(TextBlock.builder().type("text").tag("p").build()))
+                .exam(exam)
+                .build());
+        legacyDeletedProblem.delete();
+        problemRepository.save(legacyDeletedProblem);
+
+        ProblemSaveV2Request request = ProblemSaveV2Request.builder()
+                .number(4)
+                .content(List.of(TextBlock.builder().type("text").tag("p").build()))
+                .explanation(List.of(TextBlock.builder().type("text").tag("p").build()))
+                .choices(List.of())
+                .build();
+
+        mvc.perform(post("/api/v2/admin/problem")
+                        .queryParam("examId", exam.getId().toString())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(request)))
+                .andExpect(status().isOk());
+
+        List<Problem> examProblems = problemRepository.findAll().stream()
+                .filter(problem -> problem.getExam().getId().equals(exam.getId()))
+                .toList();
+
+        assertThat(examProblems)
+                .anyMatch(problem -> problem.isRemoved() && problem.getNumber() < 0);
+        assertThat(examProblems)
+                .anyMatch(problem -> !problem.isRemoved() && problem.getNumber() == 4);
+    }
+
+    @Transactional
+    @WithUserDetails(value = "John@gmail.com", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+    @Test
+    @DisplayName("삭제된 문제와 같은 시험 번호로 새 문제를 다시 등록할 수 있다")
+    void saveOrUpdateProblemV2_whenDeletedProblemHasSameExamNumber_thenRecreateSucceeds() throws Exception
+    {
+        Problem deletedProblem = problemRepository.save(Problem.builder()
+                .number(3)
+                .contentJson(List.of(TextBlock.builder().type("text").tag("p").build()))
+                .explanationJson(List.of(TextBlock.builder().type("text").tag("p").build()))
+                .exam(exam)
+                .build());
+
+        mvc.perform(delete("/api/admin/problem/{problemId}", deletedProblem.getId()))
+                .andExpect(status().isNoContent());
+
+        ProblemSaveV2Request request = ProblemSaveV2Request.builder()
+                .number(3)
+                .content(List.of(TextBlock.builder().type("text").tag("p").build()))
+                .explanation(List.of(TextBlock.builder().type("text").tag("p").build()))
+                .choices(List.of())
+                .build();
+
+        mvc.perform(post("/api/v2/admin/problem")
+                        .queryParam("examId", exam.getId().toString())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(request)))
+                .andExpect(status().isOk());
+
+        List<Problem> examProblems = problemRepository.findAll().stream()
+                .filter(problem -> problem.getExam().getId().equals(exam.getId()))
+                .toList();
+
+        assertThat(examProblems).hasSize(2);
+        assertThat(examProblems)
+                .anyMatch(problem -> problem.isRemoved() && problem.getNumber() < 0);
+        assertThat(examProblems)
+                .anyMatch(problem -> !problem.isRemoved() && problem.getNumber() == 3);
     }
 
     @Transactional

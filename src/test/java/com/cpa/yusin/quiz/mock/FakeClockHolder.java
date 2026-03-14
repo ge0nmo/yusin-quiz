@@ -9,7 +9,7 @@ public class FakeClockHolder implements ClockHolder
     @Override
     public long getCurrentTime()
     {
-        return 100000000;
+        return System.currentTimeMillis();
     }
 
     @Override

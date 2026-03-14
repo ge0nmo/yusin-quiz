@@ -138,13 +138,13 @@ class StudyConcurrencyTest {
         runConcurrently(new ConcurrentCallable<Void>() {
             @Override
             public Void call() {
-                studySessionService.saveAnswer(session.getId(), problem.getId(), firstChoice.getId(), 1);
+                studySessionService.saveAnswer(member.getId(), session.getId(), problem.getId(), firstChoice.getId(), 1);
                 return null;
             }
         }, new ConcurrentCallable<Void>() {
             @Override
             public Void call() {
-                studySessionService.saveAnswer(session.getId(), problem.getId(), secondChoice.getId(), 1);
+                studySessionService.saveAnswer(member.getId(), session.getId(), problem.getId(), secondChoice.getId(), 1);
                 return null;
             }
         });

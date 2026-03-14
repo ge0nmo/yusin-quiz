@@ -204,8 +204,6 @@ class AnswerTest {
                                                                 fieldWithPath("data[].memberId")
                                                                                 .type(JsonFieldType.NUMBER)
                                                                                 .description("작성자 회원 ID"),
-                                                                fieldWithPath("data[].email").type(JsonFieldType.STRING)
-                                                                                .description("작성자 이메일"),
                                                                 fieldWithPath("data[].username")
                                                                                 .type(JsonFieldType.STRING)
                                                                                 .description("답변 등록 유저"),

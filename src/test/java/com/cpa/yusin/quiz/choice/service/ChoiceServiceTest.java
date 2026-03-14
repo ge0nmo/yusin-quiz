@@ -77,6 +77,18 @@ class ChoiceServiceTest extends MockSetup {
     }
 
     @Test
+    @DisplayName("활성 choice 안에 정답이 둘 이상이면 저장을 거부한다")
+    void saveOrUpdate_whenMultipleCorrectAnswersExist_thenThrow() {
+        List<ChoiceRequest> requests = List.of(
+                ChoiceRequest.builder().content("보기1").number(1).isAnswer(true).build(),
+                ChoiceRequest.builder().content("보기2").number(2).isAnswer(true).build()
+        );
+
+        assertThatThrownBy(() -> testContainer.choiceService.saveOrUpdate(requests, physicsProblem1))
+                .isInstanceOf(ChoiceException.class);
+    }
+
+    @Test
     @DisplayName("다른 문제에 속한 choice 를 현재 문제 수정 요청으로 보내면 차단한다")
     void saveOrUpdate_whenChoiceBelongsToDifferentProblem_thenThrow() {
         Choice foreignChoice = testContainer.choiceRepository.save(Choice.builder()

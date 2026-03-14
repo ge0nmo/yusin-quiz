@@ -43,6 +43,20 @@ class LogbackConfigurationTest
                 .isEqualTo("${logPath}/application.%d{yyyy-MM-dd}.log");
     }
 
+    @Test
+    void logPatternShouldIncludeTraceIdAndMemberIdFromMdc() throws Exception
+    {
+        Document document = parseLogbackConfiguration();
+
+        Element root = document.getDocumentElement();
+        Element logPatternProperty = findNamedChild(root, "property", "logPattern");
+
+        assertThat(logPatternProperty).isNotNull();
+        assertThat(logPatternProperty.getAttribute("value"))
+                .contains("%X{traceId:-none}")
+                .contains("%X{memberId:-anonymous}");
+    }
+
     private Document parseLogbackConfiguration() throws Exception
     {
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();

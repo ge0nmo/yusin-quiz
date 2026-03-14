@@ -21,5 +21,11 @@ public interface ProblemRepository
 
     boolean existsByExamIdAndNumber(Long examId, int number);
 
+    Optional<Problem> findRemovedByExamIdAndNumber(long examId, int number);
+
+    Integer findMinimumNumberByExamId(long examId);
+
+    void flush();
+
     Page<AdminProblemSearchProjection> searchAdminProblems(Pageable pageable, AdminProblemSearchCondition searchCondition);
 }

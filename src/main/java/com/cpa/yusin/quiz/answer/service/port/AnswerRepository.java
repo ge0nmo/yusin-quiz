@@ -3,7 +3,6 @@ package com.cpa.yusin.quiz.answer.service.port;
 import com.cpa.yusin.quiz.answer.domain.Answer;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Optional;
@@ -21,4 +20,6 @@ public interface AnswerRepository
     void deleteById(long id);
 
     boolean hasAnswers(long questionId);
+
+    boolean hasOtherAdminAnswers(long questionId, long answerId);
 }

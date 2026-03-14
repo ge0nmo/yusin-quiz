@@ -142,11 +142,18 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     @Override
     public TokenResponse refreshAccessToken(String refreshToken) {
+        if (!jwtService.isRefreshToken(refreshToken)) {
+            throw new MemberException(ExceptionMessage.INVALID_REFRESH_TOKEN);
+        }
+
         if (jwtService.isTokenExpired(refreshToken)) {
             throw new MemberException(ExceptionMessage.REFRESH_TOKEN_EXPIRED);
         }
 
         String email = jwtService.extractSubject(refreshToken);
+        memberRepository.findByEmail(email)
+                .orElseThrow(() -> new MemberException(ExceptionMessage.USER_NOT_FOUND));
+
         String accessToken = jwtService.createAccessToken(email);
         String newRefreshToken = jwtService.createRefreshToken(email);
 

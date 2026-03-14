@@ -3,6 +3,7 @@ package com.cpa.yusin.quiz.global.filter;
 import com.cpa.yusin.quiz.global.details.MemberDetails;
 import com.cpa.yusin.quiz.global.details.MemberDetailsService;
 import com.cpa.yusin.quiz.global.jwt.JwtService;
+import com.cpa.yusin.quiz.global.logging.LogMdcContext;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
@@ -17,6 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -68,8 +70,15 @@ public class SecurityFilter extends OncePerRequestFilter {
 
         try {
             String email = jwtService.extractSubject(token);
+            Authentication currentAuthentication = SecurityContextHolder.getContext().getAuthentication();
 
-            if (!StringUtils.hasText(email) || SecurityContextHolder.getContext().getAuthentication() != null) {
+            if (!StringUtils.hasText(email)) {
+                filterChain.doFilter(request, response);
+                return;
+            }
+
+            if (currentAuthentication != null) {
+                syncAuthenticatedMemberId(currentAuthentication);
                 filterChain.doFilter(request, response);
                 return;
             }
@@ -87,6 +96,7 @@ public class SecurityFilter extends OncePerRequestFilter {
 
             context.setAuthentication(authenticationToken);
             SecurityContextHolder.setContext(context);
+            LogMdcContext.putAuthenticatedMemberId(memberDetails.getMember().getId());
 
             filterChain.doFilter(request, response);
 
@@ -131,5 +141,16 @@ public class SecurityFilter extends OncePerRequestFilter {
         }
 
         return null;
+    }
+
+    private void syncAuthenticatedMemberId(Authentication authentication) {
+        if (authentication == null) {
+            return;
+        }
+
+        Object principal = authentication.getPrincipal();
+        if (principal instanceof MemberDetails memberDetails) {
+            LogMdcContext.putAuthenticatedMemberId(memberDetails.getMember().getId());
+        }
     }
 }

@@ -13,6 +13,7 @@ import com.cpa.yusin.quiz.global.exception.AnswerException;
 import com.cpa.yusin.quiz.global.exception.ExceptionMessage;
 import com.cpa.yusin.quiz.global.exception.MemberException;
 import com.cpa.yusin.quiz.member.domain.Member;
+import com.cpa.yusin.quiz.member.domain.type.Role;
 import com.cpa.yusin.quiz.question.domain.Question;
 import com.cpa.yusin.quiz.question.service.QuestionAnswerService;
 import lombok.RequiredArgsConstructor;
@@ -118,6 +119,10 @@ public class AnswerServiceImpl implements AnswerService {
 
         Question question = answer.getQuestion();
         questionAnswerService.updateAnswerCount(question, -1);
+        if (Role.ADMIN.equals(answer.getMember().getRole())
+                && !answerRepository.hasOtherAdminAnswers(question.getId(), answerId)) {
+            question.syncAnsweredByAdmin(false);
+        }
 
         answerRepository.deleteById(answerId);
     }

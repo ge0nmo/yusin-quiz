@@ -166,7 +166,7 @@ public class StudySessionServiceTest {
                 int index = 5;
 
                 Long examId = 100L;
-                StudySession session = StudySession.builder().id(sessionId).examId(examId).mode(ExamMode.EXAM).build();
+                StudySession session = inProgressSession(sessionId, examId, ExamMode.EXAM);
                 given(studySessionRepository.findByIdWithLock(sessionId)).willReturn(Optional.of(session));
 
                 Exam exam = Exam.builder().id(examId).build();
@@ -181,7 +181,7 @@ public class StudySessionServiceTest {
                                 .willReturn(Optional.empty());
 
                 // when
-                ExamAnswerResponse response = studySessionService.saveAnswer(sessionId, problemId, choiceId, index);
+                ExamAnswerResponse response = studySessionService.saveAnswer(member.getId(), sessionId, problemId, choiceId, index);
 
                 // then
                 assertThat(response.isSuccess()).isTrue();
@@ -201,10 +201,7 @@ public class StudySessionServiceTest {
                 Long choiceId = 300L;
                 boolean correct = false;
 
-                StudySession session = StudySession.builder().id(sessionId).mode(ExamMode.PRACTICE)
-                                .member(member)
-                                .examId(100L)
-                                .build();
+                StudySession session = inProgressSession(sessionId, 100L, ExamMode.PRACTICE);
 
                 given(studySessionRepository.findByIdWithLock(sessionId)).willReturn(Optional.of(session));
 
@@ -217,7 +214,7 @@ public class StudySessionServiceTest {
                 given(choiceRepository.findById(choiceId)).willReturn(Optional.of(choice));
 
                 // when
-                ExamAnswerResponse response = studySessionService.saveAnswer(sessionId, problemId, choiceId, 1);
+                ExamAnswerResponse response = studySessionService.saveAnswer(member.getId(), sessionId, problemId, choiceId, 1);
 
                 // then
                 assertThat(response.getIsCorrect()).isFalse();
@@ -237,7 +234,7 @@ public class StudySessionServiceTest {
                 int index = 6;
 
                 Long examId = 200L;
-                StudySession session = StudySession.builder().id(sessionId).examId(examId).mode(ExamMode.EXAM).build();
+                StudySession session = inProgressSession(sessionId, examId, ExamMode.EXAM);
                 SubmittedAnswer existingAnswer = SubmittedAnswer.builder()
                                 .id(50L).choiceId(100L).isCorrect(true).build();
 
@@ -255,7 +252,7 @@ public class StudySessionServiceTest {
                                 .willReturn(Optional.of(existingAnswer));
 
                 // when
-                studySessionService.saveAnswer(sessionId, problemId, choiceId, index);
+                studySessionService.saveAnswer(member.getId(), sessionId, problemId, choiceId, index);
 
                 // then
                 assertThat(session.getLastIndex()).isEqualTo(index);
@@ -268,7 +265,7 @@ public class StudySessionServiceTest {
         void completeSession_exam_shouldCalculateScoreAndLog() {
                 // given
                 Long sessionId = 1L;
-                StudySession session = StudySession.builder().id(sessionId).mode(ExamMode.EXAM).member(member).build();
+                StudySession session = inProgressSession(sessionId, 100L, ExamMode.EXAM);
 
                 List<SubmittedAnswer> answers = List.of(
                                 SubmittedAnswer.builder().isCorrect(true).build(),
@@ -280,7 +277,7 @@ public class StudySessionServiceTest {
                 given(clockHolder.getCurrentDateTime()).willReturn(NOW);
 
                 // when
-                int finalScore = studySessionService.completeSession(sessionId);
+                int finalScore = studySessionService.completeSession(member.getId(), sessionId);
 
                 // then
                 assertThat(finalScore).isEqualTo(2);
@@ -296,15 +293,14 @@ public class StudySessionServiceTest {
         void completeSession_practice_shouldNotLog() {
                 // given
                 Long sessionId = 1L;
-                StudySession session = StudySession.builder().id(sessionId).mode(ExamMode.PRACTICE).member(member)
-                                .build();
+                StudySession session = inProgressSession(sessionId, 100L, ExamMode.PRACTICE);
 
                 given(studySessionRepository.findByIdWithLock(sessionId)).willReturn(Optional.of(session));
                 given(submittedAnswerRepository.findAllByStudySessionId(sessionId)).willReturn(List.of());
                 given(clockHolder.getCurrentDateTime()).willReturn(NOW);
 
                 // when
-                studySessionService.completeSession(sessionId);
+                studySessionService.completeSession(member.getId(), sessionId);
 
                 // then
                 assertThat(session.getFinishedAt()).isEqualTo(NOW);
@@ -337,8 +333,7 @@ public class StudySessionServiceTest {
                 Long sessionExamId = 100L;
                 Long problemId = 10L;
 
-                StudySession session = StudySession.builder().id(sessionId).examId(sessionExamId).mode(ExamMode.EXAM)
-                                .build();
+                StudySession session = inProgressSession(sessionId, sessionExamId, ExamMode.EXAM);
                 Exam sessionExam = Exam.builder().id(sessionExamId).build();
                 Exam otherExam = Exam.builder().id(999L).build();
                 Problem problem = Problem.builder().id(problemId).exam(otherExam).build();
@@ -347,7 +342,7 @@ public class StudySessionServiceTest {
                 given(examService.findById(sessionExamId)).willReturn(sessionExam);
                 given(problemService.findById(problemId)).willReturn(problem);
 
-                assertThatThrownBy(() -> studySessionService.saveAnswer(sessionId, problemId, 1L, 0))
+                assertThatThrownBy(() -> studySessionService.saveAnswer(member.getId(), sessionId, problemId, 1L, 0))
                                 .isInstanceOf(StudySessionException.class)
                                 .hasMessage(ExceptionMessage.INVALID_DATA.getMessage());
         }
@@ -360,7 +355,7 @@ public class StudySessionServiceTest {
                 Long problemId = 10L;
                 Long choiceId = 300L;
 
-                StudySession session = StudySession.builder().id(sessionId).examId(examId).mode(ExamMode.EXAM).build();
+                StudySession session = inProgressSession(sessionId, examId, ExamMode.EXAM);
                 Exam exam = Exam.builder().id(examId).build();
                 Problem requestedProblem = Problem.builder().id(problemId).exam(exam).build();
                 Problem otherProblem = Problem.builder().id(999L).exam(exam).build();
@@ -371,7 +366,7 @@ public class StudySessionServiceTest {
                 given(problemService.findById(problemId)).willReturn(requestedProblem);
                 given(choiceRepository.findById(choiceId)).willReturn(Optional.of(choice));
 
-                assertThatThrownBy(() -> studySessionService.saveAnswer(sessionId, problemId, choiceId, 1))
+                assertThatThrownBy(() -> studySessionService.saveAnswer(member.getId(), sessionId, problemId, choiceId, 1))
                                 .isInstanceOf(StudySessionException.class)
                                 .hasMessage(ExceptionMessage.INVALID_DATA.getMessage());
         }
@@ -383,7 +378,7 @@ public class StudySessionServiceTest {
                 Long examId = 100L;
                 Long problemId = 10L;
 
-                StudySession session = StudySession.builder().id(sessionId).examId(examId).mode(ExamMode.EXAM).build();
+                StudySession session = inProgressSession(sessionId, examId, ExamMode.EXAM);
                 Exam exam = Exam.builder().id(examId).build();
 
                 given(studySessionRepository.findByIdWithLock(sessionId)).willReturn(Optional.of(session));
@@ -391,8 +386,65 @@ public class StudySessionServiceTest {
                 given(problemService.findById(problemId))
                                 .willThrow(new ProblemException(ExceptionMessage.PROBLEM_NOT_FOUND));
 
-                assertThatThrownBy(() -> studySessionService.saveAnswer(sessionId, problemId, 1L, 0))
+                assertThatThrownBy(() -> studySessionService.saveAnswer(member.getId(), sessionId, problemId, 1L, 0))
                                 .isInstanceOf(ProblemException.class)
                                 .hasMessage(ExceptionMessage.PROBLEM_NOT_FOUND.getMessage());
+        }
+
+        @Test
+        @DisplayName("답안 저장 - 다른 회원의 세션이면 거부한다")
+        void saveAnswer_whenSessionOwnedByAnotherMember_thenThrow() {
+                Long sessionId = 1L;
+                Long examId = 100L;
+                Long problemId = 10L;
+
+                Member otherMember = Member.builder()
+                                .id(999L)
+                                .email("other@example.com")
+                                .role(Role.USER)
+                                .build();
+                StudySession session = StudySession.builder()
+                                .id(sessionId)
+                                .member(otherMember)
+                                .examId(examId)
+                                .mode(ExamMode.EXAM)
+                                .status(StudySessionStatus.IN_PROGRESS)
+                                .build();
+
+                given(studySessionRepository.findByIdWithLock(sessionId)).willReturn(Optional.of(session));
+
+                assertThatThrownBy(() -> studySessionService.saveAnswer(member.getId(), sessionId, problemId, 1L, 0))
+                                .isInstanceOf(MemberException.class)
+                                .hasMessage(ExceptionMessage.NO_AUTHORIZATION.getMessage());
+        }
+
+        @Test
+        @DisplayName("시험 종료 - 완료된 세션은 다시 종료할 수 없다")
+        void completeSession_whenSessionAlreadyCompleted_thenThrow() {
+                Long sessionId = 1L;
+
+                StudySession session = StudySession.builder()
+                                .id(sessionId)
+                                .member(member)
+                                .examId(100L)
+                                .mode(ExamMode.EXAM)
+                                .status(StudySessionStatus.COMPLETED)
+                                .build();
+
+                given(studySessionRepository.findByIdWithLock(sessionId)).willReturn(Optional.of(session));
+
+                assertThatThrownBy(() -> studySessionService.completeSession(member.getId(), sessionId))
+                                .isInstanceOf(StudySessionException.class)
+                                .hasMessage(ExceptionMessage.SESSION_NOT_IN_PROGRESS.getMessage());
+        }
+
+        private StudySession inProgressSession(Long sessionId, Long examId, ExamMode mode) {
+                return StudySession.builder()
+                                .id(sessionId)
+                                .member(member)
+                                .examId(examId)
+                                .mode(mode)
+                                .status(StudySessionStatus.IN_PROGRESS)
+                                .build();
         }
 }

@@ -50,6 +50,7 @@ import com.cpa.yusin.quiz.problem.service.ProblemContentProcessor;
 import com.cpa.yusin.quiz.problem.service.ProblemHtmlImageStorageService;
 import com.cpa.yusin.quiz.problem.service.CreateProblemV2ServiceImpl;
 import com.cpa.yusin.quiz.problem.service.GetProblemV2ServiceImpl;
+import com.cpa.yusin.quiz.problem.service.ProblemNumberSlotManager;
 import com.cpa.yusin.quiz.problem.service.ProblemServiceImpl;
 import com.cpa.yusin.quiz.problem.service.ProblemValidator;
 import com.cpa.yusin.quiz.problem.service.YoutubeLectureUrlProcessor;
@@ -68,6 +69,7 @@ import com.cpa.yusin.quiz.subject.service.port.SubjectRepository;
 import com.cpa.yusin.quiz.subject.service.port.SubjectValidator;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.test.util.ReflectionTestUtils;
 
 public class TestContainer {
         private static final String FAKE_SECRET_KEY = "thisIsATestSecretKeyUsedOnlyForTesasdfeefsdfewdfesredfesfwqewdasdqrewtingPurposes";
@@ -114,6 +116,7 @@ public class TestContainer {
         public final ProblemRepository problemRepository;
         public final ProblemService problemService;
         public final ProblemValidator problemValidator;
+        public final ProblemNumberSlotManager problemNumberSlotManager;
         public final CreateProblemV2Service createProblemV2Service;
         public final GetProblemV2Service getProblemV2Service;
         public final YoutubeLectureUrlProcessor youtubeLectureUrlProcessor;
@@ -163,6 +166,8 @@ public class TestContainer {
                 this.authenticationProvider = new CustomAuthenticationProvider(this.memberDetailsService,
                                 this.passwordEncoder);
                 this.jwtService = new JwtServiceImpl(FAKE_SECRET_KEY, this.clockHolder);
+                ReflectionTestUtils.setField(this.jwtService, "accessTokenExpiration", 60 * 60 * 1000L);
+                ReflectionTestUtils.setField(this.jwtService, "refreshTokenExpiration", 14L * 24 * 60 * 60 * 1000);
                 this.memberValidator = new MemberValidatorImpl(this.memberRepository);
                 this.authenticationService = new AuthenticationServiceImpl(this.passwordEncoder, this.jwtService,
                                 this.memberRepository, this.authenticationProvider, this.memberMapper,
@@ -184,6 +189,7 @@ public class TestContainer {
 
                 this.problemMapper = new ProblemMapper(this.choiceMapper);
                 problemValidator = new ProblemValidator(this.problemRepository);
+                this.problemNumberSlotManager = new ProblemNumberSlotManager(this.problemRepository);
                 ProblemContentProcessor problemContentProcessor = new ProblemContentProcessor(this.fileService,
                                 "test-prefix");
                 ProblemHtmlImageStorageService problemHtmlImageStorageService =
@@ -191,12 +197,14 @@ public class TestContainer {
                 this.youtubeLectureUrlProcessor = new YoutubeLectureUrlProcessor();
                 this.problemService = new ProblemServiceImpl(this.problemRepository, this.problemMapper,
                                 this.examService, this.choiceService, this.problemValidator,
+                                this.problemNumberSlotManager,
                                 problemContentProcessor, problemHtmlImageStorageService);
                 this.createProblemV2Service = new CreateProblemV2ServiceImpl(
                                 this.problemRepository,
                                 this.examService,
                                 this.choiceService,
                                 this.problemValidator,
+                                this.problemNumberSlotManager,
                                 this.youtubeLectureUrlProcessor);
                 this.getProblemV2Service = new GetProblemV2ServiceImpl(
                                 this.problemRepository,

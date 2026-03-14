@@ -48,4 +48,9 @@ public class AnswerRepositoryImpl implements AnswerRepository
     public boolean hasAnswers(long questionId) {
         return answerJpaRepository.existsByQuestionId(questionId);
     }
+
+    @Override
+    public boolean hasOtherAdminAnswers(long questionId, long answerId) {
+        return answerJpaRepository.existsOtherAdminAnswer(questionId, answerId);
+    }
 }

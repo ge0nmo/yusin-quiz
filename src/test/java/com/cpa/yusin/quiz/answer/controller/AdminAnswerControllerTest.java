@@ -91,7 +91,6 @@ class AdminAnswerControllerTest {
                 .content("답변 내용")
                 .createdAt(LocalDateTime.of(2026, 3, 9, 10, 0))
                 .memberId(adminMember.getId())
-                .email(adminMember.getEmail())
                 .username(adminMember.getUsername())
                 .build();
 

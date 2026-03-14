@@ -46,6 +46,14 @@ public class StudySession extends BaseEntity {
         this.lastIndex = index;
     }
 
+    public boolean isOwnedBy(Long memberId) {
+        return member != null && member.getId() != null && member.getId().equals(memberId);
+    }
+
+    public boolean isInProgress() {
+        return StudySessionStatus.IN_PROGRESS == status;
+    }
+
     public void complete(int score, LocalDateTime finishedAt) {
         this.status = StudySessionStatus.COMPLETED;
         this.currentScore = score;

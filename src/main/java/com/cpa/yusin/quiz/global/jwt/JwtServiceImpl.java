@@ -20,6 +20,10 @@ import java.util.function.Function;
 @Service
 public class JwtServiceImpl implements JwtService
 {
+    private static final String TOKEN_TYPE_CLAIM = "tokenType";
+    private static final String ACCESS_TOKEN_TYPE = "access";
+    private static final String REFRESH_TOKEN_TYPE = "refresh";
+
     private final SecretKey key;
     private final ClockHolder clockHolder;
 
@@ -40,17 +44,32 @@ public class JwtServiceImpl implements JwtService
     public String createAccessToken(String email)
     {
         Map<String, Object> claims = new HashMap<>();
+        claims.put(TOKEN_TYPE_CLAIM, ACCESS_TOKEN_TYPE);
         return createToken(claims, email, accessTokenExpiration);
     }
 
     @Override
     public String createRefreshToken(String email) {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put(TOKEN_TYPE_CLAIM, REFRESH_TOKEN_TYPE);
+
         return Jwts.builder()
+                .claims(claims)
                 .subject(email)
                 .issuedAt(currentDate())
                 .expiration(expirationDate(refreshTokenExpiration))
                 .signWith(key)
                 .compact();
+    }
+
+    @Override
+    public boolean isAccessToken(String token) {
+        return hasTokenType(token, ACCESS_TOKEN_TYPE);
+    }
+
+    @Override
+    public boolean isRefreshToken(String token) {
+        return hasTokenType(token, REFRESH_TOKEN_TYPE);
     }
 
 
@@ -71,7 +90,9 @@ public class JwtServiceImpl implements JwtService
         Date expirationDate = extractClaim(token, Claims::getExpiration);
         String email = extractSubject(token);
 
-        return !expirationDate.before(currentDate()) && memberDetails.getUsername().equals(email);
+        return isAccessToken(token)
+                && !expirationDate.before(currentDate())
+                && memberDetails.getUsername().equals(email);
     }
 
     @Override
@@ -113,5 +134,10 @@ public class JwtServiceImpl implements JwtService
                 .build()
                 .parseSignedClaims(token)
                 .getPayload();
+    }
+
+    private boolean hasTokenType(String token, String expectedType) {
+        Object tokenType = extractClaim(token, claims -> claims.get(TOKEN_TYPE_CLAIM));
+        return expectedType.equals(tokenType);
     }
 }

@@ -285,11 +285,37 @@ class AuthenticationServiceImplTest {
     @Test
     @DisplayName("리프레시 토큰이 만료되면 재발급을 거부한다")
     void refreshAccessToken_whenTokenExpired_thenThrow() {
+        given(jwtService.isRefreshToken("expired-token")).willReturn(true);
         given(jwtService.isTokenExpired("expired-token")).willReturn(true);
 
         assertThatThrownBy(() -> authenticationService.refreshAccessToken("expired-token"))
                 .isInstanceOf(MemberException.class)
                 .satisfies(exception -> assertThat(((MemberException) exception).getExceptionMessage())
                         .isEqualTo(ExceptionMessage.REFRESH_TOKEN_EXPIRED));
+    }
+
+    @Test
+    @DisplayName("액세스 토큰으로는 리프레시 재발급을 할 수 없다")
+    void refreshAccessToken_whenTokenIsNotRefreshToken_thenThrow() {
+        given(jwtService.isRefreshToken("access-token")).willReturn(false);
+
+        assertThatThrownBy(() -> authenticationService.refreshAccessToken("access-token"))
+                .isInstanceOf(MemberException.class)
+                .satisfies(exception -> assertThat(((MemberException) exception).getExceptionMessage())
+                        .isEqualTo(ExceptionMessage.INVALID_REFRESH_TOKEN));
+    }
+
+    @Test
+    @DisplayName("리프레시 토큰의 사용자가 존재하지 않으면 재발급을 거부한다")
+    void refreshAccessToken_whenMemberDoesNotExist_thenThrow() {
+        given(jwtService.isRefreshToken("refresh-token")).willReturn(true);
+        given(jwtService.isTokenExpired("refresh-token")).willReturn(false);
+        given(jwtService.extractSubject("refresh-token")).willReturn("deleted@test.com");
+        given(memberRepository.findByEmail("deleted@test.com")).willReturn(Optional.empty());
+
+        assertThatThrownBy(() -> authenticationService.refreshAccessToken("refresh-token"))
+                .isInstanceOf(MemberException.class)
+                .satisfies(exception -> assertThat(((MemberException) exception).getExceptionMessage())
+                        .isEqualTo(ExceptionMessage.USER_NOT_FOUND));
     }
 }

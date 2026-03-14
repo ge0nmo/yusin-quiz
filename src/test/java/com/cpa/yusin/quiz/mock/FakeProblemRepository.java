@@ -55,6 +55,7 @@ public class FakeProblemRepository implements ProblemRepository
     {
         return data.stream()
                 .filter(item -> item.getExam().getId().equals(examId))
+                .filter(item -> !item.isRemoved())
                 .toList();
     }
 
@@ -71,7 +72,32 @@ public class FakeProblemRepository implements ProblemRepository
     public boolean existsByExamIdAndNumber(Long examId, int number)
     {
         return data.stream()
-                .anyMatch(p -> p.getExam().getId().equals(examId) && p.getNumber() == number);
+                .anyMatch(p -> p.getExam().getId().equals(examId)
+                        && p.getNumber() == number
+                        && !p.isRemoved());
+    }
+
+    @Override
+    public Optional<Problem> findRemovedByExamIdAndNumber(long examId, int number) {
+        return data.stream()
+                .filter(problem -> problem.getExam().getId().equals(examId))
+                .filter(problem -> problem.getNumber() == number)
+                .filter(Problem::isRemoved)
+                .findFirst();
+    }
+
+    @Override
+    public Integer findMinimumNumberByExamId(long examId) {
+        return data.stream()
+                .filter(problem -> problem.getExam().getId().equals(examId))
+                .map(Problem::getNumber)
+                .min(Integer::compareTo)
+                .orElse(null);
+    }
+
+    @Override
+    public void flush() {
+        // no-op
     }
 
     @Override

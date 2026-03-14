@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class DeleteProblemServiceImpl implements DeleteProblemService
 {
     private final ProblemRepository problemRepository;
+    private final ProblemNumberSlotManager problemNumberSlotManager;
 
     @Transactional
     @Override
@@ -22,7 +23,7 @@ public class DeleteProblemServiceImpl implements DeleteProblemService
         Problem problem = problemRepository.findById(id)
                 .orElseThrow(() -> new ProblemException(ExceptionMessage.PROBLEM_NOT_FOUND));
 
-        problem.delete();
+        problemNumberSlotManager.deleteAndReleaseNumber(problem);
 
         problemRepository.save(problem);
     }

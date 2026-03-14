@@ -35,6 +35,7 @@ public class ProblemServiceImpl implements ProblemService {
     private final ExamService examService;
     private final ChoiceService choiceService;
     private final ProblemValidator problemValidator;
+    private final ProblemNumberSlotManager problemNumberSlotManager;
     private final ProblemContentProcessor problemContentProcessor;
     private final ProblemHtmlImageStorageService problemHtmlImageStorageService;
 
@@ -43,6 +44,7 @@ public class ProblemServiceImpl implements ProblemService {
     public void save(long examId, ProblemCreateRequest request) {
         Exam exam = examService.findById(examId);
         problemValidator.validateCreateNumber(examId, request.getNumber());
+        problemNumberSlotManager.releaseRemovedNumberSlot(examId, request.getNumber());
 
         String cleanContent = problemHtmlImageStorageService.replaceEmbeddedImages(request.getContent());
         String cleanExplanation = problemHtmlImageStorageService.replaceEmbeddedImages(request.getExplanation());
@@ -64,6 +66,7 @@ public class ProblemServiceImpl implements ProblemService {
         Problem problem = findById(problemId);
         problemValidator.validateBelongsToExam(problem, examId);
         problemValidator.validateUpdateNumber(problem, request.getNumber());
+        problemNumberSlotManager.releaseRemovedNumberSlot(examId, request.getNumber());
 
         String cleanContent = problemHtmlImageStorageService.replaceEmbeddedImages(request.getContent());
         String cleanExplanation = problemHtmlImageStorageService.replaceEmbeddedImages(request.getExplanation());
@@ -84,6 +87,7 @@ public class ProblemServiceImpl implements ProblemService {
 
     private ProblemDTO save(ProblemRequest request, Exam exam) {
         problemValidator.validateCreateNumber(exam.getId(), request.getNumber());
+        problemNumberSlotManager.releaseRemovedNumberSlot(exam.getId(), request.getNumber());
 
         Problem problem = Problem.fromSaveOrUpdate(request.getContent(), request.getExplanation(), request.getNumber(),
                 exam);
@@ -95,6 +99,7 @@ public class ProblemServiceImpl implements ProblemService {
     private ProblemDTO update(ProblemRequest request) {
         Problem problem = findById(request.getId());
         problemValidator.validateUpdateNumber(problem, request.getNumber());
+        problemNumberSlotManager.releaseRemovedNumberSlot(problem.getExam().getId(), request.getNumber());
         problem.update(request.getContent(), request.getNumber(), request.getExplanation());
         problem = problemRepository.save(problem);
         List<Choice> choices = choiceService.saveOrUpdate(request.getChoices(), problem);

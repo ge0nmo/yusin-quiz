@@ -66,6 +66,15 @@ public interface ProblemJpaRepository extends JpaRepository<Problem, Long>
             ")")
     boolean existsByExamIdAndNumberAndIsRemovedFalse(@Param("examId") Long examId, @Param("number") int number);
 
+    @Query("SELECT p FROM Problem p " +
+            "WHERE p.exam.id = :examId " +
+            "AND p.number = :number " +
+            "AND p.isRemoved = true")
+    Optional<Problem> findRemovedByExamIdAndNumber(@Param("examId") long examId, @Param("number") int number);
+
+    @Query("SELECT MIN(p.number) FROM Problem p WHERE p.exam.id = :examId")
+    Integer findMinimumNumberByExamId(@Param("examId") long examId);
+
     @Query(
             value = """
                     SELECT new com.cpa.yusin.quiz.problem.service.dto.AdminProblemSearchProjection(

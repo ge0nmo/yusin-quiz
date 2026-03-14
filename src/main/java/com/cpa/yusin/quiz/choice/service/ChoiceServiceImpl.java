@@ -39,8 +39,15 @@ public class ChoiceServiceImpl implements ChoiceService {
     @Transactional
     @Override
     public void save(Problem problem, List<ChoiceCreateRequest> requests) {
+        if (requests == null || requests.isEmpty()) {
+            return;
+        }
+
         validateChoiceNumbers(requests.stream()
                 .map(ChoiceCreateRequest::getNumber)
+                .toList());
+        validateSingleCorrectAnswer(requests.stream()
+                .map(ChoiceCreateRequest::getIsAnswer)
                 .toList());
 
         List<Choice> choiceRequests = requests.stream()
@@ -63,9 +70,15 @@ public class ChoiceServiceImpl implements ChoiceService {
             return Collections.emptyList();
         }
 
-        validateChoiceNumbers(requests.stream()
+        List<ChoiceRequest> activeRequests = requests.stream()
                 .filter(request -> !request.isRemovedYn())
+                .toList();
+
+        validateChoiceNumbers(activeRequests.stream()
                 .map(ChoiceRequest::getNumber)
+                .toList());
+        validateSingleCorrectAnswer(activeRequests.stream()
+                .map(ChoiceRequest::getIsAnswer)
                 .toList());
 
         List<Choice> choices = new ArrayList<>();
@@ -174,6 +187,20 @@ public class ChoiceServiceImpl implements ChoiceService {
             if (!uniqueNumbers.add(number)) {
                 throw new ChoiceException(ExceptionMessage.INVALID_DATA);
             }
+        }
+    }
+
+    private void validateSingleCorrectAnswer(List<Boolean> answerFlags) {
+        if (answerFlags.isEmpty()) {
+            return;
+        }
+
+        long correctAnswerCount = answerFlags.stream()
+                .filter(Boolean.TRUE::equals)
+                .count();
+
+        if (correctAnswerCount != 1) {
+            throw new ChoiceException(ExceptionMessage.INVALID_DATA);
         }
     }
 }

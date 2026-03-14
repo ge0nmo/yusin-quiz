@@ -81,9 +81,11 @@ public class StudySessionService {
      * Returns feedback (Explanation) if in PRACTICE mode.
      */
     @Transactional
-    public ExamAnswerResponse saveAnswer(Long sessionId, Long problemId, Long choiceId, int index) {
+    public ExamAnswerResponse saveAnswer(Long memberId, Long sessionId, Long problemId, Long choiceId, int index) {
         StudySession session = studySessionRepository.findByIdWithLock(sessionId)
                 .orElseThrow(() -> new StudySessionException(ExceptionMessage.SESSION_NOT_FOUND));
+        validateOwnership(session, memberId);
+        validateInProgress(session);
 
         examService.findById(session.getExamId());
 
@@ -122,9 +124,11 @@ public class StudySessionService {
      * Records activity log (Batch update for Exam Mode).
      */
     @Transactional
-    public int completeSession(Long sessionId) {
+    public int completeSession(Long memberId, Long sessionId) {
         StudySession session = studySessionRepository.findByIdWithLock(sessionId)
                 .orElseThrow(() -> new StudySessionException(ExceptionMessage.SESSION_NOT_FOUND));
+        validateOwnership(session, memberId);
+        validateInProgress(session);
 
         List<SubmittedAnswer> answers = submittedAnswerRepository.findAllByStudySessionId(sessionId);
         int score = (int) answers.stream().filter(SubmittedAnswer::isCorrect).count();
@@ -138,6 +142,18 @@ public class StudySessionService {
         }
 
         return score;
+    }
+
+    private void validateOwnership(StudySession session, Long memberId) {
+        if (!session.isOwnedBy(memberId)) {
+            throw new MemberException(ExceptionMessage.NO_AUTHORIZATION);
+        }
+    }
+
+    private void validateInProgress(StudySession session) {
+        if (!session.isInProgress()) {
+            throw new StudySessionException(ExceptionMessage.SESSION_NOT_IN_PROGRESS);
+        }
     }
 
     private void validateProblemBelongsToSession(Problem problem, Long examId) {

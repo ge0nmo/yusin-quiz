@@ -235,7 +235,7 @@ class QuestionServiceTest {
                                 .satisfies(question -> {
                                         assertThat(question.getId()).isEqualTo(2L);
                                         assertThat(question.isAnsweredByAdmin()).isFalse();
-                                        assertThat(question.getEmail()).isEqualTo("alpha@test.com");
+                                        assertThat(question.getUsername()).isEqualTo("alpha-user");
                                 });
         }
 }

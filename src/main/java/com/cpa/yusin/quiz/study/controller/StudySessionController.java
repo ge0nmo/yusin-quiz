@@ -53,15 +53,8 @@ public class StudySessionController {
         public ResponseEntity<GlobalResponse<ExamAnswerResponse>> saveAnswer(
                         @AuthenticationPrincipal MemberDetails memberDetails,
                         @RequestBody @Valid ExamSubmitRequest request) {
-
-                // memberDetails not strictly needed as sessionId validates ownership implicitly
-                // (scoped),
-                // or we trust sessionId. If stricter check needed, we'd verify
-                // session.member.id == memberDetails.member.id.
-                // Current implementation trusts sessionId or service handles logic. Service
-                // only needs sessionId.
-
                 ExamAnswerResponse response = studySessionService.saveAnswer(
+                                memberDetails.getMember().getId(),
                                 request.getSessionId(),
                                 request.getProblemId(),
                                 request.getChoiceId(),
@@ -76,7 +69,9 @@ public class StudySessionController {
                         @AuthenticationPrincipal MemberDetails memberDetails,
                         @RequestBody @Valid ExamFinishRequest request) {
 
-                int finalScore = studySessionService.completeSession(request.getSessionId());
+                int finalScore = studySessionService.completeSession(
+                                memberDetails.getMember().getId(),
+                                request.getSessionId());
 
                 return ResponseEntity.ok(GlobalResponse.success(new ExamFinishResponse(finalScore)));
         }

@@ -24,6 +24,7 @@ public class CreateProblemV2ServiceImpl implements CreateProblemV2Service
     private final ExamService examService;
     private final ChoiceService choiceService;
     private final ProblemValidator problemValidator;
+    private final ProblemNumberSlotManager problemNumberSlotManager;
     private final YoutubeLectureUrlProcessor youtubeLectureUrlProcessor;
 
     @Override
@@ -32,6 +33,7 @@ public class CreateProblemV2ServiceImpl implements CreateProblemV2Service
         if (request.isNew()) {
             Exam exam = examService.findById(examId);
             problemValidator.validateCreateNumber(examId, request.getNumber());
+            problemNumberSlotManager.releaseRemovedNumberSlot(examId, request.getNumber());
 
             Problem problem = Problem.fromSaveOrUpdate(
                     request.getContent(),
@@ -52,6 +54,7 @@ public class CreateProblemV2ServiceImpl implements CreateProblemV2Service
                     .orElseThrow(() -> new ProblemException(ExceptionMessage.PROBLEM_NOT_FOUND));
             problemValidator.validateBelongsToExam(problem, examId);
             problemValidator.validateUpdateNumber(problem, request.getNumber());
+            problemNumberSlotManager.releaseRemovedNumberSlot(examId, request.getNumber());
 
             problem.update(
                     request.getContent(),

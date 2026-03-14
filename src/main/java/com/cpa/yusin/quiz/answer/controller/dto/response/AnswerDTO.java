@@ -16,6 +16,5 @@ public class AnswerDTO {
 
     // 회원 정보
     private final long memberId;
-    private final String email;
     private final String username;
 }

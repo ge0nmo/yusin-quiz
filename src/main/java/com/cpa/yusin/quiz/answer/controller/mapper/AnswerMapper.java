@@ -34,7 +34,6 @@ public class AnswerMapper {
                 .content(answer.getContent())
                 .createdAt(answer.getCreatedAt())
                 .memberId(member.getId())
-                .email(member.getEmail())
                 .username(member.getUsername())
                 .build();
     }

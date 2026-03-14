@@ -2,6 +2,7 @@ package com.cpa.yusin.quiz.mock;
 
 import com.cpa.yusin.quiz.answer.domain.Answer;
 import com.cpa.yusin.quiz.answer.service.port.AnswerRepository;
+import com.cpa.yusin.quiz.member.domain.type.Role;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -41,7 +42,7 @@ public class FakeAnswerRepository implements AnswerRepository {
         List<Answer> response = data.stream().filter(item -> Objects.equals(item.getQuestion().getId(), questionId))
                 .toList();
 
-        return new PageImpl<>(response, pageable, data.size());
+        return new PageImpl<>(response, pageable, response.size());
     }
 
     @Override
@@ -57,5 +58,13 @@ public class FakeAnswerRepository implements AnswerRepository {
     @Override
     public boolean hasAnswers(long questionId) {
         return data.stream().anyMatch(item -> Objects.equals(item.getQuestion().getId(), questionId));
+    }
+
+    @Override
+    public boolean hasOtherAdminAnswers(long questionId, long answerId) {
+        return data.stream()
+                .filter(item -> Objects.equals(item.getQuestion().getId(), questionId))
+                .filter(item -> !Objects.equals(item.getId(), answerId))
+                .anyMatch(item -> item.getMember() != null && Role.ADMIN.equals(item.getMember().getRole()));
     }
 }

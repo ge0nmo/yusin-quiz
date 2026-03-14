@@ -49,12 +49,17 @@ public class Question extends BaseEntity {
     }
 
     public void updateAnswerCount(int count) {
-        int newCount = this.answerCount + count;
+        int currentCount = this.answerCount == null ? 0 : this.answerCount;
+        int newCount = currentCount + count;
         this.answerCount = Math.max(newCount, 0);
     }
 
     public void delete() {
         this.isRemoved = true;
+    }
+
+    public void syncAnsweredByAdmin(boolean answeredByAdmin) {
+        this.answeredByAdmin = answeredByAdmin;
     }
 
     /**

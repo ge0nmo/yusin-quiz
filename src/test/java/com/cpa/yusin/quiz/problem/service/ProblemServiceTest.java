@@ -115,6 +115,23 @@ class ProblemServiceTest extends MockSetup {
     }
 
     @Test
+    @DisplayName("문제 생성은 정답 choice 가 둘 이상이면 거부한다")
+    void processSaveOrUpdate_whenMultipleCorrectChoicesExist_thenThrow() {
+        ProblemRequest request = ProblemRequest.builder()
+                .content("problem1")
+                .explanation("explanation1")
+                .number(1)
+                .choices(List.of(
+                        ChoiceRequest.builder().content("problem1-choice1").number(1).isAnswer(true).build(),
+                        ChoiceRequest.builder().content("problem1-choice2").number(2).isAnswer(true).build()
+                ))
+                .build();
+
+        assertThatThrownBy(() -> testContainer.problemService.processSaveOrUpdate(request, biologyExam2.getId()))
+                .isInstanceOf(ChoiceException.class);
+    }
+
+    @Test
     @DisplayName("문제 조회는 lecture playbackUrl 을 포함한다")
     void getById_whenProblemHasLecture_thenReturnsLectureResponse() {
         physicsProblem1.assignLecture("https://www.youtube.com/watch?v=abc123XYZ09", 430);

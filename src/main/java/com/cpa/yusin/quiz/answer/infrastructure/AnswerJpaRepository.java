@@ -86,4 +86,23 @@ public interface AnswerJpaRepository extends JpaRepository<Answer, Long>
             "   AND s.isRemoved = false" +
             ")")
     boolean existsByQuestionId(@Param("questionId") long questionId);
+
+    @Query("SELECT CASE WHEN COUNT(a) > 0 THEN TRUE ELSE FALSE END " +
+            "FROM Answer a " +
+            "JOIN a.question q " +
+            "JOIN a.member m " +
+            "JOIN q.problem p " +
+            "JOIN p.exam e " +
+            "WHERE q.id = :questionId " +
+            "AND a.id <> :answerId " +
+            "AND m.role = com.cpa.yusin.quiz.member.domain.type.Role.ADMIN " +
+            "AND q.isRemoved = false " +
+            "AND p.isRemoved = false " +
+            "AND e.isRemoved = false " +
+            "AND EXISTS (" +
+            "   SELECT s.id FROM Subject s " +
+            "   WHERE s.id = e.subjectId " +
+            "   AND s.isRemoved = false" +
+            ")")
+    boolean existsOtherAdminAnswer(@Param("questionId") long questionId, @Param("answerId") long answerId);
 }

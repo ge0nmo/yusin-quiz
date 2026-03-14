@@ -52,6 +52,21 @@ public class ProblemRepositoryImpl implements ProblemRepository
     }
 
     @Override
+    public Optional<Problem> findRemovedByExamIdAndNumber(long examId, int number) {
+        return problemJpaRepository.findRemovedByExamIdAndNumber(examId, number);
+    }
+
+    @Override
+    public Integer findMinimumNumberByExamId(long examId) {
+        return problemJpaRepository.findMinimumNumberByExamId(examId);
+    }
+
+    @Override
+    public void flush() {
+        problemJpaRepository.flush();
+    }
+
+    @Override
     public Page<AdminProblemSearchProjection> searchAdminProblems(Pageable pageable,
                                                                   AdminProblemSearchCondition searchCondition) {
         return problemJpaRepository.searchAdminProblems(

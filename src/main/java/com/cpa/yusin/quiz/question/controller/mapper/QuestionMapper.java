@@ -31,7 +31,6 @@ public class QuestionMapper {
                 .answeredByAdmin(question.isAnsweredByAdmin())
                 .problemId(question.getProblem().getId())
                 .memberId(member.getId())
-                .email(member.getEmail())
                 .username(member.getUsername())
                 .build();
     }

@@ -15,6 +15,7 @@ class JwtServiceTest
 {
     TestContainer testContainer;
     static String ACCESSTOKEN;
+    static String REFRESHTOKEN;
     MemberDetails memberDetails;
 
     @BeforeEach
@@ -34,6 +35,8 @@ class JwtServiceTest
 
         ACCESSTOKEN = testContainer.jwtService
                 .createAccessToken(email);
+        REFRESHTOKEN = testContainer.jwtService
+                .createRefreshToken(email);
 
         memberDetails = testContainer.memberDetailsService.loadUserByUsername(email);
     }
@@ -49,6 +52,20 @@ class JwtServiceTest
 
         // then
         assertNotNull(result);
+    }
+
+    @Test
+    void tokenType_shouldDistinguishAccessAndRefreshToken() {
+        assertThat(testContainer.jwtService.isAccessToken(ACCESSTOKEN)).isTrue();
+        assertThat(testContainer.jwtService.isRefreshToken(ACCESSTOKEN)).isFalse();
+        assertThat(testContainer.jwtService.isRefreshToken(REFRESHTOKEN)).isTrue();
+        assertThat(testContainer.jwtService.isAccessToken(REFRESHTOKEN)).isFalse();
+    }
+
+    @Test
+    void isValidToken_shouldRejectRefreshTokenForAuthentication() {
+        assertThat(testContainer.jwtService.isValidToken(ACCESSTOKEN, memberDetails)).isTrue();
+        assertThat(testContainer.jwtService.isValidToken(REFRESHTOKEN, memberDetails)).isFalse();
     }
 
 }

@@ -178,7 +178,7 @@ class AdminQuestionTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.length()").value(1))
                 .andExpect(jsonPath("$.data[0].title").value("이메일 검색 대상"))
-                .andExpect(jsonPath("$.data[0].email").value("alpha.search@test.com"));
+                .andExpect(jsonPath("$.data[0].username").value("alpha-user"));
 
         mvc.perform(get("/api/admin/question")
                         .with(user(adminMemberDetails))

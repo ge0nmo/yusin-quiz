@@ -117,6 +117,18 @@ public class Problem extends BaseEntity
         this.isRemoved = true;
     }
 
+    /**
+     * Soft-deleted rows stay in the table, so they must leave the business number
+     * space to let a new problem reuse the same exam-local number safely.
+     */
+    public void assignDeletedNumber(int deletedNumber) {
+        if (deletedNumber >= 0) {
+            throw new IllegalArgumentException("Deleted problem number must be negative.");
+        }
+
+        this.number = deletedNumber;
+    }
+
     public void assignLecture(String lectureYoutubeUrl, Integer lectureStartSecond) {
         this.lectureYoutubeUrl = lectureYoutubeUrl;
         this.lectureStartSecond = lectureStartSecond;

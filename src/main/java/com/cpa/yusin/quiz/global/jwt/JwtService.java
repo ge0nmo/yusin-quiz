@@ -11,6 +11,10 @@ public interface JwtService
 
     String createRefreshToken(String email);
 
+    boolean isAccessToken(String token);
+
+    boolean isRefreshToken(String token);
+
     boolean isTokenExpired(String token);
 
     boolean isValidToken(String token, MemberDetails memberDetails);
