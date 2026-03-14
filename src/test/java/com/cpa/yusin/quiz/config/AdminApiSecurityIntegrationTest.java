@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -18,9 +19,11 @@ import java.util.List;
 
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.options;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -89,5 +92,40 @@ class AdminApiSecurityIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].id").value(1L))
                 .andExpect(jsonPath("$[0].name").value("회계학"));
+    }
+
+    @Test
+    @DisplayName("V2 관리자 API도 ROLE_USER 요청을 차단해야 함")
+    void adminV2ApiShouldRejectNonAdminUsers() throws Exception {
+        mockMvc.perform(get("/api/v2/admin/problem")
+                        .with(user("user@test.com").roles("USER")))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @DisplayName("V2 관리자 API도 ROLE_ADMIN 요청은 보안 체인을 통과해야 함")
+    void adminV2ApiShouldAllowAdminUsers() throws Exception {
+        mockMvc.perform(get("/api/v2/admin/problem")
+                        .with(user("admin@test.com").roles("ADMIN")))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("허용된 origin 의 관리자 preflight 요청은 CORS 헤더를 반환해야 함")
+    void adminCorsShouldAllowConfiguredOrigin() throws Exception {
+        mockMvc.perform(options("/api/admin/subject")
+                        .header(HttpHeaders.ORIGIN, "http://localhost:3000")
+                        .header(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "GET"))
+                .andExpect(status().isOk())
+                .andExpect(header().string(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, "http://localhost:3000"));
+    }
+
+    @Test
+    @DisplayName("허용되지 않은 origin 의 관리자 preflight 요청은 차단해야 함")
+    void adminCorsShouldRejectUnknownOrigin() throws Exception {
+        mockMvc.perform(options("/api/admin/subject")
+                        .header(HttpHeaders.ORIGIN, "https://malicious.example.com")
+                        .header(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "GET"))
+                .andExpect(status().isForbidden());
     }
 }

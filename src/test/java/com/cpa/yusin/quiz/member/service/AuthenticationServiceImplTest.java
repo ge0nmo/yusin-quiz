@@ -1,5 +1,6 @@
 package com.cpa.yusin.quiz.member.service;
 
+import com.cpa.yusin.quiz.common.service.UuidHolder;
 import com.cpa.yusin.quiz.global.details.MemberDetails;
 import com.cpa.yusin.quiz.global.exception.ExceptionMessage;
 import com.cpa.yusin.quiz.global.exception.MemberException;
@@ -51,6 +52,8 @@ class AuthenticationServiceImplTest {
     private MemberValidator memberValidator;
     @Mock
     private RandomNicknameGenerator randomNicknameGenerator;
+    @Mock
+    private UuidHolder uuidHolder;
 
     @Test
     @DisplayName("관리자 로그인은 ADMIN 회원일 때만 성공해야 함")
@@ -124,6 +127,7 @@ class AuthenticationServiceImplTest {
         given(memberRepository.findByEmail(email)).willReturn(Optional.empty());
         given(randomNicknameGenerator.generate()).willReturn(randomNickname);
         given(memberRepository.existsByUsername(randomNickname)).willReturn(false); // 닉네임 중복 없음
+        given(uuidHolder.getRandom()).willReturn("generated-uuid-12345");
         given(passwordEncoder.encode(any())).willReturn("encodedPassword");
 
         // Mock save to return the member with the random nickname and ID
@@ -176,6 +180,7 @@ class AuthenticationServiceImplTest {
         given(memberRepository.existsByUsername(collisionNickname)).willReturn(true);
         given(memberRepository.existsByUsername(uniqueNickname)).willReturn(false);
 
+        given(uuidHolder.getRandom()).willReturn("generated-uuid-67890");
         given(passwordEncoder.encode(any())).willReturn("encodedPassword");
 
         given(memberRepository.save(any(Member.class))).willAnswer(invocation -> {
@@ -236,5 +241,55 @@ class AuthenticationServiceImplTest {
         // 저장 로직이 호출되지 않아야 함 (닉네임 생성도 안 함)
         verify(memberRepository, org.mockito.Mockito.never()).save(any(Member.class));
         verify(randomNicknameGenerator, org.mockito.Mockito.never()).generate();
+    }
+
+    @Test
+    @DisplayName("랜덤 닉네임이 계속 충돌하면 UUID 접미사로 fallback 한다")
+    void socialLogin_NewMember_FallbackWithUuidSuffix() {
+        String email = "fallback@gmail.com";
+        SocialProfile profile = SocialProfile.builder()
+                .email(email)
+                .name("Fallback User")
+                .platform(Platform.GOOGLE)
+                .build();
+
+        given(memberRepository.findByEmail(email)).willReturn(Optional.empty());
+        given(randomNicknameGenerator.generate()).willReturn("중복닉네임");
+        given(memberRepository.existsByUsername("중복닉네임")).willReturn(true);
+        given(uuidHolder.getRandom())
+                .willReturn("abcde-uuid-fallback")
+                .willReturn("password-seed-uuid");
+        given(passwordEncoder.encode(any())).willReturn("encodedPassword");
+        given(memberRepository.save(any(Member.class))).willAnswer(invocation -> {
+            Member member = invocation.getArgument(0);
+            return Member.builder()
+                    .id(3L)
+                    .email(member.getEmail())
+                    .username(member.getUsername())
+                    .password(member.getPassword())
+                    .role(member.getRole())
+                    .platform(member.getPlatform())
+                    .build();
+        });
+        given(jwtService.createAccessToken(email)).willReturn("accessToken");
+        given(jwtService.createRefreshToken(email)).willReturn("refreshToken");
+
+        LoginResponse response = authenticationService.socialLogin(profile);
+
+        assertThat(response.getEmail()).isEqualTo(email);
+        assertThat(response.getUsername()).isEqualTo("중복닉네임abcde");
+        verify(randomNicknameGenerator, org.mockito.Mockito.times(21)).generate();
+        verify(uuidHolder, org.mockito.Mockito.times(2)).getRandom();
+    }
+
+    @Test
+    @DisplayName("리프레시 토큰이 만료되면 재발급을 거부한다")
+    void refreshAccessToken_whenTokenExpired_thenThrow() {
+        given(jwtService.isTokenExpired("expired-token")).willReturn(true);
+
+        assertThatThrownBy(() -> authenticationService.refreshAccessToken("expired-token"))
+                .isInstanceOf(MemberException.class)
+                .satisfies(exception -> assertThat(((MemberException) exception).getExceptionMessage())
+                        .isEqualTo(ExceptionMessage.REFRESH_TOKEN_EXPIRED));
     }
 }

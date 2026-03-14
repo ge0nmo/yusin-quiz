@@ -317,12 +317,12 @@ class DashboardTest {
     }
 
     private void removeSubject(Subject subject) {
-        subject.delete();
+        subject.delete(1L);
         subjectRepository.save(subject);
     }
 
     private void removeExam(Exam exam) {
-        exam.delete();
+        exam.delete(2L);
         examRepository.save(exam);
     }
 

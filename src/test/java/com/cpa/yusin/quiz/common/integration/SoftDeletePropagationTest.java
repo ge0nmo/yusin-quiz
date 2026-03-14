@@ -313,12 +313,12 @@ class SoftDeletePropagationTest {
     }
 
     private void deleteSubject(Subject subject) {
-        subject.delete();
+        subject.delete(1L);
         subjectRepository.save(subject);
     }
 
     private void deleteExam(Exam exam) {
-        exam.delete();
+        exam.delete(2L);
         examRepository.save(exam);
     }
 

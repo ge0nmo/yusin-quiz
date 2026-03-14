@@ -39,7 +39,7 @@ public class AdminAnswerController {
     }
 
     @PatchMapping("/answer/{answerId}")
-    public ResponseEntity<?> updateAnswer(@PathVariable("answerId") long answerId,
+    public ResponseEntity<GlobalResponse<Void>> updateAnswer(@PathVariable("answerId") long answerId,
             @Validated @RequestBody AdminAnswerUpdateRequest request) {
         answerService.updateInAdminPage(request, answerId);
 
@@ -55,8 +55,10 @@ public class AdminAnswerController {
     }
 
     @DeleteMapping("/answer/{answerId}")
-    public void deleteAnswer(@PathVariable("answerId") long answerId, Principal principal) {
+    public ResponseEntity<Void> deleteAnswer(@PathVariable("answerId") long answerId, Principal principal) {
         MemberDetails memberDetails = (MemberDetails) ((Authentication) principal).getPrincipal();
         answerService.deleteAnswer(answerId, memberDetails.getMember());
+
+        return ResponseEntity.noContent().build();
     }
 }

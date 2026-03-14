@@ -1,7 +1,6 @@
 package com.cpa.yusin.quiz.common.controller;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -25,18 +24,18 @@ public class HealthCheckController {
     private String serverName;
 
     @GetMapping(value = "/hc", produces = "application/json")
-    public ResponseEntity<?> healthCheck() {
+    public Map<String, String> healthCheck() {
         Map<String, String> responseData = new TreeMap<>();
         responseData.put("serverName", serverName);
         responseData.put("serverAddress", serverAddress);
         responseData.put("serverPort", serverPort);
         responseData.put("env", env);
 
-        return ResponseEntity.ok(responseData);
+        return responseData;
     }
 
     @GetMapping(value = "/env", produces = "application/json")
-    public ResponseEntity<?> env() {
-        return ResponseEntity.ok(env);
+    public String env() {
+        return env;
     }
 }

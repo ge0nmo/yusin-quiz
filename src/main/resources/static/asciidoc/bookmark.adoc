@@ -10,14 +10,14 @@
 == 북마크 API
 
 == 북마크된 문제 Slice 조회
-==== HTTP Request
+=== HTTP Request
 include::{snippets}/getBookmarkedProblems/http-request.adoc[]
 
-==== Query Parameters
+=== Query Parameters
 include::{snippets}/getBookmarkedProblems/query-parameters.adoc[]
 
-==== HTTP Response
+=== HTTP Response
 include::{snippets}/getBookmarkedProblems/http-response.adoc[]
 
-==== Response Fields
+=== Response Fields
 include::{snippets}/getBookmarkedProblems/response-fields.adoc[]

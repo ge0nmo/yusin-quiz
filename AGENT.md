@@ -16,6 +16,8 @@
 - 문제(`Problem`)는 V1 HTML 저장 모델과 V2 JSON Block 저장 모델을 동시에 보유.
 - 관리자 파일 업로드는 `file` 도메인의 `AdminFileController`가 `/api/admin/file`로 제공.
 - 관리자 답변 요청 DTO는 `answer.controller.dto.request` 패키지에 위치.
+- 시간 의존 로직은 `ClockHolder`, UUID 생성은 `UuidHolder`를 우선 사용.
+- CORS 허용 도메인은 `app.security.cors.allowed-origins`로 명시 설정한다.
 - `./gradlew test`는 현재 작업 환경에서 성공 확인됨.
 - `./gradlew test asciidoctor openapi3`로 REST Docs HTML과 OpenAPI 3 JSON까지 함께 생성할 수 있음.
 
@@ -74,6 +76,7 @@
 - `YusinQuizApplication`은 `@EnableJpaAuditing`, `@EnableAsync`를 사용.
 - 신규 JPA 엔티티는 반드시 `BaseEntity`를 상속해야 하며, 해당 규칙은 테스트에서 강제됨.
 - `AppConfig`는 `taskExecutor`를 등록하고, `StudyEventListener`는 비동기 이벤트 처리에 이를 사용.
+- 컨트롤러 응답 타입은 wildcard `ResponseEntity<?>` 대신 구체 타입 또는 plain body를 사용한다.
 
 ## HTTP 경계와 API 네임스페이스
 
@@ -284,7 +287,7 @@
 
 - `StudySessionService`는 `StudySolvedEvent`를 발행.
 - `StudyEventListener`는 `@TransactionalEventListener(AFTER_COMMIT)` + `@Async`로 후처리.
-- `StudyLogService.recordActivity`가 일별 문제 풀이 수를 누적 저장.
+- `StudyLogService.recordActivity`는 `(member_id, date)` 유니크 키 기반 upsert 로 일별 문제 풀이 수를 누적 저장한다.
 
 ### 질문 / 답변
 
@@ -317,7 +320,8 @@
 - `/api/admin/**`
   - `/api/admin/login`만 permit-all
   - 나머지는 `ROLE_ADMIN` 필요
-- CORS는 현재 `allowedOriginPatterns = *`, `allowCredentials = true`로 넓게 열려 있음.
+- `/api/v2/admin/problem`도 관리자 체인에 포함된다.
+- CORS는 `app.security.cors.allowed-origins` 값만 허용하며 `allowCredentials = true`와 wildcard 조합은 사용하지 않는다.
 - 폼 로그인 기반 관리자 체인, Thymeleaf 로그인 페이지, `FormAuthenticationProvider`는 현재 구조에 없음.
 
 ## 파일 저장 / S3
@@ -347,6 +351,7 @@
 - `src/test/java/com/cpa/yusin/quiz/config/TestContainer.java`는 스프링 없이 fake repository와 실제 서비스 객체를 직접 묶는 테스트 전용 조립기.
 - `src/test/java/com/cpa/yusin/quiz/mock/*`에 fake 구현들이 존재.
 - 서비스, 컨트롤러, 리포지토리 일부 테스트는 이 fake 기반 테스트를 사용.
+- 다만 동시성, 락, 보안 경계, soft delete 전파, 문서 계약 같은 핵심 회귀는 fake 테스트만으로 충분하지 않다.
 
 ### 2. 스프링 통합 테스트
 
@@ -354,6 +359,7 @@
 - 예시: `subject.integration.SubjectTest`, `problem.integration.ProblemTest`, `config.AdminApiSecurityIntegrationTest`.
 - `TeardownExtension` + `CleanDatabase`가 각 테스트 전 DB 정리를 수행.
 - `src/main/resources/static/asciidoc/*.adoc`와 Gradle Asciidoctor 설정이 존재해 API 문서화 흐름이 연결돼 있음.
+- 학습 도메인에는 세션 재개, 답안 단일행 보장, 일별 로그 누적을 검증하는 동시성 통합 테스트가 존재한다.
 
 ### 3. 아키텍처 / 회귀 테스트
 
@@ -395,7 +401,7 @@
   - `MemberDetailsService`
   - `AuthenticationServiceImpl`
 - 경로 permit-all 변경 시 실제 컨트롤러 매핑과 일치하는지 반드시 대조할 것.
-- 관리자 기능 변경 시 `/api/admin/**`만 기준으로 삼아야 함.
+- 관리자 기능 변경 시 `/api/admin/**`와 `/api/v2/admin/problem`을 함께 확인해야 함.
 
 ### 학습 기능 변경
 
@@ -417,11 +423,19 @@
 
 ## 확인된 주의사항
 
-- `README.md`는 Redis를 기술 스택에 포함하지만, 점검한 `build.gradle`과 메인 코드에서는 Redis 사용 흔적을 찾지 못했음.
 - 문제 도메인은 V1 HTML 모델과 V2 Block JSON 모델이 동시에 살아 있으므로, 단일 모델만 가정하면 누락이 발생하기 쉬움.
 - 공개 인증 경계는 현재 `/api/v1/auth/*`와 `/api/admin/login` 중심이므로, permit-all 변경 시 실제 컨트롤러 매핑과 반드시 대조해야 함.
 - `application.yml`에는 실제 값이 들어 있으므로 문서화, 출력, 공유 시 키 이름만 다루고 값은 다루지 말 것.
 - 신규 엔티티 추가 시 `BaseEntity` 상속을 누락하면 감사 컬럼, 정렬, 응답 매핑 규칙이 깨질 수 있음.
+
+## 품질 불변식
+
+- 시간 값을 새로 만들 때 서비스 계층에서는 `ClockHolder`를 우선 사용.
+- UUID를 새로 만들 때 애플리케이션 코드에서는 `UuidHolder`를 우선 사용.
+- `jakarta.transaction.Transactional` 대신 Spring `@Transactional`로 통일한다.
+- 이력성 주석(`[수정]`, `[Refactor]`, `[변경]`)은 남기지 않는다.
+- 보안 필터 401 응답은 `SecurityErrorResponse` 형식으로 유지한다.
+- 외부 HTTP 계약을 바꾸는 변경이면 integration test, REST Docs, OpenAPI 산출물을 같이 갱신한다.
 
 ## 코드까지 열어야 할 때 먼저 볼 파일
 

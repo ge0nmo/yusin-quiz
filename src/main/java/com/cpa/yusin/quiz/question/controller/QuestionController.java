@@ -65,7 +65,7 @@ public class QuestionController {
     }
 
     @DeleteMapping("/question/{questionId}")
-    public ResponseEntity<?> deleteById(@PathVariable("questionId") long questionId,
+    public ResponseEntity<GlobalResponse<Boolean>> deleteById(@PathVariable("questionId") long questionId,
             @AuthenticationPrincipal MemberDetails memberDetails) {
         deleteQuestionService.execute(questionId, memberDetails.getMember());
 

@@ -6,6 +6,7 @@ import com.cpa.yusin.quiz.common.service.ClockHolder;
 import com.cpa.yusin.quiz.exam.controller.port.ExamService;
 import com.cpa.yusin.quiz.exam.domain.Exam;
 import com.cpa.yusin.quiz.global.exception.ExceptionMessage;
+import com.cpa.yusin.quiz.global.exception.MemberException;
 import com.cpa.yusin.quiz.global.exception.ProblemException;
 import com.cpa.yusin.quiz.global.exception.StudySessionException;
 import com.cpa.yusin.quiz.member.domain.Member;
@@ -95,6 +96,7 @@ public class StudySessionServiceTest {
                                 .build();
 
                 given(examService.findById(examId)).willReturn(Exam.builder().id(examId).build());
+                given(memberRepository.findByIdWithLock(memberId)).willReturn(Optional.of(member));
                 given(studySessionRepository.findByMemberIdAndExamIdAndStatusAndMode(memberId, examId,
                                 StudySessionStatus.IN_PROGRESS, mode))
                                 .willReturn(Optional.of(existingSession));
@@ -116,11 +118,11 @@ public class StudySessionServiceTest {
                 ExamMode mode = ExamMode.EXAM;
 
                 given(examService.findById(examId)).willReturn(Exam.builder().id(examId).build());
+                given(memberRepository.findByIdWithLock(memberId)).willReturn(Optional.of(member));
                 given(studySessionRepository.findByMemberIdAndExamIdAndStatusAndMode(memberId, examId,
                                 StudySessionStatus.IN_PROGRESS, mode))
                                 .willReturn(Optional.empty());
 
-                given(memberRepository.getReferenceById(memberId)).willReturn(member);
                 given(clockHolder.getCurrentDateTime()).willReturn(NOW);
 
                 given(studySessionRepository.save(any(StudySession.class)))
@@ -133,8 +135,24 @@ public class StudySessionServiceTest {
                 assertThat(session.getExamId()).isEqualTo(examId);
                 assertThat(session.getMode()).isEqualTo(mode);
                 assertThat(session.getStartedAt()).isEqualTo(NOW);
-                verify(memberRepository).getReferenceById(memberId);
+                verify(memberRepository).findByIdWithLock(memberId);
                 verify(studySessionRepository).save(any(StudySession.class));
+        }
+
+        @Test
+        @DisplayName("세션 시작 - 회원이 없으면 예외를 던진다")
+        void startSession_whenMemberMissing_thenThrow() {
+                Long memberId = 1L;
+                Long examId = 100L;
+
+                given(memberRepository.findByIdWithLock(memberId)).willReturn(Optional.empty());
+
+                assertThatThrownBy(() -> studySessionService.startSession(memberId, examId, ExamMode.EXAM))
+                                .isInstanceOf(MemberException.class)
+                                .hasMessage(ExceptionMessage.USER_NOT_FOUND.getMessage());
+
+                verify(studySessionRepository, never())
+                                .findByMemberIdAndExamIdAndStatusAndMode(any(), any(), any(), any());
         }
 
         @Test
@@ -300,6 +318,7 @@ public class StudySessionServiceTest {
                 Long memberId = 1L;
                 Long examId = 100L;
 
+                given(memberRepository.findByIdWithLock(memberId)).willReturn(Optional.of(member));
                 given(examService.findById(examId))
                                 .willThrow(new com.cpa.yusin.quiz.global.exception.ExamException(ExceptionMessage.EXAM_NOT_FOUND));
 

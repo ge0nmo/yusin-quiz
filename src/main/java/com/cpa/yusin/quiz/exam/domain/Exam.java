@@ -43,8 +43,8 @@ public class Exam extends BaseEntity {
         this.year = year;
     }
 
-    public void delete() {
+    public void delete(long deletedMarker) {
         this.isRemoved = true;
-        this.name = name + "_deleted_" + System.currentTimeMillis();
+        this.name = name + "_deleted_" + deletedMarker;
     }
 }

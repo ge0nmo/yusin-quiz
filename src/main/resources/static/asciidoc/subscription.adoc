@@ -10,14 +10,5 @@
 == 구독 API
 
 == 구독 내역 조회
-==== HTTP Request
-include::{snippets}/subscriptionHistory/http-request.adoc[]
-
-==== Query Parameter
-include::{snippets}/subscriptionHistory/query-parameters.adoc[]
-
-==== HTTP Response
-include::{snippets}/subscriptionHistory/http-response.adoc[]
-
-==== Response Fields
-include::{snippets}/subscriptionHistory/response-fields.adoc[]
+현재 테스트 스위트에서는 구독 내역 스니펫을 생성하지 않는다.
+구독 기능을 다시 활성화하거나 문서화 대상에 포함할 때 REST Docs 테스트와 함께 이 문서를 갱신해야 한다.

@@ -505,7 +505,7 @@ public class ProblemTest
                 .explanation("해설")
                 .exam(deletedExam)
                 .build());
-        deletedSubject.delete();
+        deletedSubject.delete(1L);
         subjectRepository.save(deletedSubject);
 
         ResultActions resultActions = mvc.perform(get("/api/v2/admin/problem/search")

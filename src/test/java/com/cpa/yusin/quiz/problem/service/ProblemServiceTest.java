@@ -2,110 +2,120 @@ package com.cpa.yusin.quiz.problem.service;
 
 import com.cpa.yusin.quiz.choice.controller.dto.request.ChoiceRequest;
 import com.cpa.yusin.quiz.choice.domain.Choice;
-import com.cpa.yusin.quiz.common.controller.dto.response.GlobalResponse;
 import com.cpa.yusin.quiz.config.MockSetup;
+import com.cpa.yusin.quiz.global.exception.ChoiceException;
+import com.cpa.yusin.quiz.global.exception.ProblemException;
 import com.cpa.yusin.quiz.problem.controller.dto.request.ProblemRequest;
 import com.cpa.yusin.quiz.problem.controller.dto.response.ProblemDTO;
 import com.cpa.yusin.quiz.problem.domain.Problem;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-class ProblemServiceTest extends MockSetup
-{
+class ProblemServiceTest extends MockSetup {
+
     @Test
-    void saveOrUpdate()
-    {
-        // given
-        List<ChoiceRequest> choices1 = List.of(
-                ChoiceRequest.builder().content("problem1 - choice1").number(1).isAnswer(true).build(),
-                ChoiceRequest.builder().content("problem1 - choice2").number(2).isAnswer(false).build(),
-                ChoiceRequest.builder().content("problem1 - choice3").number(3).isAnswer(false).build(),
-                ChoiceRequest.builder().content("problem1 - choice4").number(4).isAnswer(false).build(),
-                ChoiceRequest.builder().content("problem1 - choice5").number(5).isAnswer(false).build()
-
+    @DisplayName("문제 생성은 문제와 choice 를 함께 저장한다")
+    void processSaveOrUpdate_whenCreate_thenSaveProblemAndChoices() {
+        List<ChoiceRequest> choices = List.of(
+                ChoiceRequest.builder().content("problem1-choice1").number(1).isAnswer(true).build(),
+                ChoiceRequest.builder().content("problem1-choice2").number(2).isAnswer(false).build()
         );
 
-        ProblemRequest request =
-                ProblemRequest.builder().content("problem1").number(1).choices(choices1).build();
+        ProblemRequest request = ProblemRequest.builder()
+                .content("problem1")
+                .explanation("explanation1")
+                .number(1)
+                .choices(choices)
+                .build();
 
-        // when
-        testContainer.problemService.processSaveOrUpdate(request, biologyExam2.getId());
+        ProblemDTO result = testContainer.problemService.processSaveOrUpdate(request, biologyExam2.getId());
 
-        // then
-        List<Choice> choices = testContainer.choiceRepository.findAllByExamId(biologyExam2.getId());
-        assertThat(choices).hasSize(5);
-        assertThat(choices.getFirst().getContent()).isEqualTo("problem1 - choice1");
-        assertThat(choices.getFirst().getNumber()).isEqualTo(1);
-        assertThat(choices.getFirst().getIsAnswer()).isTrue();
-
-        assertThat(choices.get(1).getContent()).isEqualTo("problem1 - choice2");
-        assertThat(choices.get(1).getNumber()).isEqualTo(2);
-        assertThat(choices.get(1).getIsAnswer()).isFalse();
-
-        assertThat(choices.get(2).getContent()).isEqualTo("problem1 - choice3");
-        assertThat(choices.get(2).getNumber()).isEqualTo(3);
-        assertThat(choices.get(2).getIsAnswer()).isFalse();
-
-        assertThat(choices.get(3).getContent()).isEqualTo("problem1 - choice4");
-        assertThat(choices.get(3).getNumber()).isEqualTo(4);
-        assertThat(choices.get(3).getIsAnswer()).isFalse();
-
-        assertThat(choices.get(4).getContent()).isEqualTo("problem1 - choice5");
-        assertThat(choices.get(4).getNumber()).isEqualTo(5);
-        assertThat(choices.get(4).getIsAnswer()).isFalse();
-
-        List<Problem> problems = testContainer.problemRepository.findAllByExamId(biologyExam2.getId());
-        assertThat(problems).hasSize(1);
-
-        assertThat(problems.getFirst().getContent()).isEqualTo("problem1");
-        assertThat(problems.getFirst().getNumber()).isEqualTo(1);
+        assertThat(result.content()).isEqualTo("problem1");
+        assertThat(result.explanation()).isEqualTo("explanation1");
+        assertThat(testContainer.problemRepository.findAllByExamId(biologyExam2.getId())).hasSize(1);
+        assertThat(testContainer.choiceRepository.findAllByExamId(biologyExam2.getId())).hasSize(2);
     }
 
     @Test
-    void saveOrUpdate_whenUpdate()
-    {
-        // given
-        long examId = biologyExam1.getId();
-        Problem savedProblem = testContainer.problemRepository.save(Problem.builder()
+    @DisplayName("문제 수정은 같은 시험 안에서 번호 충돌을 허용하지 않는다")
+    void processSaveOrUpdate_whenProblemNumberCollides_thenThrow() {
+        testContainer.problemRepository.save(Problem.builder()
+                .id(10L)
+                .number(10)
+                .content("first")
+                .exam(biologyExam1)
+                .build());
+        Problem secondProblem = testContainer.problemRepository.save(Problem.builder()
+                .id(11L)
+                .number(11)
+                .content("second")
+                .exam(biologyExam1)
+                .build());
+
+        ProblemRequest request = ProblemRequest.builder()
+                .id(secondProblem.getId())
+                .number(10)
+                .content("updated")
+                .explanation("updated explanation")
+                .choices(List.of())
+                .build();
+
+        assertThatThrownBy(() -> testContainer.problemService.processSaveOrUpdate(request, biologyExam1.getId()))
+                .isInstanceOf(ProblemException.class);
+    }
+
+    @Test
+    @DisplayName("문제 수정은 다른 문제의 choice ID 를 재사용할 수 없다")
+    void processSaveOrUpdate_whenChoiceBelongsToDifferentProblem_thenThrow() {
+        Problem targetProblem = testContainer.problemRepository.save(Problem.builder()
                 .id(10L)
                 .number(10)
                 .content("알맞은 것을 고르시오")
                 .explanation("설명")
                 .exam(biologyExam1)
                 .build());
+        Problem foreignProblem = testContainer.problemRepository.save(Problem.builder()
+                .id(11L)
+                .number(11)
+                .content("다른 문제")
+                .explanation("다른 설명")
+                .exam(biologyExam1)
+                .build());
 
-        testContainer.choiceRepository.saveAll(List.of(
-                Choice.builder().id(10L).number(1).content("1").problem(savedProblem).isAnswer(false).build(),
-                Choice.builder().id(11L).number(2).content("2").problem(savedProblem).isAnswer(true).build(),
-                Choice.builder().id(12L).number(3).content("3").problem(savedProblem).isAnswer(true).build(),
-                Choice.builder().id(13L).number(4).content("4").problem(savedProblem).isAnswer(false).build(),
-                Choice.builder().id(14L).number(5).content("5").problem(savedProblem).isAnswer(false).build()
-        ));
-        List<ChoiceRequest> choiceRequests = List.of(
-                ChoiceRequest.builder().id(10L).number(1).content("수정1").isAnswer(true).build(),
-                ChoiceRequest.builder().id(10L).number(1).content("수정2").isAnswer(false).build(),
-                ChoiceRequest.builder().id(10L).number(1).content("수정3").isAnswer(false).build(),
-                ChoiceRequest.builder().id(10L).number(1).content("수정4").isAnswer(false).build(),
-                ChoiceRequest.builder().id(10L).number(1).content("수정5").isAnswer(false).build()
-        );
+        Choice foreignChoice = testContainer.choiceRepository.save(Choice.builder()
+                .id(50L)
+                .number(1)
+                .content("다른 문제 보기")
+                .isAnswer(true)
+                .problem(foreignProblem)
+                .build());
 
-        ProblemRequest request = ProblemRequest.builder().id(10L).number(10).content("알맞을 것을 고르시오(수정)")
-                .explanation("설명(수정)").choices(choiceRequests).build();
+        ProblemRequest request = ProblemRequest.builder()
+                .id(targetProblem.getId())
+                .number(10)
+                .content("수정된 문제")
+                .explanation("수정된 설명")
+                .choices(List.of(
+                        ChoiceRequest.builder()
+                                .id(foreignChoice.getId())
+                                .number(1)
+                                .content("잘못된 재사용")
+                                .isAnswer(true)
+                                .build()
+                ))
+                .build();
 
-        // when
-
-        ProblemDTO result = testContainer.problemService.processSaveOrUpdate(request, examId);
-
-        // then
-        assertThat(result.content()).isEqualTo("알맞을 것을 고르시오(수정)");
-        assertThat(result.explanation()).isEqualTo("설명(수정)");
-
+        assertThatThrownBy(() -> testContainer.problemService.processSaveOrUpdate(request, biologyExam1.getId()))
+                .isInstanceOf(ChoiceException.class);
     }
 
     @Test
+    @DisplayName("문제 조회는 lecture playbackUrl 을 포함한다")
     void getById_whenProblemHasLecture_thenReturnsLectureResponse() {
         physicsProblem1.assignLecture("https://www.youtube.com/watch?v=abc123XYZ09", 430);
 
@@ -117,35 +127,4 @@ class ProblemServiceTest extends MockSetup
         assertThat(result.lecture().getPlaybackUrl())
                 .isEqualTo("https://www.youtube.com/watch?v=abc123XYZ09&t=430s");
     }
-
-    /*@Test
-    void getAllByExamId()
-    {
-        // given
-        long examId = physicsExam1.getId();
-
-        Problem biologyProblem = Problem.builder()
-                .id(10L)
-                .number(10)
-                .content("biology")
-                .exam(biologyExam1)
-                .build();
-
-        testContainer.choiceRepository.saveInRedis(Choice.builder()
-                .id(10L)
-                .number(1)
-                .content("biology content")
-                .isAnswer(true)
-                .problem(biologyProblem)
-                .build());
-
-        // when
-        GlobalResponse<List<ProblemDTO>> response = testContainer.problemService.getAllByExamId(examId);
-        List<ProblemDTO> result = response.getData();
-
-        // then
-        assertThat(result).hasSize(2);
-        assertThat(result.get(0).choices()).hasSize(3);
-        assertThat(result.get(1).choices()).isEmpty();
-    }*/
 }

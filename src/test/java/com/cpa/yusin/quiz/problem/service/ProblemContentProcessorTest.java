@@ -3,6 +3,8 @@ package com.cpa.yusin.quiz.problem.service;
 import com.cpa.yusin.quiz.file.controller.port.FileService;
 import com.cpa.yusin.quiz.problem.domain.block.Block;
 import com.cpa.yusin.quiz.problem.domain.block.ImageBlock;
+import com.cpa.yusin.quiz.problem.domain.block.ListBlock;
+import com.cpa.yusin.quiz.problem.domain.block.ListItemBlock;
 import com.cpa.yusin.quiz.problem.domain.block.TextBlock;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -84,5 +86,36 @@ class ProblemContentProcessorTest {
         // then
         ImageBlock imgBlock = (ImageBlock) result.get(0);
         assertThat(imgBlock.getSrc()).isEqualTo(normalUrl);
+    }
+
+    @Test
+    @DisplayName("중첩 리스트 안의 이미지도 presigned URL 로 변환한다")
+    void processBlocks_shouldTraverseNestedListBlocks() {
+        String originalUrl = "https://s3.amazonaws.com/" + S3_PREFIX + "/nested.png";
+        String presignedUrl = "https://s3.amazonaws.com/presigned-nested-url";
+
+        when(fileService.generatePresignedUrl(anyString())).thenReturn(presignedUrl);
+
+        List<Block> blocks = List.of(
+                ListBlock.builder()
+                        .type("list")
+                        .ordered(false)
+                        .children(List.of(
+                                ListItemBlock.builder()
+                                        .type("listItem")
+                                        .children(List.of(
+                                                ImageBlock.builder().type("image").src(originalUrl).alt("nested").build()
+                                        ))
+                                        .build()
+                        ))
+                        .build()
+        );
+
+        List<Block> result = processor.processBlocksWithPresignedUrl(blocks);
+
+        ListBlock listBlock = (ListBlock) result.getFirst();
+        ListItemBlock listItemBlock = listBlock.getChildren().getFirst();
+        ImageBlock imageBlock = (ImageBlock) listItemBlock.getChildren().getFirst();
+        assertThat(imageBlock.getSrc()).isEqualTo(presignedUrl);
     }
 }

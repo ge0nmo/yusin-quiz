@@ -43,7 +43,7 @@ public class AnswerController {
     }
 
     @DeleteMapping("/answer/{answerId}")
-    public ResponseEntity<?> deleteById(@PathVariable("answerId") long answerId,
+    public ResponseEntity<GlobalResponse<Boolean>> deleteById(@PathVariable("answerId") long answerId,
             @AuthenticationPrincipal MemberDetails memberDetails) {
         answerService.deleteAnswer(answerId, memberDetails.getMember());
 

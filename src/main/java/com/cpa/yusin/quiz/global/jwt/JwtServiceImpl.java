@@ -1,5 +1,6 @@
 package com.cpa.yusin.quiz.global.jwt;
 
+import com.cpa.yusin.quiz.common.service.ClockHolder;
 import com.cpa.yusin.quiz.global.details.MemberDetails;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -20,6 +21,7 @@ import java.util.function.Function;
 public class JwtServiceImpl implements JwtService
 {
     private final SecretKey key;
+    private final ClockHolder clockHolder;
 
     @Value("${jwt.token.access-token-expiration}")
     private long accessTokenExpiration;
@@ -27,10 +29,11 @@ public class JwtServiceImpl implements JwtService
     @Value("${jwt.token.refresh-token-expiration}")
     private long refreshTokenExpiration;
 
-
-    public JwtServiceImpl(@Value("${jwt.token.secretKey}") String secretKey)
+    public JwtServiceImpl(@Value("${jwt.token.secretKey}") String secretKey,
+                          ClockHolder clockHolder)
     {
         this.key = Keys.hmacShaKeyFor(secretKey.getBytes());
+        this.clockHolder = clockHolder;
     }
 
     @Override
@@ -44,8 +47,8 @@ public class JwtServiceImpl implements JwtService
     public String createRefreshToken(String email) {
         return Jwts.builder()
                 .subject(email)
-                .issuedAt(new Date(System.currentTimeMillis()))
-                .expiration(new Date(System.currentTimeMillis() + refreshTokenExpiration))
+                .issuedAt(currentDate())
+                .expiration(expirationDate(refreshTokenExpiration))
                 .signWith(key)
                 .compact();
     }
@@ -56,8 +59,8 @@ public class JwtServiceImpl implements JwtService
         return Jwts.builder()
                 .claims(claims)
                 .subject(email)
-                .issuedAt(new Date(System.currentTimeMillis()))
-                .expiration(new Date(System.currentTimeMillis() + expiration))
+                .issuedAt(currentDate())
+                .expiration(expirationDate(expiration))
                 .signWith(key)
                 .compact();
     }
@@ -68,15 +71,14 @@ public class JwtServiceImpl implements JwtService
         Date expirationDate = extractClaim(token, Claims::getExpiration);
         String email = extractSubject(token);
 
-        return !expirationDate.before(new Date()) && memberDetails.getUsername().equals(email);
+        return !expirationDate.before(currentDate()) && memberDetails.getUsername().equals(email);
     }
 
-    // 토큰 만료 여부만 따로 확인하는 메서드 추가
     @Override
     public boolean isTokenExpired(String token)
     {
         try {
-            return extractClaim(token, Claims::getExpiration).before(new Date());
+            return extractClaim(token, Claims::getExpiration).before(currentDate());
         } catch (ExpiredJwtException e) {
             return true;
         }
@@ -96,6 +98,14 @@ public class JwtServiceImpl implements JwtService
         return extractClaim(token, Claims::getSubject);
     }
 
+    private Date currentDate() {
+        return new Date(clockHolder.getCurrentTime());
+    }
+
+    private Date expirationDate(long expirationInMillis) {
+        return new Date(clockHolder.getCurrentTime() + expirationInMillis);
+    }
+
     private Claims extractAllClaims(String token)
     {
         return Jwts.parser()
@@ -104,6 +114,4 @@ public class JwtServiceImpl implements JwtService
                 .parseSignedClaims(token)
                 .getPayload();
     }
-
-
 }

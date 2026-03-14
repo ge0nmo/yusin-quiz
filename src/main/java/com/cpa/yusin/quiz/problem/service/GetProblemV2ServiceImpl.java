@@ -28,7 +28,7 @@ public class GetProblemV2ServiceImpl implements GetProblemV2Service {
     private final ProblemRepository problemRepository;
     private final ChoiceService choiceService;
     private final ExamService examService;
-    private final ProblemContentProcessor problemContentProcessor; // [Refactor] Add processor
+    private final ProblemContentProcessor problemContentProcessor;
 
     @Override
     public ProblemV2Response getById(Long problemId) {
@@ -43,43 +43,29 @@ public class GetProblemV2ServiceImpl implements GetProblemV2Service {
     @Override
     public List<ProblemV2Response> getAllByExamId(Long examId) {
         examService.findById(examId);
-
-        // 1. 문제 전체 조회 (Query #1)
         List<Problem> problems = problemRepository.findAllByExamId(examId);
 
         if (problems.isEmpty()) {
             return Collections.emptyList();
         }
 
-        // 2. 조회된 문제들의 ID 리스트 추출
-        // 3. 문제들에 해당하는 모든 보기를 한 번에 조회하여 Map으로 변환 (Query #2)
         Map<Long, List<ChoiceResponse>> choicesMap = choiceService.findAllByExamId(examId);
 
-        // 4. 메모리 매핑 (DB 접근 없음)
         return problems.stream()
                 .map(problem -> {
-                    // Map에서 문제 ID에 맞는 보기를 O(1)로 조회. 없으면 빈 리스트 반환.
                     List<ChoiceResponse> choices = choicesMap.getOrDefault(problem.getId(), Collections.emptyList());
 
                     return mapToResponse(problem, choices);
                 })
-                .collect(Collectors.toList());
+                .toList();
     }
-
-    // =================================================================
-    // Helper Methods
-    // =================================================================
 
     private ProblemV2Response mapToResponse(Problem problem, List<ChoiceResponse> choices) {
         return ProblemV2Response.builder()
                 .id(problem.getId())
                 .number(problem.getNumber())
-                .content(problemContentProcessor.processBlocksWithPresignedUrl(problem.getContentJson())) // [Refactor]
-                                                                                                          // Use
-                                                                                                          // processor
-                .explanation(problemContentProcessor.processBlocksWithPresignedUrl(problem.getExplanationJson())) // [Refactor]
-                                                                                                                  // Use
-                                                                                                                  // processor
+                .content(problemContentProcessor.processBlocksWithPresignedUrl(problem.getContentJson()))
+                .explanation(problemContentProcessor.processBlocksWithPresignedUrl(problem.getExplanationJson()))
                 .lecture(ProblemLectureResponse.from(problem))
                 .choices(choices)
                 .build();

@@ -26,8 +26,8 @@ public class Subject extends BaseEntity {
         this.name = name;
     }
 
-    public void delete() {
-        this.name = name + "_deleted_" + System.currentTimeMillis();
+    public void delete(long deletedMarker) {
+        this.name = name + "_deleted_" + deletedMarker;
         this.isRemoved = true;
     }
 }

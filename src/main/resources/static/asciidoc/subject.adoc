@@ -10,11 +10,11 @@
 == 과목 API
 
 == 과목 전체 조회
-==== HTTP Request
+=== HTTP Request
 include::{snippets}/과목 전체 조회/http-request.adoc[]
 
-==== HTTP Response
+=== HTTP Response
 include::{snippets}/과목 전체 조회/http-response.adoc[]
 
-==== Response Fields
+=== Response Fields
 include::{snippets}/과목 전체 조회/response-fields.adoc[]

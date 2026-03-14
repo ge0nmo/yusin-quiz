@@ -1,17 +1,16 @@
 package com.cpa.yusin.quiz.study.service;
 
-import com.cpa.yusin.quiz.member.domain.Member;
-import com.cpa.yusin.quiz.member.service.port.MemberRepository;
+import com.cpa.yusin.quiz.common.service.ClockHolder;
 import com.cpa.yusin.quiz.study.domain.DailyStudyLog;
 import com.cpa.yusin.quiz.study.service.port.DailyStudyLogRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-
 import org.springframework.stereotype.Service;
-
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.util.List;
 
@@ -22,31 +21,18 @@ import java.util.List;
 public class StudyLogService {
 
     private final DailyStudyLogRepository dailyStudyLogRepository;
-    private final MemberRepository memberRepository;
+    private final ClockHolder clockHolder;
 
-    /**
-     * Record activity with specific count.
-     * Uses atomic increment if record exists, or creates new one with initial
-     * count.
-     */
     @Transactional
     public void recordActivity(Long memberId, int count) {
-        if (count <= 0)
+        if (count <= 0) {
             return;
+        }
 
-        LocalDate today = LocalDate.now();
-
-        dailyStudyLogRepository.findByMemberIdAndDate(memberId, today)
-                .ifPresentOrElse(
-                        log -> log.increaseSolvedCount(count),
-                        () -> {
-                            Member member = memberRepository.getReferenceById(memberId);
-                            DailyStudyLog newLog = DailyStudyLog.createWithCount(member, today, count);
-                            dailyStudyLogRepository.save(newLog);
-                        });
+        LocalDateTime now = clockHolder.getCurrentDateTime();
+        LocalDate today = now.toLocalDate();
+        dailyStudyLogRepository.upsertSolvedCount(memberId, today, count, now);
     }
-
-    // createLog moved to DailyStudyLogManager
 
     public List<DailyStudyLog> getMonthlyLog(Long memberId, YearMonth yearMonth) {
         LocalDate startDate = yearMonth.atDay(1);
@@ -61,19 +47,17 @@ public class StudyLogService {
     }
 
     public int calculateCurrentStreak(Long memberId) {
-        // Fetch logs for the last 365 days to cover enough ground for a streak
-        LocalDate today = LocalDate.now();
+        LocalDate today = clockHolder.getCurrentDateTime().toLocalDate();
         LocalDate oneYearAgo = today.minusDays(365);
-        List<DailyStudyLog> logs = dailyStudyLogRepository.findByMemberIdAndDateBetween(memberId, oneYearAgo, today);
+        List<DailyStudyLog> logs = new ArrayList<>(
+                dailyStudyLogRepository.findByMemberIdAndDateBetween(memberId, oneYearAgo, today)
+        );
 
-        // Sort by date descending (Newest first)
         logs.sort((a, b) -> b.getDate().compareTo(a.getDate()));
 
         int streak = 0;
         LocalDate expectedDate = today;
 
-        // If user hasn't studied today yet, check if they studied yesterday to keep the
-        // streak alive
         if (logs.isEmpty() || !logs.get(0).getDate().equals(today)) {
             expectedDate = today.minusDays(1);
         }
@@ -83,11 +67,8 @@ public class StudyLogService {
                 streak++;
                 expectedDate = expectedDate.minusDays(1);
             } else if (log.getDate().isBefore(expectedDate)) {
-                // Streak broken
                 break;
             }
-            // If log.getDate() is after expectedDate (which shouldn't happen with sorted
-            // list and logic above), ignore
         }
 
         return streak;

@@ -1,5 +1,6 @@
 package com.cpa.yusin.quiz.member.service;
 
+import com.cpa.yusin.quiz.common.service.UuidHolder;
 import com.cpa.yusin.quiz.global.exception.ExceptionMessage;
 import com.cpa.yusin.quiz.global.exception.MemberException;
 import com.cpa.yusin.quiz.global.details.MemberDetails;
@@ -17,19 +18,16 @@ import com.cpa.yusin.quiz.member.domain.type.Role;
 import com.cpa.yusin.quiz.member.service.dto.SocialProfile;
 import com.cpa.yusin.quiz.member.service.port.MemberRepository;
 import com.cpa.yusin.quiz.member.service.port.MemberValidator;
-
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.UUID;
-
 @Slf4j
-@RequiredArgsConstructor
 @Service
 public class AuthenticationServiceImpl implements AuthenticationService {
     private final PasswordEncoder passwordEncoder;
@@ -39,16 +37,37 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final MemberMapper memberMapper;
     private final MemberValidator memberValidator;
     private final RandomNicknameGenerator randomNicknameGenerator;
+    private final UuidHolder uuidHolder;
+
+    @Autowired
+    public AuthenticationServiceImpl(PasswordEncoder passwordEncoder,
+                                     JwtService jwtService,
+                                     MemberRepository memberRepository,
+                                     CustomAuthenticationProvider authenticationProvider,
+                                     MemberMapper memberMapper,
+                                     MemberValidator memberValidator,
+                                     RandomNicknameGenerator randomNicknameGenerator,
+                                     @Qualifier("systemUuidHolder") UuidHolder uuidHolder) {
+        this.passwordEncoder = passwordEncoder;
+        this.jwtService = jwtService;
+        this.memberRepository = memberRepository;
+        this.authenticationProvider = authenticationProvider;
+        this.memberMapper = memberMapper;
+        this.memberValidator = memberValidator;
+        this.randomNicknameGenerator = randomNicknameGenerator;
+        this.uuidHolder = uuidHolder;
+    }
 
     @Override
     public LoginResponse login(LoginRequest request) {
         return processLogin(request.getEmail(), request.getPassword());
     }
 
+    @Override
     public LoginResponse loginAsAdmin(String email, String password) {
         LoginResponse response = processLogin(email, password);
 
-        if (!"ADMIN".equals(response.getRole().toString())) {
+        if (response.getRole() != Role.ADMIN) {
             log.warn("일반 유저가 관리자 페이지 접속 시도: {}", email);
             throw new MemberException(ExceptionMessage.NO_AUTHORIZATION);
         }
@@ -99,8 +118,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
         Member newMember = Member.builder()
                 .email(profile.getEmail())
-                .username(nickname) // 랜덤 닉네임 저장
-                .password(passwordEncoder.encode(UUID.randomUUID().toString())) // 랜덤 비번
+                .username(nickname)
+                .password(passwordEncoder.encode(uuidHolder.getRandom()))
                 .role(Role.USER)
                 .platform(profile.getPlatform())
                 .build();
@@ -118,17 +137,15 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             nickname = randomNicknameGenerator.generate();
         }
 
-        // Final fallback: append random suffix if failed 20 times (very unlikely)
-        return nickname + UUID.randomUUID().toString().substring(0, 5);
+        return nickname + uuidHolder.getRandom().substring(0, 5);
     }
 
+    @Override
     public TokenResponse refreshAccessToken(String refreshToken) {
-        // 1. Refresh Token 만료 여부 확인
         if (jwtService.isTokenExpired(refreshToken)) {
             throw new MemberException(ExceptionMessage.REFRESH_TOKEN_EXPIRED);
         }
 
-        // 2. 이메일 추출 후 새로운 Access Token 생성
         String email = jwtService.extractSubject(refreshToken);
         String accessToken = jwtService.createAccessToken(email);
         String newRefreshToken = jwtService.createRefreshToken(email);

@@ -12,25 +12,8 @@
 
 
 === 구독 플랜 수정 성공
-==== HTTP Request
-include::{snippets}/updateProductSuccess/http-request.adoc[]
-
-==== Request Fields
-include::{snippets}/updateProductSuccess/request-fields.adoc[]
-
-==== HTTP Response
-include::{snippets}/updateProductSuccess/http-response.adoc[]
-
-==== Response Fields
-include::{snippets}/updateProductSuccess/response-fields.adoc[]
+현재 활성 테스트에서는 구독 플랜 수정 스니펫을 생성하지 않는다.
 
 
 === 구독 플랜 전체 조회
-==== HTTP Request
-include::{snippets}/getAllSubscriptionPlans/http-request.adoc[]
-
-==== HTTP Response
-include::{snippets}/getAllSubscriptionPlans/http-response.adoc[]
-
-==== Response Fields
-include::{snippets}/getAllSubscriptionPlans/response-fields.adoc[]
+현재 활성 테스트에서는 구독 플랜 조회 스니펫을 생성하지 않는다.

@@ -26,7 +26,7 @@ public class ExamController
     }
 
     @GetMapping("/year")
-    public ResponseEntity<?> getYear(@RequestParam(value = "subjectId") long subjectId)
+    public ResponseEntity<GlobalResponse<List<Integer>>> getYear(@RequestParam(value = "subjectId") long subjectId)
     {
         List<Integer> response = examService.getAllYearsBySubjectId(subjectId);
 

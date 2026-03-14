@@ -28,7 +28,7 @@ public class GetBookmarkedProblemsServiceImpl implements GetBookmarkedProblemsSe
 
         private final BookmarkRepository bookmarkRepository;
         private final ChoiceService choiceService;
-        private final ProblemContentProcessor problemContentProcessor; // [Refactor] Add processor
+        private final ProblemContentProcessor problemContentProcessor;
 
         @Override
         public BookmarkedProblemSliceResponse getBookmarkedProblems(
@@ -64,13 +64,10 @@ public class GetBookmarkedProblemsServiceImpl implements GetBookmarkedProblemsSe
                                                         .id(problem.getId())
                                                         .number(problem.getNumber())
                                                         .content(problemContentProcessor.processBlocksWithPresignedUrl(
-                                                                        problem.getContentJson())) // [Refactor] Use
-                                                                                                   // processor
+                                                                        problem.getContentJson()))
                                                         .explanation(problemContentProcessor
                                                                         .processBlocksWithPresignedUrl(
-                                                                                        problem.getExplanationJson())) // [Refactor]
-                                                                                                                       // Use
-                                                                                                                       // processor
+                                                                                        problem.getExplanationJson()))
                                                         .lecture(ProblemLectureResponse.from(problem))
                                                         .choices(choices)
                                                         .build();

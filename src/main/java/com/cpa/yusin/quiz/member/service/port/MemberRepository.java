@@ -21,6 +21,8 @@ public interface MemberRepository {
 
     Optional<Member> findById(long id);
 
+    Optional<Member> findByIdWithLock(long id);
+
     void deleteById(long id);
 
     Member getReferenceById(long id);

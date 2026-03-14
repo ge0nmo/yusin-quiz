@@ -3,6 +3,9 @@ package com.cpa.yusin.quiz.problem.service;
 import com.cpa.yusin.quiz.file.controller.port.FileService;
 import com.cpa.yusin.quiz.problem.domain.block.Block;
 import com.cpa.yusin.quiz.problem.domain.block.ImageBlock;
+import com.cpa.yusin.quiz.problem.domain.block.ListBlock;
+import com.cpa.yusin.quiz.problem.domain.block.ListItemBlock;
+import com.cpa.yusin.quiz.problem.domain.block.TextBlock;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -14,7 +17,6 @@ import java.net.URI;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -28,36 +30,16 @@ public class ProblemContentProcessor {
         this.s3Prefix = s3Prefix;
     }
 
-    /**
-     * Block 리스트를 순회하며 ImageBlock의 URL을 Presigned URL로 변환하여 반환
-     * (V2 JSON Block 처리용)
-     */
     public List<Block> processBlocksWithPresignedUrl(List<Block> blocks) {
         if (blocks == null || blocks.isEmpty()) {
             return List.of();
         }
 
-        return blocks.stream().map(block -> {
-            if (block instanceof ImageBlock imgBlock) {
-                String originalSrc = imgBlock.getSrc();
-
-                if (isS3Url(originalSrc)) {
-                    String signedUrl = generatePresignedUrl(originalSrc);
-                    return ImageBlock.builder()
-                            .type("image")
-                            .src(signedUrl)
-                            .alt(imgBlock.getAlt())
-                            .build();
-                }
-            }
-            return block;
-        }).collect(Collectors.toList());
+        return blocks.stream()
+                .map(this::mapBlock)
+                .toList();
     }
 
-    /**
-     * HTML 문자열 내의 img 태그 src를 Presigned URL로 변환하여 반환
-     * (V1 Legacy HTML 처리용)
-     */
     public String processHtmlWithPresignedUrl(String htmlContent) {
         if (htmlContent == null || htmlContent.isEmpty()) {
             return htmlContent;
@@ -83,6 +65,60 @@ public class ProblemContentProcessor {
 
     private boolean isS3Url(String url) {
         return url != null && url.startsWith("http") && url.contains(s3Prefix);
+    }
+
+    private Block mapBlock(Block block) {
+        if (block instanceof ImageBlock imageBlock) {
+            return mapImageBlock(imageBlock);
+        }
+
+        if (block instanceof ListBlock listBlock) {
+            return ListBlock.builder()
+                    .type(listBlock.getType())
+                    .align(listBlock.getAlign())
+                    .ordered(listBlock.isOrdered())
+                    .children(listBlock.getChildren().stream()
+                            .map(this::mapListItemBlock)
+                            .toList())
+                    .build();
+        }
+
+        if (block instanceof ListItemBlock listItemBlock) {
+            return mapListItemBlock(listItemBlock);
+        }
+
+        if (block instanceof TextBlock textBlock) {
+            return TextBlock.builder()
+                    .type(textBlock.getType())
+                    .align(textBlock.getAlign())
+                    .tag(textBlock.getTag())
+                    .spans(textBlock.getSpans())
+                    .build();
+        }
+
+        return block;
+    }
+
+    private ListItemBlock mapListItemBlock(ListItemBlock listItemBlock) {
+        return ListItemBlock.builder()
+                .type(listItemBlock.getType())
+                .align(listItemBlock.getAlign())
+                .children(listItemBlock.getChildren().stream()
+                        .map(this::mapBlock)
+                        .toList())
+                .build();
+    }
+
+    private ImageBlock mapImageBlock(ImageBlock imageBlock) {
+        String source = imageBlock.getSrc();
+        String resolvedSource = isS3Url(source) ? generatePresignedUrl(source) : source;
+
+        return ImageBlock.builder()
+                .type(imageBlock.getType())
+                .align(imageBlock.getAlign())
+                .src(resolvedSource)
+                .alt(imageBlock.getAlt())
+                .build();
     }
 
     private String generatePresignedUrl(String fullUrl) {

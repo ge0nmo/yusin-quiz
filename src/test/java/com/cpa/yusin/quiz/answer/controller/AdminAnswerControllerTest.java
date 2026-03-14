@@ -74,11 +74,11 @@ class AdminAnswerControllerTest {
     void updateAnswerShouldReturnEmptyWrappedResponse() {
         AdminAnswerUpdateRequest request = new AdminAnswerUpdateRequest("수정된 관리자 답변");
 
-        ResponseEntity<?> response = adminAnswerController.updateAnswer(7L, request);
+        ResponseEntity<GlobalResponse<Void>> response = adminAnswerController.updateAnswer(7L, request);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isInstanceOf(GlobalResponse.class);
-        GlobalResponse<?> body = (GlobalResponse<?>) response.getBody();
+        GlobalResponse<Void> body = response.getBody();
         assertThat(body.getData()).isNull();
         assertThat(body.getPageInfo()).isNull();
         verify(answerService).updateInAdminPage(request, 7L);

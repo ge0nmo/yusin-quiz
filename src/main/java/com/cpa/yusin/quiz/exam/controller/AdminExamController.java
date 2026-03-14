@@ -51,7 +51,7 @@ public class AdminExamController
 
     // 4. 시험 삭제
     @DeleteMapping("/exam/{examId}")
-    public ResponseEntity<?> deleteExam(@PathVariable("examId") long examId)
+    public ResponseEntity<Void> deleteExam(@PathVariable("examId") long examId)
     {
         deleteExamService.execute(examId);
 

@@ -91,6 +91,11 @@ public class FakeMemberRepository implements MemberRepository {
     }
 
     @Override
+    public Optional<Member> findByIdWithLock(long id) {
+        return findById(id);
+    }
+
+    @Override
     public void deleteById(long id) {
         data.removeIf(item -> item.getId().equals(id));
     }

@@ -6,7 +6,6 @@ import com.cpa.yusin.quiz.choice.domain.Choice;
 import com.cpa.yusin.quiz.common.controller.dto.response.GlobalResponse;
 import com.cpa.yusin.quiz.exam.controller.port.ExamService;
 import com.cpa.yusin.quiz.exam.domain.Exam;
-import com.cpa.yusin.quiz.file.controller.port.FileService;
 import com.cpa.yusin.quiz.global.exception.ExceptionMessage;
 import com.cpa.yusin.quiz.global.exception.ProblemException;
 import com.cpa.yusin.quiz.problem.controller.dto.request.ProblemCreateRequest;
@@ -20,18 +19,11 @@ import com.cpa.yusin.quiz.problem.domain.Problem;
 import com.cpa.yusin.quiz.problem.service.port.ProblemRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Base64;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 @Slf4j
 @Transactional(readOnly = true)
@@ -43,21 +35,17 @@ public class ProblemServiceImpl implements ProblemService {
     private final ExamService examService;
     private final ChoiceService choiceService;
     private final ProblemValidator problemValidator;
-    private final FileService fileService;
-    private final ProblemContentProcessor problemContentProcessor; // [Refactor] Add processor
-
-    @Value("${cloud.aws.s3.prefix}")
-    private String s3Prefix;
+    private final ProblemContentProcessor problemContentProcessor;
+    private final ProblemHtmlImageStorageService problemHtmlImageStorageService;
 
     @Transactional
     @Override
     public void save(long examId, ProblemCreateRequest request) {
         Exam exam = examService.findById(examId);
-        problemValidator.validateUniqueProblemNumber(examId, request.getNumber());
+        problemValidator.validateCreateNumber(examId, request.getNumber());
 
-        // [수정] 문제 내용(Content)과 해설(Explanation)만 이미지 처리 (Choice 제외)
-        String cleanContent = processHtmlImages(request.getContent());
-        String cleanExplanation = processHtmlImages(request.getExplanation());
+        String cleanContent = problemHtmlImageStorageService.replaceEmbeddedImages(request.getContent());
+        String cleanExplanation = problemHtmlImageStorageService.replaceEmbeddedImages(request.getExplanation());
 
         request.setContent(cleanContent);
         request.setExplanation(cleanExplanation);
@@ -72,11 +60,13 @@ public class ProblemServiceImpl implements ProblemService {
     @Transactional
     @Override
     public void update(long problemId, ProblemUpdateRequest request, long examId) {
+        examService.findById(examId);
         Problem problem = findById(problemId);
+        problemValidator.validateBelongsToExam(problem, examId);
+        problemValidator.validateUpdateNumber(problem, request.getNumber());
 
-        // [수정] 문제 내용과 해설만 이미지 처리
-        String cleanContent = processHtmlImages(request.getContent());
-        String cleanExplanation = processHtmlImages(request.getExplanation());
+        String cleanContent = problemHtmlImageStorageService.replaceEmbeddedImages(request.getContent());
+        String cleanExplanation = problemHtmlImageStorageService.replaceEmbeddedImages(request.getExplanation());
 
         problem.update(cleanContent, request.getNumber(), cleanExplanation);
         problemRepository.save(problem);
@@ -85,15 +75,16 @@ public class ProblemServiceImpl implements ProblemService {
     @Transactional
     @Override
     public ProblemDTO processSaveOrUpdate(ProblemRequest request, long examId) {
-        // [수정] 통합 로직에서도 문제/해설만 처리
-        request.setContent(processHtmlImages(request.getContent()));
-        request.setExplanation(processHtmlImages(request.getExplanation()));
+        request.setContent(problemHtmlImageStorageService.replaceEmbeddedImages(request.getContent()));
+        request.setExplanation(problemHtmlImageStorageService.replaceEmbeddedImages(request.getExplanation()));
 
         Exam exam = examService.findById(examId);
         return request.isNew() ? save(request, exam) : update(request);
     }
 
     private ProblemDTO save(ProblemRequest request, Exam exam) {
+        problemValidator.validateCreateNumber(exam.getId(), request.getNumber());
+
         Problem problem = Problem.fromSaveOrUpdate(request.getContent(), request.getExplanation(), request.getNumber(),
                 exam);
         problem = problemRepository.save(problem);
@@ -103,6 +94,7 @@ public class ProblemServiceImpl implements ProblemService {
 
     private ProblemDTO update(ProblemRequest request) {
         Problem problem = findById(request.getId());
+        problemValidator.validateUpdateNumber(problem, request.getNumber());
         problem.update(request.getContent(), request.getNumber(), request.getExplanation());
         problem = problemRepository.save(problem);
         List<Choice> choices = choiceService.saveOrUpdate(request.getChoices(), problem);
@@ -111,8 +103,6 @@ public class ProblemServiceImpl implements ProblemService {
 
     @Override
     public GlobalResponse<List<ProblemDTO>> getAllByExamId(long examId) {
-        // Fail fast on a deleted exam/subject so callers get the existing
-        // NOT_FOUND contract instead of an empty problem list that looks valid.
         examService.findById(examId);
 
         List<Problem> problems = problemRepository.findAllByExamId(examId);
@@ -120,12 +110,9 @@ public class ProblemServiceImpl implements ProblemService {
 
         List<ProblemDTO> response = problems.stream()
                 .map(problem -> {
-                    // [Refactor] Use processor
                     String signedContent = problemContentProcessor.processHtmlWithPresignedUrl(problem.getContent());
                     String signedExplanation = problemContentProcessor
                             .processHtmlWithPresignedUrl(problem.getExplanation());
-
-                    // Choice는 텍스트이므로 변환 로직 제거됨
 
                     return ProblemDTO.builder()
                             .id(problem.getId())
@@ -146,7 +133,6 @@ public class ProblemServiceImpl implements ProblemService {
         Problem problem = findById(id);
         List<ChoiceResponse> choices = choiceService.getAllByProblemId(problem.getId());
 
-        // [Refactor] Use processor
         String signedContent = problemContentProcessor.processHtmlWithPresignedUrl(problem.getContent());
         String signedExplanation = problemContentProcessor.processHtmlWithPresignedUrl(problem.getExplanation());
 
@@ -164,40 +150,5 @@ public class ProblemServiceImpl implements ProblemService {
     public Problem findById(long id) {
         return problemRepository.findById(id)
                 .orElseThrow(() -> new ProblemException(ExceptionMessage.PROBLEM_NOT_FOUND));
-    }
-
-    // ---------------------------------------------------------
-    // 1. [저장용] Base64 -> S3 Upload & URL 변환
-    // ---------------------------------------------------------
-    private String processHtmlImages(String htmlContent) {
-        if (htmlContent == null || htmlContent.isEmpty())
-            return htmlContent;
-
-        Document doc = Jsoup.parseBodyFragment(htmlContent);
-        Elements imgs = doc.select("img[src^=data:image]");
-
-        for (Element img : imgs) {
-            String src = img.attr("src");
-            try {
-                String[] parts = src.split(",");
-                String header = parts[0];
-                String data = parts[1];
-
-                String extension = header.split(";")[0].split("/")[1];
-                byte[] imageBytes = Base64.getDecoder().decode(data);
-
-                String filename = UUID.randomUUID().toString() + "." + extension;
-
-                // FileService 호출 (Byte Array 업로드)
-                String s3Url = fileService.saveByteArray(imageBytes, filename, "image/" + extension);
-
-                img.attr("src", s3Url);
-                img.attr("style", "max-width: 100%; height: auto;");
-
-            } catch (Exception e) {
-                log.error("Base64 이미지 변환 실패", e);
-            }
-        }
-        return doc.body().html();
     }
 }

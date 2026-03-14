@@ -10,32 +10,32 @@
 == 답변 API
 
 == 답변 등록
-==== HTTP Request
+=== HTTP Request
 include::{snippets}/saveAnswer/http-request.adoc[]
 
-==== HTTP Response
+=== HTTP Response
 include::{snippets}/saveAnswer/http-response.adoc[]
 
-==== Response Fields
+=== Response Fields
 include::{snippets}/saveAnswer/response-fields.adoc[]
 
 
 == 해당 질문의 모든 답변 조회
-==== HTTP Request
+=== HTTP Request
 include::{snippets}/getAnswers/http-request.adoc[]
 
-==== HTTP Response
+=== HTTP Response
 include::{snippets}/getAnswers/http-response.adoc[]
 
-==== Response Fields
+=== Response Fields
 include::{snippets}/getAnswers/response-fields.adoc[]
 
 == 답변 삭제
-==== HTTP Request
+=== HTTP Request
 include::{snippets}/deleteAnswer/http-request.adoc[]
 
-==== HTTP Response
+=== HTTP Response
 include::{snippets}/deleteAnswer/http-response.adoc[]
 
-==== Response Fields
+=== Response Fields
 include::{snippets}/deleteAnswer/response-fields.adoc[]

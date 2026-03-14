@@ -18,6 +18,7 @@ import com.cpa.yusin.quiz.choice.service.ChoiceServiceImpl;
 import com.cpa.yusin.quiz.choice.service.port.ChoiceRepository;
 import com.cpa.yusin.quiz.common.service.ClockHolder;
 import com.cpa.yusin.quiz.common.service.MerchantIdGenerator;
+import com.cpa.yusin.quiz.common.service.UuidHolder;
 import com.cpa.yusin.quiz.exam.controller.ExamController;
 import com.cpa.yusin.quiz.exam.controller.mapper.ExamMapper;
 import com.cpa.yusin.quiz.exam.controller.port.ExamService;
@@ -46,6 +47,7 @@ import com.cpa.yusin.quiz.problem.controller.port.CreateProblemV2Service;
 import com.cpa.yusin.quiz.problem.controller.port.GetProblemV2Service;
 import com.cpa.yusin.quiz.problem.controller.port.ProblemService;
 import com.cpa.yusin.quiz.problem.service.ProblemContentProcessor;
+import com.cpa.yusin.quiz.problem.service.ProblemHtmlImageStorageService;
 import com.cpa.yusin.quiz.problem.service.CreateProblemV2ServiceImpl;
 import com.cpa.yusin.quiz.problem.service.GetProblemV2ServiceImpl;
 import com.cpa.yusin.quiz.problem.service.ProblemServiceImpl;
@@ -72,6 +74,7 @@ public class TestContainer {
 
         public final ClockHolder clockHolder;
         public final MerchantIdGenerator merchantIdGenerator;
+        public final UuidHolder uuidHolder;
 
         public final MemberRepository memberRepository;
         public final MemberService memberService;
@@ -144,6 +147,7 @@ public class TestContainer {
                 this.fileService = new FileServiceImpl(null, null, null, null, null);
                 this.clockHolder = new FakeClockHolder();
                 this.merchantIdGenerator = new FakeMerchantIdGenerator();
+                this.uuidHolder = new FakeUuidHolder("test-uuid-holder-value-1234567890");
 
                 this.memberRepository = new FakeMemberRepository();
                 this.subjectRepository = new FakeSubjectRepository();
@@ -158,11 +162,11 @@ public class TestContainer {
                 this.passwordEncoder = new BCryptPasswordEncoder();
                 this.authenticationProvider = new CustomAuthenticationProvider(this.memberDetailsService,
                                 this.passwordEncoder);
-                this.jwtService = new JwtServiceImpl(FAKE_SECRET_KEY);
+                this.jwtService = new JwtServiceImpl(FAKE_SECRET_KEY, this.clockHolder);
                 this.memberValidator = new MemberValidatorImpl(this.memberRepository);
                 this.authenticationService = new AuthenticationServiceImpl(this.passwordEncoder, this.jwtService,
                                 this.memberRepository, this.authenticationProvider, this.memberMapper,
-                                this.memberValidator, new RandomNicknameGenerator());
+                                this.memberValidator, new RandomNicknameGenerator(), this.uuidHolder);
                 this.subjectValidator = new SubjectValidatorImpl(this.subjectRepository);
                 this.subjectMapper = new SubjectMapper();
                 this.subjectService = new SubjectServiceImpl(this.subjectRepository, this.subjectMapper,
@@ -182,10 +186,12 @@ public class TestContainer {
                 problemValidator = new ProblemValidator(this.problemRepository);
                 ProblemContentProcessor problemContentProcessor = new ProblemContentProcessor(this.fileService,
                                 "test-prefix");
+                ProblemHtmlImageStorageService problemHtmlImageStorageService =
+                                new ProblemHtmlImageStorageService(this.fileService, this.uuidHolder);
                 this.youtubeLectureUrlProcessor = new YoutubeLectureUrlProcessor();
                 this.problemService = new ProblemServiceImpl(this.problemRepository, this.problemMapper,
-                                this.examService, this.choiceService, this.problemValidator, this.fileService,
-                                problemContentProcessor);
+                                this.examService, this.choiceService, this.problemValidator,
+                                problemContentProcessor, problemHtmlImageStorageService);
                 this.createProblemV2Service = new CreateProblemV2ServiceImpl(
                                 this.problemRepository,
                                 this.examService,

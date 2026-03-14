@@ -3,6 +3,7 @@ package com.cpa.yusin.quiz.study.service.port;
 import com.cpa.yusin.quiz.study.domain.DailyStudyLog;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -12,6 +13,8 @@ public interface DailyStudyLogRepository {
     Optional<DailyStudyLog> findByMemberIdAndDate(Long memberId, LocalDate date);
 
     List<DailyStudyLog> findByMemberIdAndDateBetween(Long memberId, LocalDate startDate, LocalDate endDate);
+
+    int upsertSolvedCount(Long memberId, LocalDate date, int amount, LocalDateTime timestamp);
 
     int increaseSolvedCount(Long memberId, LocalDate date);
 

@@ -3,84 +3,100 @@ package com.cpa.yusin.quiz.choice.service;
 import com.cpa.yusin.quiz.choice.controller.dto.request.ChoiceRequest;
 import com.cpa.yusin.quiz.choice.domain.Choice;
 import com.cpa.yusin.quiz.config.MockSetup;
-import com.cpa.yusin.quiz.exam.domain.Exam;
-import com.cpa.yusin.quiz.problem.controller.dto.request.ProblemRequest;
+import com.cpa.yusin.quiz.global.exception.ChoiceException;
 import com.cpa.yusin.quiz.problem.domain.Problem;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-class ChoiceServiceTest extends MockSetup
-{
-    /**
-     * Choice saveOrUpdate => 항상 DB에 저장된 Problem 객체를 받는다
-     * Choice request => isNew() true => 새로운 choice 객체 생성
-     *                           false => 기존에 저장된 choice 객체 업데이트
-     */
+class ChoiceServiceTest extends MockSetup {
+
     @Test
-    void saveOrUpdate_whenIdIsNull_shouldSave()
-    {
-        // given
-        List<ChoiceRequest> choiceRequests = List.of(
+    @DisplayName("새 choice 요청은 모두 현재 문제에 연결되어 저장된다")
+    void saveOrUpdate_whenChoicesAreNew_thenCreateAll() {
+        List<ChoiceRequest> requests = List.of(
                 ChoiceRequest.builder().content("보기1").number(1).isAnswer(true).build(),
-                ChoiceRequest.builder().content("보기2").number(2).isAnswer(false).build(),
-                ChoiceRequest.builder().content("보기3").number(3).isAnswer(false).build(),
-                ChoiceRequest.builder().content("보기4").number(4).isAnswer(false).build(),
-                ChoiceRequest.builder().content("보기5").number(5).isAnswer(false).build());
+                ChoiceRequest.builder().content("보기2").number(2).isAnswer(false).build()
+        );
 
-        Problem problem = Problem.builder().id(1L).build();
+        Problem problem = physicsProblem2;
 
-        // when
-        List<Choice> result = testContainer.choiceService.saveOrUpdate(choiceRequests, problem);
+        List<Choice> result = testContainer.choiceService.saveOrUpdate(requests, problem);
 
-        // then
-        assertThat(result.size()).isEqualTo(5);
-        assertThat(result.getFirst().getIsAnswer()).isTrue();
-        assertThat(result.getLast().getIsAnswer()).isFalse();
+        assertThat(result).hasSize(2);
+        assertThat(result).allSatisfy(choice -> assertThat(choice.getProblem().getId()).isEqualTo(problem.getId()));
     }
 
-    /**
-     * removeYn => true => should delete
-     * id => null or -1 => should create new data
-     */
     @Test
-    void saveOrUpdate_whenIdExists_shouldUpdate()
-    {
-        // given
-        testContainer.choiceRepository.saveAll(List.of(
-                Choice.builder().id(1L).content("보기1").number(1).isAnswer(true).build(),
-                Choice.builder().id(2L).content("보기2").number(2).isAnswer(false).build(),
-                Choice.builder().id(3L).content("보기3").number(3).isAnswer(false).build(),
-                Choice.builder().id(4L).content("보기4").number(4).isAnswer(false).build(),
-                Choice.builder().id(5L).content("보기5").number(5).isAnswer(false).build()
-        ));
+    @DisplayName("기존 choice 는 업데이트하고 removedYn 은 삭제하며 신규 choice 는 추가한다")
+    void saveOrUpdate_whenChoicesContainCreateUpdateDelete_thenApplyAllOperations() {
+        Problem problem = physicsProblem1;
+        Choice removableChoice = testContainer.choiceRepository.save(Choice.builder()
+                .id(99L)
+                .content("삭제 대상")
+                .number(99)
+                .isAnswer(false)
+                .problem(problem)
+                .build());
 
-        List<ChoiceRequest> choiceRequests = List.of(
-                ChoiceRequest.builder().id(1L).content("보기1").number(1).isAnswer(false).build(),
-                ChoiceRequest.builder().id(2L).content("보기2").number(2).isAnswer(false).build(),
-                ChoiceRequest.builder().id(3L).content("보기3").number(3).isAnswer(false).build(),
-                ChoiceRequest.builder().id(4L).content("보기4").number(4).isAnswer(false).build(),
-                ChoiceRequest.builder().id(5L).removedYn(true).content("보기4").number(4).isAnswer(false).build(),
-                ChoiceRequest.builder().id(-1L).content("보기5").number(5).isAnswer(true).build());
+        List<ChoiceRequest> requests = List.of(
+                ChoiceRequest.builder().id(choice1.getId()).content("수정된 보기1").number(1).isAnswer(false).build(),
+                ChoiceRequest.builder().id(choice2.getId()).content("수정된 보기2").number(2).isAnswer(true).build(),
+                ChoiceRequest.builder().id(removableChoice.getId()).removedYn(true).content("삭제 대상").number(99).isAnswer(false).build(),
+                ChoiceRequest.builder().id(-1L).content("신규 보기").number(4).isAnswer(false).build()
+        );
 
-        Problem problem = Problem.builder().id(1L).build();
+        List<Choice> result = testContainer.choiceService.saveOrUpdate(requests, problem);
 
-        // when
-        List<Choice> result = testContainer.choiceService.saveOrUpdate(choiceRequests, problem);
-
-        // then
-        assertThat(result.size()).isEqualTo(5);
-        assertThat(result.getFirst().getIsAnswer()).isFalse();
-        assertThat(result.getLast().getIsAnswer()).isTrue();
-
-        Optional<Choice> choice5 = testContainer.choiceRepository.findById(5L);
-        assertThat(choice5).isEmpty();
+        assertThat(result).hasSize(3);
+        assertThat(testContainer.choiceRepository.findById(choice1.getId())).hasValueSatisfying(choice -> {
+            assertThat(choice.getContent()).isEqualTo("수정된 보기1");
+            assertThat(choice.getIsAnswer()).isFalse();
+        });
+        assertThat(testContainer.choiceRepository.findById(choice2.getId())).hasValueSatisfying(choice -> {
+            assertThat(choice.getContent()).isEqualTo("수정된 보기2");
+            assertThat(choice.getIsAnswer()).isTrue();
+        });
+        assertThat(testContainer.choiceRepository.findById(removableChoice.getId())).isEmpty();
     }
 
+    @Test
+    @DisplayName("동일 요청 안에 중복 choice 번호가 있으면 저장을 거부한다")
+    void saveOrUpdate_whenChoiceNumbersDuplicate_thenThrow() {
+        List<ChoiceRequest> requests = List.of(
+                ChoiceRequest.builder().content("보기1").number(1).isAnswer(true).build(),
+                ChoiceRequest.builder().content("보기1-중복").number(1).isAnswer(false).build()
+        );
+
+        assertThatThrownBy(() -> testContainer.choiceService.saveOrUpdate(requests, physicsProblem1))
+                .isInstanceOf(ChoiceException.class);
+    }
+
+    @Test
+    @DisplayName("다른 문제에 속한 choice 를 현재 문제 수정 요청으로 보내면 차단한다")
+    void saveOrUpdate_whenChoiceBelongsToDifferentProblem_thenThrow() {
+        Choice foreignChoice = testContainer.choiceRepository.save(Choice.builder()
+                .id(101L)
+                .content("다른 문제 보기")
+                .number(1)
+                .isAnswer(false)
+                .problem(physicsProblem2)
+                .build());
+
+        List<ChoiceRequest> requests = List.of(
+                ChoiceRequest.builder()
+                        .id(foreignChoice.getId())
+                        .content("잘못된 수정")
+                        .number(1)
+                        .isAnswer(false)
+                        .build()
+        );
+
+        assertThatThrownBy(() -> testContainer.choiceService.saveOrUpdate(requests, physicsProblem1))
+                .isInstanceOf(ChoiceException.class);
+    }
 }

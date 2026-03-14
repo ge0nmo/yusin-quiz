@@ -11,14 +11,5 @@
 == 파일 API
 
 === 파일 등록 성공
-==== HTTP Request
-include::{snippets}/파일 업로드/http-request.adoc[]
-
-==== Request Fields
-include::{snippets}/파일 업로드/request-parts.adoc[]
-
-==== HTTP Response
-include::{snippets}/파일 업로드/http-response.adoc[]
-
-==== Response Fields
-include::{snippets}/파일 업로드/response-fields.adoc[]
+현재 활성 테스트에서는 파일 업로드 REST Docs 스니펫을 생성하지 않는다.
+관리자 파일 업로드 계약을 문서화하려면 `/api/admin/file` 경로에 대한 integration test와 snippet 이름을 먼저 고정해야 한다.

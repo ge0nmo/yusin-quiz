@@ -111,9 +111,8 @@ public class HtmlToJsonConverter {
             }
         }
 
-        // [수정] 이미지 추가 로직 (텍스트 플러시 -> 이미지 추가)
         void addImageBlock(String src, String alt) {
-            flushTextBlockToInternalList(); // 이미지 앞에 있던 텍스트 저장
+            flushTextBlockToInternalList();
 
             collectedBlocks.add(ImageBlock.builder()
                     .type("image")
@@ -122,9 +121,8 @@ public class HtmlToJsonConverter {
                     .build());
         }
 
-        // [수정] 현재 버퍼 내용을 collectedBlocks로 이동
         void flushTextBlockToInternalList() {
-            flushPendingSpan(); // 작업 중이던 Span 마무리
+            flushPendingSpan();
 
             if (currentSpans.isEmpty()) return;
 

@@ -29,10 +29,8 @@ public class S3MockConfig
         Mockito.when(mockClient.utilities()).thenReturn(mockUtilities);
 
         try {
-            // [수정] new URL() 대신 URI.create().toURL() 사용 (Java 20+ 표준)
             URL mockUrl = URI.create("https://mock-s3-url.com/file.png").toURL();
 
-            // getUrl() 호출 시 가짜 URL 반환
             Mockito.when(mockUtilities.getUrl(Mockito.any(GetUrlRequest.class)))
                     .thenReturn(mockUrl);
         } catch (MalformedURLException e) {
@@ -51,13 +49,10 @@ public class S3MockConfig
         PresignedGetObjectRequest mockPresignedRequest = Mockito.mock(PresignedGetObjectRequest.class);
 
         try {
-            // [수정] new URL() 대신 URI.create().toURL() 사용
             URL mockUrl = URI.create("https://mock-s3-url.com/presigned-file.png?signature=fake").toURL();
 
-            // 1. PresignedRequest.url() 호출 시 가짜 URL 반환
             Mockito.when(mockPresignedRequest.url()).thenReturn(mockUrl);
 
-            // 2. S3Presigner.presignGetObject() 호출 시 위의 가짜 응답 반환
             Mockito.when(mockPresigner.presignGetObject(Mockito.any(GetObjectPresignRequest.class)))
                     .thenReturn(mockPresignedRequest);
 

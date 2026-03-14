@@ -3,9 +3,9 @@ package com.cpa.yusin.quiz.global.filter;
 import com.cpa.yusin.quiz.global.details.MemberDetails;
 import com.cpa.yusin.quiz.global.details.MemberDetailsService;
 import com.cpa.yusin.quiz.global.jwt.JwtService;
-import com.fasterxml.jackson.databind.ObjectMapper; // 추가
-import io.jsonwebtoken.ExpiredJwtException; // 추가
-import io.jsonwebtoken.JwtException; // 추가
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
@@ -15,7 +15,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.annotation.Order;
-import org.springframework.http.MediaType; // 추가
+import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -26,9 +26,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 
@@ -39,7 +37,7 @@ import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 public class SecurityFilter extends OncePerRequestFilter {
     private final MemberDetailsService memberDetailsService;
     private final JwtService jwtService;
-    private final ObjectMapper objectMapper; // JSON 변환용 추가
+    private final ObjectMapper objectMapper;
 
     private final AntPathMatcher pathMatcher = new AntPathMatcher();
 
@@ -61,7 +59,7 @@ public class SecurityFilter extends OncePerRequestFilter {
     protected void doFilterInternal(@NonNull HttpServletRequest request,
                                     @NonNull HttpServletResponse response,
                                     @NonNull FilterChain filterChain) throws ServletException, IOException {
-        String token = getAuthorizationHeaderOrCookie(request);
+        String token = resolveBearerToken(request);
 
         if (token == null) {
             filterChain.doFilter(request, response);
@@ -69,7 +67,6 @@ public class SecurityFilter extends OncePerRequestFilter {
         }
 
         try {
-            // 1. 토큰 파싱 및 이메일 추출 (여기서 ExpiredJwtException 발생)
             String email = jwtService.extractSubject(token);
 
             if (!StringUtils.hasText(email) || SecurityContextHolder.getContext().getAuthentication() != null) {
@@ -79,7 +76,6 @@ public class SecurityFilter extends OncePerRequestFilter {
 
             MemberDetails memberDetails = memberDetailsService.loadUserByUsername(email);
 
-            // 2. 토큰 유효성 검증
             if (!jwtService.isValidToken(token, memberDetails)) {
                 filterChain.doFilter(request, response);
                 return;
@@ -106,32 +102,26 @@ public class SecurityFilter extends OncePerRequestFilter {
         }
     }
 
-    // [추가] 필터에서 직접 JSON 응답을 내려주기 위한 메소드
     private void setErrorResponse(HttpServletResponse response, String code, String message) throws IOException {
-        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED); // 401 에러
+        SecurityErrorResponse errorResponse = SecurityErrorResponse.unauthorized(code, message, "SecurityFilter");
+
+        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.setCharacterEncoding("UTF-8");
-
-        Map<String, Object> errorDetails = new HashMap<>();
-        errorDetails.put("status", HttpServletResponse.SC_UNAUTHORIZED);
-        errorDetails.put("code", code);
-        errorDetails.put("message", message);
-        errorDetails.put("path", "SecurityFilter");
-
-        response.getWriter().write(objectMapper.writeValueAsString(errorDetails));
+        response.getWriter().write(objectMapper.writeValueAsString(errorResponse));
     }
 
     private boolean isValidHeader(String header) {
         return StringUtils.hasText(header) && header.startsWith("Bearer ");
     }
 
-    private String getAuthorizationHeaderOrCookie(HttpServletRequest request) {
+    private String resolveBearerToken(HttpServletRequest request) {
         String headerToken = request.getHeader(AUTHORIZATION);
         if (isValidHeader(headerToken)) {
             return headerToken.substring(7);
         }
-        Cookie[] cookies = request.getCookies();
 
+        Cookie[] cookies = request.getCookies();
         if (cookies != null) {
             for (Cookie cookie : cookies) {
                 if ("JWT_TOKEN".equals(cookie.getName())) {
@@ -139,6 +129,7 @@ public class SecurityFilter extends OncePerRequestFilter {
                 }
             }
         }
+
         return null;
     }
 }

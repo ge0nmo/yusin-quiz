@@ -45,14 +45,14 @@ public class AdminQuestionController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> getQuestion(@PathVariable long id) {
+    public ResponseEntity<GlobalResponse<QuestionDTO>> getQuestion(@PathVariable long id) {
         QuestionDTO response = questionService.getById(id);
 
         return ResponseEntity.ok(new GlobalResponse<>(response));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteQuestion(@PathVariable long id, Principal principal) {
+    public ResponseEntity<Void> deleteQuestion(@PathVariable long id, Principal principal) {
         MemberDetails memberDetails = (MemberDetails) ((Authentication) principal).getPrincipal();
         deleteQuestionService.execute(id, memberDetails.getMember());
 

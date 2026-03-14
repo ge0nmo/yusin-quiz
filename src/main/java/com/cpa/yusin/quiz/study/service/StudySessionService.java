@@ -5,6 +5,7 @@ import com.cpa.yusin.quiz.choice.service.port.ChoiceRepository;
 import com.cpa.yusin.quiz.common.service.ClockHolder;
 import com.cpa.yusin.quiz.exam.controller.port.ExamService;
 import com.cpa.yusin.quiz.global.exception.ExceptionMessage;
+import com.cpa.yusin.quiz.global.exception.MemberException;
 import com.cpa.yusin.quiz.global.exception.StudySessionException;
 import com.cpa.yusin.quiz.member.domain.Member;
 import com.cpa.yusin.quiz.member.service.port.MemberRepository;
@@ -48,8 +49,9 @@ public class StudySessionService {
      */
     @Transactional
     public StudySession startSession(Long memberId, Long examId, ExamMode mode) {
-        // Query-gated soft delete means an exam under a removed subject must behave
-        // as non-existent for both fresh starts and resume flows.
+        Member lockedMember = memberRepository.findByIdWithLock(memberId)
+                .orElseThrow(() -> new MemberException(ExceptionMessage.USER_NOT_FOUND));
+
         examService.findById(examId);
 
         Optional<StudySession> existingSession = studySessionRepository.findByMemberIdAndExamIdAndStatusAndMode(
@@ -59,10 +61,8 @@ public class StudySessionService {
             return existingSession.get();
         }
 
-        // Retrieve Member Reference for creation
-        Member memberRef = memberRepository.getReferenceById(memberId);
         LocalDateTime now = clockHolder.getCurrentDateTime();
-        StudySession newSession = StudySession.start(memberRef, examId, mode, now);
+        StudySession newSession = StudySession.start(lockedMember, examId, mode, now);
         return studySessionRepository.save(newSession);
     }
 
@@ -85,26 +85,19 @@ public class StudySessionService {
         StudySession session = studySessionRepository.findByIdWithLock(sessionId)
                 .orElseThrow(() -> new StudySessionException(ExceptionMessage.SESSION_NOT_FOUND));
 
-        // Block answer writes as soon as the session's exam becomes inactive.
         examService.findById(session.getExamId());
 
-        // Update Session Index
         session.updateLastIndex(index);
 
-        // The problem lookup already applies the active hierarchy rule. The extra
-        // exam check below closes the "valid problem from another exam" hole.
         Problem problem = problemService.findById(problemId);
         validateProblemBelongsToSession(problem, session.getExamId());
 
-        // Choice lookup is also query-gated. We still verify the problem match so a
-        // foreign choice ID cannot be attached to the requested problem.
         Choice choice = choiceRepository.findById(choiceId)
                 .orElseThrow(() -> new StudySessionException(ExceptionMessage.CHOICE_NOT_FOUND));
         validateChoiceBelongsToProblem(choice, problemId);
 
         boolean isCorrect = choice.getIsAnswer();
 
-        // Upsert Answer
         Optional<SubmittedAnswer> existingAnswer = submittedAnswerRepository.findByStudySessionIdAndProblemId(sessionId,
                 problemId);
 
@@ -115,7 +108,6 @@ public class StudySessionService {
             submittedAnswerRepository.save(newAnswer);
         }
 
-        // Record activity if in Practice Mode
         if (session.getMode() == ExamMode.PRACTICE) {
             eventPublisher.publishEvent(new StudySolvedEvent(session.getMember().getId(), 1));
             return ExamAnswerResponse.practice(isCorrect, getExplanationSafe(choice));
@@ -134,15 +126,12 @@ public class StudySessionService {
         StudySession session = studySessionRepository.findByIdWithLock(sessionId)
                 .orElseThrow(() -> new StudySessionException(ExceptionMessage.SESSION_NOT_FOUND));
 
-        // Calculate Score
         List<SubmittedAnswer> answers = submittedAnswerRepository.findAllByStudySessionId(sessionId);
         int score = (int) answers.stream().filter(SubmittedAnswer::isCorrect).count();
 
         LocalDateTime now = clockHolder.getCurrentDateTime();
         session.complete(score, now);
 
-        // Record Activity (Jandi)
-        // Optimization: Batch Update for Exam Mode
         if (session.getMode() == ExamMode.EXAM) {
             int solvedCount = answers.size();
             eventPublisher.publishEvent(new StudySolvedEvent(session.getMember().getId(), solvedCount));
@@ -152,16 +141,12 @@ public class StudySessionService {
     }
 
     private void validateProblemBelongsToSession(Problem problem, Long examId) {
-        // A session is scoped to one exam only, so mixing problems across exams is
-        // treated as invalid client data rather than a missing resource.
         if (!problem.getExam().getId().equals(examId)) {
             throw new StudySessionException(ExceptionMessage.INVALID_DATA);
         }
     }
 
     private void validateChoiceBelongsToProblem(Choice choice, Long problemId) {
-        // Choices are not globally interchangeable; they must stay attached to the
-        // requested problem to prevent cross-problem submissions.
         if (!choice.getProblem().getId().equals(problemId)) {
             throw new StudySessionException(ExceptionMessage.INVALID_DATA);
         }

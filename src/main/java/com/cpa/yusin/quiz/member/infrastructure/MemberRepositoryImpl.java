@@ -50,6 +50,11 @@ public class MemberRepositoryImpl implements MemberRepository {
     }
 
     @Override
+    public Optional<Member> findByIdWithLock(long id) {
+        return memberJpaRepository.findByIdWithLock(id);
+    }
+
+    @Override
     public void deleteById(long id) {
         memberJpaRepository.deleteById(id);
     }
