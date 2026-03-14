@@ -121,6 +121,16 @@ class AdminApiSecurityIntegrationTest {
     }
 
     @Test
+    @DisplayName("운영 관리자 도메인 origin 의 관리자 preflight 요청도 허용해야 함")
+    void adminCorsShouldAllowProductionAdminOrigin() throws Exception {
+        mockMvc.perform(options("/api/admin/subject")
+                        .header(HttpHeaders.ORIGIN, "https://admin.finuminu.com")
+                        .header(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "GET"))
+                .andExpect(status().isOk())
+                .andExpect(header().string(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, "https://admin.finuminu.com"));
+    }
+
+    @Test
     @DisplayName("허용되지 않은 origin 의 관리자 preflight 요청은 차단해야 함")
     void adminCorsShouldRejectUnknownOrigin() throws Exception {
         mockMvc.perform(options("/api/admin/subject")

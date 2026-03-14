@@ -28,7 +28,7 @@ public class SecurityConfig {
     private final String corsAllowedOrigins;
 
     public SecurityConfig(SecurityFilter securityFilter,
-                          @Value("${app.security.cors.allowed-origins:http://localhost:3000,http://127.0.0.1:3000}") String corsAllowedOrigins) {
+                          @Value("${app.security.cors.allowed-origins:http://localhost:3000,http://127.0.0.1:3000,https://admin.finuminu.com,https://finuminu.com,https://www.finuminu.com}") String corsAllowedOrigins) {
         this.securityFilter = securityFilter;
         this.corsAllowedOrigins = corsAllowedOrigins;
     }
