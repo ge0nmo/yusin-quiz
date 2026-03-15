@@ -22,8 +22,9 @@ public interface SubjectService
 
     Subject findById(long id);
 
+    Subject findPublishedById(long id);
 
-    Page<SubjectDTO> getAll(Pageable pageable);
+    Page<SubjectDTO> getAllPublished(Pageable pageable);
 
     List<SubjectDTO> getAll();
 

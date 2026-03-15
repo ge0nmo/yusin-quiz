@@ -65,6 +65,14 @@ public class QuestionServiceImpl implements QuestionService {
 
     @Override
     public Question findById(long id) {
+        Question question = questionRepository.findById(id)
+                .orElseThrow(() -> new QuestionException(ExceptionMessage.QUESTION_NOT_FOUND));
+        problemService.findById(question.getProblem().getId());
+        return question;
+    }
+
+    @Override
+    public Question findByIdForAdmin(long id) {
         return questionRepository.findById(id)
                 .orElseThrow(() -> new QuestionException(ExceptionMessage.QUESTION_NOT_FOUND));
     }
@@ -72,6 +80,12 @@ public class QuestionServiceImpl implements QuestionService {
     @Override
     public QuestionDTO getById(long id) {
         Question question = findById(id);
+        return questionMapper.toQuestionDTO(question);
+    }
+
+    @Override
+    public QuestionDTO getByIdForAdmin(long id) {
+        Question question = findByIdForAdmin(id);
         return questionMapper.toQuestionDTO(question);
     }
 

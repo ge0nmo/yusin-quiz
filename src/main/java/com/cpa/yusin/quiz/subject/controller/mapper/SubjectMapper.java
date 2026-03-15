@@ -4,6 +4,7 @@ import com.cpa.yusin.quiz.subject.controller.dto.request.SubjectCreateRequest;
 import com.cpa.yusin.quiz.subject.controller.dto.response.SubjectCreateResponse;
 import com.cpa.yusin.quiz.subject.controller.dto.response.SubjectDTO;
 import com.cpa.yusin.quiz.subject.domain.Subject;
+import com.cpa.yusin.quiz.subject.domain.SubjectStatus;
 import org.springframework.stereotype.Component;
 
 import java.util.Collections;
@@ -16,6 +17,7 @@ public class SubjectMapper
     {
         return Subject.builder()
                 .name(request.getName())
+                .status(request.getStatus() == null ? SubjectStatus.PUBLISHED : request.getStatus())
                 .build();
     }
 
@@ -38,6 +40,7 @@ public class SubjectMapper
         return SubjectDTO.builder()
                 .id(subject.getId())
                 .name(subject.getName())
+                .status(subject.getStatus())
                 .build();
     }
 

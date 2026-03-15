@@ -94,7 +94,7 @@ class AdminAnswerControllerTest {
                 .username(adminMember.getUsername())
                 .build();
 
-        when(answerService.getAnswersByQuestionId(5L, PageRequest.of(0, 2)))
+        when(answerService.getAnswersByQuestionIdForAdmin(5L, PageRequest.of(0, 2)))
                 .thenReturn(new PageImpl<>(List.of(answer), PageRequest.of(0, 2), 3));
 
         ResponseEntity<GlobalResponse<List<AnswerDTO>>> response =
@@ -108,7 +108,7 @@ class AdminAnswerControllerTest {
         assertThat(response.getBody().getPageInfo().getTotalPages()).isEqualTo(2);
         assertThat(response.getBody().getPageInfo().getCurrentPage()).isEqualTo(1);
         assertThat(response.getBody().getPageInfo().getPageSize()).isEqualTo(2);
-        verify(answerService).getAnswersByQuestionId(5L, PageRequest.of(0, 2));
+        verify(answerService).getAnswersByQuestionIdForAdmin(5L, PageRequest.of(0, 2));
     }
 
     @Test

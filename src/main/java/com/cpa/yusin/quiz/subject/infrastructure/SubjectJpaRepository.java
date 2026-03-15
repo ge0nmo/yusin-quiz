@@ -1,6 +1,7 @@
 package com.cpa.yusin.quiz.subject.infrastructure;
 
 import com.cpa.yusin.quiz.subject.domain.Subject;
+import com.cpa.yusin.quiz.subject.domain.SubjectStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -28,11 +29,29 @@ public interface SubjectJpaRepository extends JpaRepository<Subject, Long>
 
     @Query("SELECT s FROM Subject s " +
             "WHERE s.isRemoved = false " +
+            "AND (s.status = :publishedStatus OR s.status IS NULL) " +
+            "ORDER BY s.name ASC ")
+    Page<Subject> findAllPublishedOrderByNameAsc(@Param("publishedStatus") SubjectStatus publishedStatus, Pageable pageable);
+
+    @Query("SELECT s FROM Subject s " +
+            "WHERE s.isRemoved = false " +
             "ORDER BY s.name ASC ")
     List<Subject> findAllByIsRemovedFalseOrderByNameAsc();
+
+    @Query("SELECT s FROM Subject s " +
+            "WHERE s.isRemoved = false " +
+            "AND (s.status = :publishedStatus OR s.status IS NULL) " +
+            "ORDER BY s.name ASC ")
+    List<Subject> findAllPublishedByIsRemovedFalseOrderByNameAsc(@Param("publishedStatus") SubjectStatus publishedStatus);
 
     @Query("SELECT s FROM Subject s " +
             "WHERE s.id = :id " +
             "AND s.isRemoved = false ")
     Optional<Subject> findByIdAndIsRemovedFalse(@Param("id") long id);
+
+    @Query("SELECT s FROM Subject s " +
+            "WHERE s.id = :id " +
+            "AND s.isRemoved = false " +
+            "AND (s.status = :publishedStatus OR s.status IS NULL)")
+    Optional<Subject> findPublishedById(@Param("id") long id, @Param("publishedStatus") SubjectStatus publishedStatus);
 }

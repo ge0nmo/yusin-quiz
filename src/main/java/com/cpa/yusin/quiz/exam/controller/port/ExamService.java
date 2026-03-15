@@ -17,9 +17,15 @@ public interface ExamService
 
     Exam findById(long id);
 
+    Exam findPublishedById(long id);
+
     ExamDTO getById(long id);
 
     List<ExamDTO> getAllBySubjectId(long subjectId, Integer year);
 
+    List<ExamDTO> getAllBySubjectIdForAdmin(long subjectId, Integer year);
+
     List<Integer> getAllYearsBySubjectId(long subjectId);
+
+    List<Integer> getAllYearsBySubjectIdForAdmin(long subjectId);
 }

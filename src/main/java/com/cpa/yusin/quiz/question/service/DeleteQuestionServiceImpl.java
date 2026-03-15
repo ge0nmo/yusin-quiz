@@ -4,9 +4,11 @@ import com.cpa.yusin.quiz.global.exception.ExceptionMessage;
 import com.cpa.yusin.quiz.global.exception.MemberException;
 import com.cpa.yusin.quiz.global.exception.QuestionException;
 import com.cpa.yusin.quiz.member.domain.Member;
+import com.cpa.yusin.quiz.member.domain.type.Role;
 import com.cpa.yusin.quiz.question.controller.port.DeleteQuestionService;
 import com.cpa.yusin.quiz.question.domain.Question;
 import com.cpa.yusin.quiz.question.service.port.QuestionRepository;
+import com.cpa.yusin.quiz.subject.controller.port.SubjectService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,12 +17,17 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class DeleteQuestionServiceImpl implements DeleteQuestionService {
     private final QuestionRepository questionRepository;
+    private final SubjectService subjectService;
 
     @Transactional
     @Override
     public void execute(long id, Member member) {
         Question question = questionRepository.findById(id)
                 .orElseThrow(() -> new QuestionException(ExceptionMessage.QUESTION_NOT_FOUND));
+
+        if (!Role.ADMIN.equals(member.getRole())) {
+            subjectService.findPublishedById(question.getProblem().getExam().getSubjectId());
+        }
 
         if (!question.isOwner(member)) {
             throw new MemberException(ExceptionMessage.NO_AUTHORIZATION);

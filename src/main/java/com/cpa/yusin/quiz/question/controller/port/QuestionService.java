@@ -18,7 +18,11 @@ public interface QuestionService {
 
     Question findById(long id);
 
+    Question findByIdForAdmin(long id);
+
     QuestionDTO getById(long id);
+
+    QuestionDTO getByIdForAdmin(long id);
 
     default Page<QuestionDTO> findAllQuestions(Pageable pageable) {
         return findAllQuestions(pageable, AdminQuestionSearchCondition.all());

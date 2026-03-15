@@ -13,11 +13,17 @@ public interface SubjectRepository
 
     Optional<Subject> findById(long id);
 
+    Optional<Subject> findPublishedById(long id);
+
     List<Subject> findAll();
+
+    List<Subject> findAllPublished();
 
     boolean existsByName(String name);
 
     boolean existsByNameAndIdNot(long id, String name);
 
     Page<Subject> findAllOrderByName(Pageable pageable);
+
+    Page<Subject> findAllPublishedOrderByName(Pageable pageable);
 }

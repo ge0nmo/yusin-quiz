@@ -17,6 +17,7 @@ import com.cpa.yusin.quiz.problem.service.port.ProblemRepository;
 import com.cpa.yusin.quiz.question.domain.Question;
 import com.cpa.yusin.quiz.question.service.port.QuestionRepository;
 import com.cpa.yusin.quiz.subject.domain.Subject;
+import com.cpa.yusin.quiz.subject.domain.SubjectStatus;
 import com.cpa.yusin.quiz.subject.service.port.SubjectRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -185,6 +186,85 @@ class SoftDeletePropagationTest {
     }
 
     @Test
+    @DisplayName("Draft 과목은 유저 API에서 숨기고 관리자 API에서는 그대로 조회할 수 있어야 한다")
+    void draftSubjectShouldHideDescendantsFromUserApisButRemainVisibleToAdmins() throws Exception {
+        Subject subject = createSubject("임시 과목", SubjectStatus.DRAFT);
+        Exam exam = createExam(subject, "모의고사", 2026);
+        Problem problem = createProblem(exam, 1);
+        Question question = createQuestion(problem, "draft 질문");
+        answerRepository.save(Answer.builder()
+                .member(member)
+                .content("draft 답변")
+                .question(question)
+                .build());
+        bookmarkRepository.save(Bookmark.create(member, problem));
+
+        mvc.perform(get("/api/v1/subject"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.length()").value(0));
+
+        mvc.perform(get("/api/v1/exam")
+                        .param("subjectId", subject.getId().toString()))
+                .andExpect(status().isNotFound());
+
+        mvc.perform(get("/api/v1/exam/year")
+                        .param("subjectId", subject.getId().toString()))
+                .andExpect(status().isNotFound());
+
+        mvc.perform(get("/api/v1/problem")
+                        .param("examId", exam.getId().toString()))
+                .andExpect(status().isNotFound());
+
+        mvc.perform(get("/api/v2/problem")
+                        .param("examId", exam.getId().toString()))
+                .andExpect(status().isNotFound());
+
+        mvc.perform(get("/api/v1/problem/{id}", problem.getId()))
+                .andExpect(status().isNotFound());
+
+        mvc.perform(get("/api/v1/question/{questionId}", question.getId()))
+                .andExpect(status().isNotFound());
+
+        mvc.perform(get("/api/v1/question/{questionId}/answer", question.getId()))
+                .andExpect(status().isNotFound());
+
+        mvc.perform(post("/api/v1/problem/{problemId}/question", problem.getId())
+                        .with(user(memberDetails))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "title": "draft 질문 생성",
+                                  "content": "질문 내용"
+                                }
+                                """))
+                .andExpect(status().isNotFound());
+
+        mvc.perform(post("/api/v1/bookmarks/{problemId}", problem.getId())
+                        .with(user(memberDetails)))
+                .andExpect(status().isNotFound());
+
+        mvc.perform(get("/api/v1/bookmarks/problems")
+                        .with(user(memberDetails))
+                        .param("page", "0")
+                        .param("size", "20"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.content").isEmpty());
+
+        mvc.perform(get("/api/admin/subject")
+                        .with(user(adminMemberDetails)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id").value(subject.getId()))
+                .andExpect(jsonPath("$[0].status").value("DRAFT"));
+
+        mvc.perform(get("/api/v2/admin/problem")
+                        .with(user(adminMemberDetails))
+                        .param("examId", exam.getId().toString()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.length()").value(1))
+                .andExpect(jsonPath("$.data[0].id").value(problem.getId()));
+    }
+
+    @Test
     @DisplayName("질문 삭제 후 답변 생성과 목록 조회는 차단되어야 한다")
     void deletedQuestionShouldRejectAnswerAccess() throws Exception {
         Subject subject = createSubject("원가관리");
@@ -281,6 +361,13 @@ class SoftDeletePropagationTest {
     private Subject createSubject(String name) {
         return subjectRepository.save(Subject.builder()
                 .name(name)
+                .build());
+    }
+
+    private Subject createSubject(String name, SubjectStatus status) {
+        return subjectRepository.save(Subject.builder()
+                .name(name)
+                .status(status)
                 .build());
     }
 

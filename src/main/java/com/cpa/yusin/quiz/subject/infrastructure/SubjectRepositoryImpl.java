@@ -1,10 +1,11 @@
-    package com.cpa.yusin.quiz.subject.infrastructure;
+package com.cpa.yusin.quiz.subject.infrastructure;
 
-    import com.cpa.yusin.quiz.subject.domain.Subject;
-    import com.cpa.yusin.quiz.subject.service.port.SubjectRepository;
-    import lombok.RequiredArgsConstructor;
-    import org.springframework.data.domain.Page;
-    import org.springframework.data.domain.Pageable;
+import com.cpa.yusin.quiz.subject.domain.SubjectStatus;
+import com.cpa.yusin.quiz.subject.domain.Subject;
+import com.cpa.yusin.quiz.subject.service.port.SubjectRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
     import org.springframework.stereotype.Repository;
 
     import java.util.List;
@@ -29,9 +30,21 @@
         }
 
         @Override
+        public Optional<Subject> findPublishedById(long id)
+        {
+            return subjectJpaRepository.findPublishedById(id, SubjectStatus.PUBLISHED);
+        }
+
+        @Override
         public List<Subject> findAll()
         {
             return subjectJpaRepository.findAllByIsRemovedFalseOrderByNameAsc();
+        }
+
+        @Override
+        public List<Subject> findAllPublished()
+        {
+            return subjectJpaRepository.findAllPublishedByIsRemovedFalseOrderByNameAsc(SubjectStatus.PUBLISHED);
         }
 
         @Override
@@ -50,5 +63,11 @@
         public Page<Subject> findAllOrderByName(Pageable pageable)
         {
             return subjectJpaRepository.findAllOrderByNameAsc(pageable);
+        }
+
+        @Override
+        public Page<Subject> findAllPublishedOrderByName(Pageable pageable)
+        {
+            return subjectJpaRepository.findAllPublishedOrderByNameAsc(SubjectStatus.PUBLISHED, pageable);
         }
     }

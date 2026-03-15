@@ -108,7 +108,7 @@ public class ProblemServiceImpl implements ProblemService {
 
     @Override
     public GlobalResponse<List<ProblemDTO>> getAllByExamId(long examId) {
-        examService.findById(examId);
+        examService.findPublishedById(examId);
 
         List<Problem> problems = problemRepository.findAllByExamId(examId);
         Map<Long, List<ChoiceResponse>> choiceMap = choiceService.findAllByExamId(examId);
@@ -153,7 +153,9 @@ public class ProblemServiceImpl implements ProblemService {
 
     @Override
     public Problem findById(long id) {
-        return problemRepository.findById(id)
+        Problem problem = problemRepository.findById(id)
                 .orElseThrow(() -> new ProblemException(ExceptionMessage.PROBLEM_NOT_FOUND));
+        examService.findPublishedById(problem.getExam().getId());
+        return problem;
     }
 }

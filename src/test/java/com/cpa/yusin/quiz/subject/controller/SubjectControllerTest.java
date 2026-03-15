@@ -4,6 +4,7 @@ import com.cpa.yusin.quiz.common.controller.dto.response.GlobalResponse;
 import com.cpa.yusin.quiz.config.TestContainer;
 import com.cpa.yusin.quiz.subject.controller.dto.response.SubjectDTO;
 import com.cpa.yusin.quiz.subject.domain.Subject;
+import com.cpa.yusin.quiz.subject.domain.SubjectStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.PageRequest;
@@ -33,6 +34,7 @@ class SubjectControllerTest
         testContainer.subjectRepository.save(Subject.builder().id(1L).name("Chemistry").build());
         testContainer.subjectRepository.save(Subject.builder().id(2L).name("Physics").build());
         testContainer.subjectRepository.save(Subject.builder().id(3L).name("Biology").build());
+        testContainer.subjectRepository.save(Subject.builder().id(4L).name("Draft").status(SubjectStatus.DRAFT).build());
         int page = 1;
         int size = 10;
         Pageable pageable = PageRequest.of(page, size);

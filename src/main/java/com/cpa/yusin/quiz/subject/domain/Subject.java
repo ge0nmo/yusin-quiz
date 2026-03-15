@@ -20,10 +20,19 @@ public class Subject extends BaseEntity {
     @Column(nullable = false, unique = true)
     private String name;
 
+    @Enumerated(EnumType.STRING)
+    @Builder.Default
+    private SubjectStatus status = SubjectStatus.PUBLISHED;
+
     private boolean isRemoved;
 
-    public void update(String name) {
+    public SubjectStatus getStatus() {
+        return status == null ? SubjectStatus.PUBLISHED : status;
+    }
+
+    public void update(String name, SubjectStatus status) {
         this.name = name;
+        this.status = status;
     }
 
     public void delete(long deletedMarker) {

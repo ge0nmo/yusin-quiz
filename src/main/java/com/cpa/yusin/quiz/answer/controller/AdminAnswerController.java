@@ -49,7 +49,7 @@ public class AdminAnswerController {
     @GetMapping("/question/{questionId}/answer")
     public ResponseEntity<GlobalResponse<List<AnswerDTO>>> getAnswers(@PathVariable("questionId") long questionId,
             @PageableDefault Pageable pageable) {
-        Page<AnswerDTO> response = answerService.getAnswersByQuestionId(questionId, pageable);
+        Page<AnswerDTO> response = answerService.getAnswersByQuestionIdForAdmin(questionId, pageable);
 
         return ResponseEntity.ok(new GlobalResponse<>(response.getContent(), PageInfo.of(response)));
     }

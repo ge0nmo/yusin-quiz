@@ -13,6 +13,7 @@ import com.cpa.yusin.quiz.question.controller.dto.response.QuestionDTO;
 import com.cpa.yusin.quiz.question.domain.Question;
 import com.cpa.yusin.quiz.question.service.dto.AdminQuestionSearchCondition;
 import com.cpa.yusin.quiz.question.service.dto.AdminQuestionStatus;
+import com.cpa.yusin.quiz.subject.domain.Subject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Page;
@@ -29,10 +30,20 @@ class QuestionServiceTest {
         @BeforeEach
         void setUp() {
                 testContainer = new TestContainer();
+                Subject subject = testContainer.subjectRepository.save(Subject.builder()
+                                .id(1L)
+                                .name("회계학")
+                                .build());
+                Exam exam = testContainer.examRepository.save(Exam.builder()
+                                .id(1L)
+                                .name("1차")
+                                .year(2025)
+                                .subjectId(subject.getId())
+                                .build());
                 problem = testContainer.problemRepository.save(Problem.builder()
                                 .id(1L)
                                 .content("problem 1")
-                                .exam(Exam.builder().build())
+                                .exam(exam)
                                 .explanation("explanation 1")
                                 .number(1)
                                 .build());
@@ -74,6 +85,7 @@ class QuestionServiceTest {
                                 .content("content")
                                 .member(member)
                                 .answerCount(0)
+                                .problem(problem)
                                 .build());
 
                 QuestionUpdateRequest request = QuestionUpdateRequest.builder()
@@ -99,6 +111,7 @@ class QuestionServiceTest {
                                 .content("content")
                                 .member(member)
                                 .answerCount(0)
+                                .problem(problem)
                                 .build());
 
                 // when

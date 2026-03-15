@@ -218,17 +218,17 @@ public class TestContainer {
                 this.answerRepository = new FakeAnswerRepository();
                 this.answerMapper = new AnswerMapper();
 
-                this.questionAnswerService = new QuestionAnswerService(questionRepository);
+                this.questionAnswerService = new QuestionAnswerService(questionRepository, this.subjectService);
 
                 this.answerService = new AnswerServiceImpl(this.answerRepository, this.answerMapper,
-                                this.questionAnswerService);
+                                this.questionAnswerService, this.subjectService);
 
                 this.questionService = new QuestionServiceImpl(questionRepository, problemService, questionMapper,
                                 clockHolder);
 
                 // bookmark
                 this.createBookmarkService = new CreateBookmarkServiceImpl(
-                                this.bookmarkRepository, this.memberRepository, this.problemRepository);
+                                this.bookmarkRepository, this.memberRepository, this.problemService);
                 this.deleteBookmarkService = new DeleteBookmarkServiceImpl(this.bookmarkRepository);
                 this.getBookmarkedProblemsService = new GetBookmarkedProblemsServiceImpl(
                                 this.bookmarkRepository, this.choiceService, problemContentProcessor);

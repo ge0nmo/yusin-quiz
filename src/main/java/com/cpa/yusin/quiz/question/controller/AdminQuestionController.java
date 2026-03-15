@@ -46,7 +46,7 @@ public class AdminQuestionController {
 
     @GetMapping("/{id}")
     public ResponseEntity<GlobalResponse<QuestionDTO>> getQuestion(@PathVariable long id) {
-        QuestionDTO response = questionService.getById(id);
+        QuestionDTO response = questionService.getByIdForAdmin(id);
 
         return ResponseEntity.ok(new GlobalResponse<>(response));
     }

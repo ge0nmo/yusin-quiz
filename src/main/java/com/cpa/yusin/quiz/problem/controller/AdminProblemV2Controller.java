@@ -69,7 +69,7 @@ public class AdminProblemV2Controller
     @GetMapping("/{problemId}")
     public ResponseEntity<GlobalResponse<ProblemV2Response>> getById(@PathVariable Long problemId)
     {
-        ProblemV2Response response = getProblemV2Service.getById(problemId);
+        ProblemV2Response response = getProblemV2Service.getByIdForAdmin(problemId);
         return ResponseEntity.ok(new GlobalResponse<>(response));
     }
 
@@ -83,7 +83,7 @@ public class AdminProblemV2Controller
     @GetMapping
     public ResponseEntity<GlobalResponse<List<ProblemV2Response>>> getAllByExamId(@RequestParam Long examId)
     {
-        List<ProblemV2Response> response = getProblemV2Service.getAllByExamId(examId);
+        List<ProblemV2Response> response = getProblemV2Service.getAllByExamIdForAdmin(examId);
         return ResponseEntity.ok(new GlobalResponse<>(response));
     }
 

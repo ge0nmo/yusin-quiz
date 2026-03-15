@@ -52,7 +52,7 @@ public class StudySessionService {
         Member lockedMember = memberRepository.findByIdWithLock(memberId)
                 .orElseThrow(() -> new MemberException(ExceptionMessage.USER_NOT_FOUND));
 
-        examService.findById(examId);
+        examService.findPublishedById(examId);
 
         Optional<StudySession> existingSession = studySessionRepository.findByMemberIdAndExamIdAndStatusAndMode(
                 memberId, examId, StudySessionStatus.IN_PROGRESS, mode);
@@ -87,7 +87,7 @@ public class StudySessionService {
         validateOwnership(session, memberId);
         validateInProgress(session);
 
-        examService.findById(session.getExamId());
+        examService.findPublishedById(session.getExamId());
 
         session.updateLastIndex(index);
 

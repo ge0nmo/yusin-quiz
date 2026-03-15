@@ -23,9 +23,13 @@ public interface AnswerService {
 
     Answer findById(long id);
 
+    Answer findByIdForAdmin(long id);
+
     AnswerDTO getAnswerById(long id);
 
     Page<AnswerDTO> getAnswersByQuestionId(long questionId, Pageable pageable);
+
+    Page<AnswerDTO> getAnswersByQuestionIdForAdmin(long questionId, Pageable pageable);
 
     List<AnswerDTO> getAnswersByQuestionId(long questionId);
 

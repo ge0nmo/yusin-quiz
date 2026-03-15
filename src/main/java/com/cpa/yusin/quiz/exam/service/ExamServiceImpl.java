@@ -70,6 +70,13 @@ public class ExamServiceImpl implements ExamService {
     }
 
     @Override
+    public Exam findPublishedById(long id) {
+        Exam exam = findById(id);
+        subjectService.findPublishedById(exam.getSubjectId());
+        return exam;
+    }
+
+    @Override
     public ExamDTO getById(long id) {
         Exam domain = findById(id);
         return examMapper.toExamDTO(domain);
@@ -77,7 +84,22 @@ public class ExamServiceImpl implements ExamService {
 
     @Override
     public List<ExamDTO> getAllBySubjectId(long subjectId, Integer year) {
-        // 과목 존재 확인
+        subjectService.findPublishedById(subjectId);
+
+        List<Exam> exams = year == null ? examRepository.findAllBySubjectId(subjectId)
+                : examRepository.findAllBySubjectId(subjectId, year);
+
+        if (exams.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        return exams.stream()
+                .map(examMapper::toExamDTO)
+                .toList();
+    }
+
+    @Override
+    public List<ExamDTO> getAllBySubjectIdForAdmin(long subjectId, Integer year) {
         subjectService.findById(subjectId);
 
         List<Exam> exams = year == null ? examRepository.findAllBySubjectId(subjectId)
@@ -94,8 +116,12 @@ public class ExamServiceImpl implements ExamService {
 
     @Override
     public List<Integer> getAllYearsBySubjectId(long subjectId) {
-        // Return 404 for a deleted subject instead of leaking an empty "valid" year
-        // list.
+        subjectService.findPublishedById(subjectId);
+        return examRepository.getYearsBySubjectId(subjectId);
+    }
+
+    @Override
+    public List<Integer> getAllYearsBySubjectIdForAdmin(long subjectId) {
         subjectService.findById(subjectId);
         return examRepository.getYearsBySubjectId(subjectId);
     }

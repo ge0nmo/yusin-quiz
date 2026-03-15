@@ -34,6 +34,7 @@ public class GetProblemV2ServiceImpl implements GetProblemV2Service {
     public ProblemV2Response getById(Long problemId) {
         Problem problem = problemRepository.findById(problemId)
                 .orElseThrow(() -> new ProblemException(ExceptionMessage.PROBLEM_NOT_FOUND));
+        examService.findPublishedById(problem.getExam().getId());
 
         List<ChoiceResponse> choices = choiceService.getAllByProblemId(problemId);
 
@@ -42,6 +43,36 @@ public class GetProblemV2ServiceImpl implements GetProblemV2Service {
 
     @Override
     public List<ProblemV2Response> getAllByExamId(Long examId) {
+        examService.findPublishedById(examId);
+        List<Problem> problems = problemRepository.findAllByExamId(examId);
+
+        if (problems.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        Map<Long, List<ChoiceResponse>> choicesMap = choiceService.findAllByExamId(examId);
+
+        return problems.stream()
+                .map(problem -> {
+                    List<ChoiceResponse> choices = choicesMap.getOrDefault(problem.getId(), Collections.emptyList());
+
+                    return mapToResponse(problem, choices);
+                })
+                .toList();
+    }
+
+    @Override
+    public ProblemV2Response getByIdForAdmin(Long problemId) {
+        Problem problem = problemRepository.findById(problemId)
+                .orElseThrow(() -> new ProblemException(ExceptionMessage.PROBLEM_NOT_FOUND));
+
+        List<ChoiceResponse> choices = choiceService.getAllByProblemId(problemId);
+
+        return mapToResponse(problem, choices);
+    }
+
+    @Override
+    public List<ProblemV2Response> getAllByExamIdForAdmin(Long examId) {
         examService.findById(examId);
         List<Problem> problems = problemRepository.findAllByExamId(examId);
 

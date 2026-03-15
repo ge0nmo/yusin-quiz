@@ -8,6 +8,7 @@ import com.cpa.yusin.quiz.subject.controller.dto.response.SubjectCreateResponse;
 import com.cpa.yusin.quiz.subject.controller.dto.response.SubjectDTO;
 import com.cpa.yusin.quiz.subject.controller.mapper.SubjectMapper;
 import com.cpa.yusin.quiz.subject.controller.port.SubjectService;
+import com.cpa.yusin.quiz.subject.domain.SubjectStatus;
 import com.cpa.yusin.quiz.subject.domain.Subject;
 import com.cpa.yusin.quiz.subject.service.port.SubjectRepository;
 import com.cpa.yusin.quiz.subject.service.port.SubjectValidator;
@@ -16,6 +17,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.util.List;
 
@@ -54,9 +56,12 @@ public class SubjectServiceImpl implements SubjectService
     public void update(long id, SubjectUpdateRequest request)
     {
         Subject subject = findById(id);
-        subjectValidator.validateName(subject.getId(), request.getName());
+        String nextName = StringUtils.hasText(request.getName()) ? request.getName() : subject.getName();
+        SubjectStatus nextStatus = request.getStatus() == null ? subject.getStatus() : request.getStatus();
 
-        subject.update(request.getName());
+        subjectValidator.validateName(subject.getId(), nextName);
+
+        subject.update(nextName, nextStatus);
         subjectRepository.save(subject);
     }
 
@@ -74,9 +79,16 @@ public class SubjectServiceImpl implements SubjectService
     }
 
     @Override
-    public Page<SubjectDTO> getAll(Pageable pageable)
+    public Subject findPublishedById(long id)
     {
-        Page<Subject> result = subjectRepository.findAllOrderByName(pageable);
+        return subjectRepository.findPublishedById(id)
+                .orElseThrow(() -> new SubjectException(ExceptionMessage.SUBJECT_NOT_FOUND));
+    }
+
+    @Override
+    public Page<SubjectDTO> getAllPublished(Pageable pageable)
+    {
+        Page<Subject> result = subjectRepository.findAllPublishedOrderByName(pageable);
 
         return result.map(subjectMapper::toSubjectDTO);
     }

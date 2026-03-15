@@ -16,6 +16,7 @@ import com.cpa.yusin.quiz.member.domain.Member;
 import com.cpa.yusin.quiz.member.domain.type.Role;
 import com.cpa.yusin.quiz.question.domain.Question;
 import com.cpa.yusin.quiz.question.service.QuestionAnswerService;
+import com.cpa.yusin.quiz.subject.controller.port.SubjectService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -33,6 +34,7 @@ public class AnswerServiceImpl implements AnswerService {
     private final AnswerRepository answerRepository;
     private final AnswerMapper answerMapper;
     private final QuestionAnswerService questionAnswerService;
+    private final SubjectService subjectService;
 
     @Transactional
     @Override
@@ -47,7 +49,7 @@ public class AnswerServiceImpl implements AnswerService {
     @Transactional
     @Override
     public long save(AdminAnswerRegisterRequest request, long questionId, Member admin) {
-        Question question = questionAnswerService.getQuestion(questionId);
+        Question question = questionAnswerService.getQuestionForAdmin(questionId);
         Answer answer = answerMapper.toAnswerEntity(request, admin, question);
 
         answer = answerRepository.save(answer);
@@ -71,7 +73,7 @@ public class AnswerServiceImpl implements AnswerService {
     @Transactional
     @Override
     public void updateInAdminPage(AdminAnswerUpdateRequest request, long answerId) {
-        Answer answer = findById(answerId);
+        Answer answer = findByIdForAdmin(answerId);
         answer.update(request.content());
 
         answerRepository.save(answer);
@@ -79,6 +81,14 @@ public class AnswerServiceImpl implements AnswerService {
 
     @Override
     public Answer findById(long id) {
+        Answer answer = answerRepository.findById(id)
+                .orElseThrow(() -> new AnswerException(ExceptionMessage.ANSWER_NOT_FOUND));
+        subjectService.findPublishedById(answer.getQuestion().getProblem().getExam().getSubjectId());
+        return answer;
+    }
+
+    @Override
+    public Answer findByIdForAdmin(long id) {
         return answerRepository.findById(id)
                 .orElseThrow(() -> new AnswerException(ExceptionMessage.ANSWER_NOT_FOUND));
     }
@@ -91,9 +101,15 @@ public class AnswerServiceImpl implements AnswerService {
 
     @Override
     public Page<AnswerDTO> getAnswersByQuestionId(long questionId, Pageable pageable) {
-        // Re-check the question first so a deleted parent chain resolves to
-        // NOT_FOUND before we ever run the answer query.
         questionAnswerService.getQuestion(questionId);
+
+        return answerRepository.findByQuestionId(questionId, pageable)
+                .map(answerMapper::toAnswerDTO);
+    }
+
+    @Override
+    public Page<AnswerDTO> getAnswersByQuestionIdForAdmin(long questionId, Pageable pageable) {
+        questionAnswerService.getQuestionForAdmin(questionId);
 
         return answerRepository.findByQuestionId(questionId, pageable)
                 .map(answerMapper::toAnswerDTO);
@@ -113,7 +129,9 @@ public class AnswerServiceImpl implements AnswerService {
     @Transactional
     @Override
     public void deleteAnswer(long answerId, Member member) {
-        Answer answer = findById(answerId);
+        Answer answer = Role.ADMIN.equals(member.getRole())
+                ? findByIdForAdmin(answerId)
+                : findById(answerId);
 
         validateOwnership(answer, member);
 

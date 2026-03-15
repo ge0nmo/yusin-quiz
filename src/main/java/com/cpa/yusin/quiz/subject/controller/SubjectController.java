@@ -25,7 +25,7 @@ public class SubjectController
     @GetMapping
     public ResponseEntity<GlobalResponse<List<SubjectDTO>>> getAll(@PageableDefault Pageable pageable)
     {
-        Page<SubjectDTO> response = subjectService.getAll(pageable.previousOrFirst());
+        Page<SubjectDTO> response = subjectService.getAllPublished(pageable.previousOrFirst());
 
         return ResponseEntity.ok(new GlobalResponse<>(response.getContent(), PageInfo.of(response)));
     }

@@ -1,6 +1,7 @@
 package com.cpa.yusin.quiz.bookmark.infrastructure;
 
 import com.cpa.yusin.quiz.bookmark.domain.Bookmark;
+import com.cpa.yusin.quiz.subject.domain.SubjectStatus;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -34,10 +35,13 @@ public interface BookmarkJpaRepository extends JpaRepository<Bookmark, Long> {
             "AND EXISTS (" +
             "   SELECT s.id FROM Subject s " +
             "   WHERE s.id = e.subjectId " +
-            "   AND s.isRemoved = false" +
+            "   AND s.isRemoved = false " +
+            "   AND (s.status = :publishedStatus OR s.status IS NULL)" +
             ") " +
             "ORDER BY b.createdAt DESC")
-    Slice<Bookmark> findAllByMemberId(@Param("memberId") Long memberId, Pageable pageable);
+    Slice<Bookmark> findAllByMemberId(@Param("memberId") Long memberId,
+                                      @Param("publishedStatus") SubjectStatus publishedStatus,
+                                      Pageable pageable);
 
     /**
      * 과목별 북마크 조회
@@ -54,11 +58,13 @@ public interface BookmarkJpaRepository extends JpaRepository<Bookmark, Long> {
             "AND EXISTS (" +
             "   SELECT s.id FROM Subject s " +
             "   WHERE s.id = e.subjectId " +
-            "   AND s.isRemoved = false" +
+            "   AND s.isRemoved = false " +
+            "   AND (s.status = :publishedStatus OR s.status IS NULL)" +
             ") " +
             "ORDER BY b.createdAt DESC")
     Slice<Bookmark> findAllByMemberIdAndSubjectId(
             @Param("memberId") Long memberId,
             @Param("subjectId") Long subjectId,
+            @Param("publishedStatus") SubjectStatus publishedStatus,
             Pageable pageable);
 }

@@ -10,6 +10,7 @@ import com.cpa.yusin.quiz.subject.controller.dto.request.SubjectUpdateRequest;
 import com.cpa.yusin.quiz.subject.controller.dto.response.SubjectCreateResponse;
 import com.cpa.yusin.quiz.subject.controller.dto.response.SubjectDTO;
 import com.cpa.yusin.quiz.subject.domain.Subject;
+import com.cpa.yusin.quiz.subject.domain.SubjectStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.PageRequest;
@@ -127,13 +128,29 @@ class SubjectServiceTest
         Pageable pageable = PageRequest.of(page, size);
 
         // when
-        List<SubjectDTO> result = testContainer.subjectService.getAll(pageable.previousOrFirst()).getContent();
+        List<SubjectDTO> result = testContainer.subjectService.getAllPublished(pageable.previousOrFirst()).getContent();
 
         // then
         assertThat(result).isNotEmpty();
         assertThat(result.get(0).getName()).isEqualTo("Chemistry");
         assertThat(result.get(1).getName()).isEqualTo("Economics");
         assertThat(result.get(2).getName()).isEqualTo("English");
+    }
+
+    @Test
+    void findAllPublishedShouldExcludeDraftSubjects()
+    {
+        testContainer.subjectRepository.save(Subject.builder()
+                .id(4L)
+                .name("Draft Subject")
+                .status(SubjectStatus.DRAFT)
+                .build());
+
+        List<SubjectDTO> result = testContainer.subjectService.getAllPublished(PageRequest.of(0, 10)).getContent();
+
+        assertThat(result)
+                .extracting(SubjectDTO::getName)
+                .doesNotContain("Draft Subject");
     }
 
     @Test

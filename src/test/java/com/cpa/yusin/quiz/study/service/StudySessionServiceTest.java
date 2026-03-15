@@ -95,7 +95,7 @@ public class StudySessionServiceTest {
                                 .id(1L).member(member).examId(examId).mode(mode).status(StudySessionStatus.IN_PROGRESS)
                                 .build();
 
-                given(examService.findById(examId)).willReturn(Exam.builder().id(examId).build());
+                given(examService.findPublishedById(examId)).willReturn(Exam.builder().id(examId).build());
                 given(memberRepository.findByIdWithLock(memberId)).willReturn(Optional.of(member));
                 given(studySessionRepository.findByMemberIdAndExamIdAndStatusAndMode(memberId, examId,
                                 StudySessionStatus.IN_PROGRESS, mode))
@@ -117,7 +117,7 @@ public class StudySessionServiceTest {
                 Long examId = 100L;
                 ExamMode mode = ExamMode.EXAM;
 
-                given(examService.findById(examId)).willReturn(Exam.builder().id(examId).build());
+                given(examService.findPublishedById(examId)).willReturn(Exam.builder().id(examId).build());
                 given(memberRepository.findByIdWithLock(memberId)).willReturn(Optional.of(member));
                 given(studySessionRepository.findByMemberIdAndExamIdAndStatusAndMode(memberId, examId,
                                 StudySessionStatus.IN_PROGRESS, mode))
@@ -173,7 +173,7 @@ public class StudySessionServiceTest {
                 Problem problem = Problem.builder().id(problemId).exam(exam).build();
                 Choice choice = Choice.builder().id(choiceId).isAnswer(correct).problem(problem).build();
 
-                given(examService.findById(examId)).willReturn(exam);
+                given(examService.findPublishedById(examId)).willReturn(exam);
                 given(problemService.findById(problemId)).willReturn(problem);
                 given(choiceRepository.findById(choiceId)).willReturn(Optional.of(choice));
 
@@ -209,7 +209,7 @@ public class StudySessionServiceTest {
                 Problem problem = Problem.builder().id(problemId).exam(exam).explanation("Test Explanation").build();
                 Choice choice = Choice.builder().id(choiceId).isAnswer(correct).problem(problem).build();
 
-                given(examService.findById(100L)).willReturn(exam);
+                given(examService.findPublishedById(100L)).willReturn(exam);
                 given(problemService.findById(problemId)).willReturn(problem);
                 given(choiceRepository.findById(choiceId)).willReturn(Optional.of(choice));
 
@@ -244,7 +244,7 @@ public class StudySessionServiceTest {
                 Problem problem = Problem.builder().id(problemId).exam(exam).build();
                 Choice choice = Choice.builder().id(choiceId).isAnswer(correct).problem(problem).build();
 
-                given(examService.findById(examId)).willReturn(exam);
+                given(examService.findPublishedById(examId)).willReturn(exam);
                 given(problemService.findById(problemId)).willReturn(problem);
                 given(choiceRepository.findById(choiceId)).willReturn(Optional.of(choice));
 
@@ -282,7 +282,7 @@ public class StudySessionServiceTest {
                 // then
                 assertThat(finalScore).isEqualTo(2);
                 assertThat(session.getFinishedAt()).isEqualTo(NOW);
-                verify(examService, never()).findById(anyLong());
+                verify(examService, never()).findPublishedById(anyLong());
                 // Verify EVENT is published
                 verify(eventPublisher).publishEvent(any(StudySolvedEvent.class));
                 assertThat(session.getStatus()).isEqualTo(StudySessionStatus.COMPLETED);
@@ -304,7 +304,7 @@ public class StudySessionServiceTest {
 
                 // then
                 assertThat(session.getFinishedAt()).isEqualTo(NOW);
-                verify(examService, never()).findById(anyLong());
+                verify(examService, never()).findPublishedById(anyLong());
                 verify(eventPublisher, org.mockito.Mockito.never()).publishEvent(any());
         }
 
@@ -315,7 +315,7 @@ public class StudySessionServiceTest {
                 Long examId = 100L;
 
                 given(memberRepository.findByIdWithLock(memberId)).willReturn(Optional.of(member));
-                given(examService.findById(examId))
+                given(examService.findPublishedById(examId))
                                 .willThrow(new com.cpa.yusin.quiz.global.exception.ExamException(ExceptionMessage.EXAM_NOT_FOUND));
 
                 assertThatThrownBy(() -> studySessionService.startSession(memberId, examId, ExamMode.EXAM))
@@ -339,7 +339,7 @@ public class StudySessionServiceTest {
                 Problem problem = Problem.builder().id(problemId).exam(otherExam).build();
 
                 given(studySessionRepository.findByIdWithLock(sessionId)).willReturn(Optional.of(session));
-                given(examService.findById(sessionExamId)).willReturn(sessionExam);
+                given(examService.findPublishedById(sessionExamId)).willReturn(sessionExam);
                 given(problemService.findById(problemId)).willReturn(problem);
 
                 assertThatThrownBy(() -> studySessionService.saveAnswer(member.getId(), sessionId, problemId, 1L, 0))
@@ -362,7 +362,7 @@ public class StudySessionServiceTest {
                 Choice choice = Choice.builder().id(choiceId).problem(otherProblem).isAnswer(true).build();
 
                 given(studySessionRepository.findByIdWithLock(sessionId)).willReturn(Optional.of(session));
-                given(examService.findById(examId)).willReturn(exam);
+                given(examService.findPublishedById(examId)).willReturn(exam);
                 given(problemService.findById(problemId)).willReturn(requestedProblem);
                 given(choiceRepository.findById(choiceId)).willReturn(Optional.of(choice));
 
@@ -382,7 +382,7 @@ public class StudySessionServiceTest {
                 Exam exam = Exam.builder().id(examId).build();
 
                 given(studySessionRepository.findByIdWithLock(sessionId)).willReturn(Optional.of(session));
-                given(examService.findById(examId)).willReturn(exam);
+                given(examService.findPublishedById(examId)).willReturn(exam);
                 given(problemService.findById(problemId))
                                 .willThrow(new ProblemException(ExceptionMessage.PROBLEM_NOT_FOUND));
 

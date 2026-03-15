@@ -8,4 +8,6 @@ public interface GetProblemV2Service
 {
     ProblemV2Response getById(Long problemId);
     List<ProblemV2Response> getAllByExamId(Long examId);
+    ProblemV2Response getByIdForAdmin(Long problemId);
+    List<ProblemV2Response> getAllByExamIdForAdmin(Long examId);
 }

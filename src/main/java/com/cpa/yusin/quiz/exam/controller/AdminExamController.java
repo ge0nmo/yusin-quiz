@@ -28,7 +28,7 @@ public class AdminExamController
     public ResponseEntity<GlobalResponse<List<ExamDTO>>> getExamList(@PathVariable("subjectId") long subjectId,
                                                                     @RequestParam(value = "year", required = false) Integer year)
     {
-        List<ExamDTO> response = examService.getAllBySubjectId(subjectId, year);
+        List<ExamDTO> response = examService.getAllBySubjectIdForAdmin(subjectId, year);
 
         return ResponseEntity.ok(new GlobalResponse<>(response));
     }
@@ -61,7 +61,7 @@ public class AdminExamController
     @GetMapping("/exam/year")
     public ResponseEntity<GlobalResponse<List<Integer>>> getYear(@RequestParam(value = "subjectId") long subjectId)
     {
-        List<Integer> response =  examService.getAllYearsBySubjectId(subjectId);
+        List<Integer> response =  examService.getAllYearsBySubjectIdForAdmin(subjectId);
 
         return ResponseEntity.ok(new GlobalResponse<>(response));
     }

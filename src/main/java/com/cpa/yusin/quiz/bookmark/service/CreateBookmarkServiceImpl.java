@@ -9,8 +9,8 @@ import com.cpa.yusin.quiz.global.exception.MemberException;
 import com.cpa.yusin.quiz.global.exception.ProblemException;
 import com.cpa.yusin.quiz.member.domain.Member;
 import com.cpa.yusin.quiz.member.service.port.MemberRepository;
+import com.cpa.yusin.quiz.problem.controller.port.ProblemService;
 import com.cpa.yusin.quiz.problem.domain.Problem;
-import com.cpa.yusin.quiz.problem.service.port.ProblemRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,7 +22,7 @@ public class CreateBookmarkServiceImpl implements CreateBookmarkService {
 
     private final BookmarkRepository bookmarkRepository;
     private final MemberRepository memberRepository;
-    private final ProblemRepository problemRepository;
+    private final ProblemService problemService;
 
     @Override
     public void create(Long memberId, Long problemId) {
@@ -32,8 +32,7 @@ public class CreateBookmarkServiceImpl implements CreateBookmarkService {
 
         // 2. Validate the active problem before duplicate check.
         // This prevents deleted problems from leaking as "already bookmarked".
-        Problem problem = problemRepository.findById(problemId)
-                .orElseThrow(() -> new ProblemException(ExceptionMessage.PROBLEM_NOT_FOUND));
+        Problem problem = problemService.findById(problemId);
 
         // 3. 중복 북마크 체크
         if (bookmarkRepository.existsByMemberIdAndProblemId(memberId, problemId)) {

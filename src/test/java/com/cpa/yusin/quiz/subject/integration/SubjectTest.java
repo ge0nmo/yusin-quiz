@@ -6,6 +6,7 @@ import com.cpa.yusin.quiz.member.domain.type.Platform;
 import com.cpa.yusin.quiz.member.domain.type.Role;
 import com.cpa.yusin.quiz.member.service.port.MemberRepository;
 import com.cpa.yusin.quiz.subject.domain.Subject;
+import com.cpa.yusin.quiz.subject.domain.SubjectStatus;
 import com.cpa.yusin.quiz.subject.service.port.SubjectRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -77,6 +78,7 @@ public class SubjectTest
         subjectRepository.save(Subject.builder().id(3L).name("세법").build());
         subjectRepository.save(Subject.builder().id(4L).name("경영학").build());
         subjectRepository.save(Subject.builder().id(5L).name("상법").build());
+        subjectRepository.save(Subject.builder().id(6L).name("임시").status(SubjectStatus.DRAFT).build());
         int page = 1;
         int size = 10;
 
@@ -104,6 +106,7 @@ public class SubjectTest
                         responseFields(
                                 fieldWithPath("data[].id").type(JsonFieldType.NUMBER).description("과목 ID"),
                                 fieldWithPath("data[].name").type(JsonFieldType.STRING).description("과목 이름"),
+                                fieldWithPath("data[].status").type(JsonFieldType.STRING).description("과목 게시 상태"),
 
                                 fieldWithPath("pageInfo").type(JsonFieldType.OBJECT).description("페이지 정보").optional(),
                                 fieldWithPath("pageInfo.totalElements").type(JsonFieldType.NUMBER).description("총 데이터 수").optional(),
