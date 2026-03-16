@@ -6,6 +6,7 @@ import com.cpa.yusin.quiz.choice.service.port.ChoiceRepository;
 import com.cpa.yusin.quiz.common.service.ClockHolder;
 import com.cpa.yusin.quiz.config.TeardownExtension;
 import com.cpa.yusin.quiz.exam.domain.Exam;
+import com.cpa.yusin.quiz.exam.domain.ExamStatus;
 import com.cpa.yusin.quiz.exam.service.port.ExamRepository;
 import com.cpa.yusin.quiz.member.domain.Member;
 import com.cpa.yusin.quiz.member.domain.type.Platform;
@@ -119,6 +120,7 @@ public class ProblemTest
                 .year(2024)
                 .name("1차")
                 .subjectId(english.getId())
+                .status(ExamStatus.PUBLISHED)
                 .build());
 
         given(clockHolder.getCurrentDateTime()).willReturn(LocalDateTime.of(2026, 3, 14, 10, 0));
@@ -453,6 +455,7 @@ public class ProblemTest
                 .year(2026)
                 .name("2차")
                 .subjectId(tax.getId())
+                .status(ExamStatus.PUBLISHED)
                 .build());
 
         Problem withoutLecture = problemRepository.save(Problem.builder()
@@ -501,6 +504,7 @@ public class ProblemTest
                 .year(2027)
                 .name("삭제 시험")
                 .subjectId(deletedSubject.getId())
+                .status(ExamStatus.PUBLISHED)
                 .build());
         problemRepository.save(Problem.builder()
                 .number(99)

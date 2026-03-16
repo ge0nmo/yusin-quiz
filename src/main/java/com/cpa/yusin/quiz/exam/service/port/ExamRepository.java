@@ -11,13 +11,21 @@ public interface ExamRepository
 
     Optional<Exam> findById(long id);
 
+    Optional<Exam> findPublishedById(long id);
+
     List<Exam> findAllBySubjectId(long subjectId, Integer year);
 
     List<Exam> findAllBySubjectId(long subjectId);
+
+    List<Exam> findAllPublishedBySubjectId(long subjectId, Integer year);
+
+    List<Exam> findAllPublishedBySubjectId(long subjectId);
 
     boolean existsBySubjectIdAndNameAndYear(long subjectId, String name, int year);
 
     boolean existsByIdNotAndSubjectIdAndNameAndYear(long examId, long subjectId, String name, int year);
 
     List<Integer> getYearsBySubjectId(long subjectId);
+
+    List<Integer> getPublishedYearsBySubjectId(long subjectId);
 }

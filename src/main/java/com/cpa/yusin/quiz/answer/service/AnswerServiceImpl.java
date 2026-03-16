@@ -9,6 +9,7 @@ import com.cpa.yusin.quiz.answer.controller.mapper.AnswerMapper;
 import com.cpa.yusin.quiz.answer.controller.port.AnswerService;
 import com.cpa.yusin.quiz.answer.domain.Answer;
 import com.cpa.yusin.quiz.answer.service.port.AnswerRepository;
+import com.cpa.yusin.quiz.exam.controller.port.ExamService;
 import com.cpa.yusin.quiz.global.exception.AnswerException;
 import com.cpa.yusin.quiz.global.exception.ExceptionMessage;
 import com.cpa.yusin.quiz.global.exception.MemberException;
@@ -16,7 +17,6 @@ import com.cpa.yusin.quiz.member.domain.Member;
 import com.cpa.yusin.quiz.member.domain.type.Role;
 import com.cpa.yusin.quiz.question.domain.Question;
 import com.cpa.yusin.quiz.question.service.QuestionAnswerService;
-import com.cpa.yusin.quiz.subject.controller.port.SubjectService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -34,7 +34,7 @@ public class AnswerServiceImpl implements AnswerService {
     private final AnswerRepository answerRepository;
     private final AnswerMapper answerMapper;
     private final QuestionAnswerService questionAnswerService;
-    private final SubjectService subjectService;
+    private final ExamService examService;
 
     @Transactional
     @Override
@@ -83,7 +83,7 @@ public class AnswerServiceImpl implements AnswerService {
     public Answer findById(long id) {
         Answer answer = answerRepository.findById(id)
                 .orElseThrow(() -> new AnswerException(ExceptionMessage.ANSWER_NOT_FOUND));
-        subjectService.findPublishedById(answer.getQuestion().getProblem().getExam().getSubjectId());
+        examService.findPublishedById(answer.getQuestion().getProblem().getExam().getId());
         return answer;
     }
 

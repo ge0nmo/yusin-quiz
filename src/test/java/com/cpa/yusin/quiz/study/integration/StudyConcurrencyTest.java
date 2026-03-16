@@ -5,6 +5,7 @@ import com.cpa.yusin.quiz.choice.service.port.ChoiceRepository;
 import com.cpa.yusin.quiz.common.service.ClockHolder;
 import com.cpa.yusin.quiz.config.TeardownExtension;
 import com.cpa.yusin.quiz.exam.domain.Exam;
+import com.cpa.yusin.quiz.exam.domain.ExamStatus;
 import com.cpa.yusin.quiz.exam.service.port.ExamRepository;
 import com.cpa.yusin.quiz.member.domain.Member;
 import com.cpa.yusin.quiz.member.domain.type.Platform;
@@ -200,6 +201,7 @@ class StudyConcurrencyTest {
                 .name(examName)
                 .year(year)
                 .subjectId(subject.getId())
+                .status(ExamStatus.PUBLISHED)
                 .build());
     }
 

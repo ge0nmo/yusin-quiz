@@ -7,6 +7,7 @@ import com.cpa.yusin.quiz.exam.controller.dto.response.ExamDTO;
 import com.cpa.yusin.quiz.exam.controller.mapper.ExamMapper;
 import com.cpa.yusin.quiz.exam.controller.port.ExamService;
 import com.cpa.yusin.quiz.exam.domain.Exam;
+import com.cpa.yusin.quiz.exam.domain.ExamStatus;
 import com.cpa.yusin.quiz.exam.service.port.ExamRepository;
 import com.cpa.yusin.quiz.exam.service.port.ExamValidator;
 import com.cpa.yusin.quiz.global.exception.ExamException;
@@ -38,7 +39,7 @@ public class ExamServiceImpl implements ExamService {
         Subject subject = subjectService.findById(subjectId);
         examValidator.validate(subjectId, request.getName(), request.getYear());
 
-        Exam exam = Exam.from(request.getName(), request.getYear(), subject.getId());
+        Exam exam = Exam.from(request.getName(), request.getYear(), subject.getId(), resolveCreateStatus(request));
         exam = examRepository.save(exam);
 
         return examMapper.toCreateResponse(exam);
@@ -50,7 +51,7 @@ public class ExamServiceImpl implements ExamService {
         Subject subject = subjectService.findById(subjectId);
         examValidator.validate(subjectId, request.getName(), request.getYear());
 
-        Exam exam = Exam.from(request.getName(), request.getYear(), subject.getId());
+        Exam exam = Exam.from(request.getName(), request.getYear(), subject.getId(), resolveCreateStatus(request));
         return examRepository.save(exam).getId();
     }
 
@@ -59,7 +60,7 @@ public class ExamServiceImpl implements ExamService {
     public void update(long examId, ExamUpdateRequest request) {
         Exam domain = findById(examId);
         examValidator.validate(examId, domain.getId(), request.getName(), request.getYear());
-        domain.update(request.getName(), request.getYear());
+        domain.update(request.getName(), request.getYear(), request.getStatus() == null ? domain.getStatus() : request.getStatus());
         examRepository.save(domain);
     }
 
@@ -71,7 +72,8 @@ public class ExamServiceImpl implements ExamService {
 
     @Override
     public Exam findPublishedById(long id) {
-        Exam exam = findById(id);
+        Exam exam = examRepository.findPublishedById(id)
+                .orElseThrow(() -> new ExamException(ExceptionMessage.EXAM_NOT_FOUND));
         subjectService.findPublishedById(exam.getSubjectId());
         return exam;
     }
@@ -86,8 +88,8 @@ public class ExamServiceImpl implements ExamService {
     public List<ExamDTO> getAllBySubjectId(long subjectId, Integer year) {
         subjectService.findPublishedById(subjectId);
 
-        List<Exam> exams = year == null ? examRepository.findAllBySubjectId(subjectId)
-                : examRepository.findAllBySubjectId(subjectId, year);
+        List<Exam> exams = year == null ? examRepository.findAllPublishedBySubjectId(subjectId)
+                : examRepository.findAllPublishedBySubjectId(subjectId, year);
 
         if (exams.isEmpty()) {
             return Collections.emptyList();
@@ -117,7 +119,7 @@ public class ExamServiceImpl implements ExamService {
     @Override
     public List<Integer> getAllYearsBySubjectId(long subjectId) {
         subjectService.findPublishedById(subjectId);
-        return examRepository.getYearsBySubjectId(subjectId);
+        return examRepository.getPublishedYearsBySubjectId(subjectId);
     }
 
     @Override
@@ -126,4 +128,7 @@ public class ExamServiceImpl implements ExamService {
         return examRepository.getYearsBySubjectId(subjectId);
     }
 
+    private ExamStatus resolveCreateStatus(ExamCreateRequest request) {
+        return request.getStatus() == null ? ExamStatus.DRAFT : request.getStatus();
+    }
 }

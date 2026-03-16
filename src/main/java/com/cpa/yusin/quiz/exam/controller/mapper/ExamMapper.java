@@ -32,6 +32,7 @@ public class ExamMapper
                 .id(domain.getId())
                 .name(domain.getName())
                 .year(domain.getYear())
+                .status(domain.getStatus())
                 .build();
     }
 

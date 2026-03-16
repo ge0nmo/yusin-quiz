@@ -2,6 +2,7 @@ package com.cpa.yusin.quiz.bookmark.infrastructure;
 
 import com.cpa.yusin.quiz.bookmark.domain.Bookmark;
 import com.cpa.yusin.quiz.bookmark.service.port.BookmarkRepository;
+import com.cpa.yusin.quiz.exam.domain.ExamStatus;
 import com.cpa.yusin.quiz.subject.domain.SubjectStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -39,8 +40,8 @@ public class BookmarkRepositoryImpl implements BookmarkRepository {
     @Override
     public Slice<Bookmark> findByMemberIdAndSubjectId(Long memberId, Long subjectId, Pageable pageable) {
         if (subjectId == null) {
-            return bookmarkJpaRepository.findAllByMemberId(memberId, SubjectStatus.PUBLISHED, pageable);
+            return bookmarkJpaRepository.findAllByMemberId(memberId, SubjectStatus.PUBLISHED, ExamStatus.PUBLISHED, pageable);
         }
-        return bookmarkJpaRepository.findAllByMemberIdAndSubjectId(memberId, subjectId, SubjectStatus.PUBLISHED, pageable);
+        return bookmarkJpaRepository.findAllByMemberIdAndSubjectId(memberId, subjectId, SubjectStatus.PUBLISHED, ExamStatus.PUBLISHED, pageable);
     }
 }

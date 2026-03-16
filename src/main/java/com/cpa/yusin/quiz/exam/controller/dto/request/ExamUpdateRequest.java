@@ -1,5 +1,6 @@
 package com.cpa.yusin.quiz.exam.controller.dto.request;
 
+import com.cpa.yusin.quiz.exam.domain.ExamStatus;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -18,4 +19,6 @@ public class ExamUpdateRequest
 
     @NotNull
     private Integer year;
+
+    private ExamStatus status;
 }

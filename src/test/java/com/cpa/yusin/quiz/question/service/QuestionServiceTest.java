@@ -2,6 +2,7 @@ package com.cpa.yusin.quiz.question.service;
 
 import com.cpa.yusin.quiz.config.TestContainer;
 import com.cpa.yusin.quiz.exam.domain.Exam;
+import com.cpa.yusin.quiz.exam.domain.ExamStatus;
 import com.cpa.yusin.quiz.global.exception.QuestionException;
 import com.cpa.yusin.quiz.member.domain.Member;
 import com.cpa.yusin.quiz.member.domain.type.Platform;
@@ -39,6 +40,7 @@ class QuestionServiceTest {
                                 .name("1차")
                                 .year(2025)
                                 .subjectId(subject.getId())
+                                .status(ExamStatus.PUBLISHED)
                                 .build());
                 problem = testContainer.problemRepository.save(Problem.builder()
                                 .id(1L)

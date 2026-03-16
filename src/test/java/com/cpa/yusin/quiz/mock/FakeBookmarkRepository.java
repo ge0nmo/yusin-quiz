@@ -2,6 +2,7 @@ package com.cpa.yusin.quiz.mock;
 
 import com.cpa.yusin.quiz.bookmark.domain.Bookmark;
 import com.cpa.yusin.quiz.bookmark.service.port.BookmarkRepository;
+import com.cpa.yusin.quiz.exam.domain.ExamStatus;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
@@ -58,6 +59,7 @@ public class FakeBookmarkRepository implements BookmarkRepository {
         List<Bookmark> filtered = data.stream()
                 .filter(b -> Objects.equals(b.getMember().getId(), memberId))
                 .filter(b -> !b.getProblem().isRemoved())
+                .filter(b -> b.getProblem().getExam().getStatus() == ExamStatus.PUBLISHED)
                 .filter(b -> subjectId == null ||
                         Objects.equals(b.getProblem().getExam().getSubjectId(), subjectId))
                 .sorted(Comparator.comparing(Bookmark::getId).reversed()) // createdAt 대체 (Fake에서는 ID 순)

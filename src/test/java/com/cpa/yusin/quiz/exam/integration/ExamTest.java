@@ -2,6 +2,7 @@ package com.cpa.yusin.quiz.exam.integration;
 
 import com.cpa.yusin.quiz.config.TeardownExtension;
 import com.cpa.yusin.quiz.exam.domain.Exam;
+import com.cpa.yusin.quiz.exam.domain.ExamStatus;
 import com.cpa.yusin.quiz.exam.service.port.ExamRepository;
 import com.cpa.yusin.quiz.member.domain.Member;
 import com.cpa.yusin.quiz.member.domain.type.Platform;
@@ -16,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
 import org.springframework.restdocs.RestDocumentationContextProvider;
 import org.springframework.restdocs.RestDocumentationExtension;
 import org.springframework.restdocs.payload.JsonFieldType;
@@ -32,6 +34,7 @@ import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuild
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.*;
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
 import static org.springframework.restdocs.request.RequestDocumentation.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith({ RestDocumentationExtension.class, TeardownExtension.class })
@@ -84,6 +87,7 @@ class ExamTest {
                                 .name("1차")
                                 .year(2024)
                                 .subjectId(economics.getId())
+                                .status(ExamStatus.PUBLISHED)
                                 .build());
 
                 examRepository.save(Exam.builder()
@@ -91,6 +95,7 @@ class ExamTest {
                                 .name("2차")
                                 .year(2024)
                                 .subjectId(economics.getId())
+                                .status(ExamStatus.PUBLISHED)
                                 .build());
 
                 examRepository.save(Exam.builder()
@@ -98,6 +103,15 @@ class ExamTest {
                                 .name("3차")
                                 .year(2024)
                                 .subjectId(economics.getId())
+                                .status(ExamStatus.PUBLISHED)
+                                .build());
+
+                examRepository.save(Exam.builder()
+                                .id(4L)
+                                .name("숨김 시험")
+                                .year(2024)
+                                .subjectId(economics.getId())
+                                .status(ExamStatus.DRAFT)
                                 .build());
 
                 // when
@@ -108,6 +122,8 @@ class ExamTest {
                 // then
                 resultActions
                                 .andExpect(status().isOk())
+                                .andExpect(jsonPath("$.data.length()").value(3))
+                                .andExpect(jsonPath("$.data[0].status").value("PUBLISHED"))
                                 .andDo(document("getExamsBySubjectIdAndYear",
                                                 preprocessRequest(prettyPrint()),
                                                 preprocessResponse(prettyPrint()),
@@ -122,7 +138,9 @@ class ExamTest {
                                                                 fieldWithPath("data[].name").type(JsonFieldType.STRING)
                                                                                 .description("시험 이름"),
                                                                 fieldWithPath("data[].year").type(JsonFieldType.NUMBER)
-                                                                                .description("시험 연도"))));
+                                                                                .description("시험 연도"),
+                                                                fieldWithPath("data[].status").type(JsonFieldType.STRING)
+                                                                                .description("시험 공개 상태"))));
 
         }
 
@@ -135,6 +153,7 @@ class ExamTest {
                                 .name("1차")
                                 .year(2024)
                                 .subjectId(economics.getId())
+                                .status(ExamStatus.PUBLISHED)
                                 .build());
 
                 examRepository.save(Exam.builder()
@@ -142,6 +161,7 @@ class ExamTest {
                                 .name("2차")
                                 .year(2024)
                                 .subjectId(economics.getId())
+                                .status(ExamStatus.PUBLISHED)
                                 .build());
 
                 examRepository.save(Exam.builder()
@@ -149,6 +169,15 @@ class ExamTest {
                                 .name("1차")
                                 .year(2023)
                                 .subjectId(economics.getId())
+                                .status(ExamStatus.PUBLISHED)
+                                .build());
+
+                examRepository.save(Exam.builder()
+                                .id(4L)
+                                .name("비공개")
+                                .year(2022)
+                                .subjectId(economics.getId())
+                                .status(ExamStatus.DRAFT)
                                 .build());
 
                 // when
@@ -158,6 +187,8 @@ class ExamTest {
                 // then
                 resultActions
                                 .andExpect(status().isOk())
+                                .andExpect(jsonPath("$.data.length()").value(3))
+                                .andExpect(jsonPath("$.data[0].status").value("PUBLISHED"))
                                 .andDo(document("getExamsBySubjectIdWithoutYear",
                                                 preprocessRequest(prettyPrint()),
                                                 preprocessResponse(prettyPrint()),
@@ -173,7 +204,9 @@ class ExamTest {
                                                                 fieldWithPath("data[].name").type(JsonFieldType.STRING)
                                                                                 .description("시험 이름"),
                                                                 fieldWithPath("data[].year").type(JsonFieldType.NUMBER)
-                                                                                .description("시험 연도"))));
+                                                                                .description("시험 연도"),
+                                                                fieldWithPath("data[].status").type(JsonFieldType.STRING)
+                                                                                .description("시험 공개 상태"))));
 
         }
 
@@ -185,6 +218,7 @@ class ExamTest {
                                 .name("1차")
                                 .year(2024)
                                 .subjectId(economics.getId())
+                                .status(ExamStatus.PUBLISHED)
                                 .build());
 
                 examRepository.save(Exam.builder()
@@ -192,6 +226,7 @@ class ExamTest {
                                 .name("1차")
                                 .year(2023)
                                 .subjectId(economics.getId())
+                                .status(ExamStatus.PUBLISHED)
                                 .build());
 
                 examRepository.save(Exam.builder()
@@ -199,6 +234,15 @@ class ExamTest {
                                 .name("1차")
                                 .year(2022)
                                 .subjectId(economics.getId())
+                                .status(ExamStatus.PUBLISHED)
+                                .build());
+
+                examRepository.save(Exam.builder()
+                                .id(4L)
+                                .name("비공개")
+                                .year(2021)
+                                .subjectId(economics.getId())
+                                .status(ExamStatus.DRAFT)
                                 .build());
 
                 // when
@@ -208,6 +252,10 @@ class ExamTest {
                 // then
                 resultActions
                                 .andExpect(status().isOk())
+                                .andExpect(jsonPath("$.data.length()").value(3))
+                                .andExpect(jsonPath("$.data[0]").value(2024))
+                                .andExpect(jsonPath("$.data[1]").value(2023))
+                                .andExpect(jsonPath("$.data[2]").value(2022))
                                 .andDo(document("getYearBySubjectId",
                                                 preprocessRequest(prettyPrint()),
                                                 preprocessResponse(prettyPrint()),
@@ -220,5 +268,81 @@ class ExamTest {
                                                                 fieldWithPath("data[]").type(JsonFieldType.ARRAY)
                                                                                 .description("시험 연도 정보"))));
 
+        }
+
+        @WithUserDetails(value = "John@gmail.com", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+        @Test
+        void adminShouldListDraftAndPublishedExams() throws Exception {
+                examRepository.save(Exam.builder()
+                                .id(1L)
+                                .name("공개 시험")
+                                .year(2024)
+                                .subjectId(economics.getId())
+                                .status(ExamStatus.PUBLISHED)
+                                .build());
+
+                examRepository.save(Exam.builder()
+                                .id(2L)
+                                .name("임시 시험")
+                                .year(2024)
+                                .subjectId(economics.getId())
+                                .status(ExamStatus.DRAFT)
+                                .build());
+
+                mvc.perform(get("/api/admin/subject/{subjectId}/exam", economics.getId()))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$.data.length()").value(2))
+                                .andExpect(jsonPath("$.data[0].status").exists())
+                                .andExpect(jsonPath("$.data[1].status").exists());
+        }
+
+        @WithUserDetails(value = "John@gmail.com", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+        @Test
+        void adminShouldCreateDraftExam() throws Exception {
+                mvc.perform(post("/api/admin/exam")
+                                .param("subjectId", economics.getId().toString())
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("""
+                                                {
+                                                  "name": "2026 모의고사",
+                                                  "year": 2026,
+                                                  "status": "DRAFT"
+                                                }
+                                                """))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$.data").isNumber());
+
+                mvc.perform(get("/api/admin/subject/{subjectId}/exam", economics.getId()))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$.data.length()").value(1))
+                                .andExpect(jsonPath("$.data[0].name").value("2026 모의고사"))
+                                .andExpect(jsonPath("$.data[0].status").value("DRAFT"));
+        }
+
+        @WithUserDetails(value = "John@gmail.com", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+        @Test
+        void adminShouldUpdateExamStatus() throws Exception {
+                Exam exam = examRepository.save(Exam.builder()
+                                .id(1L)
+                                .name("상태 변경 대상")
+                                .year(2025)
+                                .subjectId(economics.getId())
+                                .status(ExamStatus.DRAFT)
+                                .build());
+
+                mvc.perform(patch("/api/admin/exam/{id}", exam.getId())
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("""
+                                                {
+                                                  "name": "상태 변경 대상",
+                                                  "year": 2025,
+                                                  "status": "PUBLISHED"
+                                                }
+                                                """))
+                                .andExpect(status().isOk());
+
+                mvc.perform(get("/api/admin/subject/{subjectId}/exam", economics.getId()))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$.data[0].status").value("PUBLISHED"));
         }
 }

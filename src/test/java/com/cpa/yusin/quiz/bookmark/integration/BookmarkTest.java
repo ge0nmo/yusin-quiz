@@ -7,6 +7,7 @@ import com.cpa.yusin.quiz.choice.domain.Choice;
 import com.cpa.yusin.quiz.choice.service.port.ChoiceRepository;
 import com.cpa.yusin.quiz.config.TeardownExtension;
 import com.cpa.yusin.quiz.exam.domain.Exam;
+import com.cpa.yusin.quiz.exam.domain.ExamStatus;
 import com.cpa.yusin.quiz.exam.service.port.ExamRepository;
 import com.cpa.yusin.quiz.global.details.MemberDetails;
 import com.cpa.yusin.quiz.member.domain.Member;
@@ -97,6 +98,7 @@ class BookmarkTest {
                 .name("1차")
                 .year(2024)
                 .subjectId(subject.getId())
+                .status(ExamStatus.PUBLISHED)
                 .build());
 
         member = memberRepository.save(Member.builder()

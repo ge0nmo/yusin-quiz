@@ -5,6 +5,7 @@ import com.cpa.yusin.quiz.answer.domain.Answer;
 import com.cpa.yusin.quiz.answer.service.port.AnswerRepository;
 import com.cpa.yusin.quiz.config.TeardownExtension;
 import com.cpa.yusin.quiz.exam.domain.Exam;
+import com.cpa.yusin.quiz.exam.domain.ExamStatus;
 import com.cpa.yusin.quiz.exam.service.port.ExamRepository;
 import com.cpa.yusin.quiz.global.details.MemberDetails;
 import com.cpa.yusin.quiz.member.domain.Member;
@@ -96,6 +97,7 @@ class AnswerTest {
                                 .year(2024)
                                 .name("1차")
                                 .subjectId(subject.getId())
+                                .status(ExamStatus.PUBLISHED)
                                 .build());
 
                 problem = problemRepository.save(Problem.builder()

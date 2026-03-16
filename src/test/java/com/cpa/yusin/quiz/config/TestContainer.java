@@ -218,10 +218,10 @@ public class TestContainer {
                 this.answerRepository = new FakeAnswerRepository();
                 this.answerMapper = new AnswerMapper();
 
-                this.questionAnswerService = new QuestionAnswerService(questionRepository, this.subjectService);
+                this.questionAnswerService = new QuestionAnswerService(questionRepository, this.examService);
 
                 this.answerService = new AnswerServiceImpl(this.answerRepository, this.answerMapper,
-                                this.questionAnswerService, this.subjectService);
+                                this.questionAnswerService, this.examService);
 
                 this.questionService = new QuestionServiceImpl(questionRepository, problemService, questionMapper,
                                 clockHolder);

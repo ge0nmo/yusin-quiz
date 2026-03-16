@@ -1,6 +1,7 @@
 package com.cpa.yusin.quiz.exam.infrastructure;
 
 import com.cpa.yusin.quiz.exam.domain.Exam;
+import com.cpa.yusin.quiz.exam.domain.ExamStatus;
 import com.cpa.yusin.quiz.exam.service.port.ExamRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -27,6 +28,11 @@ public class ExamRepositoryImpl implements ExamRepository
     }
 
     @Override
+    public Optional<Exam> findPublishedById(long id) {
+        return examJpaRepository.findPublishedById(id, ExamStatus.PUBLISHED);
+    }
+
+    @Override
     public List<Exam> findAllBySubjectId(long subjectId, Integer year)
     {
         return examJpaRepository.findExamsBySubjectIdAndYear(subjectId, year);
@@ -36,6 +42,16 @@ public class ExamRepositoryImpl implements ExamRepository
     public List<Exam> findAllBySubjectId(long subjectId)
     {
         return examJpaRepository.findAllBySubjectId(subjectId);
+    }
+
+    @Override
+    public List<Exam> findAllPublishedBySubjectId(long subjectId, Integer year) {
+        return examJpaRepository.findPublishedExamsBySubjectIdAndYear(subjectId, year, ExamStatus.PUBLISHED);
+    }
+
+    @Override
+    public List<Exam> findAllPublishedBySubjectId(long subjectId) {
+        return examJpaRepository.findAllPublishedBySubjectId(subjectId, ExamStatus.PUBLISHED);
     }
 
     @Override
@@ -54,5 +70,10 @@ public class ExamRepositoryImpl implements ExamRepository
     public List<Integer> getYearsBySubjectId(long subjectId)
     {
         return examJpaRepository.getYearsBySubjectId(subjectId);
+    }
+
+    @Override
+    public List<Integer> getPublishedYearsBySubjectId(long subjectId) {
+        return examJpaRepository.getPublishedYearsBySubjectId(subjectId, ExamStatus.PUBLISHED);
     }
 }

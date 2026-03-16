@@ -3,6 +3,7 @@ package com.cpa.yusin.quiz.dashboard.integration;
 import com.cpa.yusin.quiz.common.service.ClockHolder;
 import com.cpa.yusin.quiz.config.TeardownExtension;
 import com.cpa.yusin.quiz.exam.domain.Exam;
+import com.cpa.yusin.quiz.exam.domain.ExamStatus;
 import com.cpa.yusin.quiz.exam.service.port.ExamRepository;
 import com.cpa.yusin.quiz.member.domain.Member;
 import com.cpa.yusin.quiz.member.domain.type.Platform;
@@ -121,6 +122,7 @@ class DashboardTest {
 
         Exam accountingFirstExam = createExam(accounting, "1차", 2025);
         Exam accountingSecondExam = createExam(accounting, "2차", 2025);
+        Exam accountingDraftExam = createExam(accounting, "임시 시험", 2021, ExamStatus.DRAFT);
         Exam taxExam = createExam(tax, "1차", 2024);
         Exam removedExam = createExam(accounting, "삭제 시험", 2023);
         removeExam(removedExam);
@@ -168,7 +170,7 @@ class DashboardTest {
         resultActions
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.totals.subjectCount").value(2))
-                .andExpect(jsonPath("$.data.totals.examCount").value(3))
+                .andExpect(jsonPath("$.data.totals.examCount").value(4))
                 .andExpect(jsonPath("$.data.totals.problemCount").value(5))
                 .andExpect(jsonPath("$.data.totals.questionCount").value(7))
                 .andExpect(jsonPath("$.data.operations.todayQuestionCount").value(5))
@@ -188,7 +190,7 @@ class DashboardTest {
                 .andExpect(jsonPath("$.data.pendingQuestions[4].answerCount").value(1))
                 .andExpect(jsonPath("$.data.context.subject.id").value(accounting.getId()))
                 .andExpect(jsonPath("$.data.context.subject.name").value("회계학"))
-                .andExpect(jsonPath("$.data.context.subject.examCount").value(2))
+                .andExpect(jsonPath("$.data.context.subject.examCount").value(3))
                 .andExpect(jsonPath("$.data.context.subject.problemCount").value(4))
                 .andExpect(jsonPath("$.data.context.exam.id").value(accountingFirstExam.getId()))
                 .andExpect(jsonPath("$.data.context.exam.name").value("1차"))
@@ -278,10 +280,15 @@ class DashboardTest {
     }
 
     private Exam createExam(Subject subject, String name, int year) {
+        return createExam(subject, name, year, ExamStatus.PUBLISHED);
+    }
+
+    private Exam createExam(Subject subject, String name, int year, ExamStatus status) {
         return examRepository.save(Exam.builder()
                 .name(name)
                 .year(year)
                 .subjectId(subject.getId())
+                .status(status)
                 .build());
     }
 

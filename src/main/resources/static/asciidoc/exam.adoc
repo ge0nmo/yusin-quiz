@@ -8,6 +8,9 @@
 :source-highlighter: highlightjs
 
 == 시험 API
+
+사용자 응답의 `status` 는 항상 `PUBLISHED` 이며, 공개 과목 아래 `DRAFT` 시험은 목록과 연도 응답에서 제외된다.
+
 == 과목의 연도 정보 조회
 === HTTP Request
 include::{snippets}/getYearBySubjectId/http-request.adoc[]

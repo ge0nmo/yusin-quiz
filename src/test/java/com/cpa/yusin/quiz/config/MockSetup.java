@@ -2,6 +2,7 @@ package com.cpa.yusin.quiz.config;
 
 import com.cpa.yusin.quiz.choice.domain.Choice;
 import com.cpa.yusin.quiz.exam.domain.Exam;
+import com.cpa.yusin.quiz.exam.domain.ExamStatus;
 import com.cpa.yusin.quiz.member.domain.Member;
 import com.cpa.yusin.quiz.member.domain.type.Platform;
 import com.cpa.yusin.quiz.member.domain.type.Role;
@@ -57,6 +58,7 @@ public class MockSetup {
                                 .name("2024 1차")
                                 .year(2024)
                                 .subjectId(physics.getId())
+                                .status(ExamStatus.PUBLISHED)
                                 .build());
 
                 physicsExam2 = testContainer.examRepository.save(Exam.builder()
@@ -64,6 +66,7 @@ public class MockSetup {
                                 .name("2024 2차")
                                 .year(2024)
                                 .subjectId(physics.getId())
+                                .status(ExamStatus.PUBLISHED)
                                 .build());
 
                 biologyExam1 = testContainer.examRepository.save(Exam.builder()
@@ -71,6 +74,7 @@ public class MockSetup {
                                 .name("2024 1차")
                                 .year(2024)
                                 .subjectId(biology.getId())
+                                .status(ExamStatus.PUBLISHED)
                                 .build());
 
                 biologyExam2 = testContainer.examRepository.save(Exam.builder()
@@ -78,6 +82,7 @@ public class MockSetup {
                                 .name("2024 2차")
                                 .year(2024)
                                 .subjectId(biology.getId())
+                                .status(ExamStatus.PUBLISHED)
                                 .build());
 
                 physicsProblem1 = testContainer.problemRepository.save(Problem.builder()

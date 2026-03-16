@@ -19,6 +19,7 @@
 - 시간 의존 로직은 `ClockHolder`, UUID 생성은 `UuidHolder`를 우선 사용.
 - CORS 허용 도메인은 `app.security.cors.allowed-origins`로 명시 설정한다.
 - `Subject`는 삭제 플래그와 별도로 `status(DRAFT, PUBLISHED)`를 가지며, 사용자 앱은 `PUBLISHED` 과목만 본다.
+- `Exam`도 삭제 플래그와 별도로 `status(DRAFT, PUBLISHED)`를 가지며, 사용자 앱은 `PUBLISHED` 시험만 본다.
 - `./gradlew test`는 현재 작업 환경에서 성공 확인됨.
 - `./gradlew test asciidoctor openapi3`로 REST Docs HTML과 OpenAPI 3 JSON까지 함께 생성할 수 있음.
 
@@ -130,6 +131,7 @@
   - `status` 가 `PUBLISHED` 인 과목만 사용자 앱 진입점으로 노출된다.
 - `Exam`
   - 시험 이름, 연도, `subjectId`를 가짐.
+  - `status(DRAFT, PUBLISHED)` 로 시험 공개 상태를 관리한다.
   - `Subject`와 JPA 연관관계가 아니라 `subjectId` 스칼라로만 연결.
 - `Problem`
   - 시험에 속한 문제.
@@ -200,7 +202,7 @@
 ### 소프트 삭제와 하드 삭제가 혼재
 
 - `Subject`, `Exam`, `Problem`, `Question`은 `isRemoved` 기반 삭제 경로가 존재.
-- `Subject`는 soft delete 와 별도로 `status(DRAFT, PUBLISHED)` 로 게시 상태를 관리한다.
+- `Subject`와 `Exam`은 soft delete 와 별도로 `status(DRAFT, PUBLISHED)` 로 게시 상태를 관리한다.
 - `Choice`, `Answer`, `Bookmark`는 서비스/리포지토리에서 실제 삭제 호출이 존재.
 - 삭제 로직 변경 시 플래그 삭제인지 실제 삭제인지 먼저 확인해야 함.
 
@@ -378,7 +380,7 @@
 ### 문제 관련 변경
 
 - 먼저 V1인지 V2인지 구분할 것.
-- 사용자 노출 여부는 `Problem` 자체가 아니라 상위 `Subject.status` 에 의해 추가로 제한된다.
+- 사용자 노출 여부는 `Problem` 자체가 아니라 상위 `Subject.status` 와 `Exam.status` 에 의해 추가로 제한된다.
 - V1 변경 시 확인 대상:
   - `ProblemServiceImpl`
   - `ProblemController`

@@ -1,6 +1,7 @@
 package com.cpa.yusin.quiz.mock;
 
 import com.cpa.yusin.quiz.exam.domain.Exam;
+import com.cpa.yusin.quiz.exam.domain.ExamStatus;
 import com.cpa.yusin.quiz.exam.service.port.ExamRepository;
 
 import java.util.*;
@@ -20,6 +21,7 @@ public class FakeExamRepository implements ExamRepository
                     .name(exam.getName())
                     .year(exam.getYear())
                     .subjectId(exam.getSubjectId())
+                    .status(exam.getStatus())
                     .build();
             data.add(newExam);
             return newExam;
@@ -40,6 +42,14 @@ public class FakeExamRepository implements ExamRepository
     }
 
     @Override
+    public Optional<Exam> findPublishedById(long id) {
+        return data.stream()
+                .filter(item -> item.getId().equals(id))
+                .filter(item -> item.getStatus() == ExamStatus.PUBLISHED)
+                .findAny();
+    }
+
+    @Override
     public List<Exam> findAllBySubjectId(long subjectId, Integer year)
     {
         return data.stream()
@@ -48,10 +58,26 @@ public class FakeExamRepository implements ExamRepository
     }
 
     @Override
+    public List<Exam> findAllPublishedBySubjectId(long subjectId, Integer year) {
+        return data.stream()
+                .filter(item -> item.getSubjectId().equals(subjectId) && item.getYear() == year)
+                .filter(item -> item.getStatus() == ExamStatus.PUBLISHED)
+                .toList();
+    }
+
+    @Override
     public List<Exam> findAllBySubjectId(long subjectId)
     {
         return data.stream()
                 .filter(item -> item.getSubjectId().equals(subjectId))
+                .toList();
+    }
+
+    @Override
+    public List<Exam> findAllPublishedBySubjectId(long subjectId) {
+        return data.stream()
+                .filter(item -> item.getSubjectId().equals(subjectId))
+                .filter(item -> item.getStatus() == ExamStatus.PUBLISHED)
                 .toList();
     }
 
@@ -82,6 +108,17 @@ public class FakeExamRepository implements ExamRepository
         return data.stream()
                 .filter(item -> item.getSubjectId().equals(subjectId))
                 .map(Exam::getYear)
+                .toList();
+    }
+
+    @Override
+    public List<Integer> getPublishedYearsBySubjectId(long subjectId) {
+        return data.stream()
+                .filter(item -> item.getSubjectId().equals(subjectId))
+                .filter(item -> item.getStatus() == ExamStatus.PUBLISHED)
+                .map(Exam::getYear)
+                .distinct()
+                .sorted(Comparator.reverseOrder())
                 .toList();
     }
 }
