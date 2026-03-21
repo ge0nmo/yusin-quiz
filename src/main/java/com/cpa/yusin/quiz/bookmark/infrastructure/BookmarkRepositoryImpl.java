@@ -9,6 +9,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 
 @RequiredArgsConstructor
@@ -35,6 +37,11 @@ public class BookmarkRepositoryImpl implements BookmarkRepository {
     @Override
     public Optional<Bookmark> findByMemberIdAndProblemId(Long memberId, Long problemId) {
         return bookmarkJpaRepository.findByMemberIdAndProblemId(memberId, problemId);
+    }
+
+    @Override
+    public List<Long> findBookmarkedProblemIds(Long memberId, Collection<Long> problemIds) {
+        return bookmarkJpaRepository.findBookmarkedProblemIds(memberId, problemIds);
     }
 
     @Override

@@ -59,7 +59,7 @@ public class ErrorResponse {
             return bindingResult.getFieldErrors()
                     .stream()
                     .map(error -> new ValueError(
-                            error.getField(),
+                            normalizeDescriptor(error.getField()),
                             error.getRejectedValue() == null ? "" : error.getRejectedValue().toString(),
                             error.getDefaultMessage()))
                     .collect(Collectors.toList());
@@ -69,10 +69,14 @@ public class ErrorResponse {
             return e.getConstraintViolations()
                     .stream()
                     .map(error -> new ValueError(
-                            error.getPropertyPath().toString(),
+                            normalizeDescriptor(error.getPropertyPath().toString()),
                             error.getInvalidValue().toString(),
                             error.getMessage()))
                     .collect(Collectors.toList());
+        }
+
+        private static String normalizeDescriptor(String descriptor) {
+            return descriptor.replace(".<list element>", "");
         }
     }
 }

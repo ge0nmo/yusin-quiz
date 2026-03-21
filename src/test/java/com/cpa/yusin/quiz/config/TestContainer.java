@@ -6,9 +6,11 @@ import com.cpa.yusin.quiz.answer.service.AnswerServiceImpl;
 import com.cpa.yusin.quiz.answer.service.port.AnswerRepository;
 import com.cpa.yusin.quiz.bookmark.controller.port.CreateBookmarkService;
 import com.cpa.yusin.quiz.bookmark.controller.port.DeleteBookmarkService;
+import com.cpa.yusin.quiz.bookmark.controller.port.GetBookmarkStatusService;
 import com.cpa.yusin.quiz.bookmark.controller.port.GetBookmarkedProblemsService;
 import com.cpa.yusin.quiz.bookmark.service.CreateBookmarkServiceImpl;
 import com.cpa.yusin.quiz.bookmark.service.DeleteBookmarkServiceImpl;
+import com.cpa.yusin.quiz.bookmark.service.GetBookmarkStatusServiceImpl;
 import com.cpa.yusin.quiz.bookmark.service.GetBookmarkedProblemsServiceImpl;
 import com.cpa.yusin.quiz.bookmark.service.port.BookmarkRepository;
 import com.cpa.yusin.quiz.choice.controller.mapper.ChoiceMapper;
@@ -143,6 +145,7 @@ public class TestContainer {
         public final CreateBookmarkService createBookmarkService;
         public final DeleteBookmarkService deleteBookmarkService;
         public final GetBookmarkedProblemsService getBookmarkedProblemsService;
+        public final GetBookmarkStatusService getBookmarkStatusService;
 
         public final FileService fileService;
 
@@ -232,6 +235,7 @@ public class TestContainer {
                 this.deleteBookmarkService = new DeleteBookmarkServiceImpl(this.bookmarkRepository);
                 this.getBookmarkedProblemsService = new GetBookmarkedProblemsServiceImpl(
                                 this.bookmarkRepository, this.choiceService, problemContentProcessor);
+                this.getBookmarkStatusService = new GetBookmarkStatusServiceImpl(this.bookmarkRepository);
         }
 
 }

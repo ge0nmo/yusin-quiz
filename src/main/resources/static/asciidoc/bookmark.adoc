@@ -21,3 +21,36 @@ include::{snippets}/getBookmarkedProblems/http-response.adoc[]
 
 === Response Fields
 include::{snippets}/getBookmarkedProblems/response-fields.adoc[]
+
+== 북마크 상태 조회
+=== HTTP Request
+include::{snippets}/postBookmarkStatus/http-request.adoc[]
+
+=== Request Fields
+include::{snippets}/postBookmarkStatus/request-fields.adoc[]
+
+=== HTTP Response
+include::{snippets}/postBookmarkStatus/http-response.adoc[]
+
+=== Response Fields
+include::{snippets}/postBookmarkStatus/response-fields.adoc[]
+
+== 북마크 상태 조회 - 잘못된 요청 예시
+=== HTTP Request
+include::{snippets}/postBookmarkStatus-invalid/http-request.adoc[]
+
+=== HTTP Response
+include::{snippets}/postBookmarkStatus-invalid/http-response.adoc[]
+
+=== Response Fields
+include::{snippets}/postBookmarkStatus-invalid/response-fields.adoc[]
+
+== 북마크 상태 조회 - 비인증 요청 예시
+=== HTTP Request
+include::{snippets}/postBookmarkStatus-unauthorized/http-request.adoc[]
+
+=== HTTP Response
+include::{snippets}/postBookmarkStatus-unauthorized/http-response.adoc[]
+
+=== Response Fields
+include::{snippets}/postBookmarkStatus-unauthorized/response-fields.adoc[]

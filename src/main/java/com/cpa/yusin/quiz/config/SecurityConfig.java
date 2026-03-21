@@ -1,6 +1,8 @@
 package com.cpa.yusin.quiz.config;
 
 import com.cpa.yusin.quiz.global.filter.SecurityFilter;
+import com.cpa.yusin.quiz.global.security.UserApiAccessDeniedHandler;
+import com.cpa.yusin.quiz.global.security.UserApiAuthenticationEntryPoint;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -25,11 +27,17 @@ import java.util.stream.Stream;
 @EnableWebSecurity
 public class SecurityConfig {
     private final SecurityFilter securityFilter;
+    private final UserApiAuthenticationEntryPoint userApiAuthenticationEntryPoint;
+    private final UserApiAccessDeniedHandler userApiAccessDeniedHandler;
     private final String corsAllowedOrigins;
 
     public SecurityConfig(SecurityFilter securityFilter,
+                          UserApiAuthenticationEntryPoint userApiAuthenticationEntryPoint,
+                          UserApiAccessDeniedHandler userApiAccessDeniedHandler,
                           @Value("${app.security.cors.allowed-origins:http://localhost:3000,http://127.0.0.1:3000,https://admin.finuminu.com,https://finuminu.com,https://www.finuminu.com}") String corsAllowedOrigins) {
         this.securityFilter = securityFilter;
+        this.userApiAuthenticationEntryPoint = userApiAuthenticationEntryPoint;
+        this.userApiAccessDeniedHandler = userApiAccessDeniedHandler;
         this.corsAllowedOrigins = corsAllowedOrigins;
     }
 
@@ -37,6 +45,9 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain restApiSecurityFilter(HttpSecurity http) throws Exception {
         configureStatelessSecurity(http, "/api/v1/**");
+        http.exceptionHandling(exceptionHandling -> exceptionHandling
+                .authenticationEntryPoint(userApiAuthenticationEntryPoint)
+                .accessDeniedHandler(userApiAccessDeniedHandler));
         http.authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/v1/bookmarks/**").authenticated()
                 .requestMatchers(HttpMethod.GET, "/api/v1/**").permitAll()

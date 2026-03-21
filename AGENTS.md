@@ -92,7 +92,7 @@
   - 질문/답변: `/api/v1/question`, `/api/v1/answer`
   - 학습 세션: `/api/v1/study`
   - 학습 로그: `/api/v1/study-logs`
-  - 북마크: `/api/v1/bookmarks`
+  - 북마크: `/api/v1/bookmarks`, `/api/v1/bookmarks/status`
   - 인증: `/api/v1/auth/*`
 - 운영 확인용 헬스 엔드포인트로 `/api/v1/hc`, `/api/v1/env`를 유지.
 
@@ -322,6 +322,8 @@
   - GET은 대체로 permit-all
   - `/api/v1/bookmarks/**`는 인증 필요
   - `/api/v1/auth/**`는 permit-all
+  - 보호된 사용자 API에 비인증으로 접근하면 `401 SecurityErrorResponse`를 반환한다
+  - 인증은 되었지만 권한이 부족한 경우는 `403`을 유지한다
 - `/api/admin/**`
   - `/api/admin/login`만 permit-all
   - 나머지는 `ROLE_ADMIN` 필요

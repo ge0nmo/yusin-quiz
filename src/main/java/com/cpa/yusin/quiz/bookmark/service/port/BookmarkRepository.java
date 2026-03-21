@@ -4,6 +4,8 @@ import com.cpa.yusin.quiz.bookmark.domain.Bookmark;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 
 public interface BookmarkRepository {
@@ -15,6 +17,8 @@ public interface BookmarkRepository {
     boolean existsByMemberIdAndProblemId(Long memberId, Long problemId);
 
     Optional<Bookmark> findByMemberIdAndProblemId(Long memberId, Long problemId);
+
+    List<Long> findBookmarkedProblemIds(Long memberId, Collection<Long> problemIds);
 
     /**
      * 특정 회원의 북마크된 문제를 Slice로 조회

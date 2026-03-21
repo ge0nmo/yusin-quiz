@@ -1,8 +1,11 @@
 package com.cpa.yusin.quiz.bookmark.controller;
 
 import com.cpa.yusin.quiz.bookmark.controller.dto.BookmarkedProblemSliceResponse;
+import com.cpa.yusin.quiz.bookmark.controller.dto.request.BookmarkStatusRequest;
+import com.cpa.yusin.quiz.bookmark.controller.dto.response.BookmarkStatusResponse;
 import com.cpa.yusin.quiz.bookmark.controller.port.CreateBookmarkService;
 import com.cpa.yusin.quiz.bookmark.controller.port.DeleteBookmarkService;
+import com.cpa.yusin.quiz.bookmark.controller.port.GetBookmarkStatusService;
 import com.cpa.yusin.quiz.bookmark.controller.port.GetBookmarkedProblemsService;
 import com.cpa.yusin.quiz.common.controller.dto.response.GlobalResponse;
 import com.cpa.yusin.quiz.global.details.MemberDetails;
@@ -10,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @RequiredArgsConstructor
@@ -20,6 +24,7 @@ public class BookmarkController {
     private final CreateBookmarkService createBookmarkService;
     private final DeleteBookmarkService deleteBookmarkService;
     private final GetBookmarkedProblemsService getBookmarkedProblemsService;
+    private final GetBookmarkStatusService getBookmarkStatusService;
 
     /**
      * 북마크 추가
@@ -70,6 +75,18 @@ public class BookmarkController {
 
         BookmarkedProblemSliceResponse response = getBookmarkedProblemsService
                 .getBookmarkedProblems(memberDetails.getMember().getId(), subjectId, page, size);
+
+        return ResponseEntity.ok(GlobalResponse.success(response));
+    }
+
+    @PostMapping("/status")
+    public ResponseEntity<GlobalResponse<BookmarkStatusResponse>> getBookmarkStatus(
+            @Validated @RequestBody BookmarkStatusRequest request,
+            @AuthenticationPrincipal MemberDetails memberDetails) {
+
+        BookmarkStatusResponse response = getBookmarkStatusService.getBookmarkStatus(
+                memberDetails.getMember().getId(),
+                request);
 
         return ResponseEntity.ok(GlobalResponse.success(response));
     }

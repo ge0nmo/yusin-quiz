@@ -55,6 +55,21 @@ public class FakeBookmarkRepository implements BookmarkRepository {
     }
 
     @Override
+    public List<Long> findBookmarkedProblemIds(Long memberId, Collection<Long> problemIds) {
+        if (problemIds == null || problemIds.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        Set<Long> targetIds = new HashSet<>(problemIds);
+        return data.stream()
+                .filter(b -> Objects.equals(b.getMember().getId(), memberId))
+                .map(b -> b.getProblem().getId())
+                .filter(targetIds::contains)
+                .distinct()
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public Slice<Bookmark> findByMemberIdAndSubjectId(Long memberId, Long subjectId, Pageable pageable) {
         List<Bookmark> filtered = data.stream()
                 .filter(b -> Objects.equals(b.getMember().getId(), memberId))

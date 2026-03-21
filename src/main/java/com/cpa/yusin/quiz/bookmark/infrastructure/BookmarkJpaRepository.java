@@ -10,6 +10,8 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 
 public interface BookmarkJpaRepository extends JpaRepository<Bookmark, Long> {
@@ -17,6 +19,12 @@ public interface BookmarkJpaRepository extends JpaRepository<Bookmark, Long> {
     boolean existsByMemberIdAndProblemId(Long memberId, Long problemId);
 
     Optional<Bookmark> findByMemberIdAndProblemId(Long memberId, Long problemId);
+
+    @Query("SELECT b.problem.id FROM Bookmark b " +
+            "WHERE b.member.id = :memberId " +
+            "AND b.problem.id IN :problemIds")
+    List<Long> findBookmarkedProblemIds(@Param("memberId") Long memberId,
+                                        @Param("problemIds") Collection<Long> problemIds);
 
     @Modifying
     @Query("DELETE FROM Bookmark b WHERE b.member.id = :memberId AND b.problem.id = :problemId")

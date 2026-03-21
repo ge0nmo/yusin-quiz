@@ -1,5 +1,10 @@
 # Frontend API Changelog
 
+## 2026-03-21
+
+- `POST /api/v1/bookmarks/status` 추가. 로그인 사용자가 현재 화면의 problemIds 중 북마크된 ID만 가볍게 조회할 수 있음
+- 보호된 `/api/v1/**` 사용자 API의 비인증 응답을 `401 SecurityErrorResponse`로 정렬. 공개 GET 과 `/api/v1/auth/**` 는 그대로 유지
+
 ## 2026-03-14
 
 - `GET /api/admin/question` 에 `datePreset=ALL|TODAY` 추가
