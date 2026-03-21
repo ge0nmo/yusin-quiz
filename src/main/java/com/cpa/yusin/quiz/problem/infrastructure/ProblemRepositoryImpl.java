@@ -3,6 +3,7 @@ package com.cpa.yusin.quiz.problem.infrastructure;
 import com.cpa.yusin.quiz.problem.domain.Problem;
 import com.cpa.yusin.quiz.problem.service.dto.AdminProblemSearchCondition;
 import com.cpa.yusin.quiz.problem.service.dto.AdminProblemSearchProjection;
+import com.cpa.yusin.quiz.problem.service.dto.ProblemCountByExamProjection;
 import com.cpa.yusin.quiz.problem.service.port.ProblemRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -10,7 +11,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Repository
@@ -59,6 +63,22 @@ public class ProblemRepositoryImpl implements ProblemRepository
     @Override
     public Integer findMinimumNumberByExamId(long examId) {
         return problemJpaRepository.findMinimumNumberByExamId(examId);
+    }
+
+    @Override
+    public long countActiveByExamId(long examId) {
+        return problemJpaRepository.countActiveByExamId(examId);
+    }
+
+    @Override
+    public Map<Long, Long> countActiveByExamIds(List<Long> examIds) {
+        if (examIds == null || examIds.isEmpty()) {
+            return Map.of();
+        }
+
+        return problemJpaRepository.countActiveByExamIds(examIds).stream()
+                .collect(Collectors.toMap(ProblemCountByExamProjection::examId,
+                        ProblemCountByExamProjection::problemCount));
     }
 
     @Override

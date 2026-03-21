@@ -2,6 +2,7 @@ package com.cpa.yusin.quiz.exam.controller.mapper;
 
 import com.cpa.yusin.quiz.exam.controller.dto.response.ExamCreateResponse;
 import com.cpa.yusin.quiz.exam.controller.dto.response.ExamDTO;
+import com.cpa.yusin.quiz.exam.controller.dto.response.UserExamDTO;
 import com.cpa.yusin.quiz.exam.domain.Exam;
 import org.springframework.stereotype.Component;
 
@@ -33,6 +34,20 @@ public class ExamMapper
                 .name(domain.getName())
                 .year(domain.getYear())
                 .status(domain.getStatus())
+                .build();
+    }
+
+    public UserExamDTO toUserExamDTO(Exam domain, long questionCount) {
+        if (domain == null) {
+            return null;
+        }
+
+        return UserExamDTO.builder()
+                .id(domain.getId())
+                .name(domain.getName())
+                .year(domain.getYear())
+                .status(domain.getStatus())
+                .questionCount(questionCount)
                 .build();
     }
 

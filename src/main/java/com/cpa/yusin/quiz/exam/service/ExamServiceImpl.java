@@ -4,6 +4,7 @@ import com.cpa.yusin.quiz.exam.controller.dto.request.ExamCreateRequest;
 import com.cpa.yusin.quiz.exam.controller.dto.request.ExamUpdateRequest;
 import com.cpa.yusin.quiz.exam.controller.dto.response.ExamCreateResponse;
 import com.cpa.yusin.quiz.exam.controller.dto.response.ExamDTO;
+import com.cpa.yusin.quiz.exam.controller.dto.response.UserExamDTO;
 import com.cpa.yusin.quiz.exam.controller.mapper.ExamMapper;
 import com.cpa.yusin.quiz.exam.controller.port.ExamService;
 import com.cpa.yusin.quiz.exam.domain.Exam;
@@ -12,6 +13,7 @@ import com.cpa.yusin.quiz.exam.service.port.ExamRepository;
 import com.cpa.yusin.quiz.exam.service.port.ExamValidator;
 import com.cpa.yusin.quiz.global.exception.ExamException;
 import com.cpa.yusin.quiz.global.exception.ExceptionMessage;
+import com.cpa.yusin.quiz.problem.service.port.ProblemRepository;
 import com.cpa.yusin.quiz.subject.controller.port.SubjectService;
 import com.cpa.yusin.quiz.subject.domain.Subject;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -32,6 +35,7 @@ public class ExamServiceImpl implements ExamService {
     private final ExamMapper examMapper;
     private final SubjectService subjectService;
     private final ExamValidator examValidator;
+    private final ProblemRepository problemRepository;
 
     @Transactional
     @Override
@@ -85,7 +89,7 @@ public class ExamServiceImpl implements ExamService {
     }
 
     @Override
-    public List<ExamDTO> getAllBySubjectId(long subjectId, Integer year) {
+    public List<UserExamDTO> getAllBySubjectId(long subjectId, Integer year) {
         subjectService.findPublishedById(subjectId);
 
         List<Exam> exams = year == null ? examRepository.findAllPublishedBySubjectId(subjectId)
@@ -95,8 +99,12 @@ public class ExamServiceImpl implements ExamService {
             return Collections.emptyList();
         }
 
+        Map<Long, Long> questionCountByExamId = problemRepository.countActiveByExamIds(
+                exams.stream().map(Exam::getId).toList()
+        );
+
         return exams.stream()
-                .map(examMapper::toExamDTO)
+                .map(exam -> examMapper.toUserExamDTO(exam, questionCountByExamId.getOrDefault(exam.getId(), 0L)))
                 .toList();
     }
 

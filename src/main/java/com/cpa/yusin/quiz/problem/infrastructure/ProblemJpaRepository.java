@@ -2,6 +2,7 @@ package com.cpa.yusin.quiz.problem.infrastructure;
 
 import com.cpa.yusin.quiz.problem.domain.Problem;
 import com.cpa.yusin.quiz.problem.service.dto.AdminProblemSearchProjection;
+import com.cpa.yusin.quiz.problem.service.dto.ProblemCountByExamProjection;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -74,6 +75,32 @@ public interface ProblemJpaRepository extends JpaRepository<Problem, Long>
 
     @Query("SELECT MIN(p.number) FROM Problem p WHERE p.exam.id = :examId")
     Integer findMinimumNumberByExamId(@Param("examId") long examId);
+
+    @Query("SELECT COUNT(p) FROM Problem p " +
+            "JOIN p.exam e " +
+            "WHERE e.id = :examId " +
+            "AND p.isRemoved = false " +
+            "AND e.isRemoved = false " +
+            "AND EXISTS (" +
+            "   SELECT s.id FROM Subject s " +
+            "   WHERE s.id = e.subjectId " +
+            "   AND s.isRemoved = false" +
+            ")")
+    long countActiveByExamId(@Param("examId") long examId);
+
+    @Query("SELECT new com.cpa.yusin.quiz.problem.service.dto.ProblemCountByExamProjection(e.id, COUNT(p)) " +
+            "FROM Problem p " +
+            "JOIN p.exam e " +
+            "WHERE e.id IN :examIds " +
+            "AND p.isRemoved = false " +
+            "AND e.isRemoved = false " +
+            "AND EXISTS (" +
+            "   SELECT s.id FROM Subject s " +
+            "   WHERE s.id = e.subjectId " +
+            "   AND s.isRemoved = false" +
+            ") " +
+            "GROUP BY e.id")
+    List<ProblemCountByExamProjection> countActiveByExamIds(@Param("examIds") List<Long> examIds);
 
     @Query(
             value = """

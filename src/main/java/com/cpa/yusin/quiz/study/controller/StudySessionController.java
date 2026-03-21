@@ -12,6 +12,7 @@ import com.cpa.yusin.quiz.study.controller.dto.response.SubmittedAnswerResponse;
 import com.cpa.yusin.quiz.study.domain.StudySession;
 import com.cpa.yusin.quiz.study.domain.SubmittedAnswer;
 import com.cpa.yusin.quiz.study.service.StudySessionService;
+import com.cpa.yusin.quiz.study.service.dto.StudySessionCompletionSummary;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -69,10 +70,16 @@ public class StudySessionController {
                         @AuthenticationPrincipal MemberDetails memberDetails,
                         @RequestBody @Valid ExamFinishRequest request) {
 
-                int finalScore = studySessionService.completeSession(
+                StudySessionCompletionSummary summary = studySessionService.completeSession(
                                 memberDetails.getMember().getId(),
                                 request.getSessionId());
 
-                return ResponseEntity.ok(GlobalResponse.success(new ExamFinishResponse(finalScore)));
+                return ResponseEntity.ok(GlobalResponse.success(new ExamFinishResponse(
+                                summary.finalScore(),
+                                summary.correctCount(),
+                                summary.totalCount(),
+                                summary.answeredCount(),
+                                summary.unansweredCount()
+                )));
         }
 }

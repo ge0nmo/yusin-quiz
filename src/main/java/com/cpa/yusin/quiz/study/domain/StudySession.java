@@ -37,10 +37,11 @@ public class StudySession extends BaseEntity {
     @Column(nullable = false)
     private int lastIndex; // 마지막으로 푼(접근한) 문제 인덱스
 
-    private Integer currentScore; // EXAM 모드 완료 시 점수
+    private Integer currentScore; // 완료 요약의 correct count
 
     private LocalDateTime startedAt;
     private LocalDateTime finishedAt;
+    private Integer plannedProblemCount;
 
     public void updateLastIndex(int index) {
         this.lastIndex = index;
@@ -65,7 +66,12 @@ public class StudySession extends BaseEntity {
         this.finishedAt = finishedAt;
     }
 
-    public static StudySession start(Member member, Long examId, ExamMode mode, LocalDateTime startedAt) {
+    public void assignPlannedProblemCount(int plannedProblemCount) {
+        this.plannedProblemCount = plannedProblemCount;
+    }
+
+    public static StudySession start(Member member, Long examId, ExamMode mode, LocalDateTime startedAt,
+                                     int plannedProblemCount) {
         return StudySession.builder()
                 .member(member)
                 .examId(examId)
@@ -73,6 +79,7 @@ public class StudySession extends BaseEntity {
                 .status(StudySessionStatus.IN_PROGRESS)
                 .lastIndex(0)
                 .startedAt(startedAt)
+                .plannedProblemCount(plannedProblemCount)
                 .build();
     }
 }

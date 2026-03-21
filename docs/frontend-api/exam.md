@@ -18,10 +18,12 @@
 ## 사용자 앱 규칙
 
 - `/api/v1/exam` 은 상위 과목이 `PUBLISHED` 이고 시험도 `PUBLISHED` 인 데이터만 내려준다
+- `/api/v1/exam` 의 각 시험은 `questionCount` 를 포함하며, 이 값은 `/api/v2/problem?examId={examId}` 가 실제로 반환하는 활성 문제 수와 같아야 한다
 - `/api/v1/exam/year` 은 사용자에게 실제로 노출되는 `PUBLISHED` 시험이 하나라도 있는 연도만 내려준다
 - 공개 과목 아래 `DRAFT` 시험만 존재하면 `/api/v1/exam` 과 `/api/v1/exam/year` 는 200 응답과 빈 목록을 반환한다
 - 사용자 응답의 `status` 는 항상 `PUBLISHED` 다
 - `DRAFT` 시험은 문제, 질문, 답변, 북마크, 학습 시작의 사용자 진입점으로 사용할 수 없다
+- 더 이상 프론트가 "시험당 40문제" 같은 하드코딩 가정을 두면 안 된다
 
 ## 관리자 규칙
 
@@ -56,6 +58,27 @@
     "name": "모의고사",
     "year": 2026,
     "status": "DRAFT"
+  }
+]
+```
+
+## 사용자 응답 예시
+
+```json
+[
+  {
+    "id": 10,
+    "name": "1차",
+    "year": 2025,
+    "status": "PUBLISHED",
+    "questionCount": 37
+  },
+  {
+    "id": 11,
+    "name": "2차",
+    "year": 2025,
+    "status": "PUBLISHED",
+    "questionCount": 0
   }
 ]
 ```

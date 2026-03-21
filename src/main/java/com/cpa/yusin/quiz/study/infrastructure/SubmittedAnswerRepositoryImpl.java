@@ -1,6 +1,7 @@
 package com.cpa.yusin.quiz.study.infrastructure;
 
 import com.cpa.yusin.quiz.study.domain.SubmittedAnswer;
+import com.cpa.yusin.quiz.study.service.dto.SubmittedAnswerCorrectnessSnapshot;
 import com.cpa.yusin.quiz.study.service.port.SubmittedAnswerRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -27,5 +28,10 @@ public class SubmittedAnswerRepositoryImpl implements SubmittedAnswerRepository 
     @Override
     public List<SubmittedAnswer> findAllByStudySessionId(Long studySessionId) {
         return submittedAnswerJpaRepository.findAllByStudySessionId(studySessionId);
+    }
+
+    @Override
+    public List<SubmittedAnswerCorrectnessSnapshot> findCorrectnessSnapshotsByStudySessionId(Long studySessionId) {
+        return submittedAnswerJpaRepository.findCorrectnessSnapshotsByStudySessionId(studySessionId);
     }
 }

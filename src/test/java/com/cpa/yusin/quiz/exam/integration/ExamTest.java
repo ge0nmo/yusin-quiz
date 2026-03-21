@@ -1,5 +1,6 @@
 package com.cpa.yusin.quiz.exam.integration;
 
+import com.epages.restdocs.apispec.ResourceSnippetParameters;
 import com.cpa.yusin.quiz.config.TeardownExtension;
 import com.cpa.yusin.quiz.exam.domain.Exam;
 import com.cpa.yusin.quiz.exam.domain.ExamStatus;
@@ -8,6 +9,8 @@ import com.cpa.yusin.quiz.member.domain.Member;
 import com.cpa.yusin.quiz.member.domain.type.Platform;
 import com.cpa.yusin.quiz.member.domain.type.Role;
 import com.cpa.yusin.quiz.member.service.port.MemberRepository;
+import com.cpa.yusin.quiz.problem.domain.Problem;
+import com.cpa.yusin.quiz.problem.service.port.ProblemRepository;
 import com.cpa.yusin.quiz.subject.domain.Subject;
 import com.cpa.yusin.quiz.subject.service.port.SubjectRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -28,7 +31,8 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
-import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
+import static com.epages.restdocs.apispec.MockMvcRestDocumentationWrapper.document;
+import static com.epages.restdocs.apispec.ResourceDocumentation.resource;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.documentationConfiguration;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.*;
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.*;
@@ -50,6 +54,9 @@ class ExamTest {
 
         @Autowired
         private ExamRepository examRepository;
+
+        @Autowired
+        private ProblemRepository problemRepository;
 
         @Autowired
         private MemberRepository memberRepository;
@@ -82,7 +89,7 @@ class ExamTest {
         @Test
         void getBySubjectIdAndYear_success() throws Exception {
                 // given
-                examRepository.save(Exam.builder()
+                Exam firstExam = examRepository.save(Exam.builder()
                                 .id(1L)
                                 .name("1차")
                                 .year(2024)
@@ -90,7 +97,7 @@ class ExamTest {
                                 .status(ExamStatus.PUBLISHED)
                                 .build());
 
-                examRepository.save(Exam.builder()
+                Exam secondExam = examRepository.save(Exam.builder()
                                 .id(2L)
                                 .name("2차")
                                 .year(2024)
@@ -114,6 +121,30 @@ class ExamTest {
                                 .status(ExamStatus.DRAFT)
                                 .build());
 
+                problemRepository.save(Problem.builder()
+                                .id(10L)
+                                .number(1)
+                                .content("활성 문제")
+                                .explanation("해설")
+                                .exam(firstExam)
+                                .build());
+                Problem removedProblem = problemRepository.save(Problem.builder()
+                                .id(11L)
+                                .number(2)
+                                .content("삭제 문제")
+                                .explanation("해설")
+                                .exam(firstExam)
+                                .build());
+                removedProblem.delete();
+                problemRepository.save(removedProblem);
+                problemRepository.save(Problem.builder()
+                                .id(12L)
+                                .number(1)
+                                .content("활성 문제 2")
+                                .explanation("해설")
+                                .exam(secondExam)
+                                .build());
+
                 // when
                 ResultActions resultActions = mvc.perform(get("/api/v1/exam")
                                 .param("subjectId", economics.getId().toString())
@@ -124,6 +155,9 @@ class ExamTest {
                                 .andExpect(status().isOk())
                                 .andExpect(jsonPath("$.data.length()").value(3))
                                 .andExpect(jsonPath("$.data[0].status").value("PUBLISHED"))
+                                .andExpect(jsonPath("$.data[0].questionCount").value(1))
+                                .andExpect(jsonPath("$.data[1].questionCount").value(1))
+                                .andExpect(jsonPath("$.data[2].questionCount").value(0))
                                 .andDo(document("getExamsBySubjectIdAndYear",
                                                 preprocessRequest(prettyPrint()),
                                                 preprocessResponse(prettyPrint()),
@@ -139,6 +173,8 @@ class ExamTest {
                                                                                 .description("시험 이름"),
                                                                 fieldWithPath("data[].year").type(JsonFieldType.NUMBER)
                                                                                 .description("시험 연도"),
+                                                                fieldWithPath("data[].questionCount").type(JsonFieldType.NUMBER)
+                                                                                .description("사용자에게 실제로 노출되는 활성 문제 수"),
                                                                 fieldWithPath("data[].status").type(JsonFieldType.STRING)
                                                                                 .description("시험 공개 상태"))));
 
@@ -179,6 +215,13 @@ class ExamTest {
                                 .subjectId(economics.getId())
                                 .status(ExamStatus.DRAFT)
                                 .build());
+                problemRepository.save(Problem.builder()
+                                .id(20L)
+                                .number(1)
+                                .content("연도 없는 조회 문제")
+                                .explanation("해설")
+                                .exam(examRepository.findById(1L).orElseThrow())
+                                .build());
 
                 // when
                 ResultActions resultActions = mvc.perform(get("/api/v1/exam")
@@ -192,6 +235,10 @@ class ExamTest {
                                 .andDo(document("getExamsBySubjectIdWithoutYear",
                                                 preprocessRequest(prettyPrint()),
                                                 preprocessResponse(prettyPrint()),
+                                                resource(examResource(
+                                                                "사용자 시험 목록 조회",
+                                                                "모바일 시험 선택 화면이 사용하는 공개 시험 목록 조회 응답입니다. questionCount 는 /api/v2/problem 과 동일한 활성 문제 기준입니다."
+                                                )),
 
                                                 queryParameters(
                                                                 parameterWithName("subjectId").description("과목 고유 식별자"),
@@ -205,6 +252,8 @@ class ExamTest {
                                                                                 .description("시험 이름"),
                                                                 fieldWithPath("data[].year").type(JsonFieldType.NUMBER)
                                                                                 .description("시험 연도"),
+                                                                fieldWithPath("data[].questionCount").type(JsonFieldType.NUMBER)
+                                                                                .description("사용자에게 실제로 노출되는 활성 문제 수"),
                                                                 fieldWithPath("data[].status").type(JsonFieldType.STRING)
                                                                                 .description("시험 공개 상태"))));
 
@@ -344,5 +393,13 @@ class ExamTest {
                 mvc.perform(get("/api/admin/subject/{subjectId}/exam", economics.getId()))
                                 .andExpect(status().isOk())
                                 .andExpect(jsonPath("$.data[0].status").value("PUBLISHED"));
+        }
+
+        private ResourceSnippetParameters examResource(String summary, String description) {
+                return ResourceSnippetParameters.builder()
+                                .tag("Exam")
+                                .summary(summary)
+                                .description(description)
+                                .build();
         }
 }

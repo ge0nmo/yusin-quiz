@@ -4,6 +4,7 @@ import com.cpa.yusin.quiz.exam.controller.dto.request.ExamCreateRequest;
 import com.cpa.yusin.quiz.exam.controller.dto.request.ExamUpdateRequest;
 import com.cpa.yusin.quiz.exam.controller.dto.response.ExamCreateResponse;
 import com.cpa.yusin.quiz.exam.controller.dto.response.ExamDTO;
+import com.cpa.yusin.quiz.exam.controller.dto.response.UserExamDTO;
 import com.cpa.yusin.quiz.exam.domain.Exam;
 
 import java.util.List;
@@ -21,7 +22,7 @@ public interface ExamService
 
     ExamDTO getById(long id);
 
-    List<ExamDTO> getAllBySubjectId(long subjectId, Integer year);
+    List<UserExamDTO> getAllBySubjectId(long subjectId, Integer year);
 
     List<ExamDTO> getAllBySubjectIdForAdmin(long subjectId, Integer year);
 

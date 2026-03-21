@@ -184,7 +184,7 @@ public class TestContainer {
                 this.examMapper = new ExamMapper();
                 this.examValidator = new ExamValidatorImpl(this.examRepository);
                 this.examService = new ExamServiceImpl(this.examRepository, this.examMapper, this.subjectService,
-                                this.examValidator);
+                                this.examValidator, this.problemRepository);
                 this.examController = new ExamController(examService);
 
                 this.choiceMapper = new ChoiceMapperImpl();

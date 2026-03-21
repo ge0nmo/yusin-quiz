@@ -1,10 +1,15 @@
 package com.cpa.yusin.quiz.study.controller.dto.response;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
 @Getter
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class ExamFinishResponse {
-    private int finalScore;
+    @Deprecated
+    private final int finalScore;
+    private final int correctCount;
+    private final int totalCount;
+    private final int answeredCount;
+    private final int unansweredCount;
 }

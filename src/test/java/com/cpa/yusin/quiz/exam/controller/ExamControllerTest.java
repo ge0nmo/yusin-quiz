@@ -3,8 +3,9 @@ package com.cpa.yusin.quiz.exam.controller;
 import com.cpa.yusin.quiz.common.controller.dto.response.GlobalResponse;
 import com.cpa.yusin.quiz.config.TestContainer;
 import com.cpa.yusin.quiz.exam.controller.dto.request.ExamCreateRequest;
-import com.cpa.yusin.quiz.exam.controller.dto.response.ExamDTO;
+import com.cpa.yusin.quiz.exam.controller.dto.response.UserExamDTO;
 import com.cpa.yusin.quiz.exam.domain.ExamStatus;
+import com.cpa.yusin.quiz.problem.domain.Problem;
 import com.cpa.yusin.quiz.subject.domain.Subject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -34,21 +35,27 @@ class ExamControllerTest
     void getAllExamBySubjectId()
     {
         // given
-        testContainer.examService.save(1L, ExamCreateRequest.builder().name("1차").year(2024).status(ExamStatus.PUBLISHED).build());
+        long firstExamId = testContainer.examService.save(1L, ExamCreateRequest.builder().name("1차").year(2024).status(ExamStatus.PUBLISHED).build()).getId();
         testContainer.examService.save(1L, ExamCreateRequest.builder().name("2차").year(2024).status(ExamStatus.PUBLISHED).build());
         testContainer.examService.save(1L, ExamCreateRequest.builder().name("3차").year(2024).status(ExamStatus.PUBLISHED).build());
         testContainer.examService.save(1L, ExamCreateRequest.builder().name("숨김 시험").year(2024).status(ExamStatus.DRAFT).build());
         testContainer.examService.save(1L, ExamCreateRequest.builder().name("1차").year(2025).status(ExamStatus.PUBLISHED).build());
         testContainer.examService.save(1L, ExamCreateRequest.builder().name("2차").year(2025).status(ExamStatus.PUBLISHED).build());
+        testContainer.problemRepository.save(Problem.builder()
+                .number(1)
+                .content("문제")
+                .explanation("해설")
+                .exam(testContainer.examRepository.findById(firstExamId).orElseThrow())
+                .build());
 
         // when
-        ResponseEntity<GlobalResponse<List<ExamDTO>>> result = testContainer.examController.getAllExamBySubjectIdAndYear(1L, 2024);
+        ResponseEntity<GlobalResponse<List<UserExamDTO>>> result = testContainer.examController.getAllExamBySubjectIdAndYear(1L, 2024);
 
         // then
         assertThat(result.getStatusCode()).isEqualTo(HttpStatusCode.valueOf(200));
         assertThat(result.getBody()).isNotNull();
 
-        List<ExamDTO> response = result.getBody().getData();
+        List<UserExamDTO> response = result.getBody().getData();
 
         assertThat(response).hasSize(3);
 
@@ -60,7 +67,9 @@ class ExamControllerTest
 
         assertThat(response.get(2).getYear()).isEqualTo(2024);
         assertThat(response.get(2).getName()).isEqualTo("3차");
-        assertThat(response).extracting(ExamDTO::getStatus).containsOnly(ExamStatus.PUBLISHED);
+        assertThat(response).extracting(UserExamDTO::getStatus).containsOnly(ExamStatus.PUBLISHED);
+        assertThat(response.get(0).getQuestionCount()).isEqualTo(1);
+        assertThat(response.get(1).getQuestionCount()).isZero();
 
     }
 

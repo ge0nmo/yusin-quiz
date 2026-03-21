@@ -167,10 +167,11 @@
 - `StudySession`
   - 특정 회원이 특정 시험을 푸는 세션.
   - `examId`는 `Exam` 연관관계가 아니라 스칼라 ID.
-  - `mode`, `status`, `lastIndex`, `currentScore`, `startedAt`, `finishedAt` 보유.
+  - `mode`, `status`, `lastIndex`, `currentScore`, `startedAt`, `finishedAt`, `plannedProblemCount` 보유.
 - `SubmittedAnswer`
   - `(study_session_id, problem_id)` 유니크 제약 존재.
   - 시험 풀이 중 실제 선택한 보기 저장.
+  - `isCorrect` 는 `saveAnswer` 시점에 서버가 계산해 저장하는 authoritative correctness 필드다.
 - `DailyStudyLog`
   - `(member_id, date)` 유니크 제약 존재.
   - 일별 푼 문제 수를 누적 저장.
@@ -219,6 +220,9 @@
 - 페이징 정보는 `pageInfo`에 담기며 nullable.
 - 일부 관리자 조회 엔드포인트는 raw list를 직접 반환.
 - 예외는 `ExceptionAdvice`가 `ErrorResponse`로 변환.
+- 사용자 `/api/v1/exam` 응답은 `questionCount` 를 포함하며, `/api/v2/problem` 의 활성 문제 기준과 동일해야 한다.
+- `/api/v1/study/finish` 는 `correctCount`, `totalCount`, `answeredCount`, `unansweredCount` 를 authoritative summary 로 사용한다.
+- `/api/v1/study/finish` 의 `finalScore` 는 deprecated 하위호환 필드이며 현재 `correctCount` 와 같은 값을 유지한다.
 
 ### Frontend Integration Contracts
 
@@ -281,18 +285,26 @@
 - 시작: `StudySessionService.startSession`
   - 같은 회원, 같은 시험, 같은 모드의 `IN_PROGRESS` 세션이 있으면 재사용.
   - 없으면 새 세션 생성.
+  - 새 세션은 시작 시점 활성 문제 수를 `plannedProblemCount` 로 스냅샷한다.
+  - 사용자 시작 응답의 `submittedAnswers[]` item 은 `problemId`, `choiceId`, `isCorrect(boolean)` 계약을 유지해야 한다.
 - 답안 저장: `saveAnswer`
   - 세션은 `PESSIMISTIC_WRITE` 잠금 조회.
   - `SubmittedAnswer`는 `(session, problem)` 기준 upsert.
+  - `SubmittedAnswer.isCorrect` 는 `Choice.isAnswer` 기준으로 즉시 계산해 저장한다.
   - PRACTICE 모드면 정답 여부와 해설 반환.
 - 종료: `completeSession`
-  - 서버 측에서 정답 수를 다시 계산해 점수 산출.
+  - 서버 측에서 persisted answer 기준으로 `correctCount`, `answeredCount`, `unansweredCount`, `totalCount` 를 계산한다.
+  - `totalCount` 는 기본적으로 `plannedProblemCount` 를 사용한다.
+  - 이미 완료된 세션에 대한 중복 finish 요청은 같은 요약을 재응답하는 idempotent 경로를 우선 사용한다.
 
 ### 학습 로그 적재
 
 - `StudySessionService`는 `StudySolvedEvent`를 발행.
 - `StudyEventListener`는 `@TransactionalEventListener(AFTER_COMMIT)` + `@Async`로 후처리.
 - `StudyLogService.recordActivity`는 `(member_id, date)` 유니크 키 기반 upsert 로 일별 문제 풀이 수를 누적 저장한다.
+- `practice` 는 세션 내 같은 문제의 첫 제출만 로그에 반영된다.
+- 같은 세션에서 같은 문제의 답 변경은 로그를 다시 누적하지 않는다.
+- `real/exam` 은 finish 시점에 `answeredCount` 만큼 한 번만 누적되며, 중복 finish 재시도는 다시 누적하지 않는다.
 
 ### 질문 / 답변
 

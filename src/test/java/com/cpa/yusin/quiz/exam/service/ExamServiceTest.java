@@ -1,21 +1,19 @@
 package com.cpa.yusin.quiz.exam.service;
 
-import com.cpa.yusin.quiz.choice.domain.Choice;
 import com.cpa.yusin.quiz.config.TestContainer;
 import com.cpa.yusin.quiz.exam.controller.dto.request.ExamCreateRequest;
 import com.cpa.yusin.quiz.exam.controller.dto.request.ExamUpdateRequest;
 import com.cpa.yusin.quiz.exam.controller.dto.response.ExamCreateResponse;
+import com.cpa.yusin.quiz.exam.controller.dto.response.ExamDTO;
+import com.cpa.yusin.quiz.exam.controller.dto.response.UserExamDTO;
 import com.cpa.yusin.quiz.exam.domain.Exam;
 import com.cpa.yusin.quiz.exam.domain.ExamStatus;
-import com.cpa.yusin.quiz.exam.controller.dto.response.ExamDTO;
 import com.cpa.yusin.quiz.problem.domain.Problem;
 import com.cpa.yusin.quiz.subject.domain.Subject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
-import java.util.Optional;
-
 import static org.assertj.core.api.Assertions.assertThat;
 
 class ExamServiceTest
@@ -81,7 +79,7 @@ class ExamServiceTest
 
     @Test
     void getAllBySubjectId_shouldReturnOnlyPublishedExams() {
-        testContainer.examService.saveAsAdmin(1L, ExamCreateRequest.builder()
+        long publishedExamId = testContainer.examService.saveAsAdmin(1L, ExamCreateRequest.builder()
                 .name("공개 시험")
                 .year(2024)
                 .status(ExamStatus.PUBLISHED)
@@ -91,12 +89,20 @@ class ExamServiceTest
                 .year(2024)
                 .status(ExamStatus.DRAFT)
                 .build());
+        Exam publishedExam = testContainer.examRepository.findById(publishedExamId).orElseThrow();
+        testContainer.problemRepository.save(Problem.builder()
+                .number(1)
+                .content("문제")
+                .explanation("해설")
+                .exam(publishedExam)
+                .build());
 
-        List<ExamDTO> result = testContainer.examService.getAllBySubjectId(1L, 2024);
+        List<UserExamDTO> result = testContainer.examService.getAllBySubjectId(1L, 2024);
 
         assertThat(result).hasSize(1);
         assertThat(result.getFirst().getName()).isEqualTo("공개 시험");
         assertThat(result.getFirst().getStatus()).isEqualTo(ExamStatus.PUBLISHED);
+        assertThat(result.getFirst().getQuestionCount()).isEqualTo(1);
     }
 
     @Test

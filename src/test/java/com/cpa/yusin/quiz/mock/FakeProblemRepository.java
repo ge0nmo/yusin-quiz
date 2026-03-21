@@ -12,6 +12,7 @@ import org.springframework.util.StringUtils;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
 
 public class FakeProblemRepository implements ProblemRepository
 {
@@ -93,6 +94,24 @@ public class FakeProblemRepository implements ProblemRepository
                 .map(Problem::getNumber)
                 .min(Integer::compareTo)
                 .orElse(null);
+    }
+
+    @Override
+    public long countActiveByExamId(long examId) {
+        return data.stream()
+                .filter(problem -> problem.getExam().getId().equals(examId))
+                .filter(problem -> !problem.isRemoved())
+                .count();
+    }
+
+    @Override
+    public Map<Long, Long> countActiveByExamIds(List<Long> examIds) {
+        Set<Long> examIdSet = new HashSet<>(examIds);
+
+        return data.stream()
+                .filter(problem -> examIdSet.contains(problem.getExam().getId()))
+                .filter(problem -> !problem.isRemoved())
+                .collect(Collectors.groupingBy(problem -> problem.getExam().getId(), Collectors.counting()));
     }
 
     @Override
