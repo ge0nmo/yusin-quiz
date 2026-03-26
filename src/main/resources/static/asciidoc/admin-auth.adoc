@@ -1,0 +1,23 @@
+= API Documentation
+:doctype: book
+:icons: font
+:toc: left
+:toc-title: 순서
+:sectnums:
+:sectnumlevels: 5
+:source-highlighter: highlightjs
+
+== 관리자 인증 API
+
+== 관리자 로그인
+=== HTTP Request
+include::{snippets}/postAdminLogin/http-request.adoc[]
+
+=== Request Fields
+include::{snippets}/postAdminLogin/request-fields.adoc[]
+
+=== HTTP Response
+include::{snippets}/postAdminLogin/http-response.adoc[]
+
+=== Response Fields
+include::{snippets}/postAdminLogin/response-fields.adoc[]
