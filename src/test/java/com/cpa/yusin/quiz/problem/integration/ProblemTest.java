@@ -183,7 +183,8 @@ public class ProblemTest
                                 fieldWithPath("data.choices[].id").description("선택지 식별자").type(JsonFieldType.NUMBER),
                                 fieldWithPath("data.choices[].number").description("선택지 번호").type(JsonFieldType.NUMBER),
                                 fieldWithPath("data.choices[].content").description("선택지 내용").type(JsonFieldType.STRING),
-                                fieldWithPath("data.choices[].isAnswer").description("정답 여부").type(JsonFieldType.BOOLEAN)
+                                fieldWithPath("data.choices[].isAnswer").description("정답 여부").type(JsonFieldType.BOOLEAN),
+                                subsectionWithPath("data.choices[].explanation").description("Block 기반 선택지 해설")
                         )
                 ));
 
@@ -278,7 +279,8 @@ public class ProblemTest
                                 fieldWithPath("data[].choices[].id").description("선택지 식별자").type(JsonFieldType.NUMBER),
                                 fieldWithPath("data[].choices[].number").description("선택지 번호").type(JsonFieldType.NUMBER),
                                 fieldWithPath("data[].choices[].content").description("선택지 내용").type(JsonFieldType.STRING),
-                                fieldWithPath("data[].choices[].isAnswer").description("정답 여부").type(JsonFieldType.BOOLEAN)
+                                fieldWithPath("data[].choices[].isAnswer").description("정답 여부").type(JsonFieldType.BOOLEAN),
+                                subsectionWithPath("data[].choices[].explanation").description("Block 기반 선택지 해설")
                         )
                 ));
 
@@ -333,7 +335,8 @@ public class ProblemTest
                                 fieldWithPath("data[].choices[].id").description("선택지 식별자").type(JsonFieldType.NUMBER),
                                 fieldWithPath("data[].choices[].number").description("선택지 번호").type(JsonFieldType.NUMBER),
                                 fieldWithPath("data[].choices[].content").description("선택지 내용").type(JsonFieldType.STRING),
-                                fieldWithPath("data[].choices[].isAnswer").description("정답 여부").type(JsonFieldType.BOOLEAN)
+                                fieldWithPath("data[].choices[].isAnswer").description("정답 여부").type(JsonFieldType.BOOLEAN),
+                                subsectionWithPath("data[].choices[].explanation").description("Block 기반 선택지 해설")
                         )
                 ));
     }
@@ -385,7 +388,8 @@ public class ProblemTest
                                 fieldWithPath("data.choices[].id").description("선택지 식별자").type(JsonFieldType.NUMBER),
                                 fieldWithPath("data.choices[].number").description("선택지 번호").type(JsonFieldType.NUMBER),
                                 fieldWithPath("data.choices[].content").description("선택지 내용").type(JsonFieldType.STRING),
-                                fieldWithPath("data.choices[].isAnswer").description("정답 여부").type(JsonFieldType.BOOLEAN)
+                                fieldWithPath("data.choices[].isAnswer").description("정답 여부").type(JsonFieldType.BOOLEAN),
+                                subsectionWithPath("data.choices[].explanation").description("Block 기반 선택지 해설")
                         )
                 ));
     }
@@ -438,7 +442,8 @@ public class ProblemTest
                                 fieldWithPath("data[].choices[].id").description("선택지 식별자").type(JsonFieldType.NUMBER),
                                 fieldWithPath("data[].choices[].number").description("선택지 번호").type(JsonFieldType.NUMBER),
                                 fieldWithPath("data[].choices[].content").description("선택지 내용").type(JsonFieldType.STRING),
-                                fieldWithPath("data[].choices[].isAnswer").description("정답 여부").type(JsonFieldType.BOOLEAN)
+                                fieldWithPath("data[].choices[].isAnswer").description("정답 여부").type(JsonFieldType.BOOLEAN),
+                                subsectionWithPath("data[].choices[].explanation").description("Block 기반 선택지 해설")
                         )
                 ));
     }

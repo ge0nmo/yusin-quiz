@@ -188,13 +188,13 @@ public class TestContainer {
                 this.examController = new ExamController(examService);
 
                 this.choiceMapper = new ChoiceMapperImpl();
-                this.choiceService = new ChoiceServiceImpl(this.choiceRepository, this.choiceMapper);
+                ProblemContentProcessor problemContentProcessor = new ProblemContentProcessor(this.fileService,
+                                "test-prefix");
+                this.choiceService = new ChoiceServiceImpl(this.choiceRepository, this.choiceMapper, problemContentProcessor);
 
                 this.problemMapper = new ProblemMapper(this.choiceMapper);
                 problemValidator = new ProblemValidator(this.problemRepository);
                 this.problemNumberSlotManager = new ProblemNumberSlotManager(this.problemRepository);
-                ProblemContentProcessor problemContentProcessor = new ProblemContentProcessor(this.fileService,
-                                "test-prefix");
                 ProblemHtmlImageStorageService problemHtmlImageStorageService =
                                 new ProblemHtmlImageStorageService(this.fileService, this.uuidHolder);
                 this.youtubeLectureUrlProcessor = new YoutubeLectureUrlProcessor();

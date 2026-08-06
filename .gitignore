@@ -41,3 +41,5 @@ out/
 /src/main/resources/application-secret.yml
 /src/test/resources/application-test.properties
 /src/main/resources/application-local.yml
+
+PLAN.md

@@ -167,6 +167,7 @@ class BookmarkTest {
                                 fieldWithPath("data.content[].choices[].number").description("선택지 번호").type(JsonFieldType.NUMBER),
                                 fieldWithPath("data.content[].choices[].content").description("선택지 내용").type(JsonFieldType.STRING),
                                 fieldWithPath("data.content[].choices[].isAnswer").description("정답 여부").type(JsonFieldType.BOOLEAN),
+                                subsectionWithPath("data.content[].choices[].explanation").description("Block 기반 선택지 해설"),
                                 fieldWithPath("data.currentPage").description("현재 페이지 번호").type(JsonFieldType.NUMBER),
                                 fieldWithPath("data.size").description("페이지 크기").type(JsonFieldType.NUMBER),
                                 fieldWithPath("data.hasNext").description("다음 페이지 존재 여부").type(JsonFieldType.BOOLEAN)

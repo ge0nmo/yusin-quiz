@@ -1,8 +1,11 @@
 package com.cpa.yusin.quiz.choice.controller.dto.request;
 
+import com.cpa.yusin.quiz.problem.domain.block.Block;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
+
+import java.util.List;
 
 @ToString
 @AllArgsConstructor
@@ -18,6 +21,8 @@ public class ChoiceRequest
     private String content;
     @NotNull
     private Boolean isAnswer;
+
+    private List<Block> explanation;
 
     private boolean removedYn;
 

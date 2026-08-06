@@ -11,6 +11,8 @@ import com.cpa.yusin.quiz.choice.service.port.ChoiceRepository;
 import com.cpa.yusin.quiz.global.exception.ChoiceException;
 import com.cpa.yusin.quiz.global.exception.ExceptionMessage;
 import com.cpa.yusin.quiz.problem.domain.Problem;
+import com.cpa.yusin.quiz.problem.domain.block.Block;
+import com.cpa.yusin.quiz.problem.service.ProblemContentProcessor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -35,6 +37,7 @@ import static java.util.stream.Collectors.toList;
 public class ChoiceServiceImpl implements ChoiceService {
     private final ChoiceRepository choiceRepository;
     private final ChoiceMapper choiceMapper;
+    private final ProblemContentProcessor problemContentProcessor;
 
     @Transactional
     @Override
@@ -88,7 +91,7 @@ public class ChoiceServiceImpl implements ChoiceService {
             }
 
             Choice choice = request.isNew()
-                    ? Choice.fromSaveOrUpdate(request.getContent(), request.getNumber(), request.getIsAnswer(), problem)
+                    ? Choice.fromSaveOrUpdate(request.getContent(), request.getNumber(), request.getIsAnswer(), request.getExplanation(), problem)
                     : update(problem, request);
             if (choice != null) {
                 choices.add(choice);
@@ -111,7 +114,7 @@ public class ChoiceServiceImpl implements ChoiceService {
             return null;
         }
 
-        choice.update(request.getNumber(), request.getContent(), request.getIsAnswer());
+        choice.update(request.getNumber(), request.getContent(), request.getIsAnswer(), request.getExplanation());
         return choice;
     }
 
@@ -120,7 +123,7 @@ public class ChoiceServiceImpl implements ChoiceService {
     public void update(long choiceId, ChoiceUpdateRequest request) {
         Choice choice = findById(choiceId);
 
-        choice.update(request.getNumber(), request.getContent(), request.getIsAnswer());
+        choice.update(request.getNumber(), request.getContent(), request.getIsAnswer(), request.getExplanation());
 
         choiceRepository.save(choice);
     }
@@ -148,7 +151,9 @@ public class ChoiceServiceImpl implements ChoiceService {
     public List<ChoiceResponse> getAllByProblemId(long problemId) {
         List<Choice> choices = findAllByProblemId(problemId);
 
-        return choiceMapper.toResponses(choices);
+        return choices.stream()
+                .map(this::toResponseWithPresignedUrl)
+                .toList();
     }
 
     @Override
@@ -158,7 +163,7 @@ public class ChoiceServiceImpl implements ChoiceService {
         return choices.stream()
                 .collect(groupingBy(
                         choice -> choice.getProblem().getId(),
-                        mapping(choiceMapper::toResponse, toList())));
+                        mapping(this::toResponseWithPresignedUrl, toList())));
     }
 
     @Override
@@ -172,7 +177,24 @@ public class ChoiceServiceImpl implements ChoiceService {
         return choices.stream()
                 .collect(groupingBy(
                         choice -> choice.getProblem().getId(),
-                        mapping(choiceMapper::toResponse, toList())));
+                        mapping(this::toResponseWithPresignedUrl, toList())));
+    }
+
+    private ChoiceResponse toResponseWithPresignedUrl(Choice choice) {
+        ChoiceResponse response = choiceMapper.toResponse(choice);
+        if (response == null) {
+            return null;
+        }
+        List<Block> signedExplanation = problemContentProcessor != null
+                ? problemContentProcessor.processBlocksWithPresignedUrl(choice.getExplanationJson())
+                : (choice.getExplanationJson() != null ? choice.getExplanationJson() : Collections.emptyList());
+        return ChoiceResponse.builder()
+                .id(response.id())
+                .number(response.number())
+                .content(response.content())
+                .isAnswer(response.isAnswer())
+                .explanation(signedExplanation)
+                .build();
     }
 
     private void validateChoiceOwnership(Choice choice, Problem problem) {

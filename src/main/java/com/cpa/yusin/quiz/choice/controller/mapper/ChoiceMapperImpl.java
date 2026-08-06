@@ -25,6 +25,7 @@ public class ChoiceMapperImpl implements ChoiceMapper
                 .number(request.getNumber())
                 .content(request.getContent())
                 .isAnswer(request.getIsAnswer())
+                .explanationJson(request.getExplanation() != null ? request.getExplanation() : Collections.emptyList())
                 .problem(problem)
                 .build();
     }
@@ -38,6 +39,7 @@ public class ChoiceMapperImpl implements ChoiceMapper
                 .number(request.getNumber())
                 .content(request.getContent())
                 .isAnswer(request.getIsAnswer())
+                .explanationJson(request.getExplanation() != null ? request.getExplanation() : Collections.emptyList())
                 .problem(problem)
                 .build();
     }
@@ -54,6 +56,7 @@ public class ChoiceMapperImpl implements ChoiceMapper
                 .number(domain.getNumber())
                 .content(domain.getContent())
                 .isAnswer(domain.getIsAnswer())
+                .explanation(domain.getExplanationJson() != null ? domain.getExplanationJson() : Collections.emptyList())
                 .build();
     }
 
@@ -79,6 +82,7 @@ public class ChoiceMapperImpl implements ChoiceMapper
                 .number(domain.getNumber())
                 .content(domain.getContent())
                 .isAnswer(domain.getIsAnswer())
+                .explanation(domain.getExplanationJson() != null ? domain.getExplanationJson() : Collections.emptyList())
                 .build();
     }
 

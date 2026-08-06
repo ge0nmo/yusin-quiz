@@ -111,4 +111,31 @@ class ChoiceServiceTest extends MockSetup {
         assertThatThrownBy(() -> testContainer.choiceService.saveOrUpdate(requests, physicsProblem1))
                 .isInstanceOf(ChoiceException.class);
     }
+
+    @Test
+    @DisplayName("Choice에 explanation 블록이 포함되어 있으면 함께 저장되고 조회시 explanation이 포함된다")
+    void saveOrUpdate_whenChoiceContainsExplanation_thenSaveAndReturnExplanation() {
+        List<com.cpa.yusin.quiz.problem.domain.block.Block> explanationBlocks = List.of(
+                com.cpa.yusin.quiz.problem.domain.block.TextBlock.builder().type("text").tag("p").build()
+        );
+        List<ChoiceRequest> requests = List.of(
+                ChoiceRequest.builder().content("보기1").number(1).isAnswer(true).explanation(explanationBlocks).build(),
+                ChoiceRequest.builder().content("보기2").number(2).isAnswer(false).build()
+        );
+
+        Problem problem = physicsProblem2;
+        testContainer.choiceService.saveOrUpdate(requests, problem);
+
+        com.cpa.yusin.quiz.choice.controller.dto.response.ChoiceResponse responseWithExp = testContainer.choiceService.getAllByProblemId(problem.getId()).stream()
+                .filter(r -> r.number() == 1)
+                .findFirst()
+                .orElseThrow();
+        assertThat(responseWithExp.explanation()).hasSize(1);
+
+        com.cpa.yusin.quiz.choice.controller.dto.response.ChoiceResponse responseWithoutExp = testContainer.choiceService.getAllByProblemId(problem.getId()).stream()
+                .filter(r -> r.number() == 2)
+                .findFirst()
+                .orElseThrow();
+        assertThat(responseWithoutExp.explanation()).isEmpty();
+    }
 }

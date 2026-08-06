@@ -56,7 +56,20 @@
     "youtubeUrl": "https://youtu.be/abc123XYZ09?t=430",
     "startTimeSecond": 430
   },
-  "choices": []
+  "choices": [
+    {
+      "number": 1,
+      "content": "보기 1 내용",
+      "isAnswer": true,
+      "explanation": [
+        {
+          "type": "text",
+          "tag": "p",
+          "content": "보기 1 해설"
+        }
+      ]
+    }
+  ]
 }
 ```
 
@@ -93,7 +106,14 @@
         "id": 41,
         "number": 1,
         "content": "A",
-        "isAnswer": true
+        "isAnswer": true,
+        "explanation": [
+          {
+            "type": "text",
+            "tag": "p",
+            "content": "보기 1 해설"
+          }
+        ]
       }
     ]
   }

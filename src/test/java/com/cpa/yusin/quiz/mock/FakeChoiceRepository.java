@@ -20,6 +20,7 @@ public class FakeChoiceRepository implements ChoiceRepository {
                     .content(choice.getContent())
                     .number(choice.getNumber())
                     .isAnswer(choice.getIsAnswer())
+                    .explanationJson(choice.getExplanationJson())
                     .problem(choice.getProblem())
                     .build();
             data.add(newChoice);
