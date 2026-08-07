@@ -156,6 +156,7 @@ class BookmarkTest {
                                 fieldWithPath("data.content").description("북마크된 문제 목록").type(JsonFieldType.ARRAY),
                                 fieldWithPath("data.content[].id").description("문제 고유 식별자").type(JsonFieldType.NUMBER),
                                 fieldWithPath("data.content[].number").description("문제 번호").type(JsonFieldType.NUMBER),
+                                fieldWithPath("data.content[].requiresCalculation").description("계산식 필요 문제 여부").type(JsonFieldType.BOOLEAN),
                                 subsectionWithPath("data.content[].content").description("Block 기반 문제 본문"),
                                 subsectionWithPath("data.content[].explanation").description("Block 기반 문제 해설"),
                                 fieldWithPath("data.content[].lecture").description("문제에 연결된 해설강의 정보").type(JsonFieldType.OBJECT),

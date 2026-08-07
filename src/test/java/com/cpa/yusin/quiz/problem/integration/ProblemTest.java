@@ -325,6 +325,7 @@ public class ProblemTest
                         responseFields(
                                 fieldWithPath("data[].id").description("문제 고유 식별자").type(JsonFieldType.NUMBER),
                                 fieldWithPath("data[].number").description("문제 번호").type(JsonFieldType.NUMBER),
+                                fieldWithPath("data[].requiresCalculation").description("계산식 필요 문제 여부").type(JsonFieldType.BOOLEAN),
                                 subsectionWithPath("data[].content").description("Block 기반 문제 본문"),
                                 subsectionWithPath("data[].explanation").description("Block 기반 문제 해설"),
                                 fieldWithPath("data[].lecture").description("문제에 연결된 해설강의 정보").type(JsonFieldType.OBJECT),
@@ -378,6 +379,7 @@ public class ProblemTest
                         responseFields(
                                 fieldWithPath("data.id").description("문제 고유 식별자").type(JsonFieldType.NUMBER),
                                 fieldWithPath("data.number").description("문제 번호").type(JsonFieldType.NUMBER),
+                                fieldWithPath("data.requiresCalculation").description("계산식 필요 문제 여부").type(JsonFieldType.BOOLEAN),
                                 subsectionWithPath("data.content").description("Block 기반 문제 본문"),
                                 subsectionWithPath("data.explanation").description("Block 기반 문제 해설"),
                                 fieldWithPath("data.lecture").description("문제에 연결된 해설강의 정보").type(JsonFieldType.OBJECT),
@@ -432,6 +434,7 @@ public class ProblemTest
                         responseFields(
                                 fieldWithPath("data[].id").description("문제 고유 식별자").type(JsonFieldType.NUMBER),
                                 fieldWithPath("data[].number").description("문제 번호").type(JsonFieldType.NUMBER),
+                                fieldWithPath("data[].requiresCalculation").description("계산식 필요 문제 여부").type(JsonFieldType.BOOLEAN),
                                 subsectionWithPath("data[].content").description("Block 기반 문제 본문"),
                                 subsectionWithPath("data[].explanation").description("Block 기반 문제 해설"),
                                 fieldWithPath("data[].lecture").description("문제에 연결된 해설강의 정보").type(JsonFieldType.OBJECT),
@@ -712,7 +715,8 @@ public class ProblemTest
                                 fieldWithPath("lecture").description("문제 해설강의 정보. null 이면 기존 링크 제거").type(JsonFieldType.OBJECT),
                                 fieldWithPath("lecture.youtubeUrl").description("관리자 화면에서 입력한 유튜브 링크").type(JsonFieldType.STRING),
                                 fieldWithPath("lecture.startTimeSecond").description("해설 시작 시각(초). null 허용").type(JsonFieldType.NUMBER),
-                                fieldWithPath("choices").description("보기 목록. 빈 배열 허용").type(JsonFieldType.ARRAY)
+                                fieldWithPath("choices").description("보기 목록. 빈 배열 허용").type(JsonFieldType.ARRAY),
+                                fieldWithPath("requiresCalculation").description("계산식 필요 문제 여부").type(JsonFieldType.BOOLEAN)
                         ),
                         responseFields(
                                 fieldWithPath("data").description("저장 완료 메시지").type(JsonFieldType.STRING)
