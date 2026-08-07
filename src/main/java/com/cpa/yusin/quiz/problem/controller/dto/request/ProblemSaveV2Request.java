@@ -31,6 +31,8 @@ public class ProblemSaveV2Request
     @Valid
     private List<ChoiceRequest> choices;
 
+    private boolean requiresCalculation;
+
     // 신규 생성인지 확인하는 헬퍼 메서드
     @JsonIgnore
     public boolean isNew() {

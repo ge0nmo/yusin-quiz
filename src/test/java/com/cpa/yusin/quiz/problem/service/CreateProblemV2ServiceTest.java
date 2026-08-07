@@ -110,4 +110,51 @@ class CreateProblemV2ServiceTest extends MockSetup {
         assertThatThrownBy(() -> testContainer.createProblemV2Service.saveOrUpdateV2(biologyExam2.getId(), request))
                 .isInstanceOf(ProblemException.class);
     }
+
+    @Test
+    @DisplayName("V2 생성 시 requiresCalculation 설정값을 정상 저장한다")
+    void saveOrUpdateV2_whenCreateWithRequiresCalculation_thenStoresRequiresCalculationFlag() {
+        ProblemSaveV2Request request = ProblemSaveV2Request.builder()
+                .number(5)
+                .content(List.of(TextBlock.builder().type("text").tag("p").build()))
+                .explanation(List.of(TextBlock.builder().type("text").tag("p").build()))
+                .requiresCalculation(true)
+                .choices(List.of())
+                .build();
+
+        testContainer.createProblemV2Service.saveOrUpdateV2(biologyExam2.getId(), request);
+
+        Problem savedProblem = testContainer.problemRepository.findAllByExamId(biologyExam2.getId()).stream()
+                .filter(p -> p.getNumber() == 5)
+                .findFirst()
+                .orElseThrow();
+        assertThat(savedProblem.isRequiresCalculation()).isTrue();
+    }
+
+    @Test
+    @DisplayName("V2 수정 시 requiresCalculation 변경값을 정상 업데이트한다")
+    void saveOrUpdateV2_whenUpdateRequiresCalculation_thenUpdatesRequiresCalculationFlag() {
+        Problem savedProblem = testContainer.problemRepository.save(Problem.builder()
+                .id(50L)
+                .number(6)
+                .contentJson(List.of(TextBlock.builder().type("text").tag("p").build()))
+                .explanationJson(List.of(TextBlock.builder().type("text").tag("p").build()))
+                .requiresCalculation(true)
+                .exam(biologyExam2)
+                .build());
+
+        ProblemSaveV2Request request = ProblemSaveV2Request.builder()
+                .id(savedProblem.getId())
+                .number(savedProblem.getNumber())
+                .content(List.of(TextBlock.builder().type("text").tag("p").build()))
+                .explanation(List.of(TextBlock.builder().type("text").tag("p").build()))
+                .requiresCalculation(false)
+                .choices(List.of())
+                .build();
+
+        testContainer.createProblemV2Service.saveOrUpdateV2(biologyExam2.getId(), request);
+
+        Problem updatedProblem = testContainer.problemRepository.findById(savedProblem.getId()).orElseThrow();
+        assertThat(updatedProblem.isRequiresCalculation()).isFalse();
+    }
 }

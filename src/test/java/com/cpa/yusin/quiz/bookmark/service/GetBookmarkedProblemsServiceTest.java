@@ -140,4 +140,27 @@ class GetBookmarkedProblemsServiceTest extends MockSetup {
                 assertThat(response.getContent().get(0).getLecture().getPlaybackUrl())
                                 .isEqualTo("https://www.youtube.com/watch?v=abc123XYZ09&t=430s");
         }
+
+        @Test
+        @DisplayName("북마크된 문제 응답에 requiresCalculation 필드가 올바르게 포함된다")
+        void getBookmarkedProblems_withRequiresCalculation() {
+                // given
+                Long memberId = member1.getId();
+                Problem calcProblem = testContainer.problemRepository.save(Problem.builder()
+                                .id(99L)
+                                .content("calc problem")
+                                .number(99)
+                                .requiresCalculation(true)
+                                .exam(physicsExam1)
+                                .build());
+                testContainer.createBookmarkService.create(memberId, calcProblem.getId());
+
+                // when
+                BookmarkedProblemSliceResponse response = testContainer.getBookmarkedProblemsService
+                                .getBookmarkedProblems(memberId, null, 0, 20);
+
+                // then
+                assertThat(response.getContent()).hasSize(1);
+                assertThat(response.getContent().get(0).isRequiresCalculation()).isTrue();
+        }
 }

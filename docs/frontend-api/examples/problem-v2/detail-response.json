@@ -28,6 +28,7 @@
         "content": "A",
         "isAnswer": true
       }
-    ]
+    ],
+    "requiresCalculation": true
   }
 }

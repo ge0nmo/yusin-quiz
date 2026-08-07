@@ -62,6 +62,11 @@ public class Problem extends BaseEntity
     @JoinColumn(name = "exam_id", nullable = false)
     private Exam exam;
 
+    /**
+     * 말문제 여부를 판단
+     */
+    private boolean requiresCalculation;
+
     // =========================================================
     // [V1 Methods] Legacy Factory
     // =========================================================
@@ -91,23 +96,25 @@ public class Problem extends BaseEntity
      * [V2 생성] JSON Block 리스트를 받아 Problem 객체 생성
      * Client에서 이미지가 URL로 넘어오므로, 그대로 저장하면 됩니다.
      */
-    public static Problem fromSaveOrUpdate(List<Block> contentJson, List<Block> explanationJson, int number, Exam exam) {
+    public static Problem fromSaveOrUpdate(List<Block> contentJson, List<Block> explanationJson, int number, boolean requiresCalculation, Exam exam) {
         return Problem.builder()
                 .contentJson(contentJson)
                 .explanationJson(explanationJson)
                 .number(number)
                 .exam(exam)
                 .isRemoved(false)
+                .requiresCalculation(requiresCalculation)
                 .build();
     }
 
     /**
      * [V2 수정] JSON Block 데이터 업데이트
      */
-    public void update(List<Block> contentJson, int number, List<Block> explanationJson) {
+    public void update(List<Block> contentJson, int number, List<Block> explanationJson, boolean requiresCalculation) {
         this.contentJson = contentJson;
         this.number = number;
         this.explanationJson = explanationJson;
+        this.requiresCalculation = requiresCalculation;
     }
 
     // =========================================================

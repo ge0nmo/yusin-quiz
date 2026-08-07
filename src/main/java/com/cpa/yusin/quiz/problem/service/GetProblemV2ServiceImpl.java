@@ -95,6 +95,7 @@ public class GetProblemV2ServiceImpl implements GetProblemV2Service {
         return ProblemV2Response.builder()
                 .id(problem.getId())
                 .number(problem.getNumber())
+                .requiresCalculation(problem.isRequiresCalculation())
                 .content(problemContentProcessor.processBlocksWithPresignedUrl(problem.getContentJson()))
                 .explanation(problemContentProcessor.processBlocksWithPresignedUrl(problem.getExplanationJson()))
                 .lecture(ProblemLectureResponse.from(problem))

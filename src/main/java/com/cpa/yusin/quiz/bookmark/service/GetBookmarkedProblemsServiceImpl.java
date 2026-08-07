@@ -70,6 +70,7 @@ public class GetBookmarkedProblemsServiceImpl implements GetBookmarkedProblemsSe
                                                                                         problem.getExplanationJson()))
                                                         .lecture(ProblemLectureResponse.from(problem))
                                                         .choices(choices)
+                                                        .requiresCalculation(problem.isRequiresCalculation())
                                                         .build();
                                 })
                                 .collect(Collectors.toList());

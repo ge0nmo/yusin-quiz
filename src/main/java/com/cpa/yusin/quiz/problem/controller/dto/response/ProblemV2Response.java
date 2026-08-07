@@ -14,6 +14,8 @@ public class ProblemV2Response
     private Long id;
     private int number;
 
+    private boolean requiresCalculation;
+
     // [핵심] HTML String이 아닌 Block List 반환
     private List<Block> content;
     private List<Block> explanation;

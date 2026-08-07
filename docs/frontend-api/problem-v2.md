@@ -30,6 +30,7 @@
 - 응답의 `lecture.playbackUrl`은 프론트가 그대로 사용해야 함
 - 입력 URL은 `youtu.be`, `youtube.com/watch`, `youtube.com/shorts`, `youtube.com/embed`를 허용함
 - 입력 URL의 `t`, `start`, `si` 등 부가 쿼리는 저장하지 않음
+- `requiresCalculation` (boolean): 계산식이 필요한 계산문제 여부 (기본값 `false`, `true`이면 계산필요 문제)
 
 ## 관리자 저장 요청 예제
 

@@ -18,5 +18,6 @@
     "youtubeUrl": "https://youtu.be/abc123XYZ09?t=430",
     "startTimeSecond": 430
   },
-  "choices": []
+  "choices": [],
+  "requiresCalculation": true
 }

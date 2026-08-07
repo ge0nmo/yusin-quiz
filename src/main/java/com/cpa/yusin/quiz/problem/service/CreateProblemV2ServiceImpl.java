@@ -39,6 +39,7 @@ public class CreateProblemV2ServiceImpl implements CreateProblemV2Service
                     request.getContent(),
                     request.getExplanation(),
                     request.getNumber(),
+                    request.isRequiresCalculation(),
                     exam
             );
             applyLecture(problem, request);
@@ -59,13 +60,12 @@ public class CreateProblemV2ServiceImpl implements CreateProblemV2Service
             problem.update(
                     request.getContent(),
                     request.getNumber(),
-                    request.getExplanation()
+                    request.getExplanation(),
+                    request.isRequiresCalculation()
             );
             applyLecture(problem, request);
 
             choiceService.saveOrUpdate(request.getChoices(), problem);
-
-            log.info("V2 Updated Problem: ID={}", problem.getId());
         }
     }
 

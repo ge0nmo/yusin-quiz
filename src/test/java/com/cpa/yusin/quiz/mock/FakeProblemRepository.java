@@ -34,6 +34,7 @@ public class FakeProblemRepository implements ProblemRepository
                     .lectureYoutubeUrl(problem.getLectureYoutubeUrl())
                     .lectureStartSecond(problem.getLectureStartSecond())
                     .exam(problem.getExam())
+                    .requiresCalculation(problem.isRequiresCalculation())
                     .build();
 
             data.add(newProblem);
