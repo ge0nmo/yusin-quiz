@@ -4,6 +4,7 @@ import com.cpa.yusin.quiz.study.domain.ExamMode;
 import com.cpa.yusin.quiz.study.domain.StudySession;
 import com.cpa.yusin.quiz.study.domain.StudySessionStatus;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface StudySessionRepository {
@@ -15,4 +16,12 @@ public interface StudySessionRepository {
 
     Optional<StudySession> findByMemberIdAndExamIdAndStatusAndMode(
             Long memberId, Long examId, StudySessionStatus status, ExamMode mode);
+
+    Optional<StudySession> findLatestByMemberIdAndStatus(Long memberId, StudySessionStatus status);
+
+    List<StudySession> findByMemberIdAndStatus(Long memberId, StudySessionStatus status);
+
+    List<StudySession> findByMemberIdAndExamIdAndStatus(Long memberId, Long examId, StudySessionStatus status);
+
+    List<StudySession> findAllByMemberIdAndExamIdAndStatusAndMode(Long memberId, Long examId, StudySessionStatus status, ExamMode mode);
 }

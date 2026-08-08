@@ -50,6 +50,8 @@ public class SecurityConfig {
                 .accessDeniedHandler(userApiAccessDeniedHandler));
         http.authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/v1/bookmarks/**").authenticated()
+                .requestMatchers("/api/v1/study/**").authenticated()
+                .requestMatchers("/api/v1/study-logs/**").authenticated()
                 .requestMatchers(HttpMethod.GET, "/api/v1/**").permitAll()
                 .requestMatchers("/api/v1/auth/**").permitAll()
                 .requestMatchers("/api/v1/**").authenticated());

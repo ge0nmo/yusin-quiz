@@ -46,6 +46,19 @@ public class StudyLogService {
         return dailyStudyLogRepository.findByMemberIdAndDateBetween(memberId, startDate, endDate);
     }
 
+    public int getTodaySolved(Long memberId) {
+        LocalDate today = clockHolder.getCurrentDateTime().toLocalDate();
+        return dailyStudyLogRepository.findByMemberIdAndDate(memberId, today)
+                .map(DailyStudyLog::getSolvedCount)
+                .orElse(0);
+    }
+
+    public int getYearSolvedCount(Long memberId, int year) {
+        LocalDate startDate = LocalDate.of(year, 1, 1);
+        LocalDate endDate = LocalDate.of(year, 12, 31);
+        return dailyStudyLogRepository.sumSolvedCountByMemberIdAndDateBetween(memberId, startDate, endDate);
+    }
+
     public int calculateCurrentStreak(Long memberId) {
         LocalDate today = clockHolder.getCurrentDateTime().toLocalDate();
         LocalDate oneYearAgo = today.minusDays(365);

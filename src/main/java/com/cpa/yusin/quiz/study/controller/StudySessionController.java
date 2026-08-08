@@ -9,6 +9,9 @@ import com.cpa.yusin.quiz.study.controller.dto.response.ExamAnswerResponse;
 import com.cpa.yusin.quiz.study.controller.dto.response.ExamFinishResponse;
 import com.cpa.yusin.quiz.study.controller.dto.response.ExamStartResponse;
 import com.cpa.yusin.quiz.study.controller.dto.response.SubmittedAnswerResponse;
+import com.cpa.yusin.quiz.study.controller.dto.response.StudyProgressAbandonResponse;
+import com.cpa.yusin.quiz.study.controller.dto.response.StudySummaryResponse;
+import com.cpa.yusin.quiz.study.domain.ExamMode;
 import com.cpa.yusin.quiz.study.domain.StudySession;
 import com.cpa.yusin.quiz.study.domain.SubmittedAnswer;
 import com.cpa.yusin.quiz.study.service.StudySessionService;
@@ -17,10 +20,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -81,5 +81,33 @@ public class StudySessionController {
                                 summary.answeredCount(),
                                 summary.unansweredCount()
                 )));
+        }
+
+        // 4. 학습 요약 조회
+        @GetMapping("/summary")
+        public ResponseEntity<GlobalResponse<StudySummaryResponse>> getSummary(
+                        @AuthenticationPrincipal MemberDetails memberDetails) {
+                StudySummaryResponse response = studySessionService.getStudySummary(memberDetails.getMember().getId());
+                return ResponseEntity.ok(GlobalResponse.success(response));
+        }
+
+        // 5. 전체 진행 중 풀이 초기화
+        @DeleteMapping("/progress")
+        public ResponseEntity<GlobalResponse<StudyProgressAbandonResponse>> abandonAllProgress(
+                        @AuthenticationPrincipal MemberDetails memberDetails) {
+                StudyProgressAbandonResponse response = studySessionService.abandonProgress(
+                                memberDetails.getMember().getId(), null, null);
+                return ResponseEntity.ok(GlobalResponse.success(response));
+        }
+
+        // 6. 특정 시험 진행 중 풀이 초기화
+        @DeleteMapping("/progress/{examId}")
+        public ResponseEntity<GlobalResponse<StudyProgressAbandonResponse>> abandonExamProgress(
+                        @AuthenticationPrincipal MemberDetails memberDetails,
+                        @PathVariable("examId") Long examId,
+                        @RequestParam(name = "mode", required = false) ExamMode mode) {
+                StudyProgressAbandonResponse response = studySessionService.abandonProgress(
+                                memberDetails.getMember().getId(), examId, mode);
+                return ResponseEntity.ok(GlobalResponse.success(response));
         }
 }

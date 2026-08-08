@@ -8,10 +8,22 @@ import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface StudySessionJpaRepository extends JpaRepository<StudySession, Long> {
     Optional<StudySession> findByMemberIdAndExamIdAndStatusAndMode(
+            Long memberId, Long examId, StudySessionStatus status, ExamMode mode);
+
+    Optional<StudySession> findFirstByMemberIdAndStatusOrderByUpdatedAtDesc(
+            Long memberId, StudySessionStatus status);
+
+    List<StudySession> findByMemberIdAndStatus(Long memberId, StudySessionStatus status);
+
+    List<StudySession> findByMemberIdAndExamIdAndStatus(
+            Long memberId, Long examId, StudySessionStatus status);
+
+    List<StudySession> findAllByMemberIdAndExamIdAndStatusAndMode(
             Long memberId, Long examId, StudySessionStatus status, ExamMode mode);
 
     @Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)

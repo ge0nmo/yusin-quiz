@@ -55,6 +55,7 @@ import static org.springframework.restdocs.operation.preprocess.Preprocessors.pr
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.restdocs.payload.PayloadDocumentation.requestFields;
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
+import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.delete;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
@@ -355,6 +356,53 @@ class StudyApiTest {
                           "sessionId": %d
                         }
                         """.formatted(sessionId)));
+    }
+
+    @Test
+    @DisplayName("GET /api/v1/study/summary - 진행 중인 세션이 있는 경우 학습 요약 조회")
+    void getSummary_whenInProgressSessionExists() throws Exception {
+        ExamFixture fixture = createExamFixture("회계학", "2024년 1차 회계학", 2024, 40);
+        given(clockHolder.getCurrentDateTime()).willReturn(NOW);
+
+        Long sessionId = startSession(fixture.exam().getId(), ExamMode.PRACTICE);
+        submitAnswer(sessionId, fixture.problemIds().get(0), fixture.correctChoiceIds().get(0), 1);
+
+        mvc.perform(get("/api/v1/study/summary")
+                        .with(user(memberDetails)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.todaySolved").exists())
+                .andExpect(jsonPath("$.data.currentStreak").exists())
+                .andExpect(jsonPath("$.data.yearSolved").exists())
+                .andExpect(jsonPath("$.data.inProgress").exists())
+                .andExpect(jsonPath("$.data.inProgress.sessionId").value(sessionId))
+                .andExpect(jsonPath("$.data.inProgress.examId").value(fixture.exam().getId()))
+                .andExpect(jsonPath("$.data.inProgress.examName").value("2024년 1차 회계학"))
+                .andExpect(jsonPath("$.data.inProgress.mode").value("PRACTICE"))
+                .andExpect(jsonPath("$.data.inProgress.lastIndex").value(1))
+                .andExpect(jsonPath("$.data.inProgress.answeredCount").value(1))
+                .andExpect(jsonPath("$.data.inProgress.totalCount").value(40));
+    }
+
+    @Test
+    @DisplayName("DELETE /api/v1/study/progress - 진행 중인 풀이 초기화 및 요약 갱신 검증")
+    void abandonProgress_andVerifySummaryNull() throws Exception {
+        ExamFixture fixture = createExamFixture("회계학", "2024년 1차 회계학", 2024, 40);
+        given(clockHolder.getCurrentDateTime()).willReturn(NOW);
+
+        startSession(fixture.exam().getId(), ExamMode.PRACTICE);
+
+        mvc.perform(get("/api/v1/study/summary").with(user(memberDetails)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.inProgress").value(org.hamcrest.Matchers.notNullValue()));
+
+        mvc.perform(delete("/api/v1/study/progress")
+                        .with(user(memberDetails)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.abandonedCount").value(1));
+
+        mvc.perform(get("/api/v1/study/summary").with(user(memberDetails)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.inProgress").value(org.hamcrest.Matchers.nullValue()));
     }
 
     private void awaitDailyLogCount(Long memberId, LocalDate date, int expectedCount) throws Exception {

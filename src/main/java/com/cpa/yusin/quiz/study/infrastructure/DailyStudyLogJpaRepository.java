@@ -17,6 +17,9 @@ public interface DailyStudyLogJpaRepository extends JpaRepository<DailyStudyLog,
 
         List<DailyStudyLog> findByMemberIdAndDateBetween(Long memberId, LocalDate startDate, LocalDate endDate);
 
+        @Query("SELECT COALESCE(SUM(d.solvedCount), 0) FROM DailyStudyLog d WHERE d.member.id = :memberId AND d.date BETWEEN :startDate AND :endDate")
+        int sumSolvedCountByMemberIdAndDateBetween(@Param("memberId") Long memberId, @Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
+
         @Modifying(clearAutomatically = true)
         @Query(value = """
                         INSERT INTO daily_study_log (member_id, date, solved_count, created_at, updated_at)

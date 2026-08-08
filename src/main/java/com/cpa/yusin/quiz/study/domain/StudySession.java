@@ -66,6 +66,10 @@ public class StudySession extends BaseEntity {
         this.finishedAt = finishedAt;
     }
 
+    public void abandon() {
+        this.status = StudySessionStatus.ABANDONED;
+    }
+
     public void assignPlannedProblemCount(int plannedProblemCount) {
         this.plannedProblemCount = plannedProblemCount;
     }

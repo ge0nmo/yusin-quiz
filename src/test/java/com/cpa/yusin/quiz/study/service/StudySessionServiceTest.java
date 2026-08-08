@@ -80,6 +80,9 @@ class StudySessionServiceTest {
     @Mock
     private ProblemRepository problemRepository;
 
+    @Mock
+    private StudyLogService studyLogService;
+
     private Member member;
     private static final LocalDateTime NOW = LocalDateTime.of(2025, 1, 1, 12, 0, 0);
 
@@ -600,6 +603,92 @@ class StudySessionServiceTest {
         assertThatThrownBy(() -> studySessionService.saveAnswer(member.getId(), sessionId, problemId, 1L, 0))
                 .isInstanceOf(MemberException.class)
                 .hasMessage(ExceptionMessage.NO_AUTHORIZATION.getMessage());
+    }
+
+    @Test
+    @DisplayName("학습 요약 조회 - 진행 중인 세션이 존재하는 경우")
+    void getStudySummary_whenInProgressSessionExists() {
+        Long memberId = 1L;
+        Long examId = 100L;
+        Exam exam = Exam.builder().id(examId).name("2024년 회계학").build();
+        StudySession session = StudySession.builder()
+                .id(10L)
+                .member(member)
+                .examId(examId)
+                .mode(ExamMode.PRACTICE)
+                .status(StudySessionStatus.IN_PROGRESS)
+                .lastIndex(5)
+                .plannedProblemCount(40)
+                .build();
+
+        given(clockHolder.getCurrentDateTime()).willReturn(NOW);
+        given(studyLogService.getTodaySolved(memberId)).willReturn(15);
+        given(studyLogService.calculateCurrentStreak(memberId)).willReturn(4);
+        given(studyLogService.getYearSolvedCount(memberId, 2025)).willReturn(320);
+        given(studySessionRepository.findLatestByMemberIdAndStatus(memberId, StudySessionStatus.IN_PROGRESS))
+                .willReturn(Optional.of(session));
+        given(examService.findPublishedById(examId)).willReturn(exam);
+        given(submittedAnswerRepository.findAllByStudySessionId(10L)).willReturn(List.of(
+                SubmittedAnswer.create(session, 1L, 100L, true),
+                SubmittedAnswer.create(session, 2L, 101L, false)
+        ));
+
+        com.cpa.yusin.quiz.study.controller.dto.response.StudySummaryResponse response = studySessionService.getStudySummary(memberId);
+
+        assertThat(response.todaySolved()).isEqualTo(15);
+        assertThat(response.currentStreak()).isEqualTo(4);
+        assertThat(response.yearSolved()).isEqualTo(320);
+        assertThat(response.inProgress()).isNotNull();
+        assertThat(response.inProgress().sessionId()).isEqualTo(10L);
+        assertThat(response.inProgress().examId()).isEqualTo(examId);
+        assertThat(response.inProgress().examName()).isEqualTo("2024년 회계학");
+        assertThat(response.inProgress().mode()).isEqualTo("PRACTICE");
+        assertThat(response.inProgress().lastIndex()).isEqualTo(5);
+        assertThat(response.inProgress().answeredCount()).isEqualTo(2);
+        assertThat(response.inProgress().totalCount()).isEqualTo(40);
+    }
+
+    @Test
+    @DisplayName("학습 요약 조회 - 진행 중인 세션이 없는 경우")
+    void getStudySummary_whenNoInProgressSession() {
+        Long memberId = 1L;
+
+        given(clockHolder.getCurrentDateTime()).willReturn(NOW);
+        given(studyLogService.getTodaySolved(memberId)).willReturn(0);
+        given(studyLogService.calculateCurrentStreak(memberId)).willReturn(0);
+        given(studyLogService.getYearSolvedCount(memberId, 2025)).willReturn(0);
+        given(studySessionRepository.findLatestByMemberIdAndStatus(memberId, StudySessionStatus.IN_PROGRESS))
+                .willReturn(Optional.empty());
+
+        com.cpa.yusin.quiz.study.controller.dto.response.StudySummaryResponse response = studySessionService.getStudySummary(memberId);
+
+        assertThat(response.todaySolved()).isEqualTo(0);
+        assertThat(response.currentStreak()).isEqualTo(0);
+        assertThat(response.yearSolved()).isEqualTo(0);
+        assertThat(response.inProgress()).isNull();
+    }
+
+    @Test
+    @DisplayName("진행 중 풀이 초기화 - 특정 시험 및 모드 초기화")
+    void abandonProgress_withExamIdAndMode() {
+        Long memberId = 1L;
+        Long examId = 100L;
+        ExamMode mode = ExamMode.PRACTICE;
+        StudySession session = StudySession.builder()
+                .id(10L)
+                .member(member)
+                .examId(examId)
+                .mode(mode)
+                .status(StudySessionStatus.IN_PROGRESS)
+                .build();
+
+        given(studySessionRepository.findAllByMemberIdAndExamIdAndStatusAndMode(memberId, examId, StudySessionStatus.IN_PROGRESS, mode))
+                .willReturn(List.of(session));
+
+        com.cpa.yusin.quiz.study.controller.dto.response.StudyProgressAbandonResponse response = studySessionService.abandonProgress(memberId, examId, mode);
+
+        assertThat(response.abandonedCount()).isEqualTo(1);
+        assertThat(session.getStatus()).isEqualTo(StudySessionStatus.ABANDONED);
     }
 
     private StudySession inProgressSession(Long sessionId, Long examId, ExamMode mode, int plannedProblemCount) {

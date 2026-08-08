@@ -14,6 +14,8 @@ public interface DailyStudyLogRepository {
 
     List<DailyStudyLog> findByMemberIdAndDateBetween(Long memberId, LocalDate startDate, LocalDate endDate);
 
+    int sumSolvedCountByMemberIdAndDateBetween(Long memberId, LocalDate startDate, LocalDate endDate);
+
     int upsertSolvedCount(Long memberId, LocalDate date, int amount, LocalDateTime timestamp);
 
     int increaseSolvedCount(Long memberId, LocalDate date);

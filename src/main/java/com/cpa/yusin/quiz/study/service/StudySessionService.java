@@ -12,7 +12,11 @@ import com.cpa.yusin.quiz.member.service.port.MemberRepository;
 import com.cpa.yusin.quiz.problem.controller.port.ProblemService;
 import com.cpa.yusin.quiz.problem.domain.Problem;
 import com.cpa.yusin.quiz.problem.service.port.ProblemRepository;
+import com.cpa.yusin.quiz.exam.domain.Exam;
 import com.cpa.yusin.quiz.study.controller.dto.response.ExamAnswerResponse;
+import com.cpa.yusin.quiz.study.controller.dto.response.InProgressSessionResponse;
+import com.cpa.yusin.quiz.study.controller.dto.response.StudyProgressAbandonResponse;
+import com.cpa.yusin.quiz.study.controller.dto.response.StudySummaryResponse;
 import com.cpa.yusin.quiz.study.domain.*;
 import com.cpa.yusin.quiz.study.event.StudySolvedEvent;
 import com.cpa.yusin.quiz.study.service.port.StudySessionRepository;
@@ -46,6 +50,7 @@ public class StudySessionService {
     private final ExamService examService;
     private final ProblemService problemService;
     private final ProblemRepository problemRepository;
+    private final StudyLogService studyLogService;
     private final ApplicationEventPublisher eventPublisher;
     private final ClockHolder clockHolder;
 
@@ -159,6 +164,62 @@ public class StudySessionService {
         }
 
         return summary;
+    }
+
+    public StudySummaryResponse getStudySummary(Long memberId) {
+        int todaySolved = studyLogService.getTodaySolved(memberId);
+        int currentStreak = studyLogService.calculateCurrentStreak(memberId);
+        int yearSolved = studyLogService.getYearSolvedCount(memberId, clockHolder.getCurrentDateTime().getYear());
+
+        Optional<StudySession> latestSessionOpt = studySessionRepository
+                .findLatestByMemberIdAndStatus(memberId, StudySessionStatus.IN_PROGRESS);
+
+        InProgressSessionResponse inProgress = null;
+        if (latestSessionOpt.isPresent()) {
+            StudySession session = latestSessionOpt.get();
+            Exam exam = examService.findPublishedById(session.getExamId());
+            String examName = (exam != null) ? exam.getName() : "";
+            int answeredCount = countAnsweredProblems(session.getId());
+            int totalCount = session.getPlannedProblemCount() != null
+                    ? session.getPlannedProblemCount()
+                    : Math.toIntExact(problemRepository.countActiveByExamId(session.getExamId()));
+
+            inProgress = new InProgressSessionResponse(
+                    session.getId(),
+                    session.getExamId(),
+                    examName,
+                    session.getMode().name(),
+                    session.getLastIndex(),
+                    answeredCount,
+                    totalCount
+            );
+        }
+
+        return new StudySummaryResponse(
+                todaySolved,
+                currentStreak,
+                yearSolved,
+                inProgress
+        );
+    }
+
+    @Transactional
+    public StudyProgressAbandonResponse abandonProgress(Long memberId, Long examId, ExamMode mode) {
+        List<StudySession> sessions;
+        if (examId == null) {
+            sessions = studySessionRepository.findByMemberIdAndStatus(memberId, StudySessionStatus.IN_PROGRESS);
+        } else if (mode == null) {
+            sessions = studySessionRepository.findByMemberIdAndExamIdAndStatus(memberId, examId, StudySessionStatus.IN_PROGRESS);
+        } else {
+            sessions = studySessionRepository.findAllByMemberIdAndExamIdAndStatusAndMode(memberId, examId, StudySessionStatus.IN_PROGRESS, mode);
+        }
+
+        for (StudySession session : sessions) {
+            session.abandon();
+            studySessionRepository.save(session);
+        }
+
+        return new StudyProgressAbandonResponse(sessions.size());
     }
 
     private void validateOwnership(StudySession session, Long memberId) {

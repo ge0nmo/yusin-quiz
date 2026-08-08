@@ -32,6 +32,11 @@ public class DailyStudyLogRepositoryImpl implements DailyStudyLogRepository {
     }
 
     @Override
+    public int sumSolvedCountByMemberIdAndDateBetween(Long memberId, LocalDate startDate, LocalDate endDate) {
+        return dailyStudyLogJpaRepository.sumSolvedCountByMemberIdAndDateBetween(memberId, startDate, endDate);
+    }
+
+    @Override
     public int upsertSolvedCount(Long memberId, LocalDate date, int amount, LocalDateTime timestamp) {
         return dailyStudyLogJpaRepository.upsertSolvedCount(memberId, date, amount, timestamp);
     }
