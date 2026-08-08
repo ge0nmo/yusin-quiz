@@ -86,6 +86,17 @@ public enum ExceptionMessage {
      */
     BOOKMARK_NOT_FOUND("해당 북마크 정보를 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
     BOOKMARK_ALREADY_EXISTS("이미 북마크된 문제입니다.", HttpStatus.CONFLICT),
+
+    WORD_PRACTICE_INVALID_GUEST_TOKEN("유효하지 않은 익명 참여자 토큰입니다.", HttpStatus.UNAUTHORIZED),
+    WORD_PRACTICE_NO_PROBLEMS("풀이할 말문제가 없습니다.", HttpStatus.CONFLICT),
+    WORD_PRACTICE_CYCLE_NOT_FOUND("말문제 풀이 회차를 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
+    WORD_PRACTICE_NOT_OWNER("다른 참여자의 말문제 풀이 회차입니다.", HttpStatus.FORBIDDEN),
+    WORD_PRACTICE_ANSWER_ALREADY_SUBMITTED("이미 다른 답안이 제출된 문제입니다.", HttpStatus.CONFLICT),
+    WORD_PRACTICE_OUT_OF_ORDER("현재 풀이 순서의 문제가 아닙니다.", HttpStatus.CONFLICT),
+    WORD_PRACTICE_CYCLE_COMPLETED("완료된 회차에는 답안을 제출할 수 없습니다.", HttpStatus.CONFLICT),
+    WORD_PRACTICE_PROBLEM_UNAVAILABLE("현재 문제를 더 이상 풀 수 없습니다.", HttpStatus.CONFLICT),
+    WORD_PRACTICE_NOT_COMPLETED("완료된 회차만 새 회차를 시작할 수 있습니다.", HttpStatus.CONFLICT),
+    WORD_PRACTICE_NOT_LATEST_CYCLE("최신 회차에서만 새 회차를 시작할 수 있습니다.", HttpStatus.CONFLICT),
     ;
 
     private final String message;

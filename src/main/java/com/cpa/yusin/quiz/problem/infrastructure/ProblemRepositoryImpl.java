@@ -4,6 +4,8 @@ import com.cpa.yusin.quiz.problem.domain.Problem;
 import com.cpa.yusin.quiz.problem.service.dto.AdminProblemSearchCondition;
 import com.cpa.yusin.quiz.problem.service.dto.AdminProblemSearchProjection;
 import com.cpa.yusin.quiz.problem.service.dto.ProblemCountByExamProjection;
+import com.cpa.yusin.quiz.problem.service.dto.WordProblemCandidateProjection;
+import com.cpa.yusin.quiz.problem.service.dto.WordProblemCountProjection;
 import com.cpa.yusin.quiz.problem.service.port.ProblemRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -79,6 +81,25 @@ public class ProblemRepositoryImpl implements ProblemRepository
         return problemJpaRepository.countActiveByExamIds(examIds).stream()
                 .collect(Collectors.toMap(ProblemCountByExamProjection::examId,
                         ProblemCountByExamProjection::problemCount));
+    }
+
+    @Override
+    public List<WordProblemCountProjection> countPublishedWordProblemsBySubject() {
+        return problemJpaRepository.countPublishedWordProblemsBySubject();
+    }
+
+    @Override
+    public List<WordProblemCandidateProjection> findPublishedWordProblemCandidatesBySubjectId(Long subjectId) {
+        return problemJpaRepository.findPublishedWordProblemCandidatesBySubjectId(subjectId);
+    }
+
+    /** 말문제 회차 GET이 문제별 조회 없이 공개 상태 문제를 묶음으로 가져오도록 위임한다. */
+    @Override
+    public List<Problem> findPublishedWordProblemsByIds(List<Long> problemIds) {
+        if (problemIds == null || problemIds.isEmpty()) {
+            return List.of();
+        }
+        return problemJpaRepository.findPublishedWordProblemsByIds(problemIds);
     }
 
     @Override

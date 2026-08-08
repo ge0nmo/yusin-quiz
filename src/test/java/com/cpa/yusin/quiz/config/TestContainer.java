@@ -49,6 +49,7 @@ import com.cpa.yusin.quiz.problem.controller.port.CreateProblemV2Service;
 import com.cpa.yusin.quiz.problem.controller.port.GetProblemV2Service;
 import com.cpa.yusin.quiz.problem.controller.port.ProblemService;
 import com.cpa.yusin.quiz.problem.service.ProblemContentProcessor;
+import com.cpa.yusin.quiz.problem.service.ProblemV2ResponseAssembler;
 import com.cpa.yusin.quiz.problem.service.ProblemHtmlImageStorageService;
 import com.cpa.yusin.quiz.problem.service.CreateProblemV2ServiceImpl;
 import com.cpa.yusin.quiz.problem.service.GetProblemV2ServiceImpl;
@@ -213,7 +214,7 @@ public class TestContainer {
                                 this.problemRepository,
                                 this.choiceService,
                                 this.examService,
-                                problemContentProcessor);
+                                new ProblemV2ResponseAssembler(problemContentProcessor));
 
                 this.questionRepository = new FakeQuestionRepository();
                 this.questionMapper = new QuestionMapper();

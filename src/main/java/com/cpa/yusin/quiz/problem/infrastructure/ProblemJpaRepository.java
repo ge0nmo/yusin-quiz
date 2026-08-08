@@ -3,6 +3,8 @@ package com.cpa.yusin.quiz.problem.infrastructure;
 import com.cpa.yusin.quiz.problem.domain.Problem;
 import com.cpa.yusin.quiz.problem.service.dto.AdminProblemSearchProjection;
 import com.cpa.yusin.quiz.problem.service.dto.ProblemCountByExamProjection;
+import com.cpa.yusin.quiz.problem.service.dto.WordProblemCandidateProjection;
+import com.cpa.yusin.quiz.problem.service.dto.WordProblemCountProjection;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -101,6 +103,49 @@ public interface ProblemJpaRepository extends JpaRepository<Problem, Long>
             ") " +
             "GROUP BY e.id")
     List<ProblemCountByExamProjection> countActiveByExamIds(@Param("examIds") List<Long> examIds);
+
+    @Query("SELECT new com.cpa.yusin.quiz.problem.service.dto.WordProblemCountProjection(s.id, COUNT(p)) " +
+            "FROM Subject s " +
+            "LEFT JOIN Exam e ON e.subjectId = s.id " +
+            "AND e.isRemoved = false " +
+            "AND e.status = com.cpa.yusin.quiz.exam.domain.ExamStatus.PUBLISHED " +
+            "LEFT JOIN Problem p ON p.exam = e " +
+            "AND p.isRemoved = false " +
+            "AND p.requiresCalculation = false " +
+            "WHERE s.isRemoved = false " +
+            "AND (s.status = com.cpa.yusin.quiz.subject.domain.SubjectStatus.PUBLISHED OR s.status IS NULL) " +
+            "GROUP BY s.id")
+    List<WordProblemCountProjection> countPublishedWordProblemsBySubject();
+
+    @Query("SELECT new com.cpa.yusin.quiz.problem.service.dto.WordProblemCandidateProjection(p.id, e.id, e.year) " +
+            "FROM Problem p " +
+            "JOIN p.exam e " +
+            "JOIN Subject s ON s.id = e.subjectId " +
+            "WHERE s.id = :subjectId " +
+            "AND s.isRemoved = false " +
+            "AND (s.status = com.cpa.yusin.quiz.subject.domain.SubjectStatus.PUBLISHED OR s.status IS NULL) " +
+            "AND e.isRemoved = false " +
+            "AND e.status = com.cpa.yusin.quiz.exam.domain.ExamStatus.PUBLISHED " +
+            "AND p.isRemoved = false " +
+            "AND p.requiresCalculation = false " +
+            "ORDER BY e.year ASC, e.id ASC, p.id ASC")
+    List<WordProblemCandidateProjection> findPublishedWordProblemCandidatesBySubjectId(@Param("subjectId") Long subjectId);
+
+    /**
+     * 말문제 회차의 스냅샷 ID를 현재 공개 계층으로 재검증하는 배치 조회다.
+     * IN 절의 DB 반환 순서는 호출자가 신뢰하지 않고 회차 order로 다시 정렬한다.
+     */
+    @Query("SELECT p FROM Problem p " +
+            "JOIN p.exam e " +
+            "JOIN Subject s ON s.id = e.subjectId " +
+            "WHERE p.id IN :problemIds " +
+            "AND p.isRemoved = false " +
+            "AND p.requiresCalculation = false " +
+            "AND e.isRemoved = false " +
+            "AND e.status = com.cpa.yusin.quiz.exam.domain.ExamStatus.PUBLISHED " +
+            "AND s.isRemoved = false " +
+            "AND (s.status = com.cpa.yusin.quiz.subject.domain.SubjectStatus.PUBLISHED OR s.status IS NULL)")
+    List<Problem> findPublishedWordProblemsByIds(@Param("problemIds") List<Long> problemIds);
 
     @Query(
             value = """

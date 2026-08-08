@@ -44,11 +44,14 @@ public class SecurityConfig {
     @Order(1)
     @Bean
     public SecurityFilterChain restApiSecurityFilter(HttpSecurity http) throws Exception {
-        configureStatelessSecurity(http, "/api/v1/**");
+        configureStatelessSecurity(http, "/api/v1/**", "/api/v2/problem", "/api/v2/problem/**");
         http.exceptionHandling(exceptionHandling -> exceptionHandling
                 .authenticationEntryPoint(userApiAuthenticationEntryPoint)
                 .accessDeniedHandler(userApiAccessDeniedHandler));
         http.authorizeHttpRequests(auth -> auth
+                // 말문제 빠른 풀이는 회원과 비회원 모두 진입할 수 있으며, JWT가 있으면 필터가 principal을 설정한다.
+                .requestMatchers("/api/v2/problem/word-practice/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/v2/problem", "/api/v2/problem/**").permitAll()
                 .requestMatchers("/api/v1/bookmarks/**").authenticated()
                 .requestMatchers("/api/v1/study/**").authenticated()
                 .requestMatchers("/api/v1/study-logs/**").authenticated()

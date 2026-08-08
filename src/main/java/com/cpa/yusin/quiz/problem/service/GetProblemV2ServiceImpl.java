@@ -5,7 +5,6 @@ import com.cpa.yusin.quiz.choice.controller.port.ChoiceService;
 import com.cpa.yusin.quiz.exam.controller.port.ExamService;
 import com.cpa.yusin.quiz.global.exception.ExceptionMessage;
 import com.cpa.yusin.quiz.global.exception.ProblemException;
-import com.cpa.yusin.quiz.problem.controller.dto.response.ProblemLectureResponse;
 import com.cpa.yusin.quiz.problem.controller.dto.response.ProblemV2Response;
 import com.cpa.yusin.quiz.problem.controller.port.GetProblemV2Service;
 import com.cpa.yusin.quiz.problem.domain.Problem;
@@ -28,7 +27,7 @@ public class GetProblemV2ServiceImpl implements GetProblemV2Service {
     private final ProblemRepository problemRepository;
     private final ChoiceService choiceService;
     private final ExamService examService;
-    private final ProblemContentProcessor problemContentProcessor;
+    private final ProblemV2ResponseAssembler problemV2ResponseAssembler;
 
     @Override
     public ProblemV2Response getById(Long problemId) {
@@ -38,7 +37,7 @@ public class GetProblemV2ServiceImpl implements GetProblemV2Service {
 
         List<ChoiceResponse> choices = choiceService.getAllByProblemId(problemId);
 
-        return mapToResponse(problem, choices);
+        return problemV2ResponseAssembler.assemble(problem, choices);
     }
 
     @Override
@@ -56,7 +55,7 @@ public class GetProblemV2ServiceImpl implements GetProblemV2Service {
                 .map(problem -> {
                     List<ChoiceResponse> choices = choicesMap.getOrDefault(problem.getId(), Collections.emptyList());
 
-                    return mapToResponse(problem, choices);
+                    return problemV2ResponseAssembler.assemble(problem, choices);
                 })
                 .toList();
     }
@@ -68,7 +67,7 @@ public class GetProblemV2ServiceImpl implements GetProblemV2Service {
 
         List<ChoiceResponse> choices = choiceService.getAllByProblemId(problemId);
 
-        return mapToResponse(problem, choices);
+        return problemV2ResponseAssembler.assemble(problem, choices);
     }
 
     @Override
@@ -86,20 +85,9 @@ public class GetProblemV2ServiceImpl implements GetProblemV2Service {
                 .map(problem -> {
                     List<ChoiceResponse> choices = choicesMap.getOrDefault(problem.getId(), Collections.emptyList());
 
-                    return mapToResponse(problem, choices);
+                    return problemV2ResponseAssembler.assemble(problem, choices);
                 })
                 .toList();
     }
 
-    private ProblemV2Response mapToResponse(Problem problem, List<ChoiceResponse> choices) {
-        return ProblemV2Response.builder()
-                .id(problem.getId())
-                .number(problem.getNumber())
-                .requiresCalculation(problem.isRequiresCalculation())
-                .content(problemContentProcessor.processBlocksWithPresignedUrl(problem.getContentJson()))
-                .explanation(problemContentProcessor.processBlocksWithPresignedUrl(problem.getExplanationJson()))
-                .lecture(ProblemLectureResponse.from(problem))
-                .choices(choices)
-                .build();
-    }
 }

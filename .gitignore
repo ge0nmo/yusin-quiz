@@ -43,3 +43,4 @@ out/
 /src/main/resources/application-local.yml
 
 PLAN.md
+.DS_Store

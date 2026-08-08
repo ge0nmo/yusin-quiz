@@ -49,6 +49,8 @@
   - `/api/v1/problem`
   - `/api/v2/problem`
   - `/api/v1/bookmarks`
+- 말문제 빠른 풀이는 공개 subject 아래의 `requiresCalculation=false` 문제만 별도 회차 스냅샷으로 제공한다.
+- 말문제 batch의 각 item은 기존 `ProblemV2Response` shape를 그대로 사용한다. 따라서 choice 정답 여부와 해설을 포함한다.
 - Admin content endpoints include:
   - `/api/admin/subject`
   - `/api/admin/exam`

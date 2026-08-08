@@ -56,6 +56,8 @@
   - changing the same answer later does not increment again
   - `EXAM`: completion increments by `answeredCount`
   - repeated finish calls do not increment again
+- `WordPracticeCycle`은 기존 `StudySession`과 분리된 말문제 빠른 풀이 회차다. 문제 순서와 최초 답안은 회차에 고정하고, 동일 답안 재전송만 200으로 멱등 처리한다.
+- 말문제는 완료 후 자동 재시작하지 않으며, 최신 완료 회차에 대한 명시적 restart만 다음 round를 만든다.
 
 ## Decision Rules
 

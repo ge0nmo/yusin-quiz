@@ -4,6 +4,8 @@ import com.cpa.yusin.quiz.problem.domain.Problem;
 import com.cpa.yusin.quiz.problem.service.dto.AdminProblemLectureStatus;
 import com.cpa.yusin.quiz.problem.service.dto.AdminProblemSearchCondition;
 import com.cpa.yusin.quiz.problem.service.dto.AdminProblemSearchProjection;
+import com.cpa.yusin.quiz.problem.service.dto.WordProblemCandidateProjection;
+import com.cpa.yusin.quiz.problem.service.dto.WordProblemCountProjection;
 import com.cpa.yusin.quiz.problem.service.port.ProblemRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -95,6 +97,43 @@ public class FakeProblemRepository implements ProblemRepository
                 .map(Problem::getNumber)
                 .min(Integer::compareTo)
                 .orElse(null);
+    }
+
+    @Override
+    public List<WordProblemCountProjection> countPublishedWordProblemsBySubject() {
+        return data.stream()
+                .filter(this::isPublishedWordProblem)
+                .collect(Collectors.groupingBy(problem -> problem.getExam().getSubjectId(), Collectors.counting()))
+                .entrySet().stream()
+                .map(entry -> new WordProblemCountProjection(entry.getKey(), entry.getValue()))
+                .toList();
+    }
+
+    @Override
+    public List<WordProblemCandidateProjection> findPublishedWordProblemCandidatesBySubjectId(Long subjectId) {
+        return data.stream()
+                .filter(this::isPublishedWordProblem)
+                .filter(problem -> Objects.equals(problem.getExam().getSubjectId(), subjectId))
+                .sorted(Comparator.comparingInt((Problem problem) -> problem.getExam().getYear())
+                        .thenComparing(problem -> problem.getExam().getId())
+                        .thenComparing(Problem::getId))
+                .map(problem -> new WordProblemCandidateProjection(
+                        problem.getId(), problem.getExam().getId(), problem.getExam().getYear()))
+                .toList();
+    }
+
+    /** 단위 테스트에서도 회차 batch 조회의 공개 말문제 필터를 재현한다. */
+    @Override
+    public List<Problem> findPublishedWordProblemsByIds(List<Long> problemIds) {
+        Set<Long> ids = new HashSet<>(problemIds);
+        return data.stream().filter(this::isPublishedWordProblem).filter(problem -> ids.contains(problem.getId())).toList();
+    }
+
+    private boolean isPublishedWordProblem(Problem problem) {
+        return !problem.isRemoved()
+                && !problem.isRequiresCalculation()
+                && !problem.getExam().isRemoved()
+                && problem.getExam().getStatus() == com.cpa.yusin.quiz.exam.domain.ExamStatus.PUBLISHED;
     }
 
     @Override

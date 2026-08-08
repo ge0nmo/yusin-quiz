@@ -34,6 +34,8 @@
 - Shared validation and exception responses are translated by `ExceptionAdvice`.
 - REST Docs HTML is generated into `build/docs/asciidoc/`.
 - OpenAPI JSON is generated into `build/api-spec/openapi3.json`.
+- 말문제 빠른 풀이는 `/api/v2/problem/word-practice/**`를 사용하며, 성공 응답은 `GlobalResponse.data`로 감싼다.
+- 말문제 계약의 프론트 요약은 `docs/frontend-api/word-practice.md`, 생성 문서는 `word-practice.html`이다.
 
 ## Decision Rules
 

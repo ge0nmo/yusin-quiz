@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor()
 @Entity
+@Table(indexes = @Index(name = "idx_exam_subject_status_removed_id", columnList = "subject_id,status,is_removed,id"))
 @Getter
 public class Exam extends BaseEntity {
     @Id

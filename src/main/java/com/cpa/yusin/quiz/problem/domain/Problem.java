@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
+@Table(indexes = @Index(name = "idx_problem_exam_calc_removed_id", columnList = "exam_id,requires_calculation,is_removed,id"))
 @Getter
 @Builder
 @AllArgsConstructor

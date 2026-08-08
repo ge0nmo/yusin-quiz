@@ -1,5 +1,10 @@
 # Frontend API Changelog
 
+## 2026-08-09
+
+- 말문제 빠른 풀이 API를 추가했다. 계약과 guest token 처리 규칙은 `word-practice.md`를 기준으로 한다.
+- 새 경로는 `/api/v2/problem/word-practice/**`이며, 기존 `GET /api/v2/problem?examId=...` 및 기존 `StudySession` 계약은 변경하지 않았다.
+
 ## 2026-03-21
 
 - `POST /api/v1/bookmarks/status` 추가. 로그인 사용자가 현재 화면의 problemIds 중 북마크된 ID만 가볍게 조회할 수 있음

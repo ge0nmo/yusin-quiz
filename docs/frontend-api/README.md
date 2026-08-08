@@ -41,3 +41,4 @@
 - `dashboard-drilldown.md`
 - `examples/problem-v2/*`
 - `changelog.md`
+- `word-practice.md`

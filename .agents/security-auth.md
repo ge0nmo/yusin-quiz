@@ -30,6 +30,7 @@
   - `GET /api/v1/**` is generally public
   - `/api/v1/bookmarks/**` requires authentication
   - other `/api/v1/**` requests require authentication
+  - `/api/v2/problem/word-practice/**`의 GET/POST는 회원과 비회원 모두 접근 가능하다. 유효 JWT가 있으면 회원 identity를 우선하고, 비회원은 `X-Guest-Token`을 사용한다.
 - Admin API rules:
   - `/api/admin/login` is public
   - other admin endpoints require `ROLE_ADMIN`
