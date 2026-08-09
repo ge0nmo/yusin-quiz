@@ -4,7 +4,11 @@ import com.cpa.yusin.quiz.global.exception.ExceptionMessage;
 import com.cpa.yusin.quiz.global.exception.WordPracticeException;
 import com.cpa.yusin.quiz.mock.FakeUuidHolder;
 import com.cpa.yusin.quiz.mock.FakeClockHolder;
+import com.cpa.yusin.quiz.mock.FakeMemberRepository;
 import com.cpa.yusin.quiz.mock.FakeWordPracticeParticipantRepository;
+import com.cpa.yusin.quiz.member.domain.Member;
+import com.cpa.yusin.quiz.member.domain.type.Platform;
+import com.cpa.yusin.quiz.member.domain.type.Role;
 import com.cpa.yusin.quiz.wordpractice.domain.WordPracticeParticipantType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,10 +27,20 @@ class WordPracticeParticipantResolverTest {
     @BeforeEach
     void setUp() {
         repository = new FakeWordPracticeParticipantRepository();
+        FakeMemberRepository memberRepository = new FakeMemberRepository();
+        memberRepository.save(Member.builder()
+                .id(42L)
+                .email("member@example.com")
+                .password("encoded-password")
+                .username("회원")
+                .platform(Platform.HOME)
+                .role(Role.USER)
+                .build());
         guestTokenHasher = new GuestTokenHasher();
         resolver = new WordPracticeParticipantResolver(
                 repository,
                 new WordPracticeParticipantCreator(repository, new FakeClockHolder()),
+                memberRepository,
                 guestTokenHasher,
                 new FakeUuidHolder(GUEST_TOKEN)
         );

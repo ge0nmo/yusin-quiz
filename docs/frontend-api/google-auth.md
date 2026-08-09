@@ -30,6 +30,10 @@ Google 로그인 엔드포인트는 `POST /api/v1/auth/login/google` 이다. 성
 토큰과 검증 라이브러리의 상세 오류는 응답 및 서버 로그에 포함하지 않는다. 검증 오류 외의
 예상하지 못한 서버 오류는 `500 INTERNAL_SERVER_ERROR` 와 일반화된 메시지로 반환한다.
 
+회원 탈퇴와 Google 연결 해제 순서는 [`member-withdrawal.md`](member-withdrawal.md)를 따른다.
+탈퇴 전 발급된 access/refresh token은 동일 이메일로 재가입하더라도 새 계정에 사용할 수 없다.
+신규 토큰은 회원 ID에 바인딩되며 기존 회원의 소셜 로그인과 refresh 발급은 탈퇴와 회원 행 잠금으로 직렬화된다.
+
 ## 공통 오류 응답
 
 - `CustomException`의 `code`는 `ExceptionMessage` enum 이름이다.

@@ -50,6 +50,10 @@
 - Missing, unverified, or malformed social profile data returns `400` with `code = INVALID_SOCIAL_PROFILE`.
 - New social users are auto-created with a generated nickname and generated password.
 - Refresh flow validates refresh-token type and expiry, then issues a new access token and refresh token.
+- New access/refresh tokens carry both the member ID account binding and an exact issuance time. A token bound to a deleted member ID cannot authenticate a fresh account that reuses the same email.
+- Deployed legacy tokens without a member ID remain valid only when their second-precision `iat` is strictly later than the current member row's creation second. The ambiguous creation-second boundary is conservatively rejected and requires login again.
+- Existing-member social login and refresh issuance lock the member row until token issuance completes, using the same serialization boundary as withdrawal.
+- Authenticated member withdrawal is `DELETE /api/v1/members/me`; the backend does not revoke Google because it stores no Google refresh token.
 
 ## Decision Rules
 

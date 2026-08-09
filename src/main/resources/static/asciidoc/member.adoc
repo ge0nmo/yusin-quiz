@@ -1,0 +1,17 @@
+= API Documentation
+:doctype: book
+:icons: font
+:toc: left
+:toc-title: 순서
+:sectnums:
+:sectnumlevels: 5
+:source-highlighter: highlightjs
+
+== 회원 API
+
+== 회원 탈퇴
+=== HTTP Request
+include::{snippets}/withdrawMember/http-request.adoc[]
+
+=== HTTP Response
+include::{snippets}/withdrawMember/http-response.adoc[]

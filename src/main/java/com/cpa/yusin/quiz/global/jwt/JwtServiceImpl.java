@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
+import java.time.ZoneId;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -21,6 +22,8 @@ import java.util.function.Function;
 public class JwtServiceImpl implements JwtService
 {
     private static final String TOKEN_TYPE_CLAIM = "tokenType";
+    private static final String ISSUED_AT_MILLIS_CLAIM = "issuedAtMillis";
+    private static final String MEMBER_ID_CLAIM = "memberId";
     private static final String ACCESS_TOKEN_TYPE = "access";
     private static final String REFRESH_TOKEN_TYPE = "refresh";
 
@@ -41,25 +44,19 @@ public class JwtServiceImpl implements JwtService
     }
 
     @Override
-    public String createAccessToken(String email)
-    {
+    public String createAccessToken(String email, long memberId) {
         Map<String, Object> claims = new HashMap<>();
         claims.put(TOKEN_TYPE_CLAIM, ACCESS_TOKEN_TYPE);
+        claims.put(MEMBER_ID_CLAIM, memberId);
         return createToken(claims, email, accessTokenExpiration);
     }
 
     @Override
-    public String createRefreshToken(String email) {
+    public String createRefreshToken(String email, long memberId) {
         Map<String, Object> claims = new HashMap<>();
         claims.put(TOKEN_TYPE_CLAIM, REFRESH_TOKEN_TYPE);
-
-        return Jwts.builder()
-                .claims(claims)
-                .subject(email)
-                .issuedAt(currentDate())
-                .expiration(expirationDate(refreshTokenExpiration))
-                .signWith(key)
-                .compact();
+        claims.put(MEMBER_ID_CLAIM, memberId);
+        return createToken(claims, email, refreshTokenExpiration);
     }
 
     @Override
@@ -75,11 +72,14 @@ public class JwtServiceImpl implements JwtService
 
     private String createToken(Map<String, Object> claims, String email, long expiration)
     {
+        long issuedAtMillis = clockHolder.getCurrentTime();
+        claims.put(ISSUED_AT_MILLIS_CLAIM, issuedAtMillis);
+
         return Jwts.builder()
                 .claims(claims)
                 .subject(email)
-                .issuedAt(currentDate())
-                .expiration(expirationDate(expiration))
+                .issuedAt(new Date(issuedAtMillis))
+                .expiration(new Date(issuedAtMillis + expiration))
                 .signWith(key)
                 .compact();
     }
@@ -92,7 +92,45 @@ public class JwtServiceImpl implements JwtService
 
         return isAccessToken(token)
                 && !expirationDate.before(currentDate())
-                && memberDetails.getUsername().equals(email);
+                && memberDetails.getUsername().equals(email)
+                && isTokenIssuedTo(token, memberDetails);
+    }
+
+    @Override
+    public boolean isTokenIssuedTo(String token, MemberDetails memberDetails) {
+        if (memberDetails == null || memberDetails.getMember() == null) {
+            return false;
+        }
+        Number tokenMemberId = extractClaim(token, claims -> claims.get(MEMBER_ID_CLAIM, Number.class));
+        if (tokenMemberId != null) {
+            return memberDetails.getMember().getId() != null
+                    && tokenMemberId.longValue() == memberDetails.getMember().getId();
+        }
+
+        if (memberDetails.getMember().getCreatedAt() == null) {
+            return false;
+        }
+
+        Number exactIssuedAt = extractClaim(token, claims -> claims.get(ISSUED_AT_MILLIS_CLAIM, Number.class));
+        long memberCreatedAtMillis = memberDetails.getMember().getCreatedAt()
+                .atZone(ZoneId.systemDefault())
+                .toInstant()
+                .toEpochMilli();
+
+        if (exactIssuedAt != null) {
+            return exactIssuedAt.longValue() >= memberCreatedAtMillis;
+        }
+
+        Date legacyIssuedAt = extractClaim(token, Claims::getIssuedAt);
+        if (legacyIssuedAt == null) {
+            return false;
+        }
+
+        // Standard JWT iat has second precision. Equality with the member-creation
+        // second is ambiguous after same-email re-registration, so deployed legacy
+        // tokens from that one-second boundary are conservatively rejected.
+        long memberCreatedAtSecond = (memberCreatedAtMillis / 1_000L) * 1_000L;
+        return legacyIssuedAt.getTime() > memberCreatedAtSecond;
     }
 
     @Override
@@ -121,10 +159,6 @@ public class JwtServiceImpl implements JwtService
 
     private Date currentDate() {
         return new Date(clockHolder.getCurrentTime());
-    }
-
-    private Date expirationDate(long expirationInMillis) {
-        return new Date(clockHolder.getCurrentTime() + expirationInMillis);
     }
 
     private Claims extractAllClaims(String token)

@@ -184,7 +184,7 @@ class WordPracticeServiceImplTest {
         List<Problem> problems = java.util.stream.LongStream.rangeClosed(1, 15)
                 .mapToObj(problemId -> Problem.builder().id(problemId).number((int) problemId).build())
                 .toList();
-        when(participantResolver.resolve(null, "guest-token")).thenReturn(Optional.of(guest));
+        when(participantResolver.resolveForWrite(null, "guest-token")).thenReturn(Optional.of(guest));
         when(cycleRepository.findByIdWithLock(77L)).thenReturn(Optional.of(cycle));
         when(problemRepository.findPublishedWordProblemsByIds(any())).thenReturn(problems);
         when(choiceService.findAllByProblemIds(any())).thenReturn(Map.of());
@@ -210,7 +210,7 @@ class WordPracticeServiceImplTest {
                 .isAnswer(true).problem(problem).build();
         LocalDateTime now = LocalDateTime.of(2026, 8, 9, 13, 0);
 
-        when(participantResolver.resolve(600L, null)).thenReturn(Optional.of(member));
+        when(participantResolver.resolveForWrite(600L, null)).thenReturn(Optional.of(member));
         when(cycleRepository.findByIdWithLock(77L)).thenReturn(Optional.of(activeCycle));
         when(answerRepository.findByCycleIdAndProblemId(77L, 1L)).thenReturn(Optional.empty());
         when(problemRepository.findPublishedWordProblemsByIds(List.of(1L))).thenReturn(List.of(problem));
@@ -240,7 +240,7 @@ class WordPracticeServiceImplTest {
                 .map(choice -> new WordPracticeAnswerRequest(choice.getProblem().getId(), choice.getId()))
                 .toList();
 
-        when(participantResolver.resolve(610L, null)).thenReturn(Optional.of(member));
+        when(participantResolver.resolveForWrite(610L, null)).thenReturn(Optional.of(member));
         when(cycleRepository.findByIdWithLock(77L)).thenReturn(Optional.of(activeCycle));
         when(answerRepository.findAllByCycleIdAndProblemIds(77L, List.of(1L, 2L, 3L, 4L, 5L)))
                 .thenReturn(List.of());
@@ -266,7 +266,7 @@ class WordPracticeServiceImplTest {
     void nonFinalPartialBatchIsRejectedBeforePersistence() {
         WordPracticeParticipant member = participant(62L, WordPracticeParticipantType.MEMBER);
         WordPracticeCycle activeCycle = cycle(member, 7, 0, WordPracticeCycleStatus.IN_PROGRESS);
-        when(participantResolver.resolve(620L, null)).thenReturn(Optional.of(member));
+        when(participantResolver.resolveForWrite(620L, null)).thenReturn(Optional.of(member));
         when(cycleRepository.findByIdWithLock(77L)).thenReturn(Optional.of(activeCycle));
         when(answerRepository.findAllByCycleIdAndProblemIds(77L, List.of(1L, 2L))).thenReturn(List.of());
 
@@ -294,7 +294,7 @@ class WordPracticeServiceImplTest {
                 com.cpa.yusin.quiz.wordpractice.domain.WordPracticeAnswer.create(
                         completedCycle, 2L, 21L, 2, false, submittedAt));
 
-        when(participantResolver.resolve(630L, null)).thenReturn(Optional.of(member));
+        when(participantResolver.resolveForWrite(630L, null)).thenReturn(Optional.of(member));
         when(cycleRepository.findByIdWithLock(77L)).thenReturn(Optional.of(completedCycle));
         when(answerRepository.findAllByCycleIdAndProblemIds(77L, List.of(1L, 2L)))
                 .thenReturn(existingAnswers);
@@ -333,7 +333,7 @@ class WordPracticeServiceImplTest {
                         ))
                         .toList();
 
-        when(participantResolver.resolve(640L, null)).thenReturn(Optional.of(member));
+        when(participantResolver.resolveForWrite(640L, null)).thenReturn(Optional.of(member));
         when(cycleRepository.findByIdWithLock(77L)).thenReturn(Optional.of(activeCycle));
         when(answerRepository.findAllByCycleIdAndProblemIds(77L, List.of(2L, 3L, 4L, 5L, 6L)))
                 .thenReturn(existingAnswers);
@@ -356,7 +356,7 @@ class WordPracticeServiceImplTest {
         var existingAnswer = com.cpa.yusin.quiz.wordpractice.domain.WordPracticeAnswer.create(
                 completedCycle, 1L, 11L, 1, true, submittedAt);
 
-        when(participantResolver.resolve(700L, null)).thenReturn(Optional.of(member));
+        when(participantResolver.resolveForWrite(700L, null)).thenReturn(Optional.of(member));
         when(cycleRepository.findByIdWithLock(77L)).thenReturn(Optional.of(completedCycle));
         when(answerRepository.findByCycleIdAndProblemId(77L, 1L)).thenReturn(Optional.of(existingAnswer));
 
@@ -375,7 +375,7 @@ class WordPracticeServiceImplTest {
                 .isAnswer(true).problem(problem).build();
         LocalDateTime now = LocalDateTime.of(2026, 8, 9, 13, 20);
 
-        when(participantResolver.resolve(null, "guest-token")).thenReturn(Optional.of(guest));
+        when(participantResolver.resolveForWrite(null, "guest-token")).thenReturn(Optional.of(guest));
         when(cycleRepository.findByIdWithLock(77L)).thenReturn(Optional.of(activeCycle));
         when(answerRepository.findByCycleIdAndProblemId(77L, 1L)).thenReturn(Optional.empty());
         when(problemRepository.findPublishedWordProblemsByIds(List.of(1L))).thenReturn(List.of(problem));

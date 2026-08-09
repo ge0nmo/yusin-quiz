@@ -23,6 +23,23 @@ public class FakeMemberRepository implements MemberRepository {
     }
 
     @Override
+    public Optional<Member> findByEmailWithLock(String email) {
+        return findByEmail(email);
+    }
+
+    @Override
+    public Optional<Member> findWithdrawnAuthor() {
+        return data.stream()
+                .filter(Member::isWithdrawnAuthor)
+                .findAny();
+    }
+
+    @Override
+    public Optional<Member> findWithdrawnAuthorWithLock() {
+        return findWithdrawnAuthor();
+    }
+
+    @Override
     public Page<Member> findAllByKeyword(String keyword, Pageable pageable) {
         List<Member> result = data.stream()
                 .filter(member -> !StringUtils.hasLength(keyword) ||
@@ -81,6 +98,11 @@ public class FakeMemberRepository implements MemberRepository {
         }
 
         return member;
+    }
+
+    @Override
+    public Member saveAndFlush(Member member) {
+        return save(member);
     }
 
     @Override

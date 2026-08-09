@@ -194,7 +194,7 @@ public class WordPracticeServiceImpl implements WordPracticeService {
     @Transactional
     public WordPracticeProblemBatchResponse getNextProblems(Long memberId, String guestToken, Long cycleId, int count) {
         validateBatchCount(count);
-        WordPracticeParticipant participant = participantResolver.resolve(memberId, guestToken)
+        WordPracticeParticipant participant = participantResolver.resolveForWrite(memberId, guestToken)
                 .orElseThrow(() -> new WordPracticeException(ExceptionMessage.NO_AUTHORIZATION));
         WordPracticeCycle cycle = cycleRepository.findByIdWithLock(cycleId)
                 .orElseThrow(() -> new WordPracticeException(ExceptionMessage.WORD_PRACTICE_CYCLE_NOT_FOUND));
@@ -291,7 +291,7 @@ public class WordPracticeServiceImpl implements WordPracticeService {
     public WordPracticeAnswerResponse submitAnswer(
             Long memberId, String guestToken, Long cycleId, Long problemId, Long choiceId
     ) {
-        WordPracticeParticipant participant = participantResolver.resolve(memberId, guestToken)
+        WordPracticeParticipant participant = participantResolver.resolveForWrite(memberId, guestToken)
                 .orElseThrow(() -> new WordPracticeException(ExceptionMessage.NO_AUTHORIZATION));
         WordPracticeCycle cycle = cycleRepository.findByIdWithLock(cycleId)
                 .orElseThrow(() -> new WordPracticeException(ExceptionMessage.WORD_PRACTICE_CYCLE_NOT_FOUND));
@@ -366,7 +366,7 @@ public class WordPracticeServiceImpl implements WordPracticeService {
             List<WordPracticeAnswerRequest> requests
     ) {
         validateAnswerBatchRequest(requests);
-        WordPracticeParticipant participant = participantResolver.resolve(memberId, guestToken)
+        WordPracticeParticipant participant = participantResolver.resolveForWrite(memberId, guestToken)
                 .orElseThrow(() -> new WordPracticeException(ExceptionMessage.NO_AUTHORIZATION));
         WordPracticeCycle cycle = cycleRepository.findByIdWithLock(cycleId)
                 .orElseThrow(() -> new WordPracticeException(ExceptionMessage.WORD_PRACTICE_CYCLE_NOT_FOUND));
@@ -494,7 +494,7 @@ public class WordPracticeServiceImpl implements WordPracticeService {
     @Override
     @Transactional(isolation = Isolation.READ_COMMITTED)
     public WordPracticeCycleResponse restartCycle(Long memberId, String guestToken, Long cycleId) {
-        WordPracticeParticipant resolvedParticipant = participantResolver.resolve(memberId, guestToken)
+        WordPracticeParticipant resolvedParticipant = participantResolver.resolveForWrite(memberId, guestToken)
                 .orElseThrow(() -> new WordPracticeException(ExceptionMessage.NO_AUTHORIZATION));
         WordPracticeParticipant participant = participantRepository.findByIdWithLock(resolvedParticipant.getId())
                 .orElseThrow(() -> new IllegalStateException("Word practice participant was not persisted"));

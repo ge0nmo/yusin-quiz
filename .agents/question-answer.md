@@ -22,6 +22,7 @@
 - `Question` tracks both `answerCount` and `answeredByAdmin`.
 - `Question` uses soft delete.
 - `Answer` is deleted directly, not soft-deleted.
+- 회원 탈퇴 시 공개 질문과 답변은 삭제하지 않고 공용 작성자 `탈퇴한 사용자`로 재배정한다.
 
 ## Current Implementation
 

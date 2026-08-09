@@ -44,3 +44,4 @@
 - `word-practice.md`
 - `question-answer.md`
 - `google-auth.md`
+- `member-withdrawal.md`

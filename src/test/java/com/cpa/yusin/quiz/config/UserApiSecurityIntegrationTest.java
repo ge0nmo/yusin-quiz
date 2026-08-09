@@ -14,6 +14,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -77,6 +78,16 @@ class UserApiSecurityIntegrationTest {
                 .andExpect(jsonPath("$.status").value(401))
                 .andExpect(jsonPath("$.code").value("AUTH_REQUIRED"))
                 .andExpect(jsonPath("$.path").value("/api/v1/study/exam/start"));
+    }
+
+    @Test
+    @DisplayName("회원 탈퇴 API는 비인증 요청에 401을 반환해야 한다")
+    void memberWithdrawalShouldReturnUnauthorizedForUnauthenticatedRequests() throws Exception {
+        mockMvc.perform(delete("/api/v1/members/me"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.status").value(401))
+                .andExpect(jsonPath("$.code").value("AUTH_REQUIRED"))
+                .andExpect(jsonPath("$.path").value("/api/v1/members/me"));
     }
 
     @Test

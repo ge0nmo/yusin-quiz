@@ -29,6 +29,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import java.util.HashMap;
 import java.util.regex.Pattern;
 
 @Slf4j
@@ -88,8 +89,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
         Member member = memberDetails.getMember();
 
-        String accessToken = jwtService.createAccessToken(member.getEmail());
-        String refreshToken = jwtService.createRefreshToken(member.getEmail());
+        String accessToken = jwtService.createAccessToken(member.getEmail(), member.getId());
+        String refreshToken = jwtService.createRefreshToken(member.getEmail(), member.getId());
 
         return LoginResponse.from(member.getId(), member.getEmail(), member.getUsername(), member.getRole(),
                 accessToken, refreshToken);
@@ -111,11 +112,11 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     public LoginResponse socialLogin(SocialProfile socialProfile) {
         validateSocialProfile(socialProfile);
 
-        Member member = memberRepository.findByEmail(socialProfile.getEmail())
+        Member member = memberRepository.findByEmailWithLock(socialProfile.getEmail())
                 .orElseGet(() -> registerSocialMember(socialProfile));
 
-        String accessToken = jwtService.createAccessToken(member.getEmail());
-        String refreshToken = jwtService.createRefreshToken(member.getEmail());
+        String accessToken = jwtService.createAccessToken(member.getEmail(), member.getId());
+        String refreshToken = jwtService.createRefreshToken(member.getEmail(), member.getId());
 
         return LoginResponse.from(member.getId(), member.getEmail(), member.getUsername(), member.getRole(),
                 accessToken, refreshToken);
@@ -158,6 +159,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         return nickname + uuidHolder.getRandom().substring(0, 5);
     }
 
+    @Transactional
     @Override
     public TokenResponse refreshAccessToken(String refreshToken) {
         if (!jwtService.isRefreshToken(refreshToken)) {
@@ -169,11 +171,15 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         }
 
         String email = jwtService.extractSubject(refreshToken);
-        memberRepository.findByEmail(email)
+        Member member = memberRepository.findByEmailWithLock(email)
                 .orElseThrow(() -> new MemberException(ExceptionMessage.USER_NOT_FOUND));
 
-        String accessToken = jwtService.createAccessToken(email);
-        String newRefreshToken = jwtService.createRefreshToken(email);
+        if (!jwtService.isTokenIssuedTo(refreshToken, new MemberDetails(member, new HashMap<>()))) {
+            throw new MemberException(ExceptionMessage.INVALID_REFRESH_TOKEN);
+        }
+
+        String accessToken = jwtService.createAccessToken(email, member.getId());
+        String newRefreshToken = jwtService.createRefreshToken(email, member.getId());
 
         return new TokenResponse(accessToken, newRefreshToken);
     }

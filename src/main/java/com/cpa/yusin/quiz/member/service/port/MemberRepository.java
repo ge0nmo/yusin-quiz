@@ -9,6 +9,12 @@ import java.util.Optional;
 public interface MemberRepository {
     Optional<Member> findByEmail(String email);
 
+    Optional<Member> findByEmailWithLock(String email);
+
+    Optional<Member> findWithdrawnAuthor();
+
+    Optional<Member> findWithdrawnAuthorWithLock();
+
     Page<Member> findAllByKeyword(String keyword, Pageable pageable);
 
     Page<Member> findAllByKeywordAndAdminNot(String keyword, Pageable pageable);
@@ -18,6 +24,8 @@ public interface MemberRepository {
     boolean existsByUsername(String username);
 
     Member save(Member member);
+
+    Member saveAndFlush(Member member);
 
     Optional<Member> findById(long id);
 

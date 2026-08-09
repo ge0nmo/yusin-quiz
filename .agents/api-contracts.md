@@ -42,6 +42,7 @@
 - 사용자 답변 목록은 `createdAt DESC` 로만 정렬하며 관리자 답변도 정렬 우선권을 갖지 않는다.
 - 사용자 시험 종류 목록은 페이지네이션 없이 전체 공개 목록을 반환한다.
 - 질문/답변 삭제 성공 응답은 body 없는 `204 No Content` 다.
+- 인증된 회원 탈퇴는 `DELETE /api/v1/members/me`이며 성공 응답은 body 없는 `204 No Content`다.
 
 ## Decision Rules
 

@@ -7,6 +7,7 @@ import com.cpa.yusin.quiz.global.exception.MemberException;
 import com.cpa.yusin.quiz.global.jwt.JwtService;
 import com.cpa.yusin.quiz.global.security.CustomAuthenticationProvider;
 import com.cpa.yusin.quiz.member.controller.dto.response.LoginResponse;
+import com.cpa.yusin.quiz.member.controller.dto.response.TokenResponse;
 import com.cpa.yusin.quiz.member.controller.mapper.MemberMapper;
 import com.cpa.yusin.quiz.member.domain.Member;
 import com.cpa.yusin.quiz.member.domain.type.Role;
@@ -73,8 +74,8 @@ class AuthenticationServiceImplTest {
 
         given(authenticationProvider.authenticate(any(UsernamePasswordAuthenticationToken.class)))
                 .willReturn(authentication);
-        given(jwtService.createAccessToken(admin.getEmail())).willReturn("access-token");
-        given(jwtService.createRefreshToken(admin.getEmail())).willReturn("refresh-token");
+        given(jwtService.createAccessToken(admin.getEmail(), admin.getId())).willReturn("access-token");
+        given(jwtService.createRefreshToken(admin.getEmail(), admin.getId())).willReturn("refresh-token");
 
         LoginResponse response = authenticationService.loginAsAdmin(admin.getEmail(), "password");
 
@@ -103,8 +104,8 @@ class AuthenticationServiceImplTest {
 
         given(authenticationProvider.authenticate(any(UsernamePasswordAuthenticationToken.class)))
                 .willReturn(authentication);
-        given(jwtService.createAccessToken(user.getEmail())).willReturn("access-token");
-        given(jwtService.createRefreshToken(user.getEmail())).willReturn("refresh-token");
+        given(jwtService.createAccessToken(user.getEmail(), user.getId())).willReturn("access-token");
+        given(jwtService.createRefreshToken(user.getEmail(), user.getId())).willReturn("refresh-token");
 
         assertThatThrownBy(() -> authenticationService.loginAsAdmin(user.getEmail(), "password"))
                 .isInstanceOf(MemberException.class)
@@ -125,7 +126,7 @@ class AuthenticationServiceImplTest {
                 .platform(Platform.GOOGLE)
                 .build();
 
-        given(memberRepository.findByEmail(email)).willReturn(Optional.empty());
+        given(memberRepository.findByEmailWithLock(email)).willReturn(Optional.empty());
         given(randomNicknameGenerator.generate()).willReturn(randomNickname);
         given(memberRepository.existsByUsername(randomNickname)).willReturn(false); // 닉네임 중복 없음
         given(uuidHolder.getRandom()).willReturn("generated-uuid-12345");
@@ -144,8 +145,8 @@ class AuthenticationServiceImplTest {
                     .build();
         });
 
-        given(jwtService.createAccessToken(email)).willReturn("accessToken");
-        given(jwtService.createRefreshToken(email)).willReturn("refreshToken");
+        given(jwtService.createAccessToken(email, 1L)).willReturn("accessToken");
+        given(jwtService.createRefreshToken(email, 1L)).willReturn("refreshToken");
 
         // when
         authenticationService.socialLogin(profile);
@@ -186,7 +187,7 @@ class AuthenticationServiceImplTest {
                 .platform(Platform.GOOGLE)
                 .build();
 
-        given(memberRepository.findByEmail(email)).willReturn(Optional.empty());
+        given(memberRepository.findByEmailWithLock(email)).willReturn(Optional.empty());
 
         // 첫 번째 호출 -> collisionNickname, 두 번째 호출 -> uniqueNickname
         given(randomNicknameGenerator.generate())
@@ -212,8 +213,8 @@ class AuthenticationServiceImplTest {
                     .build();
         });
 
-        given(jwtService.createAccessToken(email)).willReturn("accessToken");
-        given(jwtService.createRefreshToken(email)).willReturn("refreshToken");
+        given(jwtService.createAccessToken(email, 2L)).willReturn("accessToken");
+        given(jwtService.createRefreshToken(email, 2L)).willReturn("refreshToken");
 
         // when
         authenticationService.socialLogin(profile);
@@ -245,10 +246,10 @@ class AuthenticationServiceImplTest {
                 .platform(Platform.GOOGLE)
                 .build();
 
-        given(memberRepository.findByEmail(email)).willReturn(Optional.of(existingMember));
+        given(memberRepository.findByEmailWithLock(email)).willReturn(Optional.of(existingMember));
 
-        given(jwtService.createAccessToken(email)).willReturn("accessToken");
-        given(jwtService.createRefreshToken(email)).willReturn("refreshToken");
+        given(jwtService.createAccessToken(email, existingMember.getId())).willReturn("accessToken");
+        given(jwtService.createRefreshToken(email, existingMember.getId())).willReturn("refreshToken");
 
         // when
         LoginResponse response = authenticationService.socialLogin(profile);
@@ -256,6 +257,7 @@ class AuthenticationServiceImplTest {
         // then
         assertThat(response.getId()).isEqualTo(1L);
         // 저장 로직이 호출되지 않아야 함 (닉네임 생성도 안 함)
+        verify(memberRepository).findByEmailWithLock(email);
         verify(memberRepository, org.mockito.Mockito.never()).save(any(Member.class));
         verify(randomNicknameGenerator, org.mockito.Mockito.never()).generate();
     }
@@ -270,7 +272,7 @@ class AuthenticationServiceImplTest {
                 .platform(Platform.GOOGLE)
                 .build();
 
-        given(memberRepository.findByEmail(email)).willReturn(Optional.empty());
+        given(memberRepository.findByEmailWithLock(email)).willReturn(Optional.empty());
         given(randomNicknameGenerator.generate()).willReturn("중복닉네임");
         given(memberRepository.existsByUsername("중복닉네임")).willReturn(true);
         given(uuidHolder.getRandom())
@@ -288,8 +290,8 @@ class AuthenticationServiceImplTest {
                     .platform(member.getPlatform())
                     .build();
         });
-        given(jwtService.createAccessToken(email)).willReturn("accessToken");
-        given(jwtService.createRefreshToken(email)).willReturn("refreshToken");
+        given(jwtService.createAccessToken(email, 3L)).willReturn("accessToken");
+        given(jwtService.createRefreshToken(email, 3L)).willReturn("refreshToken");
 
         LoginResponse response = authenticationService.socialLogin(profile);
 
@@ -328,12 +330,43 @@ class AuthenticationServiceImplTest {
         given(jwtService.isRefreshToken("refresh-token")).willReturn(true);
         given(jwtService.isTokenExpired("refresh-token")).willReturn(false);
         given(jwtService.extractSubject("refresh-token")).willReturn("deleted@test.com");
-        given(memberRepository.findByEmail("deleted@test.com")).willReturn(Optional.empty());
+        given(memberRepository.findByEmailWithLock("deleted@test.com")).willReturn(Optional.empty());
 
         assertThatThrownBy(() -> authenticationService.refreshAccessToken("refresh-token"))
                 .isInstanceOf(MemberException.class)
                 .satisfies(exception -> assertThat(((MemberException) exception).getExceptionMessage())
                         .isEqualTo(ExceptionMessage.USER_NOT_FOUND));
+    }
+
+    @Test
+    @DisplayName("리프레시 토큰 재발급은 회원을 잠근 뒤 같은 회원 ID로 새 토큰을 발급한다")
+    void refreshAccessToken_locksMemberAndBindsNewTokensToMemberId() {
+        String refreshToken = "refresh-token";
+        String email = "refresh@example.com";
+        Member member = Member.builder()
+                .id(77L)
+                .email(email)
+                .username("refresh-user")
+                .password("encoded-password")
+                .role(Role.USER)
+                .platform(Platform.GOOGLE)
+                .build();
+        given(jwtService.isRefreshToken(refreshToken)).willReturn(true);
+        given(jwtService.isTokenExpired(refreshToken)).willReturn(false);
+        given(jwtService.extractSubject(refreshToken)).willReturn(email);
+        given(memberRepository.findByEmailWithLock(email)).willReturn(Optional.of(member));
+        given(jwtService.isTokenIssuedTo(org.mockito.ArgumentMatchers.eq(refreshToken), any(MemberDetails.class)))
+                .willReturn(true);
+        given(jwtService.createAccessToken(email, member.getId())).willReturn("new-access-token");
+        given(jwtService.createRefreshToken(email, member.getId())).willReturn("new-refresh-token");
+
+        TokenResponse response = authenticationService.refreshAccessToken(refreshToken);
+
+        assertThat(response.accessToken()).isEqualTo("new-access-token");
+        assertThat(response.refreshToken()).isEqualTo("new-refresh-token");
+        verify(memberRepository).findByEmailWithLock(email);
+        verify(jwtService).createAccessToken(email, member.getId());
+        verify(jwtService).createRefreshToken(email, member.getId());
     }
 
     private void assertInvalidSocialProfile(SocialProfile profile) {

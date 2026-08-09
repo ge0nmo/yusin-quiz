@@ -15,6 +15,10 @@ import lombok.*;
 @Builder
 @Getter
 public class Member extends BaseEntity {
+    public static final String WITHDRAWN_AUTHOR_EMAIL = "__withdrawn_author__@internal.invalid";
+    public static final String WITHDRAWN_AUTHOR_USERNAME = "탈퇴한 사용자";
+    private static final String WITHDRAWN_AUTHOR_PASSWORD = "{withdrawn-account-disabled}";
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -46,6 +50,16 @@ public class Member extends BaseEntity {
                 .build();
     }
 
+    public static Member withdrawnAuthor() {
+        return Member.builder()
+                .email(WITHDRAWN_AUTHOR_EMAIL)
+                .password(WITHDRAWN_AUTHOR_PASSWORD)
+                .username(WITHDRAWN_AUTHOR_USERNAME)
+                .platform(Platform.HOME)
+                .role(Role.USER)
+                .build();
+    }
+
     public void updateFromOauth2(String newUsername) {
         this.username = newUsername;
     }
@@ -64,5 +78,9 @@ public class Member extends BaseEntity {
 
     public void changeRole(Role role) {
         this.role = role;
+    }
+
+    public boolean isWithdrawnAuthor() {
+        return WITHDRAWN_AUTHOR_EMAIL.equals(email);
     }
 }

@@ -7,9 +7,9 @@ import java.util.function.Function;
 
 public interface JwtService
 {
-    String createAccessToken(String email);
+    String createAccessToken(String email, long memberId);
 
-    String createRefreshToken(String email);
+    String createRefreshToken(String email, long memberId);
 
     boolean isAccessToken(String token);
 
@@ -18,6 +18,8 @@ public interface JwtService
     boolean isTokenExpired(String token);
 
     boolean isValidToken(String token, MemberDetails memberDetails);
+
+    boolean isTokenIssuedTo(String token, MemberDetails memberDetails);
 
     <T> T extractClaim(String token, Function<Claims, T> claimsResolver);
 

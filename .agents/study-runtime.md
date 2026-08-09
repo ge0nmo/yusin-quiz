@@ -61,6 +61,8 @@
   - 완료 후 명시적으로 재시작한 새 말문제 round의 배치는 새로운 학습으로 다시 집계한다
 - `WordPracticeCycle`은 기존 `StudySession`과 분리된 말문제 빠른 풀이 회차다. 문제 순서와 최초 답안은 회차에 고정하고, 최대 5개 답안을 원자 저장하며 동일 payload 재전송은 200으로 멱등 처리한다.
 - 말문제는 완료 후 자동 재시작하지 않으며, 최신 완료 회차에 대한 명시적 restart만 다음 round를 만든다.
+- 회원 탈퇴 시 해당 회원의 `SubmittedAnswer`, `StudySession`, `DailyStudyLog`와 회원형 말문제 참여자·회차·답안을 한 트랜잭션에서 삭제한다.
+- 회원형 말문제 participant 생성 및 cycle/answer 쓰기는 member 행을 먼저 잠근다. 말문제 쓰기가 먼저면 탈퇴가 기다린 뒤 모두 삭제하고, 탈퇴가 먼저면 이후 쓰기는 회원 잠금 조회에서 실패한다.
 
 ## Decision Rules
 

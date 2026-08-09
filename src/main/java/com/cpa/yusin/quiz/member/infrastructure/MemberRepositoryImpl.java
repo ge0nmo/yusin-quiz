@@ -16,17 +16,32 @@ public class MemberRepositoryImpl implements MemberRepository {
 
     @Override
     public Optional<Member> findByEmail(String email) {
-        return memberJpaRepository.findByEmail(email);
+        return memberJpaRepository.findByEmail(email, Member.WITHDRAWN_AUTHOR_EMAIL);
+    }
+
+    @Override
+    public Optional<Member> findByEmailWithLock(String email) {
+        return memberJpaRepository.findByEmailWithLock(email, Member.WITHDRAWN_AUTHOR_EMAIL);
+    }
+
+    @Override
+    public Optional<Member> findWithdrawnAuthor() {
+        return memberJpaRepository.findWithdrawnAuthor(Member.WITHDRAWN_AUTHOR_EMAIL);
+    }
+
+    @Override
+    public Optional<Member> findWithdrawnAuthorWithLock() {
+        return memberJpaRepository.findWithdrawnAuthorWithLock(Member.WITHDRAWN_AUTHOR_EMAIL);
     }
 
     @Override
     public Page<Member> findAllByKeyword(String keyword, Pageable pageable) {
-        return memberJpaRepository.findAllByKeyword(keyword, pageable);
+        return memberJpaRepository.findAllByKeyword(keyword, Member.WITHDRAWN_AUTHOR_EMAIL, pageable);
     }
 
     @Override
     public Page<Member> findAllByKeywordAndAdminNot(String keyword, Pageable pageable) {
-        return memberJpaRepository.findAllByKeywordAndAdminNot(keyword, pageable);
+        return memberJpaRepository.findAllByKeywordAndAdminNot(keyword, Member.WITHDRAWN_AUTHOR_EMAIL, pageable);
     }
 
     @Override
@@ -42,6 +57,11 @@ public class MemberRepositoryImpl implements MemberRepository {
     @Override
     public Member save(Member member) {
         return memberJpaRepository.save(member);
+    }
+
+    @Override
+    public Member saveAndFlush(Member member) {
+        return memberJpaRepository.saveAndFlush(member);
     }
 
     @Override
