@@ -1,86 +1,58 @@
 package com.cpa.yusin.quiz.choice.domain;
 
 import com.cpa.yusin.quiz.common.infrastructure.BaseEntity;
-import com.cpa.yusin.quiz.global.converter.BlockListConverter;
+import com.cpa.yusin.quiz.global.converter.JsonBlockListConverter;
 import com.cpa.yusin.quiz.problem.domain.Problem;
-import com.cpa.yusin.quiz.problem.domain.block.Block;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Entity
-@AllArgsConstructor
-@Table(uniqueConstraints = {
-        @UniqueConstraint(columnNames = { "problem_id", "number" })
-})
-@NoArgsConstructor
+@Table(name = "problem_choice", uniqueConstraints =
+        @UniqueConstraint(name = "uk_choice_problem_number", columnNames = {"problem_id", "number"}))
 @Getter
-@Builder
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Choice extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "problem_id", nullable = false)
+    private Problem problem;
+
     @Column(nullable = false)
+    private int number;
+
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
 
     @Column(nullable = false)
-    private Integer number;
+    private boolean answer;
 
-    @Column(nullable = false)
-    private Boolean isAnswer;
+    @Convert(converter = JsonBlockListConverter.class)
+    @Column(nullable = false, columnDefinition = "LONGTEXT")
+    private List<Map<String, Object>> explanation = new ArrayList<>();
 
-    @Column(columnDefinition = "json")
-    @Convert(converter = BlockListConverter.class)
-    private List<Block> explanationJson;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(nullable = false, name = "problem_id")
-    private Problem problem;
-
-    public void update(int number, String content, boolean isAnswer) {
+    public Choice(int number, String content, boolean answer, List<Map<String, Object>> explanation) {
         this.number = number;
         this.content = content;
-        this.isAnswer = isAnswer;
+        this.answer = answer;
+        this.explanation = new ArrayList<>(explanation == null ? List.of() : explanation);
     }
 
-    public void update(int number, String content, boolean isAnswer, List<Block> explanationJson) {
-        this.number = number;
+    public void attachTo(Problem problem) {
+        this.problem = problem;
+    }
+
+    public void update(String content, boolean answer, List<Map<String, Object>> explanation) {
         this.content = content;
-        this.isAnswer = isAnswer;
-        this.explanationJson = explanationJson != null ? explanationJson : new ArrayList<>();
+        this.answer = answer;
+        this.explanation = new ArrayList<>(explanation == null ? List.of() : explanation);
     }
-
-    public static Choice fromSaveOrUpdate(String content, int number, Boolean isAnswer, Problem problem) {
-        return Choice.builder()
-                .content(content)
-                .number(number)
-                .isAnswer(isAnswer)
-                .problem(problem)
-                .explanationJson(new ArrayList<>())
-                .build();
-    }
-
-    public static Choice fromSaveOrUpdate(String content, int number, Boolean isAnswer, List<Block> explanationJson, Problem problem) {
-        return Choice.builder()
-                .content(content)
-                .number(number)
-                .isAnswer(isAnswer)
-                .explanationJson(explanationJson != null ? explanationJson : new ArrayList<>())
-                .problem(problem)
-                .build();
-    }
-
-    public List<Block> getExplanationJson() {
-        if (this.explanationJson == null) {
-            return new ArrayList<>();
-        }
-        return this.explanationJson;
-    }
-
 }

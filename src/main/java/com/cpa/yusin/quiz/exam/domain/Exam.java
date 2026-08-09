@@ -1,59 +1,48 @@
 package com.cpa.yusin.quiz.exam.domain;
 
+import com.cpa.yusin.quiz.common.domain.ContentStatus;
 import com.cpa.yusin.quiz.common.infrastructure.BaseEntity;
+import com.cpa.yusin.quiz.qualification.domain.QualificationExam;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-@Builder
-@AllArgsConstructor
-@NoArgsConstructor()
 @Entity
-@Table(indexes = @Index(name = "idx_exam_subject_status_removed_id", columnList = "subject_id,status,is_removed,id"))
+@Table(name = "exam", uniqueConstraints =
+        @UniqueConstraint(name = "uk_exam_qualification_year_name", columnNames = {"qualification_exam_id", "exam_year", "name"}))
 @Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Exam extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "qualification_exam_id", nullable = false)
+    private QualificationExam qualificationExam;
+
+    @Column(nullable = false, length = 120)
     private String name;
 
-    @Column(nullable = false)
+    @Column(name = "exam_year", nullable = false)
     private int year;
 
-    @Column(nullable = false, updatable = false)
-    private Long subjectId;
-
     @Enumerated(EnumType.STRING)
-    @Builder.Default
-    private ExamStatus status = ExamStatus.DRAFT;
+    @Column(nullable = false, length = 20)
+    private ContentStatus status;
 
-    private boolean isRemoved;
-
-    public ExamStatus getStatus() {
-        return status == null ? ExamStatus.DRAFT : status;
-    }
-
-    public static Exam from(String name, int year, long subjectId, ExamStatus status) {
-        return Exam.builder()
-                .name(name)
-                .year(year)
-                .subjectId(subjectId)
-                .status(status == null ? ExamStatus.DRAFT : status)
-                .build();
-    }
-
-    public void update(String name, int year, ExamStatus status) {
+    public Exam(QualificationExam qualificationExam, String name, int year, ContentStatus status) {
+        this.qualificationExam = qualificationExam;
         this.name = name;
         this.year = year;
-        this.status = status == null ? getStatus() : status;
+        this.status = status;
     }
 
-    public void delete(long deletedMarker) {
-        this.isRemoved = true;
-        this.name = name + "_deleted_" + deletedMarker;
+    public void update(QualificationExam qualificationExam, String name, int year, ContentStatus status) {
+        this.qualificationExam = qualificationExam;
+        this.name = name;
+        this.year = year;
+        this.status = status;
     }
 }

@@ -1,32 +1,21 @@
 package com.cpa.yusin.quiz.global.details;
 
-import com.cpa.yusin.quiz.global.exception.ExceptionMessage;
-import com.cpa.yusin.quiz.global.exception.MemberException;
-import com.cpa.yusin.quiz.member.domain.Member;
-import com.cpa.yusin.quiz.member.service.port.MemberRepository;
+import com.cpa.yusin.quiz.member.infrastructure.MemberRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
-
 @Service
-public class MemberDetailsService implements UserDetailsService
-{
+@RequiredArgsConstructor
+public class MemberDetailsService implements UserDetailsService {
     private final MemberRepository memberRepository;
 
-    public MemberDetailsService(MemberRepository memberRepository)
-    {
-        this.memberRepository = memberRepository;
-    }
-
-
     @Override
-    public MemberDetails loadUserByUsername(String email) throws UsernameNotFoundException
-    {
-        Member member = memberRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException(ExceptionMessage.USER_NOT_FOUND.getMessage()));
-
-        return new MemberDetails(member, new HashMap<>());
+    public UserDetails loadUserByUsername(String loginId) throws UsernameNotFoundException {
+        return memberRepository.findByLoginId(loginId)
+                .map(MemberDetails::new)
+                .orElseThrow(() -> new UsernameNotFoundException("관리자 계정을 찾을 수 없습니다."));
     }
 }

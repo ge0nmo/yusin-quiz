@@ -1,156 +1,71 @@
 package com.cpa.yusin.quiz.global.filter;
 
 import com.cpa.yusin.quiz.global.details.MemberDetails;
-import com.cpa.yusin.quiz.global.details.MemberDetailsService;
 import com.cpa.yusin.quiz.global.jwt.JwtService;
-import com.cpa.yusin.quiz.global.logging.LogMdcContext;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.jsonwebtoken.ExpiredJwtException;
+import com.cpa.yusin.quiz.member.infrastructure.MemberRepository;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.core.annotation.Order;
-import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
-import org.springframework.util.AntPathMatcher;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
 
-import static org.springframework.http.HttpHeaders.AUTHORIZATION;
-
-@Order(1)
 @Component
-@Slf4j
 @RequiredArgsConstructor
 public class SecurityFilter extends OncePerRequestFilter {
-    private final MemberDetailsService memberDetailsService;
     private final JwtService jwtService;
-    private final ObjectMapper objectMapper;
-
-    private final AntPathMatcher pathMatcher = new AntPathMatcher();
-
-    private static final List<String> EXCLUDE_URLS = Arrays.asList(
-            "/api/admin/login",
-            "/api/v1/oauth2/**",
-            "/favicon.ico",
-            "/error"
-    );
+    private final MemberRepository memberRepository;
 
     @Override
-    protected boolean shouldNotFilter(@NonNull HttpServletRequest request) throws ServletException {
-        String requestPath = request.getServletPath();
-        return EXCLUDE_URLS.stream()
-                .anyMatch(pattern -> pathMatcher.match(pattern, requestPath));
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        String path = request.getRequestURI().substring(request.getContextPath().length());
+        return !path.startsWith("/api/admin/")
+                || path.equals("/api/admin/login")
+                || path.equals("/api/admin/refresh")
+                || path.equals("/api/admin/logout");
     }
 
     @Override
-    protected void doFilterInternal(@NonNull HttpServletRequest request,
-                                    @NonNull HttpServletResponse response,
-                                    @NonNull FilterChain filterChain) throws ServletException, IOException {
-        String token = resolveBearerToken(request);
-
-        if (token == null) {
-            filterChain.doFilter(request, response);
-            return;
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
+                                    FilterChain filterChain) throws ServletException, IOException {
+        String token = resolveToken(request);
+        if (token != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+            try {
+                memberRepository.findByLoginId(jwtService.extractSubject(token)).ifPresent(member -> {
+                    if (jwtService.isValidAccessToken(token, member)) {
+                        MemberDetails details = new MemberDetails(member);
+                        SecurityContextHolder.getContext().setAuthentication(
+                                new UsernamePasswordAuthenticationToken(details, null, details.getAuthorities()));
+                    }
+                });
+            } catch (JwtException | IllegalArgumentException ignored) {
+                SecurityContextHolder.clearContext();
+            }
         }
-
-        try {
-            String email = jwtService.extractSubject(token);
-            Authentication currentAuthentication = SecurityContextHolder.getContext().getAuthentication();
-
-            if (!StringUtils.hasText(email)) {
-                filterChain.doFilter(request, response);
-                return;
-            }
-
-            if (currentAuthentication != null) {
-                syncAuthenticatedMemberId(currentAuthentication);
-                filterChain.doFilter(request, response);
-                return;
-            }
-
-            MemberDetails memberDetails = memberDetailsService.loadUserByUsername(email);
-
-            if (!jwtService.isValidToken(token, memberDetails)) {
-                filterChain.doFilter(request, response);
-                return;
-            }
-
-            SecurityContext context = SecurityContextHolder.createEmptyContext();
-            UsernamePasswordAuthenticationToken authenticationToken
-                    = new UsernamePasswordAuthenticationToken(memberDetails, null, memberDetails.getAuthorities());
-
-            context.setAuthentication(authenticationToken);
-            SecurityContextHolder.setContext(context);
-            LogMdcContext.putAuthenticatedMemberId(memberDetails.getMember().getId());
-
-            filterChain.doFilter(request, response);
-
-        } catch (ExpiredJwtException e) {
-            log.error("JWT 토큰이 만료되었습니다: {}", e.getMessage());
-            setErrorResponse(response, "TOKEN_EXPIRED", "토큰이 만료되었습니다. 다시 로그인해주세요.");
-        } catch (JwtException e) {
-            log.error("유효하지 않은 JWT 토큰입니다: {}", e.getMessage());
-            setErrorResponse(response, "INVALID_TOKEN", "유효하지 않은 토큰입니다.");
-        } catch (Exception e) {
-            log.error("보안 필터에서 예외가 발생했습니다: ", e);
-            setErrorResponse(response, "AUTH_ERROR", "인증 처리 중 에러가 발생했습니다.");
-        }
+        filterChain.doFilter(request, response);
     }
 
-    private void setErrorResponse(HttpServletResponse response, String code, String message) throws IOException {
-        SecurityErrorResponse errorResponse = SecurityErrorResponse.unauthorized(code, message, "SecurityFilter");
-
-        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-        response.setCharacterEncoding("UTF-8");
-        response.getWriter().write(objectMapper.writeValueAsString(errorResponse));
-    }
-
-    private boolean isValidHeader(String header) {
-        return StringUtils.hasText(header) && header.startsWith("Bearer ");
-    }
-
-    private String resolveBearerToken(HttpServletRequest request) {
-        String headerToken = request.getHeader(AUTHORIZATION);
-        if (isValidHeader(headerToken)) {
-            return headerToken.substring(7);
+    private String resolveToken(HttpServletRequest request) {
+        String authorization = request.getHeader("Authorization");
+        if (StringUtils.hasText(authorization) && authorization.startsWith("Bearer ")) {
+            return authorization.substring(7);
         }
-
         Cookie[] cookies = request.getCookies();
         if (cookies != null) {
             for (Cookie cookie : cookies) {
-                if ("JWT_TOKEN".equals(cookie.getName())) {
+                if ("JWT_TOKEN".equals(cookie.getName()) && StringUtils.hasText(cookie.getValue())) {
                     return cookie.getValue();
                 }
             }
         }
-
         return null;
-    }
-
-    private void syncAuthenticatedMemberId(Authentication authentication) {
-        if (authentication == null) {
-            return;
-        }
-
-        Object principal = authentication.getPrincipal();
-        if (principal instanceof MemberDetails memberDetails) {
-            LogMdcContext.putAuthenticatedMemberId(memberDetails.getMember().getId());
-        }
     }
 }

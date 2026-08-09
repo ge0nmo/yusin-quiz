@@ -1,155 +1,80 @@
 package com.cpa.yusin.quiz.problem.domain;
 
+import com.cpa.yusin.quiz.choice.domain.Choice;
+import com.cpa.yusin.quiz.common.domain.ContentStatus;
 import com.cpa.yusin.quiz.common.infrastructure.BaseEntity;
 import com.cpa.yusin.quiz.exam.domain.Exam;
-import com.cpa.yusin.quiz.global.converter.BlockListConverter;
-import com.cpa.yusin.quiz.problem.domain.block.Block;
+import com.cpa.yusin.quiz.global.converter.JsonBlockListConverter;
+import com.cpa.yusin.quiz.qualification.domain.QualificationExamSubject;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Entity
-@Table(indexes = @Index(name = "idx_problem_exam_calc_removed_id", columnList = "exam_id,requires_calculation,is_removed,id"))
+@Table(name = "problem", uniqueConstraints =
+        @UniqueConstraint(name = "uk_problem_exam_subject_number",
+                columnNames = {"exam_id", "qualification_exam_subject_id", "number"}))
 @Getter
-@Builder
-@AllArgsConstructor
-@NoArgsConstructor
-public class Problem extends BaseEntity
-{
-
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+public class Problem extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // =========================================================
-    // [V1 Legacy] HTML 기반 데이터 (호환성 유지)
-    // =========================================================
-    @Column(columnDefinition = "LONGTEXT")
-    private String content;
-
-    @Column(columnDefinition = "LONGTEXT")
-    private String explanation;
-
-    // =========================================================
-    // [V2 New] JSON Block 기반 데이터
-    // =========================================================
-    // BlockListConverter가 List<Block> <-> JSON String 변환을 담당합니다.
-    @Column(columnDefinition = "json")
-    @Convert(converter = BlockListConverter.class)
-    private List<Block> contentJson;
-
-    @Column(columnDefinition = "json")
-    @Convert(converter = BlockListConverter.class)
-    private List<Block> explanationJson;
-
-    // 공통 필드
-    @Column(nullable = false)
-    private int number;
-
-    @Column(nullable = false)
-    private boolean isRemoved;
-
-    @Column(length = 1000)
-    private String lectureYoutubeUrl;
-
-    private Integer lectureStartSecond;
-
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "exam_id", nullable = false)
     private Exam exam;
 
-    /**
-     * 말문제 여부를 판단
-     */
-    private boolean requiresCalculation;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "qualification_exam_subject_id", nullable = false)
+    private QualificationExamSubject subjectMapping;
 
-    // =========================================================
-    // [V1 Methods] Legacy Factory
-    // =========================================================
-    public static Problem fromSaveOrUpdate(String content, String explanation, int number, Exam exam) {
-        return Problem.builder()
-                .content(content)
-                .explanation(explanation)
-                .number(number)
-                .exam(exam)
-                .contentJson(new ArrayList<>())
-                .explanationJson(new ArrayList<>())
-                .isRemoved(false)
-                .build();
+    @Column(nullable = false)
+    private int number;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    private ContentStatus status;
+
+    @Convert(converter = JsonBlockListConverter.class)
+    @Column(nullable = false, columnDefinition = "LONGTEXT")
+    private List<Map<String, Object>> content = new ArrayList<>();
+
+    @Convert(converter = JsonBlockListConverter.class)
+    @Column(nullable = false, columnDefinition = "LONGTEXT")
+    private List<Map<String, Object>> explanation = new ArrayList<>();
+
+    @OneToMany(mappedBy = "problem", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("number ASC")
+    private List<Choice> choices = new ArrayList<>();
+
+    public Problem(Exam exam, QualificationExamSubject subjectMapping, int number,
+                   ContentStatus status, List<Map<String, Object>> content,
+                   List<Map<String, Object>> explanation) {
+        update(exam, subjectMapping, number, status, content, explanation);
     }
 
-    public void update(String content, int number, String explanation) {
-        this.content = content;
+    public void update(Exam exam, QualificationExamSubject subjectMapping, int number,
+                       ContentStatus status, List<Map<String, Object>> content,
+                       List<Map<String, Object>> explanation) {
+        this.exam = exam;
+        this.subjectMapping = subjectMapping;
         this.number = number;
-        this.explanation = explanation;
+        this.status = status;
+        this.content = new ArrayList<>(content == null ? List.of() : content);
+        this.explanation = new ArrayList<>(explanation == null ? List.of() : explanation);
     }
 
-    // =========================================================
-    // [V2 Methods] JSON Block Factory & Update
-    // =========================================================
-
-    /**
-     * [V2 생성] JSON Block 리스트를 받아 Problem 객체 생성
-     * Client에서 이미지가 URL로 넘어오므로, 그대로 저장하면 됩니다.
-     */
-    public static Problem fromSaveOrUpdate(List<Block> contentJson, List<Block> explanationJson, int number, boolean requiresCalculation, Exam exam) {
-        return Problem.builder()
-                .contentJson(contentJson)
-                .explanationJson(explanationJson)
-                .number(number)
-                .exam(exam)
-                .isRemoved(false)
-                .requiresCalculation(requiresCalculation)
-                .build();
-    }
-
-    /**
-     * [V2 수정] JSON Block 데이터 업데이트
-     */
-    public void update(List<Block> contentJson, int number, List<Block> explanationJson, boolean requiresCalculation) {
-        this.contentJson = contentJson;
-        this.number = number;
-        this.explanationJson = explanationJson;
-        this.requiresCalculation = requiresCalculation;
-    }
-
-    // =========================================================
-    // 공통 메서드
-    // =========================================================
-    public void delete() {
-        this.isRemoved = true;
-    }
-
-    /**
-     * Soft-deleted rows stay in the table, so they must leave the business number
-     * space to let a new problem reuse the same exam-local number safely.
-     */
-    public void assignDeletedNumber(int deletedNumber) {
-        if (deletedNumber >= 0) {
-            throw new IllegalArgumentException("Deleted problem number must be negative.");
-        }
-
-        this.number = deletedNumber;
-    }
-
-    public void assignLecture(String lectureYoutubeUrl, Integer lectureStartSecond) {
-        this.lectureYoutubeUrl = lectureYoutubeUrl;
-        this.lectureStartSecond = lectureStartSecond;
-    }
-
-    public void clearLecture() {
-        this.lectureYoutubeUrl = null;
-        this.lectureStartSecond = null;
-    }
-
-    // 마이그레이션 유틸리티
-    public void migrateToBlocks(List<Block> contentJson, List<Block> explanationJson) {
-        this.contentJson = contentJson;
-        this.explanationJson = explanationJson;
+    public void replaceChoices(List<Choice> newChoices) {
+        choices.clear();
+        newChoices.forEach(choice -> {
+            choice.attachTo(this);
+            choices.add(choice);
+        });
     }
 }

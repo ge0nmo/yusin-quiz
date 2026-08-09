@@ -57,15 +57,12 @@ dependencies {
 
     annotationProcessor 'org.projectlombok:lombok:1.18.34'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    testImplementation 'org.springframework.boot:spring-boot-testcontainers'
 
     // security
-    implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
     testImplementation 'org.springframework.security:spring-security-test'
     implementation 'org.springframework.boot:spring-boot-starter-security'
 
-    testImplementation 'org.testcontainers:mysql'
-    testImplementation 'org.testcontainers:junit-jupiter'
+    testRuntimeOnly 'com.h2database:h2'
 
 
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
@@ -75,8 +72,6 @@ dependencies {
     runtimeOnly group: 'io.jsonwebtoken', name: 'jjwt-impl', version: '0.12.6'
     runtimeOnly group: 'io.jsonwebtoken', name: 'jjwt-jackson', version: '0.12.6'
 
-    implementation 'com.google.code.gson:gson:2.11.0'
-
     //id 'org.asciidoctor.jvm.convert' version '4.0.2'
     testImplementation 'org.springframework.restdocs:spring-restdocs-mockmvc'
     testImplementation 'com.epages:restdocs-api-spec-mockmvc:0.18.2'
@@ -85,14 +80,10 @@ dependencies {
     implementation platform('software.amazon.awssdk:bom:2.40.6')
     implementation 'software.amazon.awssdk:s3'
 
-    implementation 'org.jsoup:jsoup:1.21.1'
-
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
     implementation 'io.micrometer:micrometer-registry-prometheus'
     implementation 'io.prometheus:prometheus-metrics-exposition-formats:1.2.1'
 
-    implementation 'com.google.api-client:google-api-client:2.8.1'
-    implementation 'com.google.oauth-client:google-oauth-client-jetty:1.39.0'
 }
 
 tasks.named('test') {

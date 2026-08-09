@@ -1,0 +1,40 @@
+= Admin Content API
+:doctype: book
+:icons: font
+:toc: left
+:source-highlighter: highlightjs
+
+== Dashboard
+
+include::{snippets}/admin-dashboard/http-request.adoc[]
+include::{snippets}/admin-dashboard/http-response.adoc[]
+
+== Create global subject
+
+include::{snippets}/admin-create-subject/http-request.adoc[]
+include::{snippets}/admin-create-subject/http-response.adoc[]
+
+== Create qualification and mappings
+
+include::{snippets}/admin-create-qualification-exam/http-request.adoc[]
+include::{snippets}/admin-create-qualification-exam/http-response.adoc[]
+
+== Create exam
+
+include::{snippets}/admin-create-exam/http-request.adoc[]
+include::{snippets}/admin-create-exam/http-response.adoc[]
+
+== Next problem number by exam and subject
+
+include::{snippets}/admin-next-problem-number/http-request.adoc[]
+include::{snippets}/admin-next-problem-number/http-response.adoc[]
+
+== Create JSON-block problem
+
+include::{snippets}/admin-create-problem/http-request.adoc[]
+include::{snippets}/admin-create-problem/http-response.adoc[]
+
+== Upload problem image
+
+include::{snippets}/admin-upload-file/http-request.adoc[]
+include::{snippets}/admin-upload-file/http-response.adoc[]

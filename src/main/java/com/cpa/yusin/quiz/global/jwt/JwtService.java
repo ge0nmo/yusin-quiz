@@ -1,27 +1,11 @@
 package com.cpa.yusin.quiz.global.jwt;
 
-import com.cpa.yusin.quiz.global.details.MemberDetails;
-import io.jsonwebtoken.Claims;
+import com.cpa.yusin.quiz.member.domain.Member;
 
-import java.util.function.Function;
-
-public interface JwtService
-{
-    String createAccessToken(String email, long memberId);
-
-    String createRefreshToken(String email, long memberId);
-
-    boolean isAccessToken(String token);
-
-    boolean isRefreshToken(String token);
-
-    boolean isTokenExpired(String token);
-
-    boolean isValidToken(String token, MemberDetails memberDetails);
-
-    boolean isTokenIssuedTo(String token, MemberDetails memberDetails);
-
-    <T> T extractClaim(String token, Function<Claims, T> claimsResolver);
-
+public interface JwtService {
+    String createAccessToken(Member member);
+    String createRefreshToken(Member member);
     String extractSubject(String token);
+    boolean isValidAccessToken(String token, Member member);
+    boolean isValidRefreshToken(String token, Member member);
 }

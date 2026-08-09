@@ -1,83 +1,12 @@
 # Security and Auth
 
-## Purpose
-
-- Define authentication, authorization, JWT, and CORS behavior.
-- Prevent incorrect assumptions about public endpoints and failure semantics.
-
-## Read This When
-
-- The task changes login or refresh flows.
-- The task changes Google login behavior.
-- The task changes permit-all rules, role checks, or admin access.
-- The task changes JWT parsing, token creation, or CORS settings.
-
-## Invariants
-
-- Security is stateless for user and admin APIs.
-- `/api/admin/login` is the only public admin login endpoint.
-- `/api/v2/admin/problem` is protected by the admin security chain.
-- JWT subject is the member email.
-- Allowed CORS origins come from `app.security.cors.allowed-origins`.
-- Do not combine credentialed CORS with wildcard origins.
-
-## Current Implementation
-
-- User API security chain covers `/api/v1/**`.
-- Admin security chain covers `/api/admin/**` and `/api/v2/admin/**`.
-- User API rules:
-  - `/api/v1/auth/**` is public
-  - `GET /api/v1/**` is generally public
-  - `/api/v1/bookmarks/**` requires authentication
-  - other `/api/v1/**` requests require authentication
-  - `/api/v2/problem/word-practice/**`의 GET/POST는 회원과 비회원 모두 접근 가능하다. 유효 JWT가 있으면 회원 identity를 우선하고, 비회원은 `X-Guest-Token`을 사용한다.
-- Admin API rules:
-  - `/api/admin/login` is public
-  - other admin endpoints require `ROLE_ADMIN`
-- `SecurityFilter` reads JWT from:
-  - `Authorization: Bearer ...`
-  - `JWT_TOKEN` cookie
-- User protected API unauthenticated failures return `401 SecurityErrorResponse`.
-- Admin unauthenticated failures currently resolve to Spring Security `403`.
-- Authenticated-but-forbidden requests remain `403`.
-- `AuthenticationServiceImpl.loginAsAdmin` reuses normal login and then enforces `Role.ADMIN`.
-- Social login flow is:
-  - `SocialLoadService`
-  - `GoogleTokenVerifier`
-  - `AuthenticationServiceImpl.socialLogin`
-- Google ID token verification is configured once and reused; rejected token values and parser messages must not be logged.
-- Invalid or expired Google ID tokens return `401` with `code = INVALID_SOCIAL_TOKEN`.
-- Missing, unverified, or malformed social profile data returns `400` with `code = INVALID_SOCIAL_PROFILE`.
-- New social users are auto-created with a generated nickname and generated password.
-- Refresh flow validates refresh-token type and expiry, then issues a new access token and refresh token.
-- New access/refresh tokens carry both the member ID account binding and an exact issuance time. A token bound to a deleted member ID cannot authenticate a fresh account that reuses the same email.
-- Deployed legacy tokens without a member ID remain valid only when their second-precision `iat` is strictly later than the current member row's creation second. The ambiguous creation-second boundary is conservatively rejected and requires login again.
-- Existing-member social login and refresh issuance lock the member row until token issuance completes, using the same serialization boundary as withdrawal.
-- Authenticated member withdrawal is `DELETE /api/v1/members/me`; the backend does not revoke Google because it stores no Google refresh token.
-
-## Decision Rules
-
-- When changing permit-all rules, compare `SecurityConfig` with real controller mappings before editing.
-- When changing token behavior, inspect `SecurityFilter`, `JwtServiceImpl`, and `AuthenticationServiceImpl` together.
-- When changing admin access, check both `/api/admin/**` and `/api/v2/admin/**`.
-- Do not assume user and admin unauthenticated failures have the same response format.
-
-## Change Checklist
-
-- Update security-focused tests.
-- Update frontend auth docs if login or token behavior changed.
-- Update CORS tests if allowed-origin behavior changed.
-- Update the relevant `.agents/*.md` file if public endpoint or auth semantics changed.
-
-## Verification
-
-- Run `SecurityFilterTest`.
-- Run `AdminApiSecurityIntegrationTest`.
-- Run relevant member auth tests, especially around login and refresh behavior.
-
-## Related Docs
-
-- `architecture.md`
-- `api-contracts.md`
-- `testing-and-docs.md`
-- `docs/frontend-api/admin-auth.md`
+- Public mobile content APIs are stateless and permit all requests.
+- `POST /api/admin/login`, `/api/admin/refresh`, and `/api/admin/logout` are public.
+- Every other `/api/admin/**` endpoint requires `ROLE_ADMIN`.
+- Admin login request is `{loginId,password}`; email and Google login are not supported.
+- JWT subject is immutable `Member.loginId` and the token also carries `memberId` and `tokenType`.
+- Admin refresh accepts a refresh token in the request body, validates token type/expiry/account/ADMIN role, and rotates both tokens.
+- Access tokens are accepted through `Authorization: Bearer` or the httpOnly `JWT_TOKEN` cookie.
+- Allowed CORS origins come from `app.security.cors.allowed-origins`; credentialed wildcard CORS is forbidden.
+- The first admin is created only when none exists and both `ADMIN_BOOTSTRAP_LOGIN_ID` and `ADMIN_BOOTSTRAP_PASSWORD` are set.
+- Never log passwords or JWT values.

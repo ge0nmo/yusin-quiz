@@ -3,6 +3,7 @@ package com.cpa.yusin.quiz.global.exception;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DuplicateKeyException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -98,6 +99,13 @@ public class ExceptionAdvice {
         log.error("해당 키가 중복입니다: " + e.getMessage(), e);
 
         return ErrorResponse.of(HttpStatus.CONFLICT, e.getMessage());
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ErrorResponse handleDataIntegrityViolationException(DataIntegrityViolationException e) {
+        log.warn("데이터 무결성 제약 위반이 발생했습니다.");
+        return ErrorResponse.of(HttpStatus.CONFLICT, "중복되거나 사용 중인 데이터입니다.", "DATA_CONFLICT");
     }
 
     @ExceptionHandler

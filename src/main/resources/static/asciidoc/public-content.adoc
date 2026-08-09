@@ -1,0 +1,25 @@
+= Public Quiz Content API
+:doctype: book
+:icons: font
+:toc: left
+:source-highlighter: highlightjs
+
+== Published subjects
+
+include::{snippets}/public-subjects/http-request.adoc[]
+include::{snippets}/public-subjects/http-response.adoc[]
+
+== Published problems without answers
+
+include::{snippets}/public-problems/http-request.adoc[]
+include::{snippets}/public-problems/http-response.adoc[]
+
+== Check selected choice
+
+include::{snippets}/public-check-answer/http-request.adoc[]
+include::{snippets}/public-check-answer/http-response.adoc[]
+
+== Solutions after a set
+
+include::{snippets}/public-solutions/http-request.adoc[]
+include::{snippets}/public-solutions/http-response.adoc[]

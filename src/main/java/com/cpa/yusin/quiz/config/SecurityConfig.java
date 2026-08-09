@@ -1,18 +1,19 @@
 package com.cpa.yusin.quiz.config;
 
+import com.cpa.yusin.quiz.global.exception.ErrorResponse;
 import com.cpa.yusin.quiz.global.filter.SecurityFilter;
-import com.cpa.yusin.quiz.global.security.UserApiAccessDeniedHandler;
-import com.cpa.yusin.quiz.global.security.UserApiAuthenticationEntryPoint;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
-import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
@@ -21,90 +22,72 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Stream;
 
 @Configuration
-@EnableWebSecurity
 public class SecurityConfig {
     private final SecurityFilter securityFilter;
-    private final UserApiAuthenticationEntryPoint userApiAuthenticationEntryPoint;
-    private final UserApiAccessDeniedHandler userApiAccessDeniedHandler;
-    private final String corsAllowedOrigins;
+    private final ObjectMapper objectMapper;
+    private final String allowedOrigins;
 
-    public SecurityConfig(SecurityFilter securityFilter,
-                          UserApiAuthenticationEntryPoint userApiAuthenticationEntryPoint,
-                          UserApiAccessDeniedHandler userApiAccessDeniedHandler,
-                          @Value("${app.security.cors.allowed-origins:http://localhost:3000,http://127.0.0.1:3000,https://admin.finuminu.com,https://finuminu.com,https://www.finuminu.com}") String corsAllowedOrigins) {
+    public SecurityConfig(SecurityFilter securityFilter, ObjectMapper objectMapper,
+                          @Value("${app.security.cors.allowed-origins:http://localhost:3000,http://127.0.0.1:3000}")
+                          String allowedOrigins) {
         this.securityFilter = securityFilter;
-        this.userApiAuthenticationEntryPoint = userApiAuthenticationEntryPoint;
-        this.userApiAccessDeniedHandler = userApiAccessDeniedHandler;
-        this.corsAllowedOrigins = corsAllowedOrigins;
+        this.objectMapper = objectMapper;
+        this.allowedOrigins = allowedOrigins;
     }
 
+    @Bean
     @Order(1)
-    @Bean
-    public SecurityFilterChain restApiSecurityFilter(HttpSecurity http) throws Exception {
-        configureStatelessSecurity(http, "/api/v1/**", "/api/v2/problem", "/api/v2/problem/**");
-        http.exceptionHandling(exceptionHandling -> exceptionHandling
-                .authenticationEntryPoint(userApiAuthenticationEntryPoint)
-                .accessDeniedHandler(userApiAccessDeniedHandler));
-        http.authorizeHttpRequests(auth -> auth
-                // 말문제 빠른 풀이는 회원과 비회원 모두 진입할 수 있으며, JWT가 있으면 필터가 principal을 설정한다.
-                .requestMatchers("/api/v2/problem/word-practice/**").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/v2/problem", "/api/v2/problem/**").permitAll()
-                .requestMatchers("/api/v1/bookmarks/**").authenticated()
-                .requestMatchers("/api/v1/study/**").authenticated()
-                .requestMatchers("/api/v1/study-logs/**").authenticated()
-                .requestMatchers(HttpMethod.GET, "/api/v1/**").permitAll()
-                .requestMatchers("/api/v1/auth/**").permitAll()
-                .requestMatchers("/api/v1/**").authenticated());
+    SecurityFilterChain adminSecurity(HttpSecurity http) throws Exception {
+        http.securityMatcher("/api/admin/**")
+                .csrf(AbstractHttpConfigurer::disable)
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .formLogin(AbstractHttpConfigurer::disable)
+                .httpBasic(AbstractHttpConfigurer::disable)
+                .exceptionHandling(exceptions -> exceptions.authenticationEntryPoint((request, response, exception) -> {
+                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                    response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+                    response.setCharacterEncoding("UTF-8");
+                    response.getWriter().write(objectMapper.writeValueAsString(
+                            ErrorResponse.of(org.springframework.http.HttpStatus.UNAUTHORIZED, "관리자 로그인이 필요합니다.", "UNAUTHORIZED")));
+                }))
+                .authorizeHttpRequests(authorize -> authorize
+                        .requestMatchers("/api/admin/login", "/api/admin/refresh", "/api/admin/logout").permitAll()
+                        .anyRequest().hasRole("ADMIN"))
+                .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 
+    @Bean
     @Order(2)
-    @Bean
-    public SecurityFilterChain nextJsAdminSecurityFilterChain(HttpSecurity http) throws Exception {
-        configureStatelessSecurity(http, "/api/admin/**", "/api/v2/admin/**");
-        http.formLogin(AbstractHttpConfigurer::disable)
-                .logout(AbstractHttpConfigurer::disable)
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/admin/login").permitAll()
-                        .anyRequest().hasRole("ADMIN"));
+    SecurityFilterChain publicSecurity(HttpSecurity http) throws Exception {
+        http.securityMatcher("/api/v1/**")
+                .csrf(AbstractHttpConfigurer::disable)
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .formLogin(AbstractHttpConfigurer::disable)
+                .httpBasic(AbstractHttpConfigurer::disable)
+                .authorizeHttpRequests(authorize -> authorize.anyRequest().permitAll());
         return http.build();
     }
 
     @Bean
-    public BCryptPasswordEncoder bCryptPasswordEncoder() {
+    PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
     @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
+    CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(parseAllowedOrigins(corsAllowedOrigins));
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
+        configuration.setAllowedOrigins(Arrays.stream(allowedOrigins.split(",")).map(String::trim).filter(s -> !s.isEmpty()).toList());
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
+        configuration.setExposedHeaders(List.of("Authorization", "Content-Type"));
         configuration.setAllowCredentials(true);
-        configuration.setExposedHeaders(Arrays.asList("Authorization", "Cache-Control", "Content-Type"));
-
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
-    }
-
-    private void configureStatelessSecurity(HttpSecurity http, String... securityMatchers) throws Exception {
-        http.securityMatcher(securityMatchers)
-                .csrf(AbstractHttpConfigurer::disable)
-                .httpBasic(AbstractHttpConfigurer::disable)
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
-        http.addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class);
-    }
-
-    private List<String> parseAllowedOrigins(String allowedOrigins) {
-        return Stream.of(allowedOrigins.split(","))
-                .map(String::trim)
-                .filter(origin -> !origin.isEmpty())
-                .toList();
     }
 }
