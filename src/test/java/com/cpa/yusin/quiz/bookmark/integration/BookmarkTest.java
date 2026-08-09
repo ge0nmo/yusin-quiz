@@ -260,6 +260,7 @@ class BookmarkTest {
                                 """))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"))
                 .andExpect(jsonPath("$.message").value("Bad Request"))
                 .andExpect(jsonPath("$.valueErrors[0].descriptor").value("problemIds"))
                 .andExpect(jsonPath("$.valueErrors[0].reason").value("problemIds는 필수입니다"));
@@ -279,6 +280,7 @@ class BookmarkTest {
         resultActions
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"))
                 .andExpect(jsonPath("$.message").value("Bad Request"))
                 .andExpect(jsonPath("$.valueErrors[0].descriptor").value("problemIds[1]"))
                 .andExpect(jsonPath("$.valueErrors[0].reason").value("problemIds에는 null을 포함할 수 없습니다"))
@@ -287,6 +289,7 @@ class BookmarkTest {
                         preprocessResponse(prettyPrint()),
                         responseFields(
                                 fieldWithPath("status").description("HTTP 상태 코드").type(JsonFieldType.NUMBER),
+                                fieldWithPath("code").description("안정적인 오류 코드").type(JsonFieldType.STRING),
                                 fieldWithPath("message").description("오류 요약 메시지").type(JsonFieldType.STRING),
                                 fieldWithPath("valueErrors").description("필드 단위 검증 오류 목록").type(JsonFieldType.ARRAY),
                                 fieldWithPath("valueErrors[].descriptor").description("오류가 발생한 필드 경로").type(JsonFieldType.STRING),
@@ -308,6 +311,7 @@ class BookmarkTest {
                                 """))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"))
                 .andExpect(jsonPath("$.message").value("Bad Request"))
                 .andExpect(jsonPath("$.valueErrors[0].reason").value("problemIds는 양의 정수만 허용합니다"));
     }
@@ -328,6 +332,7 @@ class BookmarkTest {
                                 """.formatted(problemIds)))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"))
                 .andExpect(jsonPath("$.message").value("Bad Request"))
                 .andExpect(jsonPath("$.valueErrors[0].descriptor").value("problemIds"))
                 .andExpect(jsonPath("$.valueErrors[0].reason").value("problemIds는 최대 500개까지 허용합니다"));

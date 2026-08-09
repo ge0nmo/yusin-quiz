@@ -19,6 +19,16 @@ include::{snippets}/saveAnswer/http-response.adoc[]
 === Response Fields
 include::{snippets}/saveAnswer/response-fields.adoc[]
 
+== 답변 수정
+=== HTTP Request
+include::{snippets}/updateAnswer/http-request.adoc[]
+
+=== HTTP Response
+include::{snippets}/updateAnswer/http-response.adoc[]
+
+=== Response Fields
+include::{snippets}/updateAnswer/response-fields.adoc[]
+
 
 == 해당 질문의 모든 답변 조회
 === HTTP Request
@@ -36,6 +46,3 @@ include::{snippets}/deleteAnswer/http-request.adoc[]
 
 === HTTP Response
 include::{snippets}/deleteAnswer/http-response.adoc[]
-
-=== Response Fields
-include::{snippets}/deleteAnswer/response-fields.adoc[]

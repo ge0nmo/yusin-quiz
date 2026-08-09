@@ -1,11 +1,13 @@
 package com.cpa.yusin.quiz.answer.controller;
 
 import com.cpa.yusin.quiz.answer.controller.dto.request.AnswerRegisterRequest;
+import com.cpa.yusin.quiz.answer.controller.dto.request.AnswerUpdateRequest;
 import com.cpa.yusin.quiz.answer.controller.dto.response.AnswerDTO;
 import com.cpa.yusin.quiz.answer.controller.port.AnswerService;
 import com.cpa.yusin.quiz.common.controller.dto.response.GlobalResponse;
 import com.cpa.yusin.quiz.common.controller.dto.response.PageInfo;
 import com.cpa.yusin.quiz.global.details.MemberDetails;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -37,16 +39,27 @@ public class AnswerController {
     public ResponseEntity<GlobalResponse<List<AnswerDTO>>> getAnswersByQuestionId(
             @PathVariable("questionId") long questionId,
             @PageableDefault Pageable pageable) {
-        Page<AnswerDTO> response = answerService.getAnswersByQuestionId(questionId, pageable.previousOrFirst());
+        Page<AnswerDTO> response = answerService.getAnswersByQuestionId(questionId, pageable);
 
         return ResponseEntity.ok(new GlobalResponse<>(response.getContent(), PageInfo.of(response)));
     }
 
+    @PatchMapping("/answer/{answerId}")
+    public ResponseEntity<GlobalResponse<AnswerDTO>> update(
+            @PathVariable("answerId") long answerId,
+            @Valid @RequestBody AnswerUpdateRequest request,
+            @AuthenticationPrincipal MemberDetails memberDetails) {
+        answerService.update(request, answerId, memberDetails.getMember());
+        AnswerDTO response = answerService.getAnswerById(answerId);
+
+        return ResponseEntity.ok(new GlobalResponse<>(response));
+    }
+
     @DeleteMapping("/answer/{answerId}")
-    public ResponseEntity<GlobalResponse<Boolean>> deleteById(@PathVariable("answerId") long answerId,
+    public ResponseEntity<Void> deleteById(@PathVariable("answerId") long answerId,
             @AuthenticationPrincipal MemberDetails memberDetails) {
         answerService.deleteAnswer(answerId, memberDetails.getMember());
 
-        return new ResponseEntity<>(new GlobalResponse<>(true), HttpStatus.NO_CONTENT);
+        return ResponseEntity.noContent().build();
     }
 }

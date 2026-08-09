@@ -26,6 +26,7 @@ import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDoc
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.restdocs.RestDocumentationContextProvider;
 import org.springframework.restdocs.RestDocumentationExtension;
 import org.springframework.restdocs.payload.JsonFieldType;
@@ -35,6 +36,8 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 
+import java.time.LocalDateTime;
+
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.documentationConfiguration;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.*;
@@ -43,6 +46,8 @@ import static org.springframework.restdocs.payload.PayloadDocumentation.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
 @ExtendWith({ RestDocumentationExtension.class, TeardownExtension.class })
 @AutoConfigureMockMvc
@@ -69,6 +74,9 @@ class QuestionTest {
 
         @Autowired
         MemberRepository memberRepository;
+
+        @Autowired
+        JdbcTemplate jdbcTemplate;
 
         Subject subject;
         Exam exam;
@@ -357,6 +365,45 @@ class QuestionTest {
         }
 
         @Test
+        void getAllByProblemIdUsesRequestedZeroBasedPage() throws Exception {
+                Question middle = questionRepository.save(Question.builder()
+                                .title("두 번째 질문")
+                                .content("두 번째 질문 내용")
+                                .member(member)
+                                .answerCount(0)
+                                .problem(problem)
+                                .build());
+                Question newest = questionRepository.save(Question.builder()
+                                .title("세 번째 질문")
+                                .content("세 번째 질문 내용")
+                                .member(member)
+                                .answerCount(0)
+                                .problem(problem)
+                                .build());
+
+                LocalDateTime base = LocalDateTime.of(2026, 8, 9, 12, 0);
+                updateQuestionCreatedAt(question.getId(), base.minusMinutes(2));
+                updateQuestionCreatedAt(middle.getId(), base.minusMinutes(1));
+                updateQuestionCreatedAt(newest.getId(), base);
+
+                mvc.perform(get("/api/v1/problem/{problemId}/question", problem.getId())
+                                .queryParam("page", "0")
+                                .queryParam("size", "2"))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$.data[0].id").value(newest.getId()))
+                                .andExpect(jsonPath("$.data[1].id").value(middle.getId()))
+                                .andExpect(jsonPath("$.pageInfo.currentPage").value(1));
+
+                mvc.perform(get("/api/v1/problem/{problemId}/question", problem.getId())
+                                .queryParam("page", "1")
+                                .queryParam("size", "2"))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$.data.length()").value(1))
+                                .andExpect(jsonPath("$.data[0].id").value(question.getId()))
+                                .andExpect(jsonPath("$.pageInfo.currentPage").value(2));
+        }
+
+        @Test
         void deleteById() throws Exception {
                 // given
                 long questionId = question.getId();
@@ -369,15 +416,16 @@ class QuestionTest {
                 // then
                 resultActions
                                 .andExpect(status().isNoContent())
+                                .andExpect(content().string(""))
                                 .andDo(document("deleteQuestion",
                                                 preprocessRequest(prettyPrint()),
-                                                preprocessResponse(prettyPrint()),
-
-                                                responseFields(
-                                                                fieldWithPath("data").type(JsonFieldType.BOOLEAN)
-                                                                                .description("삭제 성공 여부"))
-
+                                                preprocessResponse(prettyPrint())
                                 ));
 
+        }
+
+        private void updateQuestionCreatedAt(long questionId, LocalDateTime createdAt) {
+                jdbcTemplate.update("UPDATE question SET created_at = ?, updated_at = ? WHERE id = ?",
+                                createdAt, createdAt, questionId);
         }
 }

@@ -102,15 +102,4 @@ public class FakeSubjectRepository implements SubjectRepository
         return new PageImpl<>(result, pageable, activeSubjects.size());
     }
 
-    @Override
-    public Page<Subject> findAllPublishedOrderByName(Pageable pageable)
-    {
-        List<Subject> publishedSubjects = findAllPublished();
-        List<Subject> result = publishedSubjects.stream()
-                .limit(pageable.getPageSize())
-                .skip(pageable.getOffset())
-                .toList();
-
-        return new PageImpl<>(result, pageable, publishedSubjects.size());
-    }
 }

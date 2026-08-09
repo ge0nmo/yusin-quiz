@@ -29,17 +29,21 @@ import java.util.List;
 @RestController
 public class StudySessionController {
 
+        private static final String STUDY_DEVICE_HEADER = "X-Study-Device-Id";
+
         private final StudySessionService studySessionService;
 
         // 1. 시험 시작 (또는 이어풀기)
         @PostMapping("/exam/start")
         public ResponseEntity<GlobalResponse<ExamStartResponse>> startExam(
                         @AuthenticationPrincipal MemberDetails memberDetails,
-                        @RequestBody ExamStartRequest request) {
+                        @RequestHeader(name = STUDY_DEVICE_HEADER, required = false) String deviceId,
+                        @RequestBody @Valid ExamStartRequest request) {
 
                 StudySession session = studySessionService.startSession(memberDetails.getMember().getId(),
                                 request.getExamId(),
-                                request.getMode());
+                                request.getMode(),
+                                deviceId);
                 List<SubmittedAnswer> answers = studySessionService.getSubmittedAnswers(session.getId());
 
                 List<SubmittedAnswerResponse> answerResponses = answers.stream()
@@ -53,13 +57,15 @@ public class StudySessionController {
         @PostMapping("/answer")
         public ResponseEntity<GlobalResponse<ExamAnswerResponse>> saveAnswer(
                         @AuthenticationPrincipal MemberDetails memberDetails,
+                        @RequestHeader(name = STUDY_DEVICE_HEADER, required = false) String deviceId,
                         @RequestBody @Valid ExamSubmitRequest request) {
                 ExamAnswerResponse response = studySessionService.saveAnswer(
                                 memberDetails.getMember().getId(),
                                 request.getSessionId(),
                                 request.getProblemId(),
                                 request.getChoiceId(),
-                                request.getIndex());
+                                request.getIndex(),
+                                deviceId);
 
                 return ResponseEntity.ok(GlobalResponse.success(response));
         }
@@ -68,11 +74,13 @@ public class StudySessionController {
         @PostMapping("/finish")
         public ResponseEntity<GlobalResponse<ExamFinishResponse>> finishExam(
                         @AuthenticationPrincipal MemberDetails memberDetails,
+                        @RequestHeader(name = STUDY_DEVICE_HEADER, required = false) String deviceId,
                         @RequestBody @Valid ExamFinishRequest request) {
 
                 StudySessionCompletionSummary summary = studySessionService.completeSession(
                                 memberDetails.getMember().getId(),
-                                request.getSessionId());
+                                request.getSessionId(),
+                                deviceId);
 
                 return ResponseEntity.ok(GlobalResponse.success(new ExamFinishResponse(
                                 summary.finalScore(),

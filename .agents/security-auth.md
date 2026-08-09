@@ -45,6 +45,9 @@
   - `SocialLoadService`
   - `GoogleTokenVerifier`
   - `AuthenticationServiceImpl.socialLogin`
+- Google ID token verification is configured once and reused; rejected token values and parser messages must not be logged.
+- Invalid or expired Google ID tokens return `401` with `code = INVALID_SOCIAL_TOKEN`.
+- Missing, unverified, or malformed social profile data returns `400` with `code = INVALID_SOCIAL_PROFILE`.
 - New social users are auto-created with a generated nickname and generated password.
 - Refresh flow validates refresh-token type and expiry, then issues a new access token and refresh token.
 

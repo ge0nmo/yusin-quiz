@@ -30,8 +30,7 @@ import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.docu
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.*;
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.*;
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
-import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
-import static org.springframework.restdocs.request.RequestDocumentation.queryParameters;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith({RestDocumentationExtension.class, TeardownExtension.class})
@@ -79,40 +78,23 @@ public class SubjectTest
         subjectRepository.save(Subject.builder().id(4L).name("경영학").build());
         subjectRepository.save(Subject.builder().id(5L).name("상법").build());
         subjectRepository.save(Subject.builder().id(6L).name("임시").status(SubjectStatus.DRAFT).build());
-        int page = 1;
-        int size = 10;
-
-
         // when
         ResultActions resultActions = mvc
-                .perform(get("/api/v1/subject")
-                        .queryParam("page", Integer.toString(page))
-                        .queryParam("size", Integer.toString(size))
-
-                );
+                .perform(get("/api/v1/subject"));
 
         // then
         resultActions
                 .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.length()").value(5))
+                .andExpect(jsonPath("$.pageInfo").doesNotExist())
                 .andDo(document("과목 전체 조회",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),
 
-                        queryParameters(
-                                parameterWithName("page").description("페이지 번호"),
-                                parameterWithName("size").description("페이지 크기")
-                        ),
-
                         responseFields(
                                 fieldWithPath("data[].id").type(JsonFieldType.NUMBER).description("과목 ID"),
                                 fieldWithPath("data[].name").type(JsonFieldType.STRING).description("과목 이름"),
-                                fieldWithPath("data[].status").type(JsonFieldType.STRING).description("과목 게시 상태"),
-
-                                fieldWithPath("pageInfo").type(JsonFieldType.OBJECT).description("페이지 정보").optional(),
-                                fieldWithPath("pageInfo.totalElements").type(JsonFieldType.NUMBER).description("총 데이터 수").optional(),
-                                fieldWithPath("pageInfo.totalPages").type(JsonFieldType.NUMBER).description("총 페이지 수").optional(),
-                                fieldWithPath("pageInfo.currentPage").type(JsonFieldType.NUMBER).description("현재 페이지").optional(),
-                                fieldWithPath("pageInfo.pageSize").type(JsonFieldType.NUMBER).description("페이지 크기").optional()
+                                fieldWithPath("data[].status").type(JsonFieldType.STRING).description("과목 게시 상태")
                         )
                 ));
     }

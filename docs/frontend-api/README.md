@@ -42,3 +42,5 @@
 - `examples/problem-v2/*`
 - `changelog.md`
 - `word-practice.md`
+- `question-answer.md`
+- `google-auth.md`

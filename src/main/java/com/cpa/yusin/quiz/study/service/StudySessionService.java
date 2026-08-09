@@ -22,7 +22,6 @@ import com.cpa.yusin.quiz.study.event.StudySolvedEvent;
 import com.cpa.yusin.quiz.study.service.port.StudySessionRepository;
 import com.cpa.yusin.quiz.study.service.port.SubmittedAnswerRepository;
 import com.cpa.yusin.quiz.study.service.dto.StudySessionCompletionSummary;
-import com.cpa.yusin.quiz.study.service.dto.SubmittedAnswerCorrectnessSnapshot;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
@@ -31,17 +30,15 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 @Slf4j
 @RequiredArgsConstructor
 @Service
 @Transactional(readOnly = true)
 public class StudySessionService {
+
+    private static final int MAX_DEVICE_ID_LENGTH = 64;
 
     private final StudySessionRepository studySessionRepository;
     private final SubmittedAnswerRepository submittedAnswerRepository;
@@ -62,23 +59,37 @@ public class StudySessionService {
      */
     @Transactional
     public StudySession startSession(Long memberId, Long examId, ExamMode mode) {
+        return startSession(memberId, examId, mode, null);
+    }
+
+    @Transactional
+    public StudySession startSession(Long memberId, Long examId, ExamMode mode, String deviceId) {
+        String normalizedDeviceId = normalizeDeviceId(deviceId);
         Member lockedMember = memberRepository.findByIdWithLock(memberId)
                 .orElseThrow(() -> new MemberException(ExceptionMessage.USER_NOT_FOUND));
 
         examService.findPublishedById(examId);
 
-        Optional<StudySession> existingSession = studySessionRepository.findByMemberIdAndExamIdAndStatusAndMode(
+        Optional<StudySession> existingSession = studySessionRepository.findByMemberIdAndExamIdAndStatusAndModeWithLock(
                 memberId, examId, StudySessionStatus.IN_PROGRESS, mode);
 
         if (existingSession.isPresent()) {
             StudySession resumedSession = existingSession.get();
+            resumedSession.claimDevice(normalizedDeviceId);
             backfillPlannedProblemCountIfMissing(resumedSession, examId, countAnsweredProblems(resumedSession.getId()));
             return resumedSession;
         }
 
         LocalDateTime now = clockHolder.getCurrentDateTime();
         int plannedProblemCount = Math.toIntExact(problemRepository.countActiveByExamId(examId));
-        StudySession newSession = StudySession.start(lockedMember, examId, mode, now, plannedProblemCount);
+        StudySession newSession = StudySession.start(
+                lockedMember,
+                examId,
+                mode,
+                now,
+                plannedProblemCount,
+                normalizedDeviceId
+        );
         return studySessionRepository.save(newSession);
     }
 
@@ -98,10 +109,24 @@ public class StudySessionService {
      */
     @Transactional
     public ExamAnswerResponse saveAnswer(Long memberId, Long sessionId, Long problemId, Long choiceId, int index) {
+        return saveAnswer(memberId, sessionId, problemId, choiceId, index, null);
+    }
+
+    @Transactional
+    public ExamAnswerResponse saveAnswer(
+            Long memberId,
+            Long sessionId,
+            Long problemId,
+            Long choiceId,
+            int index,
+            String deviceId
+    ) {
+        String normalizedDeviceId = normalizeDeviceId(deviceId);
         StudySession session = studySessionRepository.findByIdWithLock(sessionId)
                 .orElseThrow(() -> new StudySessionException(ExceptionMessage.SESSION_NOT_FOUND));
         validateOwnership(session, memberId);
         validateInProgress(session);
+        validateAndClaimDevice(session, normalizedDeviceId);
 
         examService.findPublishedById(session.getExamId());
 
@@ -124,10 +149,6 @@ public class StudySessionService {
         } else {
             SubmittedAnswer newAnswer = SubmittedAnswer.create(session, problemId, choiceId, isCorrect);
             submittedAnswerRepository.save(newAnswer);
-
-            if (session.getMode() == ExamMode.PRACTICE) {
-                eventPublisher.publishEvent(new StudySolvedEvent(session.getMember().getId(), 1));
-            }
         }
 
         if (session.getMode() == ExamMode.PRACTICE) {
@@ -144,9 +165,21 @@ public class StudySessionService {
      */
     @Transactional
     public StudySessionCompletionSummary completeSession(Long memberId, Long sessionId) {
+        return completeSession(memberId, sessionId, null);
+    }
+
+    @Transactional
+    public StudySessionCompletionSummary completeSession(Long memberId, Long sessionId, String deviceId) {
+        String normalizedDeviceId = normalizeDeviceId(deviceId);
         StudySession session = studySessionRepository.findByIdWithLock(sessionId)
                 .orElseThrow(() -> new StudySessionException(ExceptionMessage.SESSION_NOT_FOUND));
         validateOwnership(session, memberId);
+
+        if (!session.isInProgress() && session.getStatus() != StudySessionStatus.COMPLETED) {
+            throw new StudySessionException(ExceptionMessage.SESSION_NOT_IN_PROGRESS);
+        }
+
+        validateAndClaimDevice(session, normalizedDeviceId);
 
         List<SubmittedAnswer> answers = submittedAnswerRepository.findAllByStudySessionId(sessionId);
         backfillPlannedProblemCountIfMissing(session, session.getExamId(), answers.size());
@@ -159,7 +192,7 @@ public class StudySessionService {
         LocalDateTime now = clockHolder.getCurrentDateTime();
         session.complete(summary.correctCount(), now);
 
-        if (session.getMode() == ExamMode.EXAM) {
+        if (shouldRecordCompletedLearningUnit(session, summary)) {
             eventPublisher.publishEvent(new StudySolvedEvent(session.getMember().getId(), summary.answeredCount()));
         }
 
@@ -171,35 +204,19 @@ public class StudySessionService {
         int currentStreak = studyLogService.calculateCurrentStreak(memberId);
         int yearSolved = studyLogService.getYearSolvedCount(memberId, clockHolder.getCurrentDateTime().getYear());
 
-        Optional<StudySession> latestSessionOpt = studySessionRepository
-                .findLatestByMemberIdAndStatus(memberId, StudySessionStatus.IN_PROGRESS);
-
-        InProgressSessionResponse inProgress = null;
-        if (latestSessionOpt.isPresent()) {
-            StudySession session = latestSessionOpt.get();
-            Exam exam = examService.findPublishedById(session.getExamId());
-            String examName = (exam != null) ? exam.getName() : "";
-            int answeredCount = countAnsweredProblems(session.getId());
-            int totalCount = session.getPlannedProblemCount() != null
-                    ? session.getPlannedProblemCount()
-                    : Math.toIntExact(problemRepository.countActiveByExamId(session.getExamId()));
-
-            inProgress = new InProgressSessionResponse(
-                    session.getId(),
-                    session.getExamId(),
-                    examName,
-                    session.getMode().name(),
-                    session.getLastIndex(),
-                    answeredCount,
-                    totalCount
-            );
-        }
+        List<InProgressSessionResponse> inProgressSessions = studySessionRepository
+                .findAllByMemberIdAndStatusOrderByUpdatedAtDesc(memberId, StudySessionStatus.IN_PROGRESS)
+                .stream()
+                .map(this::toInProgressSessionResponse)
+                .toList();
+        InProgressSessionResponse inProgress = inProgressSessions.isEmpty() ? null : inProgressSessions.get(0);
 
         return new StudySummaryResponse(
                 todaySolved,
                 currentStreak,
                 yearSolved,
-                inProgress
+                inProgress,
+                inProgressSessions
         );
     }
 
@@ -234,6 +251,27 @@ public class StudySessionService {
         }
     }
 
+    private void validateAndClaimDevice(StudySession session, String deviceId) {
+        if (!session.isOwnedByDevice(deviceId)) {
+            throw new StudySessionException(ExceptionMessage.SESSION_TAKEN_OVER);
+        }
+
+        session.claimDevice(deviceId);
+    }
+
+    private String normalizeDeviceId(String deviceId) {
+        if (deviceId == null || deviceId.isBlank()) {
+            return null;
+        }
+
+        String normalized = deviceId.trim();
+        if (normalized.length() > MAX_DEVICE_ID_LENGTH) {
+            throw new StudySessionException(ExceptionMessage.INVALID_DATA);
+        }
+
+        return normalized;
+    }
+
     private void backfillPlannedProblemCountIfMissing(StudySession session, Long examId, int answeredCount) {
         if (session.getPlannedProblemCount() != null) {
             return;
@@ -252,59 +290,47 @@ public class StudySessionService {
         int totalCount = session.getPlannedProblemCount() == null
                 ? answeredCount
                 : Math.max(session.getPlannedProblemCount(), answeredCount);
-        int correctCount = calculateCorrectCount(session.getId(), answers);
+        int correctCount = calculateCorrectCount(answers);
         int unansweredCount = Math.max(totalCount - answeredCount, 0);
 
         return new StudySessionCompletionSummary(correctCount, totalCount, answeredCount, unansweredCount);
     }
 
-    /**
-     * SubmittedAnswer.isCorrect is the normal finish fast path because saveAnswer
-     * persists the evaluated correctness for both PRACTICE and EXAM.
-     * We still run a single batched verification query so legacy or corrupted rows
-     * can fall back to a choice-join based recalculation without introducing N+1.
-     */
-    private int calculateCorrectCount(Long sessionId, List<SubmittedAnswer> answers) {
-        int persistedCorrectCount = (int) answers.stream()
+    private int calculateCorrectCount(List<SubmittedAnswer> answers) {
+        return (int) answers.stream()
                 .filter(SubmittedAnswer::isCorrect)
                 .count();
+    }
 
-        if (answers.isEmpty()) {
-            return persistedCorrectCount;
+    private boolean shouldRecordCompletedLearningUnit(
+            StudySession session,
+            StudySessionCompletionSummary summary
+    ) {
+        if (summary.answeredCount() <= 0) {
+            return false;
         }
 
-        List<SubmittedAnswerCorrectnessSnapshot> snapshots = submittedAnswerRepository
-                .findCorrectnessSnapshotsByStudySessionId(sessionId);
+        return session.getMode() == ExamMode.EXAM
+                || summary.answeredCount() == summary.totalCount();
+    }
 
-        if (snapshots.size() != answers.size()) {
-            return persistedCorrectCount;
-        }
+    private InProgressSessionResponse toInProgressSessionResponse(StudySession session) {
+        Exam exam = examService.findPublishedById(session.getExamId());
+        String examName = exam != null ? exam.getName() : "";
+        int answeredCount = countAnsweredProblems(session.getId());
+        int totalCount = session.getPlannedProblemCount() != null
+                ? session.getPlannedProblemCount()
+                : Math.toIntExact(problemRepository.countActiveByExamId(session.getExamId()));
 
-        Map<Long, SubmittedAnswerCorrectnessSnapshot> snapshotByProblemId = snapshots.stream()
-                .collect(Collectors.toMap(SubmittedAnswerCorrectnessSnapshot::problemId, Function.identity()));
-
-        boolean mismatchDetected = false;
-        int recalculatedCorrectCount = 0;
-
-        for (SubmittedAnswer answer : answers) {
-            SubmittedAnswerCorrectnessSnapshot snapshot = snapshotByProblemId.get(answer.getProblemId());
-
-            if (snapshot == null
-                    || !Objects.equals(snapshot.choiceId(), answer.getChoiceId())
-                    || snapshot.authoritativeCorrect() == null) {
-                return persistedCorrectCount;
-            }
-
-            if (!Objects.equals(snapshot.authoritativeCorrect(), answer.isCorrect())) {
-                mismatchDetected = true;
-            }
-
-            if (Boolean.TRUE.equals(snapshot.authoritativeCorrect())) {
-                recalculatedCorrectCount++;
-            }
-        }
-
-        return mismatchDetected ? recalculatedCorrectCount : persistedCorrectCount;
+        return new InProgressSessionResponse(
+                session.getId(),
+                session.getExamId(),
+                examName,
+                session.getMode().name(),
+                session.getLastIndex(),
+                answeredCount,
+                totalCount
+        );
     }
 
     private void validateProblemBelongsToSession(Problem problem, Long examId) {

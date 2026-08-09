@@ -9,7 +9,7 @@
 
 ## 엔드포인트
 
-- `GET /api/v1/subject?page={page}&size={size}`
+- `GET /api/v1/subject`
 - `GET /api/admin/subject`
 - `POST /api/admin/subject`
 - `PATCH /api/admin/subject/{subjectId}`
@@ -17,6 +17,7 @@
 ## 사용자 앱 규칙
 
 - `/api/v1/subject` 는 `status = PUBLISHED` 인 과목만 내려준다
+- 사용자 과목 수는 20개 미만이라는 제품 제약에 따라 전체 목록을 한 번에 반환하며 `pageInfo` 는 없다
 - 응답 항목의 `status` 는 항상 `PUBLISHED` 다
 - `DRAFT` 과목은 사용자 앱 과목 목록, 시험 목록, 문제 목록의 진입점으로 사용할 수 없다
 

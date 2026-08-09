@@ -20,6 +20,7 @@ import com.cpa.yusin.quiz.question.service.QuestionAnswerService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -103,7 +104,7 @@ public class AnswerServiceImpl implements AnswerService {
     public Page<AnswerDTO> getAnswersByQuestionId(long questionId, Pageable pageable) {
         questionAnswerService.getQuestion(questionId);
 
-        return answerRepository.findByQuestionId(questionId, pageable)
+        return answerRepository.findByQuestionId(questionId, answerPage(pageable))
                 .map(answerMapper::toAnswerDTO);
     }
 
@@ -111,7 +112,7 @@ public class AnswerServiceImpl implements AnswerService {
     public Page<AnswerDTO> getAnswersByQuestionIdForAdmin(long questionId, Pageable pageable) {
         questionAnswerService.getQuestionForAdmin(questionId);
 
-        return answerRepository.findByQuestionId(questionId, pageable)
+        return answerRepository.findByQuestionId(questionId, answerPage(pageable))
                 .map(answerMapper::toAnswerDTO);
     }
 
@@ -149,5 +150,11 @@ public class AnswerServiceImpl implements AnswerService {
         if (!answer.isOwner(member)) {
             throw new MemberException(ExceptionMessage.NO_AUTHORIZATION);
         }
+    }
+
+    private Pageable answerPage(Pageable pageable) {
+        // Answer order is an API contract. Ignore caller-provided sort fields so the
+        // repository's createdAt DESC ordering remains the only ordering rule.
+        return PageRequest.of(pageable.getPageNumber(), pageable.getPageSize());
     }
 }

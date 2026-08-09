@@ -14,6 +14,7 @@ import com.cpa.yusin.quiz.member.controller.dto.response.TokenResponse;
 import com.cpa.yusin.quiz.member.controller.mapper.MemberMapper;
 import com.cpa.yusin.quiz.member.controller.port.AuthenticationService;
 import com.cpa.yusin.quiz.member.domain.Member;
+import com.cpa.yusin.quiz.member.domain.type.Platform;
 import com.cpa.yusin.quiz.member.domain.type.Role;
 import com.cpa.yusin.quiz.member.service.dto.SocialProfile;
 import com.cpa.yusin.quiz.member.service.port.MemberRepository;
@@ -26,10 +27,15 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
+
+import java.util.regex.Pattern;
 
 @Slf4j
 @Service
 public class AuthenticationServiceImpl implements AuthenticationService {
+    private static final Pattern EMAIL_PATTERN = Pattern.compile("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$");
+
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final MemberRepository memberRepository;
@@ -103,6 +109,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     @Override
     @Transactional
     public LoginResponse socialLogin(SocialProfile socialProfile) {
+        validateSocialProfile(socialProfile);
+
         Member member = memberRepository.findByEmail(socialProfile.getEmail())
                 .orElseGet(() -> registerSocialMember(socialProfile));
 
@@ -124,6 +132,16 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 .platform(profile.getPlatform())
                 .build();
         return memberRepository.save(newMember);
+    }
+
+    private void validateSocialProfile(SocialProfile profile) {
+        if (profile == null
+                || !StringUtils.hasText(profile.getEmail())
+                || !EMAIL_PATTERN.matcher(profile.getEmail()).matches()
+                || profile.getPlatform() == null
+                || Platform.HOME.equals(profile.getPlatform())) {
+            throw new MemberException(ExceptionMessage.INVALID_SOCIAL_PROFILE);
+        }
     }
 
     private String generateUniqueNickname() {

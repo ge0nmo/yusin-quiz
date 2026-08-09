@@ -412,6 +412,181 @@ class WordPracticeApiTest {
                 .andDo(document("wordPracticeAnswerChangeConflict"));
     }
 
+    /** 다섯 답안을 한 트랜잭션으로 저장하고 동일 payload 재시도는 기존 결과를 반환한다. */
+    @Test
+    void answerBatchIsAtomicIdempotentAndDocumentsContract() throws Exception {
+        addWordProblems(4);
+        WordPracticeCycleResponse cycleResponse = wordPracticeService.startOrResumeCycle(null, null, subject.getId());
+        WordPracticeCycle cycle = cycleRepository.findById(cycleResponse.cycleId()).orElseThrow();
+        List<String> answerBodies = cycle.getProblemOrder().stream().map(problemId -> {
+            Choice choice = choiceRepository.findAllByProblemId(problemId).getFirst();
+            return "{\"problemId\":" + problemId + ",\"choiceId\":" + choice.getId() + "}";
+        }).toList();
+        String payload = "{\"answers\":[" + String.join(",", answerBodies) + "]}";
+
+        mvc.perform(post("/api/v2/problem/word-practice/cycles/{cycleId}/answers/batch", cycleResponse.cycleId())
+                        .header("X-Guest-Token", cycleResponse.issuedGuestToken())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(payload))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.answers.length()").value(5))
+                .andExpect(jsonPath("$.data.answers[0].problemId").value(cycle.getProblemOrder().getFirst()))
+                .andExpect(jsonPath("$.data.answers[0].isCorrect").value(true))
+                .andExpect(jsonPath("$.data.answers[4].sequence").value(5))
+                .andExpect(jsonPath("$.data.status").value("COMPLETED"))
+                .andExpect(jsonPath("$.data.progress.solvedCount").value(5))
+                .andExpect(jsonPath("$.data.progress.remainingCount").value(0))
+                .andDo(document("postWordPracticeAnswerBatch",
+                        requestHeaders(
+                                headerWithName("X-Guest-Token")
+                                        .description("비회원 회차 소유권을 확인하는 UUID token")
+                                        .optional()
+                        ),
+                        pathParameters(
+                                parameterWithName("cycleId").description("답안 묶음을 제출할 말문제 회차 ID")
+                        ),
+                        requestFields(
+                                fieldWithPath("answers").type(JsonFieldType.ARRAY)
+                                        .description("현재 서버 순서의 답안 목록. 보통 5개, 마지막 묶음은 1~4개"),
+                                fieldWithPath("answers[].problemId").type(JsonFieldType.NUMBER)
+                                        .description("현재 문제 묶음의 문제 ID"),
+                                fieldWithPath("answers[].choiceId").type(JsonFieldType.NUMBER)
+                                        .description("선택한 보기 ID")
+                        ),
+                        responseFields(
+                                fieldWithPath("data.answers").type(JsonFieldType.ARRAY)
+                                        .description("요청 순서와 같은 서버 판정 결과"),
+                                fieldWithPath("data.answers[].problemId").type(JsonFieldType.NUMBER)
+                                        .description("저장된 문제 ID"),
+                                fieldWithPath("data.answers[].choiceId").type(JsonFieldType.NUMBER)
+                                        .description("저장된 보기 ID"),
+                                fieldWithPath("data.answers[].isCorrect").type(JsonFieldType.BOOLEAN)
+                                        .description("서버가 계산한 정답 여부"),
+                                fieldWithPath("data.answers[].sequence").type(JsonFieldType.NUMBER)
+                                        .description("1부터 시작하는 회차 내 답안 순서"),
+                                fieldWithPath("data.status").type(JsonFieldType.STRING)
+                                        .description("배치 저장 뒤 회차 상태"),
+                                fieldWithPath("data.progress").type(JsonFieldType.OBJECT)
+                                        .description("배치 저장 뒤 회차 진행률"),
+                                fieldWithPath("data.progress.solvedCount").type(JsonFieldType.NUMBER)
+                                        .description("저장된 전체 답안 수"),
+                                fieldWithPath("data.progress.correctCount").type(JsonFieldType.NUMBER)
+                                        .description("정답 수"),
+                                fieldWithPath("data.progress.incorrectCount").type(JsonFieldType.NUMBER)
+                                        .description("오답 수"),
+                                fieldWithPath("data.progress.totalCount").type(JsonFieldType.NUMBER)
+                                        .description("회차 문제 수"),
+                                fieldWithPath("data.progress.remainingCount").type(JsonFieldType.NUMBER)
+                                        .description("남은 문제 수")
+                        )));
+
+        mvc.perform(post("/api/v2/problem/word-practice/cycles/{cycleId}/answers/batch", cycleResponse.cycleId())
+                        .header("X-Guest-Token", cycleResponse.issuedGuestToken())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(payload))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.answers.length()").value(5))
+                .andExpect(jsonPath("$.data.progress.solvedCount").value(5))
+                .andDo(document("wordPracticeAnswerBatchIdempotentRetry"));
+
+        org.assertj.core.api.Assertions.assertThat(answerJpaRepository.count()).isEqualTo(5);
+    }
+
+    /**
+     * 구버전 앱이 첫 답안을 단건 저장한 뒤 새 앱이 sequence 2부터 다섯 답안을 저장한 경우에도,
+     * 첫 배치 응답 유실 뒤 동일 payload 재전송은 저장·진행률을 반복하지 않고 성공해야 한다.
+     */
+    @Test
+    void batchRetryAfterLegacySingleAnswerIsIdempotentWithoutFixedSequenceBoundary() throws Exception {
+        addWordProblems(5);
+        WordPracticeCycleResponse cycleResponse = wordPracticeService.startOrResumeCycle(null, null, subject.getId());
+        WordPracticeCycle cycle = cycleRepository.findById(cycleResponse.cycleId()).orElseThrow();
+        Long legacyProblemId = cycle.getProblemOrder().getFirst();
+        Choice legacyChoice = choiceRepository.findAllByProblemId(legacyProblemId).getFirst();
+        wordPracticeService.submitAnswer(
+                null,
+                cycleResponse.issuedGuestToken(),
+                cycleResponse.cycleId(),
+                legacyProblemId,
+                legacyChoice.getId()
+        );
+
+        List<String> answerBodies = cycle.getProblemOrder().subList(1, 6).stream().map(problemId -> {
+            Choice choice = choiceRepository.findAllByProblemId(problemId).getFirst();
+            return "{\"problemId\":" + problemId + ",\"choiceId\":" + choice.getId() + "}";
+        }).toList();
+        String payload = "{\"answers\":[" + String.join(",", answerBodies) + "]}";
+
+        mvc.perform(post("/api/v2/problem/word-practice/cycles/{cycleId}/answers/batch", cycleResponse.cycleId())
+                        .header("X-Guest-Token", cycleResponse.issuedGuestToken())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(payload))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.answers[0].sequence").value(2))
+                .andExpect(jsonPath("$.data.answers[4].sequence").value(6))
+                .andExpect(jsonPath("$.data.progress.solvedCount").value(6));
+
+        // 위 응답을 앱이 받지 못했다고 보고 동일 본문을 그대로 재시도한다.
+        mvc.perform(post("/api/v2/problem/word-practice/cycles/{cycleId}/answers/batch", cycleResponse.cycleId())
+                        .header("X-Guest-Token", cycleResponse.issuedGuestToken())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(payload))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.answers[0].sequence").value(2))
+                .andExpect(jsonPath("$.data.answers[4].sequence").value(6))
+                .andExpect(jsonPath("$.data.status").value("COMPLETED"))
+                .andExpect(jsonPath("$.data.progress.solvedCount").value(6));
+
+        org.assertj.core.api.Assertions.assertThat(answerJpaRepository.count()).isEqualTo(6);
+    }
+
+    /** 마지막 문제 묶음은 다섯 개보다 작아도 완료할 수 있다. */
+    @Test
+    void finalAnswerBatchMayContainFewerThanFiveAnswers() throws Exception {
+        WordPracticeCycleResponse cycleResponse = wordPracticeService.startOrResumeCycle(null, null, subject.getId());
+        WordPracticeCycle cycle = cycleRepository.findById(cycleResponse.cycleId()).orElseThrow();
+        Long problemId = cycle.getProblemOrder().getFirst();
+        Choice choice = choiceRepository.findAllByProblemId(problemId).getFirst();
+
+        mvc.perform(post("/api/v2/problem/word-practice/cycles/{cycleId}/answers/batch", cycleResponse.cycleId())
+                        .header("X-Guest-Token", cycleResponse.issuedGuestToken())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"answers\":[{\"problemId\":" + problemId
+                                + ",\"choiceId\":" + choice.getId() + "}]}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.answers.length()").value(1))
+                .andExpect(jsonPath("$.data.status").value("COMPLETED"))
+                .andDo(document("postWordPracticeFinalAnswerBatch"));
+    }
+
+    /** 한 항목이라도 문제와 보기가 맞지 않으면 배치 전체가 롤백된다. */
+    @Test
+    void invalidAnswerRollsBackWholeBatch() throws Exception {
+        addWordProblems(4);
+        WordPracticeCycleResponse cycleResponse = wordPracticeService.startOrResumeCycle(null, null, subject.getId());
+        WordPracticeCycle cycle = cycleRepository.findById(cycleResponse.cycleId()).orElseThrow();
+        List<String> answerBodies = new ArrayList<>();
+        Choice firstChoice = choiceRepository.findAllByProblemId(cycle.getProblemOrder().getFirst()).getFirst();
+        for (int index = 0; index < cycle.getProblemOrder().size(); index++) {
+            Long problemId = cycle.getProblemOrder().get(index);
+            Choice choice = index == 4
+                    ? firstChoice
+                    : choiceRepository.findAllByProblemId(problemId).getFirst();
+            answerBodies.add("{\"problemId\":" + problemId + ",\"choiceId\":" + choice.getId() + "}");
+        }
+
+        mvc.perform(post("/api/v2/problem/word-practice/cycles/{cycleId}/answers/batch", cycleResponse.cycleId())
+                        .header("X-Guest-Token", cycleResponse.issuedGuestToken())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"answers\":[" + String.join(",", answerBodies) + "]}"))
+                .andExpect(status().isBadRequest())
+                .andDo(document("wordPracticeAnswerBatchAtomicFailure"));
+
+        org.assertj.core.api.Assertions.assertThat(answerJpaRepository.count()).isZero();
+        WordPracticeCycle persistedCycle = cycleRepository.findById(cycleResponse.cycleId()).orElseThrow();
+        org.assertj.core.api.Assertions.assertThat(persistedCycle.getSolvedCount()).isZero();
+    }
+
     /** 동일 답안이 동시에 도착해도 최초 이력과 회차 진행률은 한 번만 반영돼야 한다. */
     @Test
     void concurrentSameAnswerCreatesOneHistoryAndAdvancesOnce() throws Exception {

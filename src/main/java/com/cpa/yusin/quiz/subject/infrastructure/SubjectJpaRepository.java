@@ -29,12 +29,6 @@ public interface SubjectJpaRepository extends JpaRepository<Subject, Long>
 
     @Query("SELECT s FROM Subject s " +
             "WHERE s.isRemoved = false " +
-            "AND (s.status = :publishedStatus OR s.status IS NULL) " +
-            "ORDER BY s.name ASC ")
-    Page<Subject> findAllPublishedOrderByNameAsc(@Param("publishedStatus") SubjectStatus publishedStatus, Pageable pageable);
-
-    @Query("SELECT s FROM Subject s " +
-            "WHERE s.isRemoved = false " +
             "ORDER BY s.name ASC ")
     List<Subject> findAllByIsRemovedFalseOrderByNameAsc();
 

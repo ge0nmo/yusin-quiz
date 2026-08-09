@@ -15,7 +15,18 @@ public interface StudySessionJpaRepository extends JpaRepository<StudySession, L
     Optional<StudySession> findByMemberIdAndExamIdAndStatusAndMode(
             Long memberId, Long examId, StudySessionStatus status, ExamMode mode);
 
-    Optional<StudySession> findFirstByMemberIdAndStatusOrderByUpdatedAtDesc(
+    @Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
+    @Query("select s from StudySession s " +
+            "where s.member.id = :memberId and s.examId = :examId " +
+            "and s.status = :status and s.mode = :mode")
+    Optional<StudySession> findByMemberIdAndExamIdAndStatusAndModeWithLock(
+            @Param("memberId") Long memberId,
+            @Param("examId") Long examId,
+            @Param("status") StudySessionStatus status,
+            @Param("mode") ExamMode mode
+    );
+
+    List<StudySession> findAllByMemberIdAndStatusOrderByUpdatedAtDesc(
             Long memberId, StudySessionStatus status);
 
     List<StudySession> findByMemberIdAndStatus(Long memberId, StudySessionStatus status);

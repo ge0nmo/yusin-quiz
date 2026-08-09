@@ -17,7 +17,10 @@ public interface StudySessionRepository {
     Optional<StudySession> findByMemberIdAndExamIdAndStatusAndMode(
             Long memberId, Long examId, StudySessionStatus status, ExamMode mode);
 
-    Optional<StudySession> findLatestByMemberIdAndStatus(Long memberId, StudySessionStatus status);
+    Optional<StudySession> findByMemberIdAndExamIdAndStatusAndModeWithLock(
+            Long memberId, Long examId, StudySessionStatus status, ExamMode mode);
+
+    List<StudySession> findAllByMemberIdAndStatusOrderByUpdatedAtDesc(Long memberId, StudySessionStatus status);
 
     List<StudySession> findByMemberIdAndStatus(Long memberId, StudySessionStatus status);
 

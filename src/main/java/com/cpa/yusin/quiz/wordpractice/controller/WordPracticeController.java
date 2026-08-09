@@ -7,6 +7,8 @@ import com.cpa.yusin.quiz.wordpractice.controller.dto.response.WordPracticeCycle
 import com.cpa.yusin.quiz.wordpractice.controller.dto.response.WordPracticeProblemBatchResponse;
 import com.cpa.yusin.quiz.wordpractice.controller.dto.response.WordPracticeAnswerResponse;
 import com.cpa.yusin.quiz.wordpractice.controller.dto.request.WordPracticeAnswerRequest;
+import com.cpa.yusin.quiz.wordpractice.controller.dto.request.WordPracticeAnswerBatchRequest;
+import com.cpa.yusin.quiz.wordpractice.controller.dto.response.WordPracticeAnswerBatchResponse;
 import jakarta.validation.Valid;
 import com.cpa.yusin.quiz.wordpractice.controller.port.WordPracticeService;
 import lombok.RequiredArgsConstructor;
@@ -89,6 +91,19 @@ public class WordPracticeController {
         Long memberId = memberDetails == null ? null : memberDetails.getMember().getId();
         return ResponseEntity.ok(GlobalResponse.success(
                 wordPracticeService.submitAnswer(memberId, guestToken, cycleId, request.problemId(), request.choiceId())));
+    }
+
+    /** 현재 문제 묶음의 답안을 최대 5개까지 한 트랜잭션으로 저장한다. */
+    @PostMapping("/cycles/{cycleId}/answers/batch")
+    public ResponseEntity<GlobalResponse<WordPracticeAnswerBatchResponse>> submitAnswerBatch(
+            @AuthenticationPrincipal MemberDetails memberDetails,
+            @RequestHeader(value = "X-Guest-Token", required = false) String guestToken,
+            @PathVariable Long cycleId,
+            @Valid @RequestBody WordPracticeAnswerBatchRequest request
+    ) {
+        Long memberId = memberDetails == null ? null : memberDetails.getMember().getId();
+        return ResponseEntity.ok(GlobalResponse.success(
+                wordPracticeService.submitAnswerBatch(memberId, guestToken, cycleId, request.answers())));
     }
 
     /** 완료 화면에서 사용자가 명시적으로 선택했을 때만 다음 회차를 새 순서로 생성한다. */

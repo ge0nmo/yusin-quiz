@@ -13,8 +13,6 @@ import com.cpa.yusin.quiz.subject.domain.Subject;
 import com.cpa.yusin.quiz.subject.service.port.SubjectRepository;
 import com.cpa.yusin.quiz.subject.service.port.SubjectValidator;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -86,11 +84,11 @@ public class SubjectServiceImpl implements SubjectService
     }
 
     @Override
-    public Page<SubjectDTO> getAllPublished(Pageable pageable)
+    public List<SubjectDTO> getAllPublished()
     {
-        Page<Subject> result = subjectRepository.findAllPublishedOrderByName(pageable);
-
-        return result.map(subjectMapper::toSubjectDTO);
+        return subjectRepository.findAllPublished().stream()
+                .map(subjectMapper::toSubjectDTO)
+                .toList();
     }
 
     @Override

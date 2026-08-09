@@ -40,6 +40,7 @@ class ExceptionAdviceTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.code").value("BAD_REQUEST"))
                 .andExpect(jsonPath("$.message").value("disk failure"));
     }
 
@@ -48,6 +49,17 @@ class ExceptionAdviceTest {
         mockMvc.perform(get("/test/broken-pipe"))
                 .andExpect(status().isNoContent())
                 .andExpect(content().string(""));
+    }
+
+    @Test
+    void unexpectedExceptionShouldReturnStableCodeWithoutInternalMessage() throws Exception {
+        mockMvc.perform(get("/test/unexpected-error"))
+                .andExpect(status().isInternalServerError())
+                .andExpect(jsonPath("$.status").value(500))
+                .andExpect(jsonPath("$.code").value("INTERNAL_SERVER_ERROR"))
+                .andExpect(jsonPath("$.message").value("서버 내부 오류가 발생했습니다."))
+                .andExpect(content().string(org.hamcrest.Matchers.not(
+                        org.hamcrest.Matchers.containsString("database-password-leak"))));
     }
 
     @RestController
@@ -66,6 +78,11 @@ class ExceptionAdviceTest {
         @GetMapping("/test/broken-pipe")
         public String brokenPipe() throws IOException {
             throw new IOException("Broken pipe");
+        }
+
+        @GetMapping("/test/unexpected-error")
+        public String unexpectedError() {
+            throw new IllegalStateException("database-password-leak");
         }
     }
 }

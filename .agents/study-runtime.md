@@ -56,9 +56,10 @@
   - changing the same answer later does not increment again
   - `EXAM`: completion increments by `answeredCount`
   - repeated finish calls do not increment again
-  - `WordPractice`: 회원의 회차별 최초 답안은 1씩 증가하고, 동일 답안 재전송과 비회원 답안은 증가하지 않는다
-  - 완료 후 명시적으로 재시작한 새 말문제 round의 답안은 새로운 학습으로 다시 집계한다
-- `WordPracticeCycle`은 기존 `StudySession`과 분리된 말문제 빠른 풀이 회차다. 문제 순서와 최초 답안은 회차에 고정하고, 동일 답안 재전송만 200으로 멱등 처리한다.
+  - `WordPractice`: 회원이 현재 5문제 묶음(마지막은 1~4개)을 원자 저장했을 때 실제 답안 수를 이벤트 한 건으로 기록한다
+  - 동일 배치 재전송, 미완성 배치, 로컬 오답 복습, 비회원 답안은 증가하지 않는다
+  - 완료 후 명시적으로 재시작한 새 말문제 round의 배치는 새로운 학습으로 다시 집계한다
+- `WordPracticeCycle`은 기존 `StudySession`과 분리된 말문제 빠른 풀이 회차다. 문제 순서와 최초 답안은 회차에 고정하고, 최대 5개 답안을 원자 저장하며 동일 payload 재전송은 200으로 멱등 처리한다.
 - 말문제는 완료 후 자동 재시작하지 않으며, 최신 완료 회차에 대한 명시적 restart만 다음 round를 만든다.
 
 ## Decision Rules

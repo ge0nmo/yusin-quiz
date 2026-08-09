@@ -1,6 +1,7 @@
 package com.cpa.yusin.quiz.answer.integration;
 
 import com.cpa.yusin.quiz.answer.controller.dto.request.AnswerRegisterRequest;
+import com.cpa.yusin.quiz.answer.controller.dto.request.AnswerUpdateRequest;
 import com.cpa.yusin.quiz.answer.domain.Answer;
 import com.cpa.yusin.quiz.answer.service.port.AnswerRepository;
 import com.cpa.yusin.quiz.config.TeardownExtension;
@@ -26,6 +27,7 @@ import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDoc
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.restdocs.RestDocumentationContextProvider;
 import org.springframework.restdocs.RestDocumentationExtension;
 import org.springframework.restdocs.payload.JsonFieldType;
@@ -35,6 +37,8 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 
+import java.time.LocalDateTime;
+
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.documentationConfiguration;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.*;
@@ -43,6 +47,8 @@ import static org.springframework.restdocs.payload.PayloadDocumentation.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
 @ExtendWith({ RestDocumentationExtension.class, TeardownExtension.class })
 @AutoConfigureMockMvc
@@ -69,6 +75,9 @@ class AnswerTest {
 
         @Autowired
         MemberRepository memberRepository;
+
+        @Autowired
+        JdbcTemplate jdbcTemplate;
 
         Subject subject;
         Exam exam;
@@ -109,7 +118,7 @@ class AnswerTest {
 
                 member = memberRepository.save(Member.builder()
                                 .email("test@test.com")
-                                .username("관리자")
+                                .username("일반 사용자")
                                 .password("encodedPass")
                                 .role(Role.USER)
                                 .platform(Platform.HOME)
@@ -184,7 +193,7 @@ class AnswerTest {
                 answerRepository.save(
                                 Answer.builder().id(4L).member(member).content("네 감사합니다").question(question).build());
 
-                int pageNumber = 1;
+                int pageNumber = 0;
                 int pageSize = 10;
 
                 // when
@@ -215,6 +224,9 @@ class AnswerTest {
                                                                 fieldWithPath("data[].createdAt")
                                                                                 .type(JsonFieldType.STRING)
                                                                                 .description("답변 등록 시간"),
+                                                                fieldWithPath("data[].isAdmin")
+                                                                                .type(JsonFieldType.BOOLEAN)
+                                                                                .description("관리자 작성 여부"),
 
                                                                 fieldWithPath("pageInfo.totalElements")
                                                                                 .type(JsonFieldType.NUMBER)
@@ -234,6 +246,106 @@ class AnswerTest {
         }
 
         @Test
+        void getAnswersUsesRequestedZeroBasedPageAndCreatedAtDescendingOnly() throws Exception {
+                Answer middle = answerRepository.save(Answer.builder()
+                                .member(member)
+                                .content("두 번째 답변")
+                                .question(question)
+                                .build());
+                Member admin = memberRepository.save(Member.builder()
+                                .email("admin@test.com")
+                                .username("관리자")
+                                .password("encodedPass")
+                                .role(Role.ADMIN)
+                                .platform(Platform.HOME)
+                                .build());
+                Answer newest = answerRepository.save(Answer.builder()
+                                .member(admin)
+                                .content("관리자 답변")
+                                .question(question)
+                                .build());
+
+                LocalDateTime base = LocalDateTime.of(2026, 8, 9, 12, 0);
+                updateAnswerCreatedAt(answer.getId(), base.minusMinutes(2));
+                updateAnswerCreatedAt(middle.getId(), base.minusMinutes(1));
+                updateAnswerCreatedAt(newest.getId(), base);
+
+                mvc.perform(get("/api/v1/question/{questionId}/answer", question.getId())
+                                .queryParam("page", "0")
+                                .queryParam("size", "2")
+                                .queryParam("sort", "id,asc"))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$.data[0].id").value(newest.getId()))
+                                .andExpect(jsonPath("$.data[0].isAdmin").value(true))
+                                .andExpect(jsonPath("$.data[1].id").value(middle.getId()))
+                                .andExpect(jsonPath("$.data[1].isAdmin").value(false))
+                                .andExpect(jsonPath("$.pageInfo.currentPage").value(1));
+
+                mvc.perform(get("/api/v1/question/{questionId}/answer", question.getId())
+                                .queryParam("page", "1")
+                                .queryParam("size", "2"))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$.data.length()").value(1))
+                                .andExpect(jsonPath("$.data[0].id").value(answer.getId()))
+                                .andExpect(jsonPath("$.pageInfo.currentPage").value(2));
+        }
+
+        @Test
+        void updateAnswer() throws Exception {
+                AnswerUpdateRequest request = AnswerUpdateRequest.builder()
+                                .content("수정된 답변")
+                                .build();
+
+                mvc.perform(patch("/api/v1/answer/{answerId}", answer.getId())
+                                .with(user(memberDetails))
+                                .content(mapper.writeValueAsString(request))
+                                .contentType(MediaType.APPLICATION_JSON))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$.data.id").value(answer.getId()))
+                                .andExpect(jsonPath("$.data.content").value("수정된 답변"))
+                                .andExpect(jsonPath("$.data.isAdmin").value(false))
+                                .andDo(document("updateAnswer",
+                                                preprocessRequest(prettyPrint()),
+                                                preprocessResponse(prettyPrint()),
+                                                requestFields(
+                                                                fieldWithPath("content").type(JsonFieldType.STRING)
+                                                                                .description("수정할 내용")),
+                                                responseFields(
+                                                                fieldWithPath("data.id").type(JsonFieldType.NUMBER)
+                                                                                .description("답변 고유 식별자"),
+                                                                fieldWithPath("data.memberId").type(JsonFieldType.NUMBER)
+                                                                                .description("작성자 회원 ID"),
+                                                                fieldWithPath("data.username").type(JsonFieldType.STRING)
+                                                                                .description("답변 등록 유저"),
+                                                                fieldWithPath("data.content").type(JsonFieldType.STRING)
+                                                                                .description("수정된 답변 내용"),
+                                                                fieldWithPath("data.createdAt").type(JsonFieldType.STRING)
+                                                                                .description("답변 등록 시간"),
+                                                                fieldWithPath("data.isAdmin").type(JsonFieldType.BOOLEAN)
+                                                                                .description("관리자 작성 여부"))));
+        }
+
+        @Test
+        void updateAnswerRejectsNonOwner() throws Exception {
+                Member otherMember = memberRepository.save(Member.builder()
+                                .email("other@test.com")
+                                .username("다른 사용자")
+                                .password("encodedPass")
+                                .role(Role.USER)
+                                .platform(Platform.HOME)
+                                .build());
+                AnswerUpdateRequest request = AnswerUpdateRequest.builder()
+                                .content("권한 없는 수정")
+                                .build();
+
+                mvc.perform(patch("/api/v1/answer/{answerId}", answer.getId())
+                                .with(user(new MemberDetails(otherMember, null)))
+                                .content(mapper.writeValueAsString(request))
+                                .contentType(MediaType.APPLICATION_JSON))
+                                .andExpect(status().isForbidden());
+        }
+
+        @Test
         void deleteAnswer() throws Exception {
                 // given
                 long answerId = answer.getId();
@@ -246,15 +358,16 @@ class AnswerTest {
                 // then
                 resultActions
                                 .andExpect(status().isNoContent())
+                                .andExpect(content().string(""))
                                 .andDo(document("deleteAnswer",
                                                 preprocessRequest(prettyPrint()),
-                                                preprocessResponse(prettyPrint()),
-
-                                                responseFields(
-                                                                fieldWithPath("data").type(JsonFieldType.BOOLEAN)
-                                                                                .description("삭제 성공 여부"))
-
+                                                preprocessResponse(prettyPrint())
                                 ));
 
+        }
+
+        private void updateAnswerCreatedAt(long answerId, LocalDateTime createdAt) {
+                jdbcTemplate.update("UPDATE answer SET created_at = ?, updated_at = ? WHERE id = ?",
+                                createdAt, createdAt, answerId);
         }
 }

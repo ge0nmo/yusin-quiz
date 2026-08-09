@@ -37,6 +37,7 @@ import org.springframework.restdocs.RestDocumentationExtension;
 import org.springframework.restdocs.payload.JsonFieldType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
@@ -72,6 +73,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class StudyApiTest {
 
     private static final LocalDateTime NOW = LocalDateTime.of(2026, 3, 15, 10, 0);
+    private static final String STUDY_DEVICE_HEADER = "X-Study-Device-Id";
 
     @Autowired
     private MockMvc mvc;
@@ -170,6 +172,33 @@ class StudyApiTest {
     }
 
     @Test
+    @DisplayName("study start 는 examId 와 mode 가 없으면 400을 반환한다")
+    void startExam_shouldValidateRequiredFields() throws Exception {
+        mvc.perform(post("/api/v1/study/exam/start")
+                        .with(user(memberDetails))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{}"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("study answer 는 음수 문제 인덱스를 거부한다")
+    void submitAnswer_shouldRejectNegativeIndex() throws Exception {
+        mvc.perform(post("/api/v1/study/answer")
+                        .with(user(memberDetails))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "sessionId": 1,
+                                  "problemId": 1,
+                                  "choiceId": 1,
+                                  "index": -1
+                                }
+                                """))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
     @DisplayName("study finish 응답은 counts 기반 요약을 반환하고 finalScore 를 유지한다")
     void finishExam_shouldReturnCountsAndKeepDeprecatedFinalScore() throws Exception {
         ExamFixture fixture = createExamFixture("회계학", "1차", 2025, 4);
@@ -259,7 +288,7 @@ class StudyApiTest {
                         preprocessResponse(prettyPrint()),
                         resource(studyResource(
                                 "연간 학습 로그 조회",
-                                "로그인 사용자의 학습 로그를 연간 기준으로 조회합니다. practice 는 세션 내 첫 제출만, real 은 finish 시 answeredCount 만큼 누적됩니다."
+                                "로그인 사용자의 학습 로그를 연간 기준으로 조회합니다. practice 는 전체 문제 완료 시, real 은 finish 시 answeredCount 만큼 누적됩니다."
                         )),
                         queryParameters(
                                 parameterWithName("year").description("조회 연도")
@@ -288,8 +317,8 @@ class StudyApiTest {
     }
 
     @Test
-    @DisplayName("practice 는 세션 내 동일 문제 답 변경을 재집계하지 않고 yearly/streak 에 반영된다")
-    void practiceSession_shouldAffectYearlyLogAndStreakWithoutDuplicateRecountPerProblem() throws Exception {
+    @DisplayName("practice 는 모든 문제를 완료한 시점에 한 번만 yearly/streak 에 반영된다")
+    void practiceSession_shouldAffectYearlyLogAndStreakOnlyAfterCompletion() throws Exception {
         ExamFixture fixture = createExamFixture("재무회계", "2차", 2025, 2);
         Long sessionId = startSession(fixture.exam().getId(), ExamMode.PRACTICE);
 
@@ -297,7 +326,9 @@ class StudyApiTest {
         submitAnswer(sessionId, fixture.problemIds().get(0), fixture.correctChoiceIds().get(0), 0);
         submitAnswer(sessionId, fixture.problemIds().get(1), fixture.correctChoiceIds().get(1), 1);
 
-        awaitDailyLogCount(member.getId(), NOW.toLocalDate(), 2);
+        org.assertj.core.api.Assertions.assertThat(
+                dailyStudyLogJpaRepository.findByMemberIdAndDate(member.getId(), NOW.toLocalDate())
+        ).isEmpty();
 
         finishSession(sessionId)
                 .andExpect(status().isOk())
@@ -306,6 +337,8 @@ class StudyApiTest {
                 .andExpect(jsonPath("$.data.totalCount").value(2))
                 .andExpect(jsonPath("$.data.answeredCount").value(2))
                 .andExpect(jsonPath("$.data.unansweredCount").value(0));
+
+        awaitDailyLogCount(member.getId(), NOW.toLocalDate(), 2);
 
         mvc.perform(get("/api/v1/study-logs/yearly")
                         .with(user(memberDetails))
@@ -321,10 +354,18 @@ class StudyApiTest {
     }
 
     private Long startSession(Long examId, ExamMode mode) throws Exception {
-        ResultActions result = mvc.perform(post("/api/v1/study/exam/start")
+        return startSession(examId, mode, null);
+    }
+
+    private Long startSession(Long examId, ExamMode mode, String deviceId) throws Exception {
+        MockHttpServletRequestBuilder request = post("/api/v1/study/exam/start")
                 .with(user(memberDetails))
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(new StartRequest(examId, mode))));
+                .content(objectMapper.writeValueAsString(new StartRequest(examId, mode)));
+        if (deviceId != null) {
+            request.header(STUDY_DEVICE_HEADER, deviceId);
+        }
+        ResultActions result = mvc.perform(request);
 
         result.andExpect(status().isOk());
 
@@ -333,29 +374,51 @@ class StudyApiTest {
     }
 
     private void submitAnswer(Long sessionId, Long problemId, Long choiceId, int index) throws Exception {
-        mvc.perform(post("/api/v1/study/answer")
-                        .with(user(memberDetails))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("""
-                                {
-                                  "sessionId": %d,
-                                  "problemId": %d,
-                                  "choiceId": %d,
-                                  "index": %d
-                                }
-                                """.formatted(sessionId, problemId, choiceId, index)))
+        submitAnswer(sessionId, problemId, choiceId, index, null);
+    }
+
+    private void submitAnswer(
+            Long sessionId,
+            Long problemId,
+            Long choiceId,
+            int index,
+            String deviceId
+    ) throws Exception {
+        MockHttpServletRequestBuilder request = post("/api/v1/study/answer")
+                .with(user(memberDetails))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                        {
+                          "sessionId": %d,
+                          "problemId": %d,
+                          "choiceId": %d,
+                          "index": %d
+                        }
+                        """.formatted(sessionId, problemId, choiceId, index));
+        if (deviceId != null) {
+            request.header(STUDY_DEVICE_HEADER, deviceId);
+        }
+        mvc.perform(request)
                 .andExpect(status().isOk());
     }
 
     private ResultActions finishSession(Long sessionId) throws Exception {
-        return mvc.perform(post("/api/v1/study/finish")
+        return finishSession(sessionId, null);
+    }
+
+    private ResultActions finishSession(Long sessionId, String deviceId) throws Exception {
+        MockHttpServletRequestBuilder request = post("/api/v1/study/finish")
                 .with(user(memberDetails))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""
                         {
                           "sessionId": %d
                         }
-                        """.formatted(sessionId)));
+                        """.formatted(sessionId));
+        if (deviceId != null) {
+            request.header(STUDY_DEVICE_HEADER, deviceId);
+        }
+        return mvc.perform(request);
     }
 
     @Test
@@ -380,7 +443,31 @@ class StudyApiTest {
                 .andExpect(jsonPath("$.data.inProgress.mode").value("PRACTICE"))
                 .andExpect(jsonPath("$.data.inProgress.lastIndex").value(1))
                 .andExpect(jsonPath("$.data.inProgress.answeredCount").value(1))
-                .andExpect(jsonPath("$.data.inProgress.totalCount").value(40));
+                .andExpect(jsonPath("$.data.inProgress.totalCount").value(40))
+                .andExpect(jsonPath("$.data.inProgressSessions.length()").value(1))
+                .andExpect(jsonPath("$.data.inProgressSessions[0].sessionId").value(sessionId));
+    }
+
+    @Test
+    @DisplayName("GET /api/v1/study/summary - 모든 진행 중 세션을 반환한다")
+    void getSummary_shouldReturnAllInProgressSessions() throws Exception {
+        ExamFixture firstFixture = createExamFixture("회계학", "2025년 회계학", 2025, 2);
+        ExamFixture secondFixture = createExamFixture("세법", "2025년 세법", 2025, 2);
+
+        Long firstSessionId = startSession(firstFixture.exam().getId(), ExamMode.PRACTICE);
+        Long secondSessionId = startSession(secondFixture.exam().getId(), ExamMode.EXAM);
+
+        mvc.perform(get("/api/v1/study/summary")
+                        .with(user(memberDetails)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.inProgress").exists())
+                .andExpect(jsonPath("$.data.inProgressSessions.length()").value(2))
+                .andExpect(jsonPath("$.data.inProgressSessions[*].sessionId").value(
+                        org.hamcrest.Matchers.containsInAnyOrder(
+                                firstSessionId.intValue(),
+                                secondSessionId.intValue()
+                        )
+                ));
     }
 
     @Test
@@ -402,7 +489,81 @@ class StudyApiTest {
 
         mvc.perform(get("/api/v1/study/summary").with(user(memberDetails)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.inProgress").value(org.hamcrest.Matchers.nullValue()));
+                .andExpect(jsonPath("$.data.inProgress").value(org.hamcrest.Matchers.nullValue()))
+                .andExpect(jsonPath("$.data.inProgressSessions").isEmpty());
+    }
+
+    @Test
+    @DisplayName("포기한 세션은 finish 할 수 없다")
+    void finishExam_shouldRejectAbandonedSession() throws Exception {
+        ExamFixture fixture = createExamFixture("원가관리회계", "2025년 원가관리회계", 2025, 2);
+        Long sessionId = startSession(fixture.exam().getId(), ExamMode.EXAM);
+
+        mvc.perform(delete("/api/v1/study/progress/{examId}", fixture.exam().getId())
+                        .with(user(memberDetails))
+                        .param("mode", ExamMode.EXAM.name()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.abandonedCount").value(1));
+
+        finishSession(sessionId)
+                .andExpect(status().isConflict());
+    }
+
+    @Test
+    @DisplayName("새 기기가 세션을 인계하면 이전 기기의 answer/finish 를 안정 코드로 거부한다")
+    void studySession_shouldBeTakenOverByLatestDevice() throws Exception {
+        ExamFixture fixture = createExamFixture("고급회계", "2026년 고급회계", 2026, 2);
+        Long sessionId = startSession(fixture.exam().getId(), ExamMode.PRACTICE, "install-a");
+
+        Long resumedSessionId = startSession(fixture.exam().getId(), ExamMode.PRACTICE, "install-b");
+        org.assertj.core.api.Assertions.assertThat(resumedSessionId).isEqualTo(sessionId);
+
+        // Header가 없는 구버전 앱은 takeover를 식별할 수 없으므로 하위 호환으로 허용한다.
+        submitAnswer(
+                sessionId,
+                fixture.problemIds().get(0),
+                fixture.correctChoiceIds().get(0),
+                0
+        );
+
+        mvc.perform(post("/api/v1/study/answer")
+                        .with(user(memberDetails))
+                        .header(STUDY_DEVICE_HEADER, "install-a")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "sessionId": %d,
+                                  "problemId": %d,
+                                  "choiceId": %d,
+                                  "index": 0
+                                }
+                                """.formatted(
+                                        sessionId,
+                                        fixture.problemIds().get(0),
+                                        fixture.correctChoiceIds().get(0)
+                                )))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.code").value("SESSION_TAKEN_OVER"));
+
+        submitAnswer(
+                sessionId,
+                fixture.problemIds().get(0),
+                fixture.correctChoiceIds().get(0),
+                0,
+                "install-b"
+        );
+
+        finishSession(sessionId, "install-a")
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.code").value("SESSION_TAKEN_OVER"));
+
+        finishSession(sessionId, "install-b")
+                .andExpect(status().isOk());
+
+        finishSession(sessionId, "install-b")
+                .andExpect(status().isOk());
+        finishSession(sessionId)
+                .andExpect(status().isOk());
     }
 
     private void awaitDailyLogCount(Long memberId, LocalDate date, int expectedCount) throws Exception {

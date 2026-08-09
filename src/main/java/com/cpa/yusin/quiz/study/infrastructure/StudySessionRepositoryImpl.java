@@ -37,8 +37,26 @@ public class StudySessionRepositoryImpl implements StudySessionRepository {
     }
 
     @Override
-    public Optional<StudySession> findLatestByMemberIdAndStatus(Long memberId, StudySessionStatus status) {
-        return studySessionJpaRepository.findFirstByMemberIdAndStatusOrderByUpdatedAtDesc(memberId, status);
+    public Optional<StudySession> findByMemberIdAndExamIdAndStatusAndModeWithLock(
+            Long memberId,
+            Long examId,
+            StudySessionStatus status,
+            ExamMode mode
+    ) {
+        return studySessionJpaRepository.findByMemberIdAndExamIdAndStatusAndModeWithLock(
+                memberId,
+                examId,
+                status,
+                mode
+        );
+    }
+
+    @Override
+    public java.util.List<StudySession> findAllByMemberIdAndStatusOrderByUpdatedAtDesc(
+            Long memberId,
+            StudySessionStatus status
+    ) {
+        return studySessionJpaRepository.findAllByMemberIdAndStatusOrderByUpdatedAtDesc(memberId, status);
     }
 
     @Override

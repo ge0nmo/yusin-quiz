@@ -5,6 +5,7 @@ import com.cpa.yusin.quiz.answer.controller.dto.request.AnswerRegisterRequest;
 import com.cpa.yusin.quiz.answer.controller.dto.response.AnswerDTO;
 import com.cpa.yusin.quiz.answer.domain.Answer;
 import com.cpa.yusin.quiz.member.domain.Member;
+import com.cpa.yusin.quiz.member.domain.type.Role;
 import com.cpa.yusin.quiz.question.domain.Question;
 import org.springframework.stereotype.Component;
 
@@ -35,6 +36,7 @@ public class AnswerMapper {
                 .createdAt(answer.getCreatedAt())
                 .memberId(member.getId())
                 .username(member.getUsername())
+                .admin(Role.ADMIN.equals(member.getRole()))
                 .build();
     }
 }

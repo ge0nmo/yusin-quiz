@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
+import java.util.List;
 
 @Repository
 @RequiredArgsConstructor
@@ -20,8 +21,18 @@ public class WordPracticeAnswerRepositoryImpl implements WordPracticeAnswerRepos
     }
 
     @Override
+    public List<WordPracticeAnswer> saveAll(List<WordPracticeAnswer> answers) {
+        return answerJpaRepository.saveAll(answers);
+    }
+
+    @Override
     /** HTTP 재시도와 동시 제출 뒤 기존 불변 이력을 읽는 어댑터다. */
     public Optional<WordPracticeAnswer> findByCycleIdAndProblemId(Long cycleId, Long problemId) {
         return answerJpaRepository.findByCycleIdAndProblemId(cycleId, problemId);
+    }
+
+    @Override
+    public List<WordPracticeAnswer> findAllByCycleIdAndProblemIds(Long cycleId, List<Long> problemIds) {
+        return answerJpaRepository.findAllByCycleIdAndProblemIdIn(cycleId, problemIds);
     }
 }

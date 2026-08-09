@@ -1,6 +1,7 @@
 package com.cpa.yusin.quiz.study.controller.dto.request;
 
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PositiveOrZero;
 import lombok.*;
 
 @Data
@@ -18,5 +19,6 @@ public class ExamSubmitRequest
     private Long choiceId;
 
     // 현재 몇번째 문제인지 (재접속 시 위치 복원용)
+    @PositiveOrZero(message = "문제 인덱스는 0 이상이어야 합니다.")
     private int index;
 }

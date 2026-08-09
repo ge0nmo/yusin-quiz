@@ -65,9 +65,4 @@ import org.springframework.data.domain.Pageable;
             return subjectJpaRepository.findAllOrderByNameAsc(pageable);
         }
 
-        @Override
-        public Page<Subject> findAllPublishedOrderByName(Pageable pageable)
-        {
-            return subjectJpaRepository.findAllPublishedOrderByNameAsc(SubjectStatus.PUBLISHED, pageable);
-        }
     }

@@ -13,8 +13,6 @@ import com.cpa.yusin.quiz.subject.domain.Subject;
 import com.cpa.yusin.quiz.subject.domain.SubjectStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 import java.util.Optional;
@@ -122,13 +120,8 @@ class SubjectServiceTest
     @Test
     void findAllWithSortedByName()
     {
-        // given
-        int page = 1;
-        int size = 10;
-        Pageable pageable = PageRequest.of(page, size);
-
         // when
-        List<SubjectDTO> result = testContainer.subjectService.getAllPublished(pageable.previousOrFirst()).getContent();
+        List<SubjectDTO> result = testContainer.subjectService.getAllPublished();
 
         // then
         assertThat(result).isNotEmpty();
@@ -146,7 +139,7 @@ class SubjectServiceTest
                 .status(SubjectStatus.DRAFT)
                 .build());
 
-        List<SubjectDTO> result = testContainer.subjectService.getAllPublished(PageRequest.of(0, 10)).getContent();
+        List<SubjectDTO> result = testContainer.subjectService.getAllPublished();
 
         assertThat(result)
                 .extracting(SubjectDTO::getName)

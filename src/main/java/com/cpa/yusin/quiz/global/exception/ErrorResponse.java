@@ -14,16 +14,23 @@ import java.util.stream.Collectors;
 public class ErrorResponse {
     private final int status;
     private final String message;
+    private final String code;
     private List<ValueError> valueErrors;
 
     private ErrorResponse(int status, String message) {
+        this(status, message, HttpStatus.valueOf(status).name());
+    }
+
+    private ErrorResponse(int status, String message, String code) {
         this.status = status;
         this.message = message;
+        this.code = code;
     }
 
     private ErrorResponse(final List<ValueError> valueErrors) {
         this.status = HttpStatus.BAD_REQUEST.value();
         this.message = HttpStatus.BAD_REQUEST.getReasonPhrase();
+        this.code = "VALIDATION_ERROR";
         this.valueErrors = valueErrors;
     }
 
@@ -33,6 +40,17 @@ public class ErrorResponse {
 
     public static ErrorResponse of(HttpStatus httpStatus, String message) {
         return new ErrorResponse(httpStatus.value(), message);
+    }
+
+    public static ErrorResponse of(HttpStatus httpStatus, String message, String code) {
+        return new ErrorResponse(httpStatus.value(), message, code);
+    }
+
+    public static ErrorResponse of(ExceptionMessage exceptionMessage) {
+        return new ErrorResponse(
+                exceptionMessage.getHttpStatus().value(),
+                exceptionMessage.getMessage(),
+                exceptionMessage.name());
     }
 
     public static ErrorResponse of(BindingResult bindingResult) {
@@ -60,7 +78,7 @@ public class ErrorResponse {
                     .stream()
                     .map(error -> new ValueError(
                             normalizeDescriptor(error.getField()),
-                            error.getRejectedValue() == null ? "" : error.getRejectedValue().toString(),
+                            sanitizeRejectedValue(error.getField(), error.getRejectedValue()),
                             error.getDefaultMessage()))
                     .collect(Collectors.toList());
         }
@@ -70,13 +88,24 @@ public class ErrorResponse {
                     .stream()
                     .map(error -> new ValueError(
                             normalizeDescriptor(error.getPropertyPath().toString()),
-                            error.getInvalidValue().toString(),
+                            sanitizeRejectedValue(error.getPropertyPath().toString(), error.getInvalidValue()),
                             error.getMessage()))
                     .collect(Collectors.toList());
         }
 
         private static String normalizeDescriptor(String descriptor) {
             return descriptor.replace(".<list element>", "");
+        }
+
+        private static Object sanitizeRejectedValue(String descriptor, Object rejectedValue) {
+            String normalizedDescriptor = descriptor.toLowerCase();
+            if (normalizedDescriptor.contains("token")
+                    || normalizedDescriptor.contains("password")
+                    || normalizedDescriptor.contains("secret")) {
+                return "[REDACTED]";
+            }
+
+            return rejectedValue == null ? "" : rejectedValue.toString();
         }
     }
 }

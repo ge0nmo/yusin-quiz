@@ -84,13 +84,12 @@ public class ExceptionAdvice {
 
     @ExceptionHandler
     public ResponseEntity<ErrorResponse> handleCustomException(CustomException e) {
-        log.error("비즈니스 예외 발생: {}", e.getMessage(), e);
+        log.warn("비즈니스 예외 발생: code={}, status={}",
+                e.getExceptionMessage().name(), e.getHttpStatus().value());
 
-        // CustomException의 ExceptionMessage enum 이름을 코드(code)로 내려주기 위해
-        // ErrorResponse.of(...) 확장 사용
         return ResponseEntity
                 .status(e.getHttpStatus())
-                .body(ErrorResponse.of(e.getHttpStatus(), e.getMessage()));
+                .body(ErrorResponse.of(e.getExceptionMessage()));
     }
 
     @ExceptionHandler
@@ -106,7 +105,7 @@ public class ExceptionAdvice {
     public ErrorResponse handleException(Exception e) {
         log.error("예외가 발생했습니다.", e);
 
-        return ErrorResponse.of(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+        return ErrorResponse.of(ExceptionMessage.INTERNAL_SERVER_ERROR);
     }
 
     @ExceptionHandler(AsyncRequestNotUsableException.class)
@@ -135,15 +134,15 @@ public class ExceptionAdvice {
     @ExceptionHandler(io.jsonwebtoken.ExpiredJwtException.class)
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     public ErrorResponse handleExpiredJwtException(io.jsonwebtoken.ExpiredJwtException e) {
-        log.error("토큰 만료 예외 발생", e);
-        return ErrorResponse.of(HttpStatus.UNAUTHORIZED, "토큰이 만료되었습니다.");
+        log.warn("만료된 JWT가 거부되었습니다.");
+        return ErrorResponse.of(HttpStatus.UNAUTHORIZED, "토큰이 만료되었습니다.", "TOKEN_EXPIRED");
     }
 
     @ExceptionHandler(io.jsonwebtoken.JwtException.class)
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     public ErrorResponse handleJwtException(io.jsonwebtoken.JwtException e) {
-        log.error("JWT 예외 발생", e);
-        return ErrorResponse.of(HttpStatus.UNAUTHORIZED, "유효하지 않은 토큰입니다.");
+        log.warn("유효하지 않은 JWT가 거부되었습니다.");
+        return ErrorResponse.of(HttpStatus.UNAUTHORIZED, "유효하지 않은 토큰입니다.", "INVALID_TOKEN");
     }
 
     @ExceptionHandler(org.springframework.security.core.userdetails.UsernameNotFoundException.class)

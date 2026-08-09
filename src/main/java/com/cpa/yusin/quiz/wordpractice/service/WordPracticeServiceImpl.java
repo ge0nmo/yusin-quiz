@@ -22,6 +22,8 @@ import com.cpa.yusin.quiz.wordpractice.controller.dto.response.WordPracticeCycle
 import com.cpa.yusin.quiz.wordpractice.controller.dto.response.WordPracticeProgressResponse;
 import com.cpa.yusin.quiz.wordpractice.controller.dto.response.WordPracticeProblemBatchResponse;
 import com.cpa.yusin.quiz.wordpractice.controller.dto.response.WordPracticeAnswerResponse;
+import com.cpa.yusin.quiz.wordpractice.controller.dto.request.WordPracticeAnswerRequest;
+import com.cpa.yusin.quiz.wordpractice.controller.dto.response.WordPracticeAnswerBatchResponse;
 import com.cpa.yusin.quiz.wordpractice.controller.port.WordPracticeService;
 import com.cpa.yusin.quiz.wordpractice.domain.WordPracticeCycle;
 import com.cpa.yusin.quiz.wordpractice.domain.WordPracticeCycleStatus;
@@ -39,10 +41,12 @@ import org.springframework.context.ApplicationEventPublisher;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.time.LocalDateTime;
 
 /**
  * 공개 subject 카탈로그와 참여자의 고정 순서 회차·불변 답안을 관리한다.
@@ -324,24 +328,163 @@ public class WordPracticeServiceImpl implements WordPracticeService {
         WordPracticeAnswer savedAnswer = answerRepository.save(answer);
         cycle.markAnswered(choice.getIsAnswer());
         cycle.completeIfFinished(clockHolder.getCurrentDateTime());
-        publishSolvedEventForMember(memberId);
+        publishCompletedLearningUnitForSingleAnswer(memberId, cycle);
         return toAnswerResponse(savedAnswer, cycle);
     }
 
     /**
-     * 회원의 최초 말문제 답안만 기존 학습 로그 이벤트 경로에 연결한다.
-     * 동일 답안 재전송은 위의 기존 답안 조기 반환에서 끝나고, 비회원은 memberId가 없어 이벤트를 발행하지 않는다.
+     * 이전 단건 API를 사용하는 앱도 다섯 문제 또는 마지막 잔여 묶음을 끝냈을 때만 학습 기록을 만든다.
      */
-    private void publishSolvedEventForMember(Long memberId) {
+    private void publishCompletedLearningUnitForSingleAnswer(Long memberId, WordPracticeCycle cycle) {
         if (memberId == null) {
             return;
         }
-        eventPublisher.publishEvent(new StudySolvedEvent(memberId, 1));
+        int solvedCount = cycle.getSolvedCount();
+        boolean completedFullUnit = solvedCount % 5 == 0;
+        if (!completedFullUnit && !cycle.isCompleted()) {
+            return;
+        }
+        int completedUnitSize = completedFullUnit ? 5 : solvedCount % 5;
+        eventPublisher.publishEvent(new StudySolvedEvent(memberId, completedUnitSize));
     }
 
     /** 답안 저장과 동일 답안 재시도가 같은 진행률 응답 형태를 공유하도록 변환한다. */
     private WordPracticeAnswerResponse toAnswerResponse(WordPracticeAnswer answer, WordPracticeCycle cycle) {
         return WordPracticeAnswerResponse.from(answer, toCycleResponse(cycle, null));
+    }
+
+    /**
+     * 현재 서버 cursor의 한 문제 묶음을 먼저 전부 검증한 뒤 저장한다. cycle 행 잠금과 답안 유니크 제약으로
+     * 동시 요청을 직렬화하며, 이미 저장된 동일 payload는 통계와 학습 기록을 다시 올리지 않고 반환한다.
+     */
+    @Override
+    @Transactional(isolation = Isolation.READ_COMMITTED)
+    public WordPracticeAnswerBatchResponse submitAnswerBatch(
+            Long memberId,
+            String guestToken,
+            Long cycleId,
+            List<WordPracticeAnswerRequest> requests
+    ) {
+        validateAnswerBatchRequest(requests);
+        WordPracticeParticipant participant = participantResolver.resolve(memberId, guestToken)
+                .orElseThrow(() -> new WordPracticeException(ExceptionMessage.NO_AUTHORIZATION));
+        WordPracticeCycle cycle = cycleRepository.findByIdWithLock(cycleId)
+                .orElseThrow(() -> new WordPracticeException(ExceptionMessage.WORD_PRACTICE_CYCLE_NOT_FOUND));
+        validateOwnership(participant, cycle);
+
+        List<Long> problemIds = requests.stream().map(WordPracticeAnswerRequest::problemId).toList();
+        List<WordPracticeAnswer> existingAnswers = answerRepository.findAllByCycleIdAndProblemIds(cycleId, problemIds);
+        if (!existingAnswers.isEmpty()) {
+            return toIdempotentBatchResponse(requests, existingAnswers, cycle);
+        }
+        if (cycle.isCompleted()) {
+            throw new WordPracticeException(ExceptionMessage.WORD_PRACTICE_CYCLE_COMPLETED);
+        }
+
+        int expectedCount = Math.min(5, cycle.getRemainingCount());
+        if (requests.size() != expectedCount) {
+            throw new WordPracticeException(ExceptionMessage.INVALID_DATA);
+        }
+        List<Long> expectedProblemIds = cycle.getProblemOrder().subList(
+                cycle.getNextIndex(), cycle.getNextIndex() + expectedCount);
+        if (!expectedProblemIds.equals(problemIds)) {
+            throw new WordPracticeException(ExceptionMessage.WORD_PRACTICE_OUT_OF_ORDER);
+        }
+
+        List<Problem> availableProblems = problemRepository.findPublishedWordProblemsByIds(problemIds);
+        if (availableProblems.size() != problemIds.size()
+                || !availableProblems.stream().map(Problem::getId).collect(Collectors.toSet()).containsAll(problemIds)) {
+            throw new WordPracticeException(ExceptionMessage.WORD_PRACTICE_PROBLEM_UNAVAILABLE);
+        }
+
+        List<Choice> choices = requests.stream().map(request -> {
+            Choice choice = choiceService.findById(request.choiceId());
+            if (!choice.getProblem().getId().equals(request.problemId())) {
+                throw new WordPracticeException(ExceptionMessage.INVALID_DATA);
+            }
+            return choice;
+        }).toList();
+
+        LocalDateTime submittedAt = clockHolder.getCurrentDateTime();
+        int firstSequence = cycle.getNextIndex() + 1;
+        List<WordPracticeAnswer> newAnswers = new ArrayList<>();
+        for (int index = 0; index < requests.size(); index++) {
+            WordPracticeAnswerRequest request = requests.get(index);
+            Choice choice = choices.get(index);
+            newAnswers.add(WordPracticeAnswer.create(
+                    cycle,
+                    request.problemId(),
+                    request.choiceId(),
+                    firstSequence + index,
+                    choice.getIsAnswer(),
+                    submittedAt
+            ));
+        }
+
+        List<WordPracticeAnswer> savedAnswers = answerRepository.saveAll(newAnswers);
+        for (Choice choice : choices) {
+            cycle.markAnswered(choice.getIsAnswer());
+        }
+        cycle.completeIfFinished(clockHolder.getCurrentDateTime());
+        publishCompletedBatchForMember(memberId, savedAnswers.size());
+        return toAnswerBatchResponse(savedAnswers, cycle);
+    }
+
+    /** controller 검증을 우회한 서비스 호출에도 같은 최대 다섯 개 계약을 적용한다. */
+    private void validateAnswerBatchRequest(List<WordPracticeAnswerRequest> requests) {
+        if (requests == null || requests.isEmpty() || requests.size() > 5
+                || requests.stream().anyMatch(request -> request == null
+                || request.problemId() == null || request.problemId() <= 0
+                || request.choiceId() == null || request.choiceId() <= 0)
+                || new HashSet<>(requests.stream().map(WordPracticeAnswerRequest::problemId).toList()).size()
+                != requests.size()) {
+            throw new WordPracticeException(ExceptionMessage.INVALID_DATA);
+        }
+    }
+
+    /** 일부만 기존인 상태는 원자적 배치 계약과 맞지 않으므로 충돌로 처리한다. */
+    private WordPracticeAnswerBatchResponse toIdempotentBatchResponse(
+            List<WordPracticeAnswerRequest> requests,
+            List<WordPracticeAnswer> existingAnswers,
+            WordPracticeCycle cycle
+    ) {
+        Map<Long, WordPracticeAnswer> existingByProblemId = existingAnswers.stream()
+                .collect(Collectors.toMap(WordPracticeAnswer::getProblemId, Function.identity()));
+        List<WordPracticeAnswer> orderedAnswers = new ArrayList<>();
+        Integer firstSequence = null;
+        for (int index = 0; index < requests.size(); index++) {
+            WordPracticeAnswerRequest request = requests.get(index);
+            WordPracticeAnswer existing = existingByProblemId.get(request.problemId());
+            if (existing == null || !existing.getChoiceId().equals(request.choiceId())) {
+                throw new WordPracticeException(ExceptionMessage.WORD_PRACTICE_ANSWER_ALREADY_SUBMITTED);
+            }
+            if (firstSequence == null) {
+                firstSequence = existing.getSequence();
+                int expectedBatchSize = Math.min(5, cycle.getTotalCount() - firstSequence + 1);
+                if (requests.size() != expectedBatchSize) {
+                    throw new WordPracticeException(ExceptionMessage.WORD_PRACTICE_ANSWER_ALREADY_SUBMITTED);
+                }
+            }
+            if (existing.getSequence() != firstSequence + index) {
+                throw new WordPracticeException(ExceptionMessage.WORD_PRACTICE_ANSWER_ALREADY_SUBMITTED);
+            }
+            orderedAnswers.add(existing);
+        }
+        return toAnswerBatchResponse(orderedAnswers, cycle);
+    }
+
+    /** 한 번의 학습 단위 완료 이벤트에 실제 저장된 문제 수를 담는다. */
+    private void publishCompletedBatchForMember(Long memberId, int solvedCount) {
+        if (memberId != null) {
+            eventPublisher.publishEvent(new StudySolvedEvent(memberId, solvedCount));
+        }
+    }
+
+    private WordPracticeAnswerBatchResponse toAnswerBatchResponse(
+            List<WordPracticeAnswer> answers,
+            WordPracticeCycle cycle
+    ) {
+        return WordPracticeAnswerBatchResponse.from(answers, toCycleResponse(cycle, null));
     }
 
     /**

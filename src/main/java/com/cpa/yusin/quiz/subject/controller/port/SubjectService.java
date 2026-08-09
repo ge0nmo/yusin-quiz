@@ -5,9 +5,6 @@ import com.cpa.yusin.quiz.subject.controller.dto.request.SubjectUpdateRequest;
 import com.cpa.yusin.quiz.subject.controller.dto.response.SubjectCreateResponse;
 import com.cpa.yusin.quiz.subject.controller.dto.response.SubjectDTO;
 import com.cpa.yusin.quiz.subject.domain.Subject;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-
 import java.util.List;
 
 public interface SubjectService
@@ -24,7 +21,7 @@ public interface SubjectService
 
     Subject findPublishedById(long id);
 
-    Page<SubjectDTO> getAllPublished(Pageable pageable);
+    List<SubjectDTO> getAllPublished();
 
     List<SubjectDTO> getAll();
 

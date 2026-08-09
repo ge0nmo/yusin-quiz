@@ -21,6 +21,7 @@ import com.cpa.yusin.quiz.wordpractice.domain.WordPracticeCycleStatus;
 import com.cpa.yusin.quiz.wordpractice.domain.WordPracticeParticipant;
 import com.cpa.yusin.quiz.wordpractice.domain.WordPracticeParticipantType;
 import com.cpa.yusin.quiz.wordpractice.controller.dto.response.WordPracticeCycleResponse;
+import com.cpa.yusin.quiz.wordpractice.controller.dto.request.WordPracticeAnswerRequest;
 import com.cpa.yusin.quiz.wordpractice.service.port.WordPracticeCycleRepository;
 import com.cpa.yusin.quiz.wordpractice.service.port.WordPracticeParticipantRepository;
 import com.cpa.yusin.quiz.wordpractice.service.port.WordPracticeAnswerRepository;
@@ -41,6 +42,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class WordPracticeServiceImplTest {
 
@@ -198,9 +200,9 @@ class WordPracticeServiceImplTest {
         verify(choiceService, times(1)).findAllByProblemIds(problems.stream().map(Problem::getId).toList());
     }
 
-    /** 회원의 새 답안은 저장 성공 이후 오늘의 학습 문제 수에 한 건만 반영한다. */
+    /** 다섯 문제 학습 단위를 끝내기 전에는 단건 호환 API도 학습 기록을 만들지 않는다. */
     @Test
-    void firstMemberAnswerPublishesSolvedEvent() {
+    void firstMemberAnswerDoesNotPublishSolvedEventBeforeLearningUnitCompletes() {
         WordPracticeParticipant member = participant(60L, WordPracticeParticipantType.MEMBER);
         WordPracticeCycle activeCycle = cycle(member, 2, 0, WordPracticeCycleStatus.IN_PROGRESS);
         Problem problem = Problem.builder().id(1L).number(1).build();
@@ -218,7 +220,131 @@ class WordPracticeServiceImplTest {
 
         service.submitAnswer(600L, null, 77L, 1L, 11L);
 
-        verify(eventPublisher).publishEvent(new StudySolvedEvent(600L, 1));
+        verify(eventPublisher, never()).publishEvent(any());
+    }
+
+    /** 회원의 다섯 답안 배치는 한 이벤트로 실제 풀이 수를 기록한다. */
+    @Test
+    void memberAnswerBatchPublishesOneCompletedLearningUnitEvent() {
+        WordPracticeParticipant member = participant(61L, WordPracticeParticipantType.MEMBER);
+        WordPracticeCycle activeCycle = cycle(member, 5, 0, WordPracticeCycleStatus.IN_PROGRESS);
+        LocalDateTime now = LocalDateTime.of(2026, 8, 9, 13, 5);
+        List<Problem> problems = java.util.stream.LongStream.rangeClosed(1, 5)
+                .mapToObj(id -> Problem.builder().id(id).number((int) id).build())
+                .toList();
+        List<Choice> choices = problems.stream()
+                .map(problem -> Choice.builder().id(problem.getId() * 10).number(1).content("정답")
+                        .isAnswer(true).problem(problem).build())
+                .toList();
+        List<WordPracticeAnswerRequest> requests = choices.stream()
+                .map(choice -> new WordPracticeAnswerRequest(choice.getProblem().getId(), choice.getId()))
+                .toList();
+
+        when(participantResolver.resolve(610L, null)).thenReturn(Optional.of(member));
+        when(cycleRepository.findByIdWithLock(77L)).thenReturn(Optional.of(activeCycle));
+        when(answerRepository.findAllByCycleIdAndProblemIds(77L, List.of(1L, 2L, 3L, 4L, 5L)))
+                .thenReturn(List.of());
+        when(problemRepository.findPublishedWordProblemsByIds(List.of(1L, 2L, 3L, 4L, 5L)))
+                .thenReturn(problems);
+        for (Choice choice : choices) {
+            when(choiceService.findById(choice.getId())).thenReturn(choice);
+        }
+        when(clockHolder.getCurrentDateTime()).thenReturn(now);
+        when(answerRepository.saveAll(any())).thenAnswer(invocation -> invocation.getArgument(0));
+
+        var response = service.submitAnswerBatch(610L, null, 77L, requests);
+
+        assertThat(response.answers()).hasSize(5);
+        assertThat(response.status()).isEqualTo("COMPLETED");
+        assertThat(response.progress().solvedCount()).isEqualTo(5);
+        verify(answerRepository).saveAll(any());
+        verify(eventPublisher).publishEvent(new StudySolvedEvent(610L, 5));
+    }
+
+    /** 마지막 문제 묶음만 다섯 개보다 작을 수 있고, 중간의 부분 묶음은 저장 전에 거부한다. */
+    @Test
+    void nonFinalPartialBatchIsRejectedBeforePersistence() {
+        WordPracticeParticipant member = participant(62L, WordPracticeParticipantType.MEMBER);
+        WordPracticeCycle activeCycle = cycle(member, 7, 0, WordPracticeCycleStatus.IN_PROGRESS);
+        when(participantResolver.resolve(620L, null)).thenReturn(Optional.of(member));
+        when(cycleRepository.findByIdWithLock(77L)).thenReturn(Optional.of(activeCycle));
+        when(answerRepository.findAllByCycleIdAndProblemIds(77L, List.of(1L, 2L))).thenReturn(List.of());
+
+        assertThatThrownBy(() -> service.submitAnswerBatch(620L, null, 77L, List.of(
+                new WordPracticeAnswerRequest(1L, 11L),
+                new WordPracticeAnswerRequest(2L, 21L))))
+                .isInstanceOf(com.cpa.yusin.quiz.global.exception.WordPracticeException.class);
+
+        verify(answerRepository, never()).saveAll(any());
+        assertThat(activeCycle.getSolvedCount()).isZero();
+    }
+
+    /** 동일한 완성 payload 재시도는 기존 답안을 반환하고 저장·학습 이벤트를 반복하지 않는다. */
+    @Test
+    void identicalAnswerBatchRetryIsIdempotent() {
+        WordPracticeParticipant member = participant(63L, WordPracticeParticipantType.MEMBER);
+        WordPracticeCycle completedCycle = cycle(member, 2, 2, WordPracticeCycleStatus.COMPLETED);
+        LocalDateTime submittedAt = LocalDateTime.of(2026, 8, 9, 13, 10);
+        List<WordPracticeAnswerRequest> requests = List.of(
+                new WordPracticeAnswerRequest(1L, 11L),
+                new WordPracticeAnswerRequest(2L, 21L));
+        List<com.cpa.yusin.quiz.wordpractice.domain.WordPracticeAnswer> existingAnswers = List.of(
+                com.cpa.yusin.quiz.wordpractice.domain.WordPracticeAnswer.create(
+                        completedCycle, 1L, 11L, 1, true, submittedAt),
+                com.cpa.yusin.quiz.wordpractice.domain.WordPracticeAnswer.create(
+                        completedCycle, 2L, 21L, 2, false, submittedAt));
+
+        when(participantResolver.resolve(630L, null)).thenReturn(Optional.of(member));
+        when(cycleRepository.findByIdWithLock(77L)).thenReturn(Optional.of(completedCycle));
+        when(answerRepository.findAllByCycleIdAndProblemIds(77L, List.of(1L, 2L)))
+                .thenReturn(existingAnswers);
+
+        var response = service.submitAnswerBatch(630L, null, 77L, requests);
+
+        assertThat(response.answers()).extracting(answer -> answer.problemId()).containsExactly(1L, 2L);
+        assertThat(response.progress().solvedCount()).isEqualTo(2);
+        verify(answerRepository, never()).saveAll(any());
+        verify(eventPublisher, never()).publishEvent(any());
+
+        assertThatThrownBy(() -> service.submitAnswerBatch(630L, null, 77L, List.of(
+                new WordPracticeAnswerRequest(2L, 21L),
+                new WordPracticeAnswerRequest(1L, 11L))))
+                .isInstanceOf(com.cpa.yusin.quiz.global.exception.WordPracticeException.class);
+    }
+
+    /** 구버전 단건 답안 다음 sequence부터 저장된 다섯 답안도 동일 payload면 멱등 응답한다. */
+    @Test
+    void identicalBatchRetryMayStartImmediatelyAfterLegacySingleAnswer() {
+        WordPracticeParticipant member = participant(64L, WordPracticeParticipantType.MEMBER);
+        WordPracticeCycle activeCycle = cycle(member, 7, 6, WordPracticeCycleStatus.IN_PROGRESS);
+        LocalDateTime submittedAt = LocalDateTime.of(2026, 8, 9, 13, 15);
+        List<WordPracticeAnswerRequest> requests = java.util.stream.LongStream.rangeClosed(2, 6)
+                .mapToObj(problemId -> new WordPracticeAnswerRequest(problemId, problemId * 10))
+                .toList();
+        List<com.cpa.yusin.quiz.wordpractice.domain.WordPracticeAnswer> existingAnswers =
+                java.util.stream.IntStream.rangeClosed(2, 6)
+                        .mapToObj(sequence -> com.cpa.yusin.quiz.wordpractice.domain.WordPracticeAnswer.create(
+                                activeCycle,
+                                (long) sequence,
+                                (long) sequence * 10,
+                                sequence,
+                                true,
+                                submittedAt
+                        ))
+                        .toList();
+
+        when(participantResolver.resolve(640L, null)).thenReturn(Optional.of(member));
+        when(cycleRepository.findByIdWithLock(77L)).thenReturn(Optional.of(activeCycle));
+        when(answerRepository.findAllByCycleIdAndProblemIds(77L, List.of(2L, 3L, 4L, 5L, 6L)))
+                .thenReturn(existingAnswers);
+
+        var response = service.submitAnswerBatch(640L, null, 77L, requests);
+
+        assertThat(response.answers()).extracting(answer -> answer.sequence())
+                .containsExactly(2, 3, 4, 5, 6);
+        assertThat(response.progress().solvedCount()).isEqualTo(6);
+        verify(answerRepository, never()).saveAll(any());
+        verify(eventPublisher, never()).publishEvent(any());
     }
 
     /** 이미 저장된 동일 답안 재전송은 멱등 응답만 반환하고 학습 통계를 다시 올리지 않는다. */

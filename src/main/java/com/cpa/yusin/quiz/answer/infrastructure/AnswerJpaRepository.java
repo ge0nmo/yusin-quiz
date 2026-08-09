@@ -48,7 +48,7 @@ public interface AnswerJpaRepository extends JpaRepository<Answer, Long>
             "   WHERE s.id = e.subjectId " +
             "   AND s.isRemoved = false" +
             ") " +
-            "ORDER BY a.createdAt ASC ")
+            "ORDER BY a.createdAt DESC ")
     Page<Answer> findByQuestionId(@Param("questionId") long questionId, Pageable pageable);
 
     @Query("SELECT a FROM Answer a " +
@@ -64,7 +64,7 @@ public interface AnswerJpaRepository extends JpaRepository<Answer, Long>
             "   WHERE s.id = e.subjectId " +
             "   AND s.isRemoved = false" +
             ") " +
-            "ORDER BY a.createdAt ASC ")
+            "ORDER BY a.createdAt DESC ")
     List<Answer> findByQuestionId(long questionId);
 
     /**

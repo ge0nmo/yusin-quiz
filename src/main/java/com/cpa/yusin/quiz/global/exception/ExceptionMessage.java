@@ -8,6 +8,8 @@ public enum ExceptionMessage {
     INVALID_LOGIN_INFORMATION("로그인 정보가 일치하지 않습니다.", HttpStatus.UNAUTHORIZED),
     REFRESH_TOKEN_EXPIRED("리프레시 토큰이 만료되었습니다. 다시 로그인해주세요.", HttpStatus.UNAUTHORIZED),
     INVALID_REFRESH_TOKEN("유효한 리프레시 토큰이 아닙니다.", HttpStatus.UNAUTHORIZED),
+    INVALID_SOCIAL_TOKEN("유효하지 않거나 만료된 소셜 로그인 토큰입니다.", HttpStatus.UNAUTHORIZED),
+    INVALID_SOCIAL_PROFILE("소셜 로그인 프로필 정보가 유효하지 않습니다.", HttpStatus.BAD_REQUEST),
 
     EMAIL_EXISTS("사용중인 이메일입니다.", HttpStatus.CONFLICT),
 
@@ -71,6 +73,7 @@ public enum ExceptionMessage {
     // Study Session
     SESSION_NOT_FOUND("세션을 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
     SESSION_NOT_IN_PROGRESS("진행 중인 세션만 수정하거나 종료할 수 있습니다.", HttpStatus.CONFLICT),
+    SESSION_TAKEN_OVER("다른 기기에서 이어서 학습 중인 세션입니다.", HttpStatus.CONFLICT),
 
     // Server
     INTERNAL_SERVER_ERROR("서버 내부 오류가 발생했습니다.", HttpStatus.INTERNAL_SERVER_ERROR),

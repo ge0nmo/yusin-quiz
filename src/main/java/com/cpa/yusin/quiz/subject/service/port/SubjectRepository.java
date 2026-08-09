@@ -25,5 +25,4 @@ public interface SubjectRepository
 
     Page<Subject> findAllOrderByName(Pageable pageable);
 
-    Page<Subject> findAllPublishedOrderByName(Pageable pageable);
 }

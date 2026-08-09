@@ -31,6 +31,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 
 @ExtendWith(MockitoExtension.class)
 class AuthenticationServiceImplTest {
@@ -152,6 +153,22 @@ class AuthenticationServiceImplTest {
         // then
         verify(randomNicknameGenerator).generate();
         verify(memberRepository).save(any(Member.class));
+    }
+
+    @Test
+    @DisplayName("소셜 프로필의 이메일 또는 플랫폼이 유효하지 않으면 저장 전에 거부한다")
+    void socialLogin_InvalidProfile_ThrowsStableError() {
+        assertInvalidSocialProfile(null);
+        assertInvalidSocialProfile(SocialProfile.builder()
+                .email("not-an-email")
+                .platform(Platform.GOOGLE)
+                .build());
+        assertInvalidSocialProfile(SocialProfile.builder()
+                .email("user@example.com")
+                .platform(Platform.HOME)
+                .build());
+
+        verifyNoInteractions(memberRepository);
     }
 
     @Test
@@ -317,5 +334,12 @@ class AuthenticationServiceImplTest {
                 .isInstanceOf(MemberException.class)
                 .satisfies(exception -> assertThat(((MemberException) exception).getExceptionMessage())
                         .isEqualTo(ExceptionMessage.USER_NOT_FOUND));
+    }
+
+    private void assertInvalidSocialProfile(SocialProfile profile) {
+        assertThatThrownBy(() -> authenticationService.socialLogin(profile))
+                .isInstanceOf(MemberException.class)
+                .satisfies(exception -> assertThat(((MemberException) exception).getExceptionMessage())
+                        .isEqualTo(ExceptionMessage.INVALID_SOCIAL_PROFILE));
     }
 }

@@ -59,16 +59,16 @@ public class QuestionController {
     public ResponseEntity<GlobalResponse<List<QuestionDTO>>> getAllByProblemId(
             @PathVariable("problemId") long problemId,
             @PageableDefault Pageable pageable) {
-        Page<QuestionDTO> response = questionService.getAllByProblemId(pageable.previousOrFirst(), problemId);
+        Page<QuestionDTO> response = questionService.getAllByProblemId(pageable, problemId);
 
         return ResponseEntity.ok(new GlobalResponse<>(response.getContent(), PageInfo.of(response)));
     }
 
     @DeleteMapping("/question/{questionId}")
-    public ResponseEntity<GlobalResponse<Boolean>> deleteById(@PathVariable("questionId") long questionId,
+    public ResponseEntity<Void> deleteById(@PathVariable("questionId") long questionId,
             @AuthenticationPrincipal MemberDetails memberDetails) {
         deleteQuestionService.execute(questionId, memberDetails.getMember());
 
-        return new ResponseEntity<>(new GlobalResponse<>(true), HttpStatus.NO_CONTENT);
+        return ResponseEntity.noContent().build();
     }
 }

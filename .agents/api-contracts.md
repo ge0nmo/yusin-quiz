@@ -32,10 +32,16 @@
 - `pageInfo` is nullable and is present only when needed.
 - Some admin endpoints return raw JSON lists instead of `GlobalResponse<T>`.
 - Shared validation and exception responses are translated by `ExceptionAdvice`.
+- Shared `ErrorResponse` objects include a stable, non-null `code`; `CustomException` uses the `ExceptionMessage` enum name.
+- Validation failures use `VALIDATION_ERROR`, while uncaught failures use `INTERNAL_SERVER_ERROR` without exposing the exception message.
 - REST Docs HTML is generated into `build/docs/asciidoc/`.
 - OpenAPI JSON is generated into `build/api-spec/openapi3.json`.
 - 말문제 빠른 풀이는 `/api/v2/problem/word-practice/**`를 사용하며, 성공 응답은 `GlobalResponse.data`로 감싼다.
 - 말문제 계약의 프론트 요약은 `docs/frontend-api/word-practice.md`, 생성 문서는 `word-practice.html`이다.
+- 사용자 질문/답변 목록의 요청 `page` 는 0 기반이고, 응답 `pageInfo.currentPage` 는 1 기반이다.
+- 사용자 답변 목록은 `createdAt DESC` 로만 정렬하며 관리자 답변도 정렬 우선권을 갖지 않는다.
+- 사용자 시험 종류 목록은 페이지네이션 없이 전체 공개 목록을 반환한다.
+- 질문/답변 삭제 성공 응답은 body 없는 `204 No Content` 다.
 
 ## Decision Rules
 

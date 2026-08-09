@@ -64,6 +64,3 @@ include::{snippets}/deleteQuestion/http-request.adoc[]
 
 === HTTP Response
 include::{snippets}/deleteQuestion/http-response.adoc[]
-
-=== Response Fields
-include::{snippets}/deleteQuestion/response-fields.adoc[]

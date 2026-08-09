@@ -43,6 +43,9 @@ public class StudySession extends BaseEntity {
     private LocalDateTime finishedAt;
     private Integer plannedProblemCount;
 
+    @Column(length = 64)
+    private String ownerDeviceId;
+
     public void updateLastIndex(int index) {
         this.lastIndex = index;
     }
@@ -74,8 +77,18 @@ public class StudySession extends BaseEntity {
         this.plannedProblemCount = plannedProblemCount;
     }
 
+    public void claimDevice(String deviceId) {
+        if (deviceId != null) {
+            this.ownerDeviceId = deviceId;
+        }
+    }
+
+    public boolean isOwnedByDevice(String deviceId) {
+        return ownerDeviceId == null || deviceId == null || ownerDeviceId.equals(deviceId);
+    }
+
     public static StudySession start(Member member, Long examId, ExamMode mode, LocalDateTime startedAt,
-                                     int plannedProblemCount) {
+                                     int plannedProblemCount, String ownerDeviceId) {
         return StudySession.builder()
                 .member(member)
                 .examId(examId)
@@ -84,6 +97,12 @@ public class StudySession extends BaseEntity {
                 .lastIndex(0)
                 .startedAt(startedAt)
                 .plannedProblemCount(plannedProblemCount)
+                .ownerDeviceId(ownerDeviceId)
                 .build();
+    }
+
+    public static StudySession start(Member member, Long examId, ExamMode mode, LocalDateTime startedAt,
+                                     int plannedProblemCount) {
+        return start(member, examId, mode, startedAt, plannedProblemCount, null);
     }
 }

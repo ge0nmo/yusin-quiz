@@ -4,11 +4,12 @@
 
 ## 화면 흐름
 
-1. 과목 목록 화면에서 `GET /subjects`로 진행률을 그린다.
-2. 과목 선택 시 `POST /subjects/{subjectId}/cycle`로 최신 회차를 시작하거나 이어 푼다.
+1. 시험 목록 화면에서 `GET /subjects`로 진행률을 그린다.
+2. 시험 선택 시 `POST /subjects/{subjectId}/cycle`로 최신 회차를 시작하거나 이어 푼다.
 3. 문제 화면은 `GET /cycles/{cycleId}/problems?count=5|10|15`를 호출한다.
-4. 반환된 `problems` 배열 순서대로 한 문제씩 `POST /answers`로 제출한다.
-5. 마지막 답안 뒤 `status=COMPLETED`가 되면 자동으로 다음 회차를 만들지 않는다. 완료 화면의 사용자가 선택할 때만 `POST /restart`를 호출한다.
+4. 앱은 각 선택을 기기에 영속 저장하고 `choices[].isAnswer`로 즉시 피드백한다.
+5. 현재 묶음을 모두 풀면 같은 배열을 `POST /answers/batch`로 한 번 제출한다. 서버 동기화가 끝나기 전에는 다음 묶음이나 결과로 이동하지 않는다.
+6. 마지막 배치 뒤 `status=COMPLETED`가 되면 자동으로 다음 회차를 만들지 않는다. 완료 화면의 사용자가 선택할 때만 `POST /restart`를 호출한다.
 
 ## 공통 식별 규칙
 
@@ -25,7 +26,8 @@
 | 과목 진행률 | GET | `/api/v2/problem/word-practice/subjects` | 선택: JWT 또는 `X-Guest-Token` |
 | 회차 시작/이어풀기 | POST | `/api/v2/problem/word-practice/subjects/{subjectId}/cycle` | 선택: JWT 또는 `X-Guest-Token` |
 | 다음 문제 묶음 | GET | `/api/v2/problem/word-practice/cycles/{cycleId}/problems?count={count}` | JWT 또는 guest token |
-| 최초 답안 제출 | POST | `/api/v2/problem/word-practice/cycles/{cycleId}/answers` | JWT 또는 guest token |
+| 답안 묶음 제출 | POST | `/api/v2/problem/word-practice/cycles/{cycleId}/answers/batch` | JWT 또는 guest token |
+| 단건 답안 제출(이전 앱 호환) | POST | `/api/v2/problem/word-practice/cycles/{cycleId}/answers` | JWT 또는 guest token |
 | 완료 회차 재시작 | POST | `/api/v2/problem/word-practice/cycles/{cycleId}/restart` | JWT 또는 guest token |
 
 ## 1. subject 진행률
@@ -106,36 +108,47 @@ X-Guest-Token: 2f10c41e-0c1b-4f29-8971-1108eff78552
 }
 ```
 
-`problems` item은 기존 `ProblemV2Response`와 동일한 shape다. 따라서 현재 계약상 `choices[].isAnswer`와 `explanation`을 포함한다. React Native는 배열의 첫 문제부터 순서대로 답안을 제출해야 하며, 다음 문제를 건너뛰어 제출하면 `409 Conflict`다. 완료 회차 조회는 빈 `problems`, `returnedCount=0`, `hasMore=false`를 반환한다.
+`problems` item은 기존 `ProblemV2Response`와 동일한 shape다. 따라서 현재 계약상 `choices[].isAnswer`와 `explanation`을 포함한다. React Native는 배열의 첫 문제부터 순서대로 로컬 답안을 쌓아야 한다. 완료 회차 조회는 빈 `problems`, `returnedCount=0`, `hasMore=false`를 반환한다.
 
-## 4. 답안 제출
+## 4. 답안 묶음 제출
 
 ### Request
 
 ```http
-POST /api/v2/problem/word-practice/cycles/301/answers
+POST /api/v2/problem/word-practice/cycles/301/answers/batch
 Content-Type: application/json
 X-Guest-Token: 2f10c41e-0c1b-4f29-8971-1108eff78552
 
-{ "problemId": 1001, "choiceId": 4004 }
+{
+  "answers": [
+    { "problemId": 1001, "choiceId": 4004 },
+    { "problemId": 1002, "choiceId": 4010 }
+  ]
+}
 ```
+
+`answers`는 서버가 내려준 현재 문제 순서와 같아야 한다. 보통 정확히 5개이며 마지막 묶음만 남은 수에 따라 1~4개를 허용한다. 빈 배열, 5개 초과, 중복 문제, 중간 묶음의 부분 제출은 `400`이고 서버 cursor와 다른 순서는 `409`다.
 
 ### Response
 
 ```json
 {
   "data": {
-    "problemId": 1001,
-    "choiceId": 4004,
-    "isCorrect": true,
-    "sequence": 1,
+    "answers": [
+      { "problemId": 1001, "choiceId": 4004, "isCorrect": true, "sequence": 1 },
+      { "problemId": 1002, "choiceId": 4010, "isCorrect": false, "sequence": 2 }
+    ],
     "status": "IN_PROGRESS",
-    "progress": { "solvedCount": 1, "correctCount": 1, "incorrectCount": 0, "totalCount": 120, "remainingCount": 119 }
+    "progress": { "solvedCount": 2, "correctCount": 1, "incorrectCount": 1, "totalCount": 120, "remainingCount": 118 }
   }
 }
 ```
 
-정답 여부는 서버가 계산하고 `sequence`는 1부터 시작하는 회차 내 최초 답안 제출 순서다. 같은 `problemId`와 같은 `choiceId`를 재전송하면 기존 결과를 `200 OK`로 그대로 반환하는 멱등 요청이다. 이미 저장한 답안을 다른 `choiceId`로 바꾸려 하면 `409 Conflict`이며, 앱은 변경 재시도를 하지 않아야 한다. 마지막 문제의 최초 답안 응답은 `status=COMPLETED`다.
+서버는 묶음 전체의 소유권, 문제 순서, 보기 소속, 공개 문제 여부를 먼저 검증하고 한 트랜잭션으로 저장한다. 한 항목이라도 실패하면 아무 답안도 저장하지 않는다. 동일한 문제·보기 배열을 재전송하면 기존 결과를 `200 OK`로 반환하며 학습 기록도 중복 집계하지 않는다. 이미 저장한 묶음의 보기를 바꾸거나 일부만 겹치는 payload는 `409 Conflict`다.
+
+앱은 각 선택 직후 전체 미전송 배열을 AsyncStorage에 덮어쓰고 로컬 `isAnswer`로 피드백한다. 서버 응답을 확인하고 outbox 삭제까지 성공한 뒤에만 다음 묶음 또는 결과로 이동한다. 통신 실패 시 저장된 동일 payload를 그대로 재시도한다. 오답 다시 풀기는 메모리에서만 수행하며 원래 배치 점수와 서버 진행률을 변경하지 않는다.
+
+이전 `/answers` 단건 API는 구버전 앱 호환용으로 남아 있다. 신규 앱은 배치 API만 사용한다.
 
 ## 5. 다음 회차 재시작
 
@@ -171,6 +184,7 @@ X-Guest-Token: 2f10c41e-0c1b-4f29-8971-1108eff78552
 | count가 5·10·15 외 값 | 400 |
 | 존재하지 않는 cycle/비공개 subject | 404 |
 | 문제 없는 subject, 답안 변경, 순서 위반, 진행 중 restart, 오래된 cycle restart | 409 |
+| 빈/5개 초과/중복 답안, 마지막이 아닌 부분 배치, 문제와 보기 불일치 | 400 |
 
 ## 관련 자료
 

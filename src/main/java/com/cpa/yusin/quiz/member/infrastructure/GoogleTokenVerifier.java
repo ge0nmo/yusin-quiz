@@ -1,25 +1,25 @@
 package com.cpa.yusin.quiz.member.infrastructure;
 
+import com.cpa.yusin.quiz.global.exception.ExceptionMessage;
+import com.cpa.yusin.quiz.global.exception.MemberException;
 import com.cpa.yusin.quiz.member.domain.type.Platform;
 import com.cpa.yusin.quiz.member.service.dto.SocialProfile;
 import com.cpa.yusin.quiz.member.service.port.SocialTokenVerifier;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
-import com.google.api.client.http.javanet.NetHttpTransport;
-import com.google.api.client.json.gson.GsonFactory;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
-import java.util.Collections;
+import java.io.IOException;
+import java.security.GeneralSecurityException;
 
 @Slf4j
 @Component
-public class GoogleTokenVerifier implements SocialTokenVerifier
-{
-
-    @Value("${spring.security.oauth2.client.registration.google.client-id}")
-    private String googleClientId;
+@RequiredArgsConstructor
+public class GoogleTokenVerifier implements SocialTokenVerifier {
+    private final GoogleIdTokenVerifier verifier;
 
     @Override
     public boolean support(Platform platform) {
@@ -28,28 +28,36 @@ public class GoogleTokenVerifier implements SocialTokenVerifier
 
     @Override
     public SocialProfile verify(String token) {
-        try {
-            GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(new NetHttpTransport(), new GsonFactory())
-                    .setAudience(Collections.singletonList(googleClientId))
-                    .build();
+        if (!StringUtils.hasText(token)) {
+            throw new MemberException(ExceptionMessage.INVALID_SOCIAL_TOKEN);
+        }
 
+        try {
             GoogleIdToken idToken = verifier.verify(token);
 
             if (idToken == null) {
-                throw new IllegalArgumentException("유효하지 않은 Google ID Token 입니다.");
+                throw new MemberException(ExceptionMessage.INVALID_SOCIAL_TOKEN);
             }
 
             GoogleIdToken.Payload payload = idToken.getPayload();
-            
+            if (payload == null
+                    || !StringUtils.hasText(payload.getEmail())
+                    || !Boolean.TRUE.equals(payload.getEmailVerified())) {
+                throw new MemberException(ExceptionMessage.INVALID_SOCIAL_PROFILE);
+            }
+
             return SocialProfile.builder()
                     .email(payload.getEmail())
-                    .name((String) payload.get("name"))
+                    .name(payload.get("name") instanceof String name ? name : null)
                     .platform(Platform.GOOGLE)
                     .build();
-
-        } catch (Exception e) {
-            log.error("Google Token Verification Failed", e);
-            throw new IllegalArgumentException("구글 토큰 검증 실패: " + e.getMessage());
+        } catch (MemberException e) {
+            throw e;
+        } catch (GeneralSecurityException | IOException | RuntimeException e) {
+            // Verification errors may contain token parsing details. Log only the
+            // exception type and return a stable authentication error to the client.
+            log.warn("Google ID token verification rejected: reasonType={}", e.getClass().getSimpleName());
+            throw new MemberException(ExceptionMessage.INVALID_SOCIAL_TOKEN);
         }
     }
 }

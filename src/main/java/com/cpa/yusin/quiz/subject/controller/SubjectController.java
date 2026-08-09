@@ -1,13 +1,9 @@
 package com.cpa.yusin.quiz.subject.controller;
 
 import com.cpa.yusin.quiz.common.controller.dto.response.GlobalResponse;
-import com.cpa.yusin.quiz.common.controller.dto.response.PageInfo;
 import com.cpa.yusin.quiz.subject.controller.dto.response.SubjectDTO;
 import com.cpa.yusin.quiz.subject.controller.port.SubjectService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,11 +19,11 @@ public class SubjectController
     private final SubjectService subjectService;
 
     @GetMapping
-    public ResponseEntity<GlobalResponse<List<SubjectDTO>>> getAll(@PageableDefault Pageable pageable)
+    public ResponseEntity<GlobalResponse<List<SubjectDTO>>> getAll()
     {
-        Page<SubjectDTO> response = subjectService.getAllPublished(pageable.previousOrFirst());
+        List<SubjectDTO> response = subjectService.getAllPublished();
 
-        return ResponseEntity.ok(new GlobalResponse<>(response.getContent(), PageInfo.of(response)));
+        return ResponseEntity.ok(new GlobalResponse<>(response));
     }
 
 }

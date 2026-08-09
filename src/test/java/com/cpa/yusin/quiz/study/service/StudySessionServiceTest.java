@@ -22,7 +22,6 @@ import com.cpa.yusin.quiz.study.domain.StudySessionStatus;
 import com.cpa.yusin.quiz.study.domain.SubmittedAnswer;
 import com.cpa.yusin.quiz.study.event.StudySolvedEvent;
 import com.cpa.yusin.quiz.study.service.dto.StudySessionCompletionSummary;
-import com.cpa.yusin.quiz.study.service.dto.SubmittedAnswerCorrectnessSnapshot;
 import com.cpa.yusin.quiz.study.service.port.StudySessionRepository;
 import com.cpa.yusin.quiz.study.service.port.SubmittedAnswerRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -113,13 +112,47 @@ class StudySessionServiceTest {
 
         given(examService.findPublishedById(examId)).willReturn(Exam.builder().id(examId).build());
         given(memberRepository.findByIdWithLock(memberId)).willReturn(Optional.of(member));
-        given(studySessionRepository.findByMemberIdAndExamIdAndStatusAndMode(memberId, examId,
+        given(studySessionRepository.findByMemberIdAndExamIdAndStatusAndModeWithLock(memberId, examId,
                 StudySessionStatus.IN_PROGRESS, mode)).willReturn(Optional.of(existingSession));
 
         StudySession session = studySessionService.startSession(memberId, examId, mode);
 
         assertThat(session).isEqualTo(existingSession);
         verify(studySessionRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("세션 시작 - 다른 기기에서 이어풀면 최신 기기가 소유권을 가져간다")
+    void startSession_whenResumedFromAnotherDevice_thenTakeOver() {
+        Long memberId = 1L;
+        Long examId = 100L;
+        StudySession existingSession = StudySession.builder()
+                .id(1L)
+                .member(member)
+                .examId(examId)
+                .mode(ExamMode.EXAM)
+                .status(StudySessionStatus.IN_PROGRESS)
+                .plannedProblemCount(10)
+                .ownerDeviceId("install-a")
+                .build();
+
+        given(examService.findPublishedById(examId)).willReturn(Exam.builder().id(examId).build());
+        given(memberRepository.findByIdWithLock(memberId)).willReturn(Optional.of(member));
+        given(studySessionRepository.findByMemberIdAndExamIdAndStatusAndModeWithLock(
+                memberId,
+                examId,
+                StudySessionStatus.IN_PROGRESS,
+                ExamMode.EXAM
+        )).willReturn(Optional.of(existingSession));
+
+        StudySession session = studySessionService.startSession(
+                memberId,
+                examId,
+                ExamMode.EXAM,
+                "install-b"
+        );
+
+        assertThat(session.getOwnerDeviceId()).isEqualTo("install-b");
     }
 
     @Test
@@ -139,7 +172,7 @@ class StudySessionServiceTest {
 
         given(examService.findPublishedById(examId)).willReturn(Exam.builder().id(examId).build());
         given(memberRepository.findByIdWithLock(memberId)).willReturn(Optional.of(member));
-        given(studySessionRepository.findByMemberIdAndExamIdAndStatusAndMode(memberId, examId,
+        given(studySessionRepository.findByMemberIdAndExamIdAndStatusAndModeWithLock(memberId, examId,
                 StudySessionStatus.IN_PROGRESS, mode)).willReturn(Optional.of(existingSession));
         given(submittedAnswerRepository.findAllByStudySessionId(existingSession.getId())).willReturn(List.of(
                 SubmittedAnswer.builder().problemId(1L).choiceId(11L).isCorrect(true).build(),
@@ -161,7 +194,7 @@ class StudySessionServiceTest {
 
         given(examService.findPublishedById(examId)).willReturn(Exam.builder().id(examId).build());
         given(memberRepository.findByIdWithLock(memberId)).willReturn(Optional.of(member));
-        given(studySessionRepository.findByMemberIdAndExamIdAndStatusAndMode(memberId, examId,
+        given(studySessionRepository.findByMemberIdAndExamIdAndStatusAndModeWithLock(memberId, examId,
                 StudySessionStatus.IN_PROGRESS, mode)).willReturn(Optional.empty());
         given(problemRepository.countActiveByExamId(examId)).willReturn(7L);
         given(clockHolder.getCurrentDateTime()).willReturn(NOW);
@@ -190,7 +223,7 @@ class StudySessionServiceTest {
                 .hasMessage(ExceptionMessage.USER_NOT_FOUND.getMessage());
 
         verify(studySessionRepository, never())
-                .findByMemberIdAndExamIdAndStatusAndMode(any(), any(), any(), any());
+                .findByMemberIdAndExamIdAndStatusAndModeWithLock(any(), any(), any(), any());
     }
 
     @Test
@@ -228,8 +261,8 @@ class StudySessionServiceTest {
     }
 
     @Test
-    @DisplayName("답안 저장 - 연습 모드도 authoritative isCorrect 를 저장하고 첫 제출만 로그 반영")
-    void saveAnswer_whenPractice_thenReturnFeedbackAndPublishEventOnce() {
+    @DisplayName("답안 저장 - 연습 모드는 피드백을 반환하지만 완료 전에는 로그를 기록하지 않는다")
+    void saveAnswer_whenPractice_thenReturnFeedbackWithoutPublishingEvent() {
         Long sessionId = 1L;
         Long problemId = 10L;
         Long choiceId = 300L;
@@ -256,7 +289,7 @@ class StudySessionServiceTest {
         assertThat(response.getExplanation()).isEqualTo("Test Explanation");
         verify(submittedAnswerRepository).save(captor.capture());
         assertThat(captor.getValue().isCorrect()).isFalse();
-        verify(eventPublisher).publishEvent(any(StudySolvedEvent.class));
+        verify(eventPublisher, never()).publishEvent(any());
     }
 
     @Test
@@ -331,6 +364,35 @@ class StudySessionServiceTest {
     }
 
     @Test
+    @DisplayName("답안 저장 - 세션을 인계받지 않은 기기는 거부한다")
+    void saveAnswer_whenSessionTakenOver_thenThrow() {
+        Long sessionId = 1L;
+        StudySession session = StudySession.builder()
+                .id(sessionId)
+                .member(member)
+                .examId(100L)
+                .mode(ExamMode.EXAM)
+                .status(StudySessionStatus.IN_PROGRESS)
+                .plannedProblemCount(10)
+                .ownerDeviceId("install-b")
+                .build();
+        given(studySessionRepository.findByIdWithLock(sessionId)).willReturn(Optional.of(session));
+
+        assertThatThrownBy(() -> studySessionService.saveAnswer(
+                member.getId(),
+                sessionId,
+                10L,
+                20L,
+                0,
+                "install-a"
+        ))
+                .isInstanceOf(StudySessionException.class)
+                .hasMessage(ExceptionMessage.SESSION_TAKEN_OVER.getMessage());
+
+        verify(examService, never()).findPublishedById(anyLong());
+    }
+
+    @Test
     @DisplayName("시험 종료 - counts 기반 요약 및 잔디 기록 (실전 모드)")
     void completeSession_exam_shouldCalculateScoreAndLog() {
         Long sessionId = 1L;
@@ -344,11 +406,6 @@ class StudySessionServiceTest {
 
         given(studySessionRepository.findByIdWithLock(sessionId)).willReturn(Optional.of(session));
         given(submittedAnswerRepository.findAllByStudySessionId(sessionId)).willReturn(answers);
-        given(submittedAnswerRepository.findCorrectnessSnapshotsByStudySessionId(sessionId)).willReturn(List.of(
-                new SubmittedAnswerCorrectnessSnapshot(1L, 11L, true),
-                new SubmittedAnswerCorrectnessSnapshot(2L, 22L, true),
-                new SubmittedAnswerCorrectnessSnapshot(3L, 33L, false)
-        ));
         given(clockHolder.getCurrentDateTime()).willReturn(NOW);
 
         StudySessionCompletionSummary summary = studySessionService.completeSession(member.getId(), sessionId);
@@ -366,8 +423,8 @@ class StudySessionServiceTest {
     }
 
     @Test
-    @DisplayName("시험 종료 - 연습 모드도 같은 요약 계약을 쓰고 finish 에서는 로그를 추가하지 않는다")
-    void completeSession_practice_shouldNotLog() {
+    @DisplayName("시험 종료 - 일부만 푼 연습 세션은 학습 완료 로그를 기록하지 않는다")
+    void completeSession_incompletePractice_shouldNotLog() {
         Long sessionId = 1L;
         StudySession session = inProgressSession(sessionId, 100L, ExamMode.PRACTICE, 4);
 
@@ -375,10 +432,6 @@ class StudySessionServiceTest {
         given(submittedAnswerRepository.findAllByStudySessionId(sessionId)).willReturn(List.of(
                 SubmittedAnswer.builder().problemId(1L).choiceId(11L).isCorrect(true).build(),
                 SubmittedAnswer.builder().problemId(2L).choiceId(22L).isCorrect(false).build()
-        ));
-        given(submittedAnswerRepository.findCorrectnessSnapshotsByStudySessionId(sessionId)).willReturn(List.of(
-                new SubmittedAnswerCorrectnessSnapshot(1L, 11L, true),
-                new SubmittedAnswerCorrectnessSnapshot(2L, 22L, false)
         ));
         given(clockHolder.getCurrentDateTime()).willReturn(NOW);
 
@@ -390,6 +443,26 @@ class StudySessionServiceTest {
         assertThat(summary.unansweredCount()).isEqualTo(2);
         assertThat(session.getFinishedAt()).isEqualTo(NOW);
         verify(eventPublisher, never()).publishEvent(any());
+    }
+
+    @Test
+    @DisplayName("시험 종료 - 모든 문제를 푼 연습 세션은 완료 시 한 번만 학습 로그를 기록한다")
+    void completeSession_completedPractice_shouldLogOnce() {
+        Long sessionId = 1L;
+        StudySession session = inProgressSession(sessionId, 100L, ExamMode.PRACTICE, 2);
+
+        given(studySessionRepository.findByIdWithLock(sessionId)).willReturn(Optional.of(session));
+        given(submittedAnswerRepository.findAllByStudySessionId(sessionId)).willReturn(List.of(
+                SubmittedAnswer.builder().problemId(1L).choiceId(11L).isCorrect(true).build(),
+                SubmittedAnswer.builder().problemId(2L).choiceId(22L).isCorrect(false).build()
+        ));
+        given(clockHolder.getCurrentDateTime()).willReturn(NOW);
+
+        StudySessionCompletionSummary summary = studySessionService.completeSession(member.getId(), sessionId);
+
+        assertThat(summary.answeredCount()).isEqualTo(2);
+        assertThat(summary.totalCount()).isEqualTo(2);
+        verify(eventPublisher).publishEvent(new StudySolvedEvent(member.getId(), 2));
     }
 
     @Test
@@ -415,18 +488,35 @@ class StudySessionServiceTest {
 
         given(studySessionRepository.findByIdWithLock(sessionId)).willReturn(Optional.of(session));
         given(submittedAnswerRepository.findAllByStudySessionId(sessionId)).willReturn(answers);
-        given(submittedAnswerRepository.findCorrectnessSnapshotsByStudySessionId(sessionId)).willReturn(List.of(
-                new SubmittedAnswerCorrectnessSnapshot(1L, 11L, true),
-                new SubmittedAnswerCorrectnessSnapshot(2L, 22L, true),
-                new SubmittedAnswerCorrectnessSnapshot(3L, 33L, false)
-        ));
-
         StudySessionCompletionSummary summary = studySessionService.completeSession(member.getId(), sessionId);
 
         assertThat(summary.correctCount()).isEqualTo(2);
         assertThat(summary.totalCount()).isEqualTo(5);
         assertThat(summary.answeredCount()).isEqualTo(3);
         assertThat(summary.unansweredCount()).isEqualTo(2);
+        verify(eventPublisher, never()).publishEvent(any());
+    }
+
+    @Test
+    @DisplayName("시험 종료 - 포기한 세션은 완료할 수 없다")
+    void completeSession_whenSessionAbandoned_thenThrow() {
+        Long sessionId = 1L;
+        StudySession session = StudySession.builder()
+                .id(sessionId)
+                .member(member)
+                .examId(100L)
+                .mode(ExamMode.EXAM)
+                .status(StudySessionStatus.ABANDONED)
+                .plannedProblemCount(5)
+                .build();
+
+        given(studySessionRepository.findByIdWithLock(sessionId)).willReturn(Optional.of(session));
+
+        assertThatThrownBy(() -> studySessionService.completeSession(member.getId(), sessionId))
+                .isInstanceOf(StudySessionException.class)
+                .hasMessage(ExceptionMessage.SESSION_NOT_IN_PROGRESS.getMessage());
+
+        verify(submittedAnswerRepository, never()).findAllByStudySessionId(anyLong());
         verify(eventPublisher, never()).publishEvent(any());
     }
 
@@ -451,11 +541,6 @@ class StudySessionServiceTest {
 
         given(studySessionRepository.findByIdWithLock(sessionId)).willReturn(Optional.of(session));
         given(submittedAnswerRepository.findAllByStudySessionId(sessionId)).willReturn(answers);
-        given(submittedAnswerRepository.findCorrectnessSnapshotsByStudySessionId(sessionId)).willReturn(List.of(
-                new SubmittedAnswerCorrectnessSnapshot(1L, 11L, true),
-                new SubmittedAnswerCorrectnessSnapshot(2L, 22L, false),
-                new SubmittedAnswerCorrectnessSnapshot(3L, 33L, false)
-        ));
         given(problemRepository.countActiveByExamId(100L)).willReturn(2L);
 
         StudySessionCompletionSummary summary = studySessionService.completeSession(member.getId(), sessionId);
@@ -469,8 +554,8 @@ class StudySessionServiceTest {
     }
 
     @Test
-    @DisplayName("시험 종료 - persisted correctness 가 깨진 경우 batch join 결과로 보정한다")
-    void completeSession_whenPersistedCorrectnessIsCorrupted_thenUseFallback() {
+    @DisplayName("시험 종료 - 저장 시 확정한 정오 여부를 최종 점수의 기준으로 사용한다")
+    void completeSession_shouldUsePersistedCorrectness() {
         Long sessionId = 1L;
         StudySession session = inProgressSession(sessionId, 100L, ExamMode.EXAM, 2);
 
@@ -481,16 +566,12 @@ class StudySessionServiceTest {
 
         given(studySessionRepository.findByIdWithLock(sessionId)).willReturn(Optional.of(session));
         given(submittedAnswerRepository.findAllByStudySessionId(sessionId)).willReturn(answers);
-        given(submittedAnswerRepository.findCorrectnessSnapshotsByStudySessionId(sessionId)).willReturn(List.of(
-                new SubmittedAnswerCorrectnessSnapshot(1L, 11L, true),
-                new SubmittedAnswerCorrectnessSnapshot(2L, 22L, false)
-        ));
         given(clockHolder.getCurrentDateTime()).willReturn(NOW);
 
         StudySessionCompletionSummary summary = studySessionService.completeSession(member.getId(), sessionId);
 
-        assertThat(summary.correctCount()).isEqualTo(1);
-        assertThat(summary.finalScore()).isEqualTo(1);
+        assertThat(summary.correctCount()).isZero();
+        assertThat(summary.finalScore()).isZero();
         verify(eventPublisher).publishEvent(any(StudySolvedEvent.class));
     }
 
@@ -509,7 +590,7 @@ class StudySessionServiceTest {
                 .hasMessage(ExceptionMessage.EXAM_NOT_FOUND.getMessage());
 
         verify(studySessionRepository, never())
-                .findByMemberIdAndExamIdAndStatusAndMode(any(), any(), any(), any());
+                .findByMemberIdAndExamIdAndStatusAndModeWithLock(any(), any(), any(), any());
     }
 
     @Test
@@ -620,18 +701,30 @@ class StudySessionServiceTest {
                 .lastIndex(5)
                 .plannedProblemCount(40)
                 .build();
+        StudySession anotherSession = StudySession.builder()
+                .id(11L)
+                .member(member)
+                .examId(examId)
+                .mode(ExamMode.EXAM)
+                .status(StudySessionStatus.IN_PROGRESS)
+                .lastIndex(2)
+                .plannedProblemCount(40)
+                .build();
 
         given(clockHolder.getCurrentDateTime()).willReturn(NOW);
         given(studyLogService.getTodaySolved(memberId)).willReturn(15);
         given(studyLogService.calculateCurrentStreak(memberId)).willReturn(4);
         given(studyLogService.getYearSolvedCount(memberId, 2025)).willReturn(320);
-        given(studySessionRepository.findLatestByMemberIdAndStatus(memberId, StudySessionStatus.IN_PROGRESS))
-                .willReturn(Optional.of(session));
+        given(studySessionRepository.findAllByMemberIdAndStatusOrderByUpdatedAtDesc(
+                memberId,
+                StudySessionStatus.IN_PROGRESS
+        )).willReturn(List.of(session, anotherSession));
         given(examService.findPublishedById(examId)).willReturn(exam);
         given(submittedAnswerRepository.findAllByStudySessionId(10L)).willReturn(List.of(
                 SubmittedAnswer.create(session, 1L, 100L, true),
                 SubmittedAnswer.create(session, 2L, 101L, false)
         ));
+        given(submittedAnswerRepository.findAllByStudySessionId(11L)).willReturn(List.of());
 
         com.cpa.yusin.quiz.study.controller.dto.response.StudySummaryResponse response = studySessionService.getStudySummary(memberId);
 
@@ -646,6 +739,11 @@ class StudySessionServiceTest {
         assertThat(response.inProgress().lastIndex()).isEqualTo(5);
         assertThat(response.inProgress().answeredCount()).isEqualTo(2);
         assertThat(response.inProgress().totalCount()).isEqualTo(40);
+        assertThat(response.inProgressSessions()).hasSize(2);
+        assertThat(response.inProgressSessions()).extracting(sessionResponse -> sessionResponse.sessionId())
+                .containsExactly(10L, 11L);
+        assertThat(response.inProgressSessions().get(1).mode()).isEqualTo("EXAM");
+        assertThat(response.inProgressSessions().get(1).answeredCount()).isZero();
     }
 
     @Test
@@ -657,8 +755,10 @@ class StudySessionServiceTest {
         given(studyLogService.getTodaySolved(memberId)).willReturn(0);
         given(studyLogService.calculateCurrentStreak(memberId)).willReturn(0);
         given(studyLogService.getYearSolvedCount(memberId, 2025)).willReturn(0);
-        given(studySessionRepository.findLatestByMemberIdAndStatus(memberId, StudySessionStatus.IN_PROGRESS))
-                .willReturn(Optional.empty());
+        given(studySessionRepository.findAllByMemberIdAndStatusOrderByUpdatedAtDesc(
+                memberId,
+                StudySessionStatus.IN_PROGRESS
+        )).willReturn(List.of());
 
         com.cpa.yusin.quiz.study.controller.dto.response.StudySummaryResponse response = studySessionService.getStudySummary(memberId);
 
@@ -666,6 +766,7 @@ class StudySessionServiceTest {
         assertThat(response.currentStreak()).isEqualTo(0);
         assertThat(response.yearSolved()).isEqualTo(0);
         assertThat(response.inProgress()).isNull();
+        assertThat(response.inProgressSessions()).isEmpty();
     }
 
     @Test
