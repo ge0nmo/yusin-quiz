@@ -10,7 +10,7 @@ public enum ExceptionMessage {
     NO_AUTHORIZATION("권한이 없습니다.", HttpStatus.FORBIDDEN),
     USER_NOT_FOUND("관리자 계정을 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
     QUALIFICATION_EXAM_NOT_FOUND("자격시험을 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
-    QUALIFICATION_EXAM_CODE_EXISTS("이미 사용 중인 자격시험 코드입니다.", HttpStatus.CONFLICT),
+    QUALIFICATION_EXAM_CODE_EXISTS("이미 등록된 자격시험입니다.", HttpStatus.CONFLICT),
     SUBJECT_NOT_FOUND("과목을 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
     SUBJECT_NAME_EXISTS("이미 사용 중인 과목 이름입니다.", HttpStatus.CONFLICT),
     SUBJECT_MAPPING_NOT_FOUND("자격시험에 연결된 과목을 찾을 수 없습니다.", HttpStatus.NOT_FOUND),

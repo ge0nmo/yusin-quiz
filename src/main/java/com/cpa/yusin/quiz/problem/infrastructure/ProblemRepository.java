@@ -1,6 +1,7 @@
 package com.cpa.yusin.quiz.problem.infrastructure;
 
 import com.cpa.yusin.quiz.problem.domain.Problem;
+import com.cpa.yusin.quiz.qualification.domain.QualificationExamCode;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -34,7 +35,7 @@ public interface ProblemRepository extends JpaRepository<Problem, Long> {
             "and p.subjectMapping.status = com.cpa.yusin.quiz.common.domain.ContentStatus.PUBLISHED " +
             "and p.subjectMapping.subject.status = com.cpa.yusin.quiz.common.domain.ContentStatus.PUBLISHED " +
             "order by p.exam.year desc, p.number asc")
-    List<Problem> findPublished(@Param("code") String code, @Param("subjectId") Long subjectId);
+    List<Problem> findPublished(@Param("code") QualificationExamCode code, @Param("subjectId") Long subjectId);
 
     @Query("select count(p) from Problem p " +
             "where p.exam.qualificationExam.code = :code and p.subjectMapping.subject.id = :subjectId " +
@@ -43,7 +44,7 @@ public interface ProblemRepository extends JpaRepository<Problem, Long> {
             "and p.exam.qualificationExam.status = com.cpa.yusin.quiz.common.domain.ContentStatus.PUBLISHED " +
             "and p.subjectMapping.status = com.cpa.yusin.quiz.common.domain.ContentStatus.PUBLISHED " +
             "and p.subjectMapping.subject.status = com.cpa.yusin.quiz.common.domain.ContentStatus.PUBLISHED")
-    long countPublished(@Param("code") String code, @Param("subjectId") Long subjectId);
+    long countPublished(@Param("code") QualificationExamCode code, @Param("subjectId") Long subjectId);
 
     boolean existsByExamId(Long examId);
     boolean existsBySubjectMappingId(Long mappingId);

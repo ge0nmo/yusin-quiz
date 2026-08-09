@@ -9,6 +9,7 @@ import com.cpa.yusin.quiz.problem.domain.Problem;
 import com.cpa.yusin.quiz.problem.infrastructure.ProblemRepository;
 import com.cpa.yusin.quiz.problem.service.JsonBlockContentProcessor;
 import com.cpa.yusin.quiz.qualification.domain.QualificationExam;
+import com.cpa.yusin.quiz.qualification.domain.QualificationExamCode;
 import com.cpa.yusin.quiz.qualification.domain.QualificationExamSubject;
 import com.cpa.yusin.quiz.qualification.infrastructure.QualificationExamRepository;
 import com.cpa.yusin.quiz.qualification.infrastructure.QualificationExamSubjectRepository;
@@ -40,7 +41,7 @@ public class PublicContentService {
 
     public List<ProblemResponse> getProblems(String code, Long subjectId) {
         validatePublishedMapping(code, subjectId);
-        return problemRepository.findPublished(normalizeCode(code), subjectId).stream().map(this::toProblemResponse).toList();
+        return problemRepository.findPublished(parseCode(code), subjectId).stream().map(this::toProblemResponse).toList();
     }
 
     public CheckResponse check(String code, Long problemId, CheckRequest request) {
@@ -91,7 +92,7 @@ public class PublicContentService {
     }
 
     private QualificationExam findPublishedQualification(String code) {
-        QualificationExam qualificationExam = qualificationExamRepository.findByCode(normalizeCode(code))
+        QualificationExam qualificationExam = qualificationExamRepository.findByCode(parseCode(code))
                 .orElseThrow(() -> new ContentException(ExceptionMessage.QUALIFICATION_EXAM_NOT_FOUND));
         if (qualificationExam.getStatus() != ContentStatus.PUBLISHED) {
             throw new ContentException(ExceptionMessage.QUALIFICATION_EXAM_NOT_FOUND);
@@ -113,8 +114,8 @@ public class PublicContentService {
     private Problem findPublishedProblem(String code, Long problemId) {
         Problem problem = problemRepository.findDetailById(problemId)
                 .orElseThrow(() -> new ContentException(ExceptionMessage.PROBLEM_NOT_FOUND));
-        String normalizedCode = normalizeCode(code);
-        if (!problem.getExam().getQualificationExam().getCode().equals(normalizedCode)
+        QualificationExamCode qualificationCode = parseCode(code);
+        if (problem.getExam().getQualificationExam().getCode() != qualificationCode
                 || problem.getStatus() != ContentStatus.PUBLISHED
                 || problem.getExam().getStatus() != ContentStatus.PUBLISHED
                 || problem.getExam().getQualificationExam().getStatus() != ContentStatus.PUBLISHED
@@ -125,11 +126,9 @@ public class PublicContentService {
         return problem;
     }
 
-    private String normalizeCode(String code) {
-        if (code == null || code.isBlank()) {
-            throw new ContentException(ExceptionMessage.QUALIFICATION_EXAM_NOT_FOUND);
-        }
-        return code.trim().toUpperCase(Locale.ROOT);
+    private QualificationExamCode parseCode(String code) {
+        return QualificationExamCode.from(code)
+                .orElseThrow(() -> new ContentException(ExceptionMessage.QUALIFICATION_EXAM_NOT_FOUND));
     }
 
 }

@@ -15,6 +15,7 @@
 - Public APIs live under `/api/v1/qualification-exams/{code}/**`.
 - Admin APIs live under `/api/admin/**`.
 - JSON blocks are the single problem/explanation content model; do not add HTML compatibility fields.
+- Qualification exam codes are limited to `QualificationExamCode`; display names come from that enum.
 - External contract changes update tests and docs together.
 
 ## Task router

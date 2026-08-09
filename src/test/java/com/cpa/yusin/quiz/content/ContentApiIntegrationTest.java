@@ -13,6 +13,7 @@ import com.cpa.yusin.quiz.global.jwt.JwtService;
 import com.cpa.yusin.quiz.problem.domain.Problem;
 import com.cpa.yusin.quiz.problem.infrastructure.ProblemRepository;
 import com.cpa.yusin.quiz.qualification.domain.QualificationExam;
+import com.cpa.yusin.quiz.qualification.domain.QualificationExamCode;
 import com.cpa.yusin.quiz.qualification.domain.QualificationExamSubject;
 import com.cpa.yusin.quiz.qualification.infrastructure.QualificationExamRepository;
 import com.cpa.yusin.quiz.qualification.infrastructure.QualificationExamSubjectRepository;
@@ -85,7 +86,7 @@ class ContentApiIntegrationTest {
         memberRepository.deleteAll();
 
         QualificationExam appraiser = qualificationExamRepository.save(
-                new QualificationExam("APPRAISER", "감정평가사", ContentStatus.PUBLISHED));
+                new QualificationExam(QualificationExamCode.APPRAISER, ContentStatus.PUBLISHED));
         Subject accounting = subjectRepository.save(new Subject("회계학", ContentStatus.PUBLISHED));
         QualificationExamSubject mapping = mappingRepository.save(
                 new QualificationExamSubject(appraiser, accounting, ContentStatus.PUBLISHED, 1));
@@ -222,10 +223,11 @@ class ContentApiIntegrationTest {
                         .header("Authorization", "Bearer " + accessToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(Map.of(
-                                "code", "CUSTOMS_BROKER", "name", "관세사", "status", "PUBLISHED",
+                                "code", "CUSTOMS_BROKER", "status", "PUBLISHED",
                                 "subjects", List.of(Map.of("subjectId", subjectId, "status", "PUBLISHED", "displayOrder", 1))))))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.data.code").value("CUSTOMS_BROKER"))
+                .andExpect(jsonPath("$.data.name").value("관세사"))
                 .andDo(document("admin-create-qualification-exam", api("Admin Content", "자격시험과 과목 연결 생성")))
                 .andReturn().getResponse().getContentAsString());
 
@@ -261,6 +263,18 @@ class ContentApiIntegrationTest {
                 .andExpect(jsonPath("$.data.choices[2].isAnswer").value(true))
                 .andExpect(jsonPath("$.data.explanation", hasSize(0)))
                 .andDo(document("admin-create-problem", api("Admin Content", "JSON 블록 문제 생성")));
+    }
+
+    @Test
+    void adminRejectsQualificationCodesOutsideTheEnum() throws Exception {
+        String token = loginAdmin();
+
+        mockMvc.perform(post("/api/admin/qualification-exams")
+                        .header("Authorization", bearer(token))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of(
+                                "code", "LAWYER", "status", "DRAFT", "subjects", List.of()))))
+                .andExpect(status().isBadRequest());
     }
 
     @Test
@@ -309,14 +323,14 @@ class ContentApiIntegrationTest {
         mockMvc.perform(put("/api/admin/qualification-exams/{id}", qualification.getId())
                         .header("Authorization", bearer(token)).contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(Map.of(
-                                "name", "감정평가사", "status", "PUBLISHED", "subjects", List.of(Map.of(
+                                "status", "PUBLISHED", "subjects", List.of(Map.of(
                                         "subjectId", subject.getId(), "status", "PUBLISHED", "displayOrder", 1))))))
                 .andExpect(status().isOk()).andDo(document("admin-update-qualification-exam",
                         api("Admin Content", "자격시험과 과목 연결 수정")));
         long emptyQualificationId = responseId(mockMvc.perform(post("/api/admin/qualification-exams")
                         .header("Authorization", bearer(token)).contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(Map.of(
-                                "code", "CPA", "name", "회계사", "status", "DRAFT", "subjects", List.of()))))
+                                "code", "CPA", "status", "DRAFT", "subjects", List.of()))))
                 .andExpect(status().isCreated()).andReturn().getResponse().getContentAsString());
         mockMvc.perform(delete("/api/admin/qualification-exams/{id}", emptyQualificationId)
                         .header("Authorization", bearer(token)))

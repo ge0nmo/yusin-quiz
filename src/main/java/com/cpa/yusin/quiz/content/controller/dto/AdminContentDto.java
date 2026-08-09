@@ -1,6 +1,7 @@
 package com.cpa.yusin.quiz.content.controller.dto;
 
 import com.cpa.yusin.quiz.common.domain.ContentStatus;
+import com.cpa.yusin.quiz.qualification.domain.QualificationExamCode;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 
@@ -14,12 +15,12 @@ public final class AdminContentDto {
                                  @PositiveOrZero int displayOrder) {}
     public record MappingResponse(Long id, Long subjectId, String subjectName,
                                   ContentStatus status, int displayOrder, long problemCount) {}
-    public record QualificationExamCreateRequest(@NotBlank String code, @NotBlank String name,
+    public record QualificationExamCreateRequest(@NotNull QualificationExamCode code,
                                                  @NotNull ContentStatus status,
                                                  @NotNull List<@Valid MappingRequest> subjects) {}
-    public record QualificationExamUpdateRequest(@NotBlank String name, @NotNull ContentStatus status,
+    public record QualificationExamUpdateRequest(@NotNull ContentStatus status,
                                                  @NotNull List<@Valid MappingRequest> subjects) {}
-    public record QualificationExamResponse(Long id, String code, String name, ContentStatus status,
+    public record QualificationExamResponse(Long id, QualificationExamCode code, String name, ContentStatus status,
                                             List<MappingResponse> subjects) {}
 
     public record SubjectRequest(@NotBlank String name, @NotNull ContentStatus status) {}
@@ -27,7 +28,7 @@ public final class AdminContentDto {
 
     public record ExamRequest(@NotNull Long qualificationExamId, @NotBlank String name,
                               @Min(1900) @Max(3000) int year, @NotNull ContentStatus status) {}
-    public record ExamResponse(Long id, Long qualificationExamId, String qualificationExamCode,
+    public record ExamResponse(Long id, Long qualificationExamId, QualificationExamCode qualificationExamCode,
                                String qualificationExamName, String name, int year,
                                ContentStatus status, long problemCount) {}
 

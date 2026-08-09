@@ -42,13 +42,12 @@ public class AdminContentService {
 
     @Transactional
     public QualificationExamResponse createQualificationExam(QualificationExamCreateRequest request) {
-        String code = normalizeCode(request.code());
-        if (qualificationExamRepository.existsByCode(code)) {
+        if (qualificationExamRepository.existsByCode(request.code())) {
             throw new ContentException(ExceptionMessage.QUALIFICATION_EXAM_CODE_EXISTS);
         }
         validateDistinctMappings(request.subjects());
         QualificationExam qualificationExam = qualificationExamRepository.save(
-                new QualificationExam(code, request.name().trim(), request.status()));
+                new QualificationExam(request.code(), request.status()));
         saveMappings(qualificationExam, request.subjects());
         return toQualificationResponse(qualificationExam);
     }
@@ -57,7 +56,7 @@ public class AdminContentService {
     public QualificationExamResponse updateQualificationExam(Long id, QualificationExamUpdateRequest request) {
         QualificationExam qualificationExam = findQualification(id);
         validateDistinctMappings(request.subjects());
-        qualificationExam.update(request.name().trim(), request.status());
+        qualificationExam.update(request.status());
         synchronizeMappings(qualificationExam, request.subjects());
         return toQualificationResponse(qualificationExam);
     }
@@ -350,14 +349,6 @@ public class AdminContentService {
     private String preview(List<Map<String, Object>> blocks) {
         String value = blocks == null ? "" : blocks.toString();
         return value.length() <= 160 ? value : value.substring(0, 160);
-    }
-
-    private String normalizeCode(String code) {
-        String normalized = code.trim().toUpperCase(Locale.ROOT);
-        if (!normalized.matches("[A-Z][A-Z0-9_]{0,63}")) {
-            throw new ContentException(ExceptionMessage.INVALID_DATA);
-        }
-        return normalized;
     }
 
     private List<Map<String, Object>> safeBlocks(List<Map<String, Object>> blocks) {

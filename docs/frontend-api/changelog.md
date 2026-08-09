@@ -8,3 +8,4 @@
 - V1 HTML 문제 모델을 삭제하고 JSON block 모델 하나만 유지했다.
 - 사용자 인증, Google 로그인, 북마크, 질문/답변, 학습 세션/로그, 말문제 API를 삭제했다.
 - Member는 향후 확장을 위해 남기되 현재는 loginId/passwordHash/role 기반 관리자 인증만 제공한다.
+- 자격시험 `code`를 `APPRAISER | CPA | CUSTOMS_BROKER` enum으로 제한하고, 표시 이름을 서버 enum에서 결정하도록 변경했다.

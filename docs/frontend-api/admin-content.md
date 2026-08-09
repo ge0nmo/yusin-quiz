@@ -11,8 +11,9 @@
 
 - `GET|POST /api/admin/qualification-exams`
 - `GET|PUT|DELETE /api/admin/qualification-exams/{id}`
-- 생성: `{code,name,status,subjects:[{subjectId,status,displayOrder}]}`
-- 수정: `{name,status,subjects:[...]}` (`code`는 불변)
+- `code`는 `APPRAISER | CPA | CUSTOMS_BROKER` enum이며, 표시 이름은 서버가 enum에서 결정한다.
+- 생성: `{code,status,subjects:[{subjectId,status,displayOrder}]}`
+- 수정: `{status,subjects:[...]}` (`code`와 표시 이름은 불변)
 
 ## Global subjects
 

@@ -17,23 +17,23 @@ public class QualificationExam extends BaseEntity {
     private Long id;
 
     @Column(nullable = false, unique = true, updatable = false, length = 64)
-    private String code;
+    @Enumerated(EnumType.STRING)
+    private QualificationExamCode code;
 
-    @Column(nullable = false, length = 100)
+    @Column(nullable = false, updatable = false, length = 100)
     private String name;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private ContentStatus status;
 
-    public QualificationExam(String code, String name, ContentStatus status) {
+    public QualificationExam(QualificationExamCode code, ContentStatus status) {
         this.code = code;
-        this.name = name;
+        this.name = code.getDisplayName();
         this.status = status;
     }
 
-    public void update(String name, ContentStatus status) {
-        this.name = name;
+    public void update(ContentStatus status) {
         this.status = status;
     }
 }

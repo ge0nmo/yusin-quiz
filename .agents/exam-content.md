@@ -2,7 +2,7 @@
 
 ## Model
 
-- `QualificationExam`: immutable unique code, editable name and status.
+- `QualificationExam`: `APPRAISER | CPA | CUSTOMS_BROKER` enum code, enum-derived immutable display name, and editable status.
 - `Subject`: global unique name and status.
 - `QualificationExamSubject`: qualification/subject mapping with status and display order.
 - `Exam`: belongs to QualificationExam and stores name, year and status.
