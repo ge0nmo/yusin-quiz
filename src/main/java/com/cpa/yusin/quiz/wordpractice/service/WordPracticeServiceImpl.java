@@ -15,6 +15,7 @@ import com.cpa.yusin.quiz.choice.controller.port.ChoiceService;
 import com.cpa.yusin.quiz.choice.domain.Choice;
 import com.cpa.yusin.quiz.subject.domain.Subject;
 import com.cpa.yusin.quiz.subject.service.port.SubjectRepository;
+import com.cpa.yusin.quiz.study.event.StudySolvedEvent;
 import com.cpa.yusin.quiz.wordpractice.controller.dto.response.WordPracticeProgressStatus;
 import com.cpa.yusin.quiz.wordpractice.controller.dto.response.WordPracticeSubjectResponse;
 import com.cpa.yusin.quiz.wordpractice.controller.dto.response.WordPracticeCycleResponse;
@@ -33,6 +34,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.ApplicationEventPublisher;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -61,6 +63,7 @@ public class WordPracticeServiceImpl implements WordPracticeService {
     private final ChoiceService choiceService;
     private final ProblemV2ResponseAssembler problemV2ResponseAssembler;
     private final WordPracticeAnswerRepository answerRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
     /** 애플리케이션 생성 UUID는 파일명 UUID와 분리된 systemUuidHolder를 사용한다. */
     public WordPracticeServiceImpl(
@@ -74,7 +77,8 @@ public class WordPracticeServiceImpl implements WordPracticeService {
             @Qualifier("systemUuidHolder") UuidHolder uuidHolder,
             ChoiceService choiceService,
             ProblemV2ResponseAssembler problemV2ResponseAssembler,
-            WordPracticeAnswerRepository answerRepository
+            WordPracticeAnswerRepository answerRepository,
+            ApplicationEventPublisher eventPublisher
     ) {
         this.subjectRepository = subjectRepository;
         this.problemRepository = problemRepository;
@@ -87,6 +91,7 @@ public class WordPracticeServiceImpl implements WordPracticeService {
         this.choiceService = choiceService;
         this.problemV2ResponseAssembler = problemV2ResponseAssembler;
         this.answerRepository = answerRepository;
+        this.eventPublisher = eventPublisher;
     }
 
     /**
@@ -319,7 +324,19 @@ public class WordPracticeServiceImpl implements WordPracticeService {
         WordPracticeAnswer savedAnswer = answerRepository.save(answer);
         cycle.markAnswered(choice.getIsAnswer());
         cycle.completeIfFinished(clockHolder.getCurrentDateTime());
+        publishSolvedEventForMember(memberId);
         return toAnswerResponse(savedAnswer, cycle);
+    }
+
+    /**
+     * 회원의 최초 말문제 답안만 기존 학습 로그 이벤트 경로에 연결한다.
+     * 동일 답안 재전송은 위의 기존 답안 조기 반환에서 끝나고, 비회원은 memberId가 없어 이벤트를 발행하지 않는다.
+     */
+    private void publishSolvedEventForMember(Long memberId) {
+        if (memberId == null) {
+            return;
+        }
+        eventPublisher.publishEvent(new StudySolvedEvent(memberId, 1));
     }
 
     /** 답안 저장과 동일 답안 재시도가 같은 진행률 응답 형태를 공유하도록 변환한다. */

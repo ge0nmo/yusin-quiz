@@ -7,8 +7,10 @@ import com.cpa.yusin.quiz.problem.domain.Problem;
 import com.cpa.yusin.quiz.problem.service.ProblemV2ResponseAssembler;
 import com.cpa.yusin.quiz.problem.controller.dto.response.ProblemV2Response;
 import com.cpa.yusin.quiz.choice.controller.port.ChoiceService;
+import com.cpa.yusin.quiz.choice.domain.Choice;
 import com.cpa.yusin.quiz.common.service.ClockHolder;
 import com.cpa.yusin.quiz.common.service.UuidHolder;
+import com.cpa.yusin.quiz.study.event.StudySolvedEvent;
 import com.cpa.yusin.quiz.subject.domain.Subject;
 import com.cpa.yusin.quiz.subject.domain.SubjectStatus;
 import com.cpa.yusin.quiz.subject.service.port.SubjectRepository;
@@ -24,6 +26,7 @@ import com.cpa.yusin.quiz.wordpractice.service.port.WordPracticeParticipantRepos
 import com.cpa.yusin.quiz.wordpractice.service.port.WordPracticeAnswerRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.context.ApplicationEventPublisher;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -52,9 +55,11 @@ class WordPracticeServiceImplTest {
     private final ChoiceService choiceService = mock(ChoiceService.class);
     private final ProblemV2ResponseAssembler problemV2ResponseAssembler = mock(ProblemV2ResponseAssembler.class);
     private final WordPracticeAnswerRepository answerRepository = mock(WordPracticeAnswerRepository.class);
+    private final ApplicationEventPublisher eventPublisher = mock(ApplicationEventPublisher.class);
     private final WordPracticeServiceImpl service = new WordPracticeServiceImpl(
             subjectRepository, problemRepository, participantResolver, cycleRepository,
-            participantRepository, orderStrategy, clockHolder, uuidHolder, choiceService, problemV2ResponseAssembler, answerRepository);
+            participantRepository, orderStrategy, clockHolder, uuidHolder, choiceService,
+            problemV2ResponseAssembler, answerRepository, eventPublisher);
 
     private final Subject subject = Subject.builder().id(1L).name("감정평가사").status(SubjectStatus.PUBLISHED).build();
 
@@ -191,6 +196,70 @@ class WordPracticeServiceImplTest {
         assertThat(response.returnedCount()).isEqualTo(15);
         verify(problemRepository, times(1)).findPublishedWordProblemsByIds(any());
         verify(choiceService, times(1)).findAllByProblemIds(problems.stream().map(Problem::getId).toList());
+    }
+
+    /** 회원의 새 답안은 저장 성공 이후 오늘의 학습 문제 수에 한 건만 반영한다. */
+    @Test
+    void firstMemberAnswerPublishesSolvedEvent() {
+        WordPracticeParticipant member = participant(60L, WordPracticeParticipantType.MEMBER);
+        WordPracticeCycle activeCycle = cycle(member, 2, 0, WordPracticeCycleStatus.IN_PROGRESS);
+        Problem problem = Problem.builder().id(1L).number(1).build();
+        Choice choice = Choice.builder().id(11L).number(1).content("정답")
+                .isAnswer(true).problem(problem).build();
+        LocalDateTime now = LocalDateTime.of(2026, 8, 9, 13, 0);
+
+        when(participantResolver.resolve(600L, null)).thenReturn(Optional.of(member));
+        when(cycleRepository.findByIdWithLock(77L)).thenReturn(Optional.of(activeCycle));
+        when(answerRepository.findByCycleIdAndProblemId(77L, 1L)).thenReturn(Optional.empty());
+        when(problemRepository.findPublishedWordProblemsByIds(List.of(1L))).thenReturn(List.of(problem));
+        when(choiceService.findById(11L)).thenReturn(choice);
+        when(clockHolder.getCurrentDateTime()).thenReturn(now);
+        when(answerRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+
+        service.submitAnswer(600L, null, 77L, 1L, 11L);
+
+        verify(eventPublisher).publishEvent(new StudySolvedEvent(600L, 1));
+    }
+
+    /** 이미 저장된 동일 답안 재전송은 멱등 응답만 반환하고 학습 통계를 다시 올리지 않는다. */
+    @Test
+    void identicalMemberAnswerRetryDoesNotPublishSolvedEvent() {
+        WordPracticeParticipant member = participant(70L, WordPracticeParticipantType.MEMBER);
+        WordPracticeCycle completedCycle = cycle(member, 1, 1, WordPracticeCycleStatus.COMPLETED);
+        LocalDateTime submittedAt = LocalDateTime.of(2026, 8, 9, 13, 10);
+        var existingAnswer = com.cpa.yusin.quiz.wordpractice.domain.WordPracticeAnswer.create(
+                completedCycle, 1L, 11L, 1, true, submittedAt);
+
+        when(participantResolver.resolve(700L, null)).thenReturn(Optional.of(member));
+        when(cycleRepository.findByIdWithLock(77L)).thenReturn(Optional.of(completedCycle));
+        when(answerRepository.findByCycleIdAndProblemId(77L, 1L)).thenReturn(Optional.of(existingAnswer));
+
+        service.submitAnswer(700L, null, 77L, 1L, 11L);
+
+        verify(eventPublisher, never()).publishEvent(any());
+    }
+
+    /** 비회원의 새 답안은 회차 진행률에는 반영하지만 회원용 학습 통계 이벤트는 만들지 않는다. */
+    @Test
+    void firstGuestAnswerDoesNotPublishSolvedEvent() {
+        WordPracticeParticipant guest = participant(80L, WordPracticeParticipantType.GUEST);
+        WordPracticeCycle activeCycle = cycle(guest, 1, 0, WordPracticeCycleStatus.IN_PROGRESS);
+        Problem problem = Problem.builder().id(1L).number(1).build();
+        Choice choice = Choice.builder().id(11L).number(1).content("정답")
+                .isAnswer(true).problem(problem).build();
+        LocalDateTime now = LocalDateTime.of(2026, 8, 9, 13, 20);
+
+        when(participantResolver.resolve(null, "guest-token")).thenReturn(Optional.of(guest));
+        when(cycleRepository.findByIdWithLock(77L)).thenReturn(Optional.of(activeCycle));
+        when(answerRepository.findByCycleIdAndProblemId(77L, 1L)).thenReturn(Optional.empty());
+        when(problemRepository.findPublishedWordProblemsByIds(List.of(1L))).thenReturn(List.of(problem));
+        when(choiceService.findById(11L)).thenReturn(choice);
+        when(clockHolder.getCurrentDateTime()).thenReturn(now);
+        when(answerRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+
+        service.submitAnswer(null, "guest-token", 77L, 1L, 11L);
+
+        verify(eventPublisher, never()).publishEvent(any());
     }
 
     private WordPracticeParticipant participant(Long id, WordPracticeParticipantType type) {
