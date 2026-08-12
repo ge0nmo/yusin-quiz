@@ -20,10 +20,13 @@ class JsonBlockContentProcessorTest {
         ReflectionTestUtils.setField(processor, "s3Prefix", "post");
 
         List<Map<String, Object>> processed = processor.withFreshImageUrls(List.of(Map.of(
-                "type", "list", "children", List.of(Map.of(
-                        "type", "image", "src", "https://bucket.s3.amazonaws.com/post/image%20one.png?old=true")))));
+                "type", "statementGroup", "items", List.of(Map.of(
+                        "label", "(가)", "content", List.of(Map.of(
+                                "type", "image",
+                                "src", "https://bucket.s3.amazonaws.com/post/image%20one.png?old=true")))))));
 
-        Map<?, ?> image = (Map<?, ?>) ((List<?>) processed.getFirst().get("children")).getFirst();
+        Map<?, ?> item = (Map<?, ?>) ((List<?>) processed.getFirst().get("items")).getFirst();
+        Map<?, ?> image = (Map<?, ?>) ((List<?>) item.get("content")).getFirst();
         assertThat(image.get("src")).isEqualTo("https://signed/new");
         verify(fileService).generatePresignedUrl("post/image one.png");
     }

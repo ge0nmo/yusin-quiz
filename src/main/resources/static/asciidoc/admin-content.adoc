@@ -31,6 +31,11 @@ include::{snippets}/admin-next-problem-number/http-response.adoc[]
 
 == Create JSON-block problem
 
+Problem, problem-explanation, and choice-explanation block arrays may contain a recursive
+`statementGroup` block. Its `items` array must contain at least one item. Each item has a
+trimmed, non-blank `label` of at most 20 characters and a `content` block array containing
+meaningful text or an image. Invalid or partial groups return `400 INVALID_STATEMENT_GROUP`.
+
 include::{snippets}/admin-create-problem/http-request.adoc[]
 include::{snippets}/admin-create-problem/http-response.adoc[]
 

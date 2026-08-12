@@ -11,6 +11,9 @@ include::{snippets}/public-subjects/http-response.adoc[]
 
 == Published problems without answers
 
+Problem `content` is a recursive JSON block array and may contain
+`{type: "statementGroup", items: [{label, content}]}` blocks.
+
 include::{snippets}/public-problems/http-request.adoc[]
 include::{snippets}/public-problems/http-response.adoc[]
 

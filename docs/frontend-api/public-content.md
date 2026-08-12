@@ -14,8 +14,10 @@
 
 최신 시험 연도 우선, 같은 연도는 원본 문제 번호 오름차순이다. `content`는 JSON block 배열이다. 정답 플래그와 모든 해설은 포함하지 않는다.
 
+문제 본문에는 일반 블록과 함께 `{type:"statementGroup",items:[{label,content}]}`가 중첩될 수 있다. `label`은 `(가)`, `ㄱ.`, `A)`처럼 그대로 표시할 문자열이고, 각 `content`도 JSON block 배열이다.
+
 ```json
-{"data":[{"id":10,"number":41,"content":[],"exam":{"id":3,"name":"2025년 1차","year":2025},"choices":[{"id":101,"number":1,"content":"보기"}]}]}
+{"data":[{"id":10,"number":41,"content":[{"type":"statementGroup","items":[{"label":"(가)","content":[{"type":"text","spans":[{"text":"보고기간말 이전에"}]}]}]}],"exam":{"id":3,"name":"2025년 1차","year":2025},"choices":[{"id":101,"number":1,"content":"보기"}]}]}
 ```
 
 ## POST /api/v1/qualification-exams/{code}/problems/{problemId}/check

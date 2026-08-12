@@ -9,6 +9,7 @@ import com.cpa.yusin.quiz.global.exception.ExceptionMessage;
 import com.cpa.yusin.quiz.problem.domain.Problem;
 import com.cpa.yusin.quiz.problem.infrastructure.ProblemRepository;
 import com.cpa.yusin.quiz.problem.service.JsonBlockContentProcessor;
+import com.cpa.yusin.quiz.problem.service.JsonBlockContentValidator;
 import com.cpa.yusin.quiz.qualification.domain.QualificationExam;
 import com.cpa.yusin.quiz.qualification.domain.QualificationExamSubject;
 import com.cpa.yusin.quiz.qualification.infrastructure.QualificationExamRepository;
@@ -31,6 +32,7 @@ public class AdminContentService {
     private final ExamRepository examRepository;
     private final ProblemRepository problemRepository;
     private final JsonBlockContentProcessor blockContentProcessor;
+    private final JsonBlockContentValidator blockContentValidator;
 
     public List<QualificationExamResponse> getQualificationExams() {
         return qualificationExamRepository.findAllByOrderByNameAsc().stream().map(this::toQualificationResponse).toList();
@@ -167,6 +169,7 @@ public class AdminContentService {
     @Transactional
     public ProblemDetailResponse createProblem(ProblemRequest request) {
         validateChoices(request.choices());
+        validateRichContent(request);
         Exam exam = findExam(request.examId());
         QualificationExamSubject mapping = findMapping(exam, request.subjectId());
         validateProblemNumber(null, exam, mapping, request.number());
@@ -179,6 +182,7 @@ public class AdminContentService {
     @Transactional
     public ProblemDetailResponse updateProblem(Long id, ProblemRequest request) {
         validateChoices(request.choices());
+        validateRichContent(request);
         Problem problem = findProblem(id);
         Exam exam = findExam(request.examId());
         QualificationExamSubject mapping = findMapping(exam, request.subjectId());
@@ -249,6 +253,12 @@ public class AdminContentService {
                 || !choices.stream().map(ChoiceRequest::number).sorted().toList().equals(List.of(1, 2, 3, 4, 5))) {
             throw new ContentException(ExceptionMessage.INVALID_PROBLEM_CHOICES);
         }
+    }
+
+    private void validateRichContent(ProblemRequest request) {
+        blockContentValidator.validate(request.content());
+        blockContentValidator.validate(request.explanation());
+        request.choices().forEach(choice -> blockContentValidator.validate(choice.explanation()));
     }
 
     private void validateProblemNumber(Long problemId, Exam exam, QualificationExamSubject mapping, int number) {

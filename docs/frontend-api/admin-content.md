@@ -36,6 +36,32 @@
 - `POST /api/admin/problems`
 - 문제는 해당 Exam의 QualificationExam에 연결된 Subject만 선택할 수 있다.
 - `content`, 문제 해설, 보기별 해설은 JSON block 배열이다.
+- JSON block 배열의 어느 위치에서든 다음 `statementGroup` 블록을 중첩해 사용할 수 있다.
+
+```json
+{
+  "type": "statementGroup",
+  "items": [
+    {
+      "label": "(가)",
+      "content": [
+        {"type": "text", "spans": [{"text": "보고기간말 이전에"}]}
+      ]
+    },
+    {
+      "label": "ㄴ.",
+      "content": [
+        {"type": "image", "src": "https://example.com/condition.png"}
+      ]
+    }
+  ]
+}
+```
+
+- `items`는 하나 이상이어야 하며 최대 개수 제한은 없다.
+- `label`은 화면에 표시할 문자열 전체다. 앞뒤 공백을 제외하고 필수이며 최대 20자다.
+- 각 `content`는 텍스트(`text` 또는 `spans[].text`)나 이미지(`src`)가 하나 이상 있는 JSON block 배열이어야 한다. 목록과 다른 지문 묶음 안에 중첩된 텍스트·이미지도 유효하다.
+- 관리자는 완전히 빈 행과 빈 지문 묶음을 요청에서 제외해야 한다. 서버가 빈 묶음, 빈 항목 또는 라벨/내용 중 하나만 있는 항목을 받으면 `400 INVALID_STATEMENT_GROUP`으로 거부한다.
 - 보기는 plain text이며 1~5번 정확히 다섯 개, 정답은 정확히 하나다.
 - 문제/보기 해설은 빈 배열이어도 공개할 수 있다.
 

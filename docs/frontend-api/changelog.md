@@ -1,5 +1,12 @@
 # Frontend API Changelog
 
+## 2026-08-13 — 지문 묶음 블록
+
+- 문제 JSON block 배열에 `{type:"statementGroup",items:[{label,content}]}` 구조를 추가했다.
+- 라벨은 앞뒤 공백 제외 필수·최대 20자이며, 각 항목 내용에는 의미 있는 텍스트 또는 이미지가 필요하다.
+- 빈 묶음이나 부분 입력 항목은 관리자 생성·수정 API에서 `400 INVALID_STATEMENT_GROUP`으로 거부한다.
+- 기존 API 경로, 최상위 요청·응답 구조와 JSON 저장 방식은 변경하지 않았다.
+
 ## 2026-08-09 — clean rebuild
 
 - 자격시험, 전역 과목, 자격시험-과목 연결, 시험 회차, 문제, 보기 계층으로 전면 재구축했다.

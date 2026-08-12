@@ -8,6 +8,7 @@ import com.cpa.yusin.quiz.exam.infrastructure.ExamRepository;
 import com.cpa.yusin.quiz.global.exception.ContentException;
 import com.cpa.yusin.quiz.problem.infrastructure.ProblemRepository;
 import com.cpa.yusin.quiz.problem.service.JsonBlockContentProcessor;
+import com.cpa.yusin.quiz.problem.service.JsonBlockContentValidator;
 import com.cpa.yusin.quiz.qualification.infrastructure.QualificationExamRepository;
 import com.cpa.yusin.quiz.qualification.infrastructure.QualificationExamSubjectRepository;
 import com.cpa.yusin.quiz.subject.infrastructure.SubjectRepository;
@@ -23,7 +24,7 @@ class AdminContentServiceTest {
     private final AdminContentService service = new AdminContentService(
             mock(QualificationExamRepository.class), mock(QualificationExamSubjectRepository.class),
             mock(SubjectRepository.class), mock(ExamRepository.class), mock(ProblemRepository.class),
-            mock(JsonBlockContentProcessor.class));
+            mock(JsonBlockContentProcessor.class), mock(JsonBlockContentValidator.class));
 
     @Test
     void problemMustHaveExactlyFiveNumberedChoicesAndOneAnswer() {

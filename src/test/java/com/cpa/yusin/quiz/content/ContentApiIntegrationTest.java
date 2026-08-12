@@ -100,6 +100,10 @@ class ContentApiIntegrationTest {
 
     @Test
     void publicCatalogDoesNotLeakAnswersOrExplanationsAndUsesBackendOrder() throws Exception {
+        newerProblem.update(newerProblem.getExam(), newerProblem.getSubjectMapping(), newerProblem.getNumber(),
+                newerProblem.getStatus(), statementGroupContent(), newerProblem.getExplanation());
+        problemRepository.saveAndFlush(newerProblem);
+
         mockMvc.perform(get("/api/v1/qualification-exams/{code}/subjects", "APPRAISER"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data", hasSize(1)))
@@ -113,6 +117,10 @@ class ContentApiIntegrationTest {
                 .andExpect(jsonPath("$.data", hasSize(2)))
                 .andExpect(jsonPath("$.data[0].id").value(newerProblem.getId()))
                 .andExpect(jsonPath("$.data[1].id").value(olderProblem.getId()))
+                .andExpect(jsonPath("$.data[0].content[0].type").value("statementGroup"))
+                .andExpect(jsonPath("$.data[0].content[0].items[0].label").value("(가)"))
+                .andExpect(jsonPath("$.data[0].content[0].items[0].content[0].spans[0].text")
+                        .value("보고기간말 이전에"))
                 .andExpect(jsonPath("$.data[0].choices", hasSize(5)))
                 .andExpect(jsonPath("$.data[0].choices[0].isAnswer").doesNotExist())
                 .andExpect(jsonPath("$.data[0].choices[0].explanation").doesNotExist())
@@ -249,7 +257,7 @@ class ContentApiIntegrationTest {
         problemRequest.put("subjectId", subjectId);
         problemRequest.put("number", 1);
         problemRequest.put("status", "PUBLISHED");
-        problemRequest.put("content", List.of(Map.of("type", "text", "text", "JSON 문제")));
+        problemRequest.put("content", statementGroupContent());
         problemRequest.put("explanation", List.of());
         problemRequest.put("choices", choices);
 
@@ -258,7 +266,10 @@ class ContentApiIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(problemRequest)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.data.content[0].text").value("JSON 문제"))
+                .andExpect(jsonPath("$.data.content[0].type").value("statementGroup"))
+                .andExpect(jsonPath("$.data.content[0].items[0].label").value("(가)"))
+                .andExpect(jsonPath("$.data.content[0].items[0].content[0].spans[0].text")
+                        .value("보고기간말 이전에"))
                 .andExpect(jsonPath("$.data.choices", hasSize(5)))
                 .andExpect(jsonPath("$.data.choices[2].isAnswer").value(true))
                 .andExpect(jsonPath("$.data.explanation", hasSize(0)))
@@ -275,6 +286,36 @@ class ContentApiIntegrationTest {
                         .content(objectMapper.writeValueAsString(Map.of(
                                 "code", "LAWYER", "status", "DRAFT", "subjects", List.of()))))
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void adminRejectsMalformedStatementGroupsOnCreateAndUpdate() throws Exception {
+        String token = loginAdmin();
+        Exam exam = newerProblem.getExam();
+        Subject subject = newerProblem.getSubjectMapping().getSubject();
+
+        Map<String, Object> createPayload = problemPayload(exam.getId(), subject.getId(), 57);
+        createPayload.put("content", List.of(Map.of("type", "statementGroup", "items", List.of())));
+        mockMvc.perform(post("/api/admin/problems").header("Authorization", bearer(token))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(createPayload)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("INVALID_STATEMENT_GROUP"));
+
+        Map<String, Object> updatePayload = problemPayload(
+                exam.getId(), subject.getId(), newerProblem.getNumber());
+        updatePayload.put("content", List.of(Map.of(
+                "type", "statementGroup",
+                "items", List.of(Map.of("label", "(가)", "content", List.of())))));
+        mockMvc.perform(put("/api/admin/problems/{id}", newerProblem.getId())
+                        .header("Authorization", bearer(token))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(updatePayload)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("INVALID_STATEMENT_GROUP"));
+
+        org.assertj.core.api.Assertions.assertThat(problemRepository.findById(newerProblem.getId()).orElseThrow()
+                .getContent().getFirst().get("text")).isEqualTo("새 문제");
     }
 
     @Test
@@ -433,6 +474,16 @@ class ContentApiIntegrationTest {
         payload.put("choices", List.of(adminChoice(1, false), adminChoice(2, true),
                 adminChoice(3, false), adminChoice(4, false), adminChoice(5, false)));
         return payload;
+    }
+
+    private List<Map<String, Object>> statementGroupContent() {
+        return List.of(Map.of(
+                "type", "statementGroup",
+                "items", List.of(
+                        Map.of("label", "(가)", "content", List.of(Map.of(
+                                "type", "text", "spans", List.of(Map.of("text", "보고기간말 이전에"))))),
+                        Map.of("label", "ㄴ.", "content", List.of(Map.of(
+                                "type", "text", "spans", List.of(Map.of("text", "유동부채로 분류한다"))))))));
     }
 
     private String bearer(String token) {
