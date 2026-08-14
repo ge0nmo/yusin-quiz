@@ -64,6 +64,17 @@ app:
   security:
     cors:
       allowed-origins: http://localhost:3000,http://127.0.0.1:3000,https://admin.finuminu.com,https://finuminu.com,https://www.finuminu.com
+  version-policy:
+    qualification-exams:
+      APPRAISER:
+        ANDROID:
+          latest-version: 2.0.0
+          minimum-version: 2.0.0
+          store-url: https://play.google.com/store/apps/details?id=com.yusin.quiz
+        IOS:
+          latest-version: 2.0.0
+          minimum-version: 0.0.0
+          store-url: ""
 
 management:
   endpoints:

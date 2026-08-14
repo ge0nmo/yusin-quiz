@@ -10,6 +10,7 @@ JSON success responses use `GlobalResponse<T>` and expose payloads under `data`.
 
 ## Public contract
 
+- `GET /api/v1/qualification-exams/{code}/app-version-policy?platform=android|ios`
 - `GET /api/v1/qualification-exams/{code}/subjects`
 - `GET /api/v1/qualification-exams/{code}/subjects/{subjectId}/problems`
 - `POST /api/v1/qualification-exams/{code}/problems/{problemId}/check`

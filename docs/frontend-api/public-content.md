@@ -2,6 +2,16 @@
 
 모든 API는 로그인 없이 호출하며 `{code}`가 가리키는 공개 자격시험 범위 안에서만 데이터를 반환한다.
 
+## GET /api/v1/qualification-exams/{code}/app-version-policy?platform=android|ios
+
+대상 앱과 플랫폼의 최신·최소 지원 버전, 스토어 URL을 반환한다. 강제 업데이트 여부는 설치 버전이 `minimumVersion`보다 낮은지 semantic version으로 비교해 결정한다. 정책은 서버 환경변수로 관리한다.
+
+```json
+{"data":{"latestVersion":"2.0.0","minimumVersion":"2.0.0","storeUrl":"https://play.google.com/store/apps/details?id=com.yusin.quiz"}}
+```
+
+미출시 플랫폼은 `minimumVersion`을 `0.0.0`으로 두고 빈 `storeUrl`을 반환해 강제 업데이트를 비활성화한다.
+
 ## GET /api/v1/qualification-exams/{code}/subjects
 
 연결 순서대로 공개 과목과 실제 공개 문제 수를 반환한다.

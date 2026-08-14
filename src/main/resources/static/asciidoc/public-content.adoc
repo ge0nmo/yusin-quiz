@@ -4,6 +4,11 @@
 :toc: left
 :source-highlighter: highlightjs
 
+== App version policy
+
+include::{snippets}/public-app-version-policy/http-request.adoc[]
+include::{snippets}/public-app-version-policy/http-response.adoc[]
+
 == Published subjects
 
 include::{snippets}/public-subjects/http-request.adoc[]

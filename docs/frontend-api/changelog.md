@@ -1,5 +1,11 @@
 # Frontend API Changelog
 
+## 2026-08-14 — 앱 버전 정책
+
+- `GET /api/v1/qualification-exams/{code}/app-version-policy?platform=android|ios`를 추가했다.
+- 최신 버전, 최소 지원 버전, 플랫폼별 스토어 URL은 서버 환경변수로 관리한다.
+- 미출시 iOS 기본 정책은 최소 버전 `0.0.0`으로 강제 업데이트를 비활성화한다.
+
 ## 2026-08-13 — 지문 묶음 블록
 
 - 문제 JSON block 배열에 `{type:"statementGroup",items:[{label,content}]}` 구조를 추가했다.
