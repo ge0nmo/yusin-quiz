@@ -27,15 +27,27 @@ class AdminContentServiceTest {
             mock(JsonBlockContentProcessor.class), mock(JsonBlockContentValidator.class));
 
     @Test
-    void problemMustHaveExactlyFiveNumberedChoicesAndOneAnswer() {
+    void problemMustHaveAtLeastOneAnswer() {
         ProblemRequest request = new ProblemRequest(1L, 1L, 1, ContentStatus.PUBLISHED,
                 List.of(Map.of("type", "text", "text", "문제")), List.of(), List.of(
-                choice(1, true), choice(2, true), choice(3, false), choice(4, false), choice(5, false)
+                choice(1, false), choice(2, false), choice(3, false), choice(4, false), choice(5, false)
         ));
 
         assertThatThrownBy(() -> service.createProblem(request))
                 .isInstanceOf(ContentException.class)
-                .hasMessageContaining("정답은 하나");
+                .hasMessageContaining("정답은 최소 하나 이상");
+    }
+
+    @Test
+    void problemChoicesMustBeSequentiallyNumbered() {
+        ProblemRequest request = new ProblemRequest(1L, 1L, 1, ContentStatus.PUBLISHED,
+                List.of(Map.of("type", "text", "text", "문제")), List.of(), List.of(
+                choice(1, true), choice(3, false), choice(4, false), choice(5, false)
+        ));
+
+        assertThatThrownBy(() -> service.createProblem(request))
+                .isInstanceOf(ContentException.class)
+                .hasMessageContaining("보기는 1번부터 연속");
     }
 
     private ChoiceRequest choice(int number, boolean answer) {

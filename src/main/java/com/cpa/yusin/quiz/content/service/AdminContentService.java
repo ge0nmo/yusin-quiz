@@ -247,10 +247,26 @@ public class AdminContentService {
         }
     }
 
+    /**
+     * 문제 보기(Choice) 유효성 검증.
+     * <p>
+     * - 보기 null 또는 비어있음 여부 확인<br>
+     * - 보기 번호가 1부터 N(보기 개수)까지 중간 빠짐없이 순차적으로 구성되어 있는지 확인<br>
+     * - 정답으로 표시된 보기가 최소 1개 이상 존재하는지 검증 (복수 정답 허용)
+     * </p>
+     */
     private void validateChoices(List<ChoiceRequest> choices) {
-        if (choices == null || choices.size() != 5
-                || choices.stream().filter(ChoiceRequest::isAnswer).count() != 1
-                || !choices.stream().map(ChoiceRequest::number).sorted().toList().equals(List.of(1, 2, 3, 4, 5))) {
+        if (choices == null || choices.isEmpty()) {
+            throw new ContentException(ExceptionMessage.INVALID_PROBLEM_CHOICES);
+        }
+        // 보기 개수(N)에 대응하는 1..N 번호 목록 생성
+        List<Integer> expectedNumbers = java.util.stream.IntStream.rangeClosed(1, choices.size()).boxed().toList();
+        // 요청받은 보기들의 번호 추출 및 오름차순 정렬
+        List<Integer> actualNumbers = choices.stream().map(ChoiceRequest::number).sorted().toList();
+
+        // 1..N 순차 구성이 아니거나 정답(isAnswer=true) 보기가 1개 미만인 경우 예외 발생
+        if (!actualNumbers.equals(expectedNumbers)
+                || choices.stream().filter(ChoiceRequest::isAnswer).count() < 1) {
             throw new ContentException(ExceptionMessage.INVALID_PROBLEM_CHOICES);
         }
     }

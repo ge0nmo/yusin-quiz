@@ -15,7 +15,11 @@ public final class PublicContentDto {
     public record CheckResponse(boolean correct) {}
     public record SolutionsRequest(List<Long> problemIds) {}
     public record ChoiceSolutionResponse(Long choiceId, List<Map<String, Object>> explanation) {}
-    public record SolutionResponse(Long problemId, Long correctChoiceId,
+    /**
+     * 문제 해설 응답 DTO
+     * @param correctChoiceIds 해당 문제의 정답 보기 ID 리스트 (복수 정답 대응)
+     */
+    public record SolutionResponse(Long problemId, List<Long> correctChoiceIds,
                                    List<Map<String, Object>> explanation,
                                    List<ChoiceSolutionResponse> choices) {}
 }

@@ -19,7 +19,7 @@ public enum ExceptionMessage {
     PROBLEM_NOT_FOUND("문제를 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
     PROBLEM_NUMBER_EXISTS("같은 시험 회차와 과목에 동일한 문제 번호가 이미 존재합니다.", HttpStatus.CONFLICT),
     CHOICE_NOT_FOUND("보기를 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
-    INVALID_PROBLEM_CHOICES("보기는 1번부터 5번까지 정확히 다섯 개이며 정답은 하나여야 합니다.", HttpStatus.BAD_REQUEST),
+    INVALID_PROBLEM_CHOICES("보기는 1번부터 연속이어야 하며 정답은 최소 하나 이상이어야 합니다.", HttpStatus.BAD_REQUEST),
     INVALID_STATEMENT_GROUP("지문 묶음의 라벨과 내용을 확인해 주세요.", HttpStatus.BAD_REQUEST),
     INVALID_SUBJECT_MAPPING("문제 과목은 시험 자격시험에 연결된 과목이어야 합니다.", HttpStatus.BAD_REQUEST),
     CONTENT_IN_USE("사용 중인 콘텐츠는 삭제할 수 없습니다.", HttpStatus.CONFLICT),

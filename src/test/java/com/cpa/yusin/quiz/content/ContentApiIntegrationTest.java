@@ -136,7 +136,7 @@ class ContentApiIntegrationTest {
                         .content(objectMapper.writeValueAsString(Map.of("selectedChoiceId", correctChoice.getId()))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.correct").value(true))
-                .andExpect(jsonPath("$.data.correctChoiceId").doesNotExist())
+                .andExpect(jsonPath("$.data.correctChoiceIds").doesNotExist())
                 .andDo(document("public-check-answer", api("Public Content", "선택한 보기 정답 여부 확인")));
 
         mockMvc.perform(post("/api/v1/qualification-exams/{code}/solutions", "APPRAISER")
@@ -144,7 +144,7 @@ class ContentApiIntegrationTest {
                         .content(objectMapper.writeValueAsString(Map.of("problemIds", List.of(newerProblem.getId())))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data[0].problemId").value(newerProblem.getId()))
-                .andExpect(jsonPath("$.data[0].correctChoiceId").value(correctChoice.getId()))
+                .andExpect(jsonPath("$.data[0].correctChoiceIds[0]").value(correctChoice.getId()))
                 .andExpect(jsonPath("$.data[0].choices", hasSize(5)))
                 .andDo(document("public-solutions", api("Public Content", "완료 문제의 정답과 해설 조회")));
     }
@@ -274,6 +274,31 @@ class ContentApiIntegrationTest {
                 .andExpect(jsonPath("$.data.choices[2].isAnswer").value(true))
                 .andExpect(jsonPath("$.data.explanation", hasSize(0)))
                 .andDo(document("admin-create-problem", api("Admin Content", "JSON 블록 문제 생성")));
+    }
+
+    @Test
+    void adminCanCreateProblemWithMultipleAnswers() throws Exception {
+        String token = loginAdmin();
+        Exam exam = newerProblem.getExam();
+        Subject subject = newerProblem.getSubjectMapping().getSubject();
+
+        Map<String, Object> payload = problemPayload(exam.getId(), subject.getId(), 99);
+        payload.put("choices", List.of(
+                adminChoice(1, true),
+                adminChoice(2, true),
+                adminChoice(3, false),
+                adminChoice(4, false),
+                adminChoice(5, false)
+        ));
+
+        mockMvc.perform(post("/api/admin/problems")
+                        .header("Authorization", bearer(token))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(payload)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.data.choices[0].isAnswer").value(true))
+                .andExpect(jsonPath("$.data.choices[1].isAnswer").value(true))
+                .andExpect(jsonPath("$.data.choices[2].isAnswer").value(false));
     }
 
     @Test

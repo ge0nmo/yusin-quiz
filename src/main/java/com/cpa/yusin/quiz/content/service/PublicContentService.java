@@ -79,15 +79,30 @@ public class PublicContentService {
                 blockContentProcessor.withFreshImageUrls(problem.getContent()), exam, choices);
     }
 
+    /**
+     * 문제 도메인 엔티티를 public 해설 응답(SolutionResponse) DTO로 변환.
+     * <p>
+     * - 정답 지정 보기 ID 목록(correctChoiceIds) 추출 (단일 및 복수 정답 지원)<br>
+     * - 정답 정보 부재 시 예외 발생<br>
+     * - 보기 해설 및 문제 해설 내 블록 콘텐츠(JSON)의 이미지 URL을 최신 URL로 변환하여 반환
+     * </p>
+     */
     private SolutionResponse toSolutionResponse(Problem problem) {
-        Choice correct = problem.getChoices().stream().filter(Choice::isAnswer).findFirst()
-                .orElseThrow(() -> new ContentException(ExceptionMessage.INVALID_PROBLEM_CHOICES));
+        // 정답(isAnswer = true) 선택 모든 보기 ID 수집
+        List<Long> correctChoiceIds = problem.getChoices().stream()
+                .filter(Choice::isAnswer)
+                .map(Choice::getId)
+                .toList();
+        if (correctChoiceIds.isEmpty()) {
+            throw new ContentException(ExceptionMessage.INVALID_PROBLEM_CHOICES);
+        }
+        // 보기 번호 오름차순 정렬 및 보기별 해설 정보 구성
         List<ChoiceSolutionResponse> choiceSolutions = problem.getChoices().stream()
                 .sorted(Comparator.comparingInt(Choice::getNumber))
                 .map(choice -> new ChoiceSolutionResponse(choice.getId(),
                         blockContentProcessor.withFreshImageUrls(choice.getExplanation())))
                 .toList();
-        return new SolutionResponse(problem.getId(), correct.getId(),
+        return new SolutionResponse(problem.getId(), correctChoiceIds,
                 blockContentProcessor.withFreshImageUrls(problem.getExplanation()), choiceSolutions);
     }
 
