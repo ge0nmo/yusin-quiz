@@ -11,7 +11,8 @@ import java.util.Optional;
 public enum QualificationExamCode {
     APPRAISER("감정평가사"),
     CPA("회계사"),
-    CUSTOMS_BROKER("관세사");
+    CUSTOMS_BROKER("관세사"),
+    REAL_ESTATE_AGENT("공인중개사");
 
     private final String displayName;
 
