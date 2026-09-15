@@ -29,7 +29,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
         "app.version-policy.qualification-exams.APPRAISER.ANDROID.store-url=https://play.google.com/store/apps/details?id=com.yusin.quiz",
         "app.version-policy.qualification-exams.APPRAISER.IOS.latest-version=2.0.0",
         "app.version-policy.qualification-exams.APPRAISER.IOS.minimum-version=0.0.0",
-        "app.version-policy.qualification-exams.APPRAISER.IOS.store-url="
+        "app.version-policy.qualification-exams.APPRAISER.IOS.store-url=",
+        "app.version-policy.qualification-exams.REAL_ESTATE_AGENT.ANDROID.latest-version=1.0.0",
+        "app.version-policy.qualification-exams.REAL_ESTATE_AGENT.ANDROID.minimum-version=0.0.0",
+        "app.version-policy.qualification-exams.REAL_ESTATE_AGENT.ANDROID.store-url=",
+        "app.version-policy.qualification-exams.REAL_ESTATE_AGENT.IOS.latest-version=1.0.0",
+        "app.version-policy.qualification-exams.REAL_ESTATE_AGENT.IOS.minimum-version=0.0.0",
+        "app.version-policy.qualification-exams.REAL_ESTATE_AGENT.IOS.store-url="
 })
 @ActiveProfiles("test")
 @ExtendWith(RestDocumentationExtension.class)
@@ -63,6 +69,18 @@ class AppVersionPolicyApiIntegrationTest {
                         .param("platform", "ios"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.latestVersion").value("2.0.0"))
+                .andExpect(jsonPath("$.data.minimumVersion").value("0.0.0"))
+                .andExpect(jsonPath("$.data.storeUrl").value(""));
+    }
+
+    @Test
+    void returnsAnIndependentUnreleasedRealEstateAgentPolicy(
+            RestDocumentationContextProvider restDocumentation) throws Exception {
+        mockMvc(restDocumentation)
+                .perform(get("/api/v1/qualification-exams/{code}/app-version-policy", "REAL_ESTATE_AGENT")
+                        .param("platform", "android"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.latestVersion").value("1.0.0"))
                 .andExpect(jsonPath("$.data.minimumVersion").value("0.0.0"))
                 .andExpect(jsonPath("$.data.storeUrl").value(""));
     }

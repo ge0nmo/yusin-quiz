@@ -75,6 +75,15 @@ app:
           latest-version: 2.0.0
           minimum-version: 0.0.0
           store-url: ""
+      REAL_ESTATE_AGENT:
+        ANDROID:
+          latest-version: 1.0.0
+          minimum-version: 0.0.0
+          store-url: ""
+        IOS:
+          latest-version: 1.0.0
+          minimum-version: 0.0.0
+          store-url: ""
 
 management:
   endpoints:
