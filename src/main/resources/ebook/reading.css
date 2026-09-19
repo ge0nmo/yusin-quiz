@@ -1,0 +1,45 @@
+/* Reflowable EPUB: 페이지 수·양면 보기·글자 크기는 리더 앱이 결정합니다.
+   고정 높이/열/본문 색상을 강제하지 않아 독자의 테마와 확대 설정을 존중합니다. */
+body {
+    font-family: "Noto Serif CJK KR", "Batang", serif;
+    font-size: 1em;
+    font-weight: normal;
+    line-height: 1.85;
+    margin: 5%;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    widows: 2;
+    orphans: 2;
+}
+h1, h2, h3 { line-height: 1.4; page-break-after: avoid; break-after: avoid; }
+h1 { font-size: 1.8em; margin: 1em 0 1.6em; }
+h2 { font-size: 1.28em; margin: 0 0 .3em; }
+h3 { font-size: 1em; margin: 1.4em 0 .55em; }
+p { margin: .6em 0; }
+.chapter-title { border-bottom: 2px solid currentColor; padding-bottom: .7em; }
+.problem-group { margin: 0 0 2.6em; }
+.problem-group + .problem-group { border-top: 1px solid #939b94; padding-top: 1.8em; }
+.problem-heading { page-break-inside: avoid; break-inside: avoid; page-break-after: avoid; break-after: avoid; margin-bottom: 1.1em; }
+.source { font-size: .82em; font-family: sans-serif; line-height: 1.6; margin: .3em 0 0; }
+.original { white-space: pre-wrap; }
+.choices { padding-left: 1.65em; margin: 1.1em 0; }
+.choices li { padding-left: .3em; margin: .65em 0; }
+.choices p { margin: 0; }
+/* 정답은 짧은 활자 띠로, 해설은 별도 제목과 여백으로 구분합니다.
+   색상에만 의존하지 않으므로 리더가 야간 색상을 덮어써도 위계가 유지됩니다. */
+.answer-line { border-top: 1px solid #939b94; border-bottom: 1px solid #939b94; padding: .55em 0; font-size: .92em; }
+.inline-answer { margin-top: 1.3em; page-break-inside: avoid; break-inside: avoid; }
+.explanation { margin-top: 1.4em; }
+.choice-explanation-title { font-size: .92em; }
+.statement { margin: 1em 0; padding: .65em 1em; border: 1px solid #939b94; }
+.statement dt { font-weight: bold; margin-top: .5em; }
+.statement dd { margin: 0 0 .5em 1em; }
+blockquote { margin: 1em 1.2em; }
+.underline { text-decoration: underline; }
+.strike { text-decoration: line-through; }
+nav ol { list-style: none; padding: 0; }
+nav li { border-bottom: 1px solid #939b94; padding: .85em 0; }
+nav a { color: inherit; text-decoration: none; }
+a:focus { outline: 2px solid currentColor; }
+.cover { margin: 0; padding: 0; text-align: center; }
+.cover img { width: 100%; max-width: 32em; height: auto; }

@@ -1,6 +1,6 @@
 # Quiz Ebook: Agent Implementation Handoff
 
-Updated: 2026-09-16. Status: EPUB feature implemented; final verification evidence below. PDF is deliberately deferred by the user.
+Updated: 2026-09-19. Status: EPUB feature implemented; final verification evidence below. PDF is deliberately deferred by the user.
 
 ## Resume protocol
 
@@ -32,7 +32,7 @@ These are implementation choices, documented to the user rather than silently at
 - Fully published content only across qualification/exam/mapping/subject/problem.
 - Original number ascending within year. Ties: exam ID, subject display order, subject ID, problem ID. Source exam/subject labels distinguish repeated numbers without rewriting them.
 - `AFTER_QUESTION`, `YEAR_END`, and `BOOK_END` for each independent placement setting.
-- Editable derived title; no fabricated creator/publisher or graphic cover. A simple title page and navigation are generated.
+- Editable derived title; no fabricated creator/publisher. A generated typographic SVG cover and navigation are included.
 - Synchronous generation, one request per backend process at a time; no job queue, permanent files, download history, external storage, or automatic publishing.
 - At most 5,000 questions and 20,000,000 serialized source-content bytes per request; browser wait limit 120 seconds. Split scope on limit errors. Browser disconnect does not guarantee backend cancellation.
 - Text-only initial output. Unsupported blocks/images fail explicitly with source context, never silently disappear.
@@ -98,11 +98,11 @@ All paths below are relative to `quiz-admin`.
 
 The snapshot count and joined query execute in one repeatable-read transaction. Rendering receives only immutable records and runs after transaction completion. Every selected year/subject must have a matching eligible question in combined scope; reject stale/foreign selections rather than treating them as “all.” No pagination means no partial-page success case.
 
-Source identities, not human-readable question numbers, produce link anchors. Composition emits each question, answer, and nonempty explanation exactly once. Multiple correct options are not reduced to one. Blank explanations are omitted, while content without a required answer/body is an error.
+Source identities, not human-readable question numbers, produce stable element IDs. Composition emits each question, answer, and nonempty explanation exactly once. Multiple correct options are not reduced to one. Blank explanations are omitted, while content without a required answer/body is an error.
 
 Text is XML-escaped; illegal XML control characters fail instead of being deleted. Allowed semantic styles are preserved. Source heading tags are normalized to subordinate headings inside question content. A future format adapter must consume typed blocks rather than parse EPUB XHTML. Nested content is bounded at 24 levels.
 
-The EPUB uses a stored first `mimetype` entry, OCF container, OPF metadata/manifest/spine, navigation, separate year/solution XHTML documents, relative internal links, and local CSS. No scripts, remote images/fonts, live answer checks, or fixed page-size assumptions. Korean language metadata and source line breaks are retained; reader font-size controls remain usable.
+The EPUB uses a stored first `mimetype` entry, OCF container, OPF metadata/manifest/spine, navigation, separate year/solution XHTML documents, relative TOC links, a registered SVG cover image, and local CSS. No scripts, remote images/fonts, live answer checks, or fixed page-size assumptions. Korean language metadata and source line breaks are retained; reader font-size controls remain usable.
 
 `META-INF/generation.json` stores schema version, capture time, publication identifier, source question IDs, scope, and settings. It contains no credentials. The EPUB already contains rendered content; this JSON is provenance, not a raw snapshot backup/re-import system.
 
@@ -161,3 +161,17 @@ Do not add storefront/DRM integration, automatic editorial rewriting, AI-generat
 - [EPUBCheck 5.4.0 release](https://github.com/w3c/epubcheck/releases/tag/v5.4.0)
 - [Apple Books import guide](https://support.apple.com/en-ae/guide/books/ibkseed72068/mac)
 - [calibre viewer](https://manual.calibre-ebook.com/viewer.html)
+
+## Reading design revision — 2026-09-19
+
+The user requested a Kyobo-like, quiet ebook reading experience and removal of redundant buttons. This is a refinement of the EPUB artifact, not a new reader application. Never imply that EPUB can install a custom toolbar into Apple Books or reproduce Kyobo DRM/storefront behavior.
+
+- `src/main/resources/ebook/reading.css` owns book typography, grouping, rules, spacing, and reader-safe wrapping. Body foreground/background stay reader-controlled; no fixed page heights or CSS columns. Font sizes are relative. No fonts are bundled.
+- `EpubCover.java` generates an original cream/forest-green typographic SVG, registered as `cover-image` in OPF. Only supplied title, selected years, and question count are printed. No Kyobo logo or invented author/publisher. Cover typography is fixed artwork; the body remains reflowable.
+- Consecutive entries for one source question share a visual group. Inline answers do not repeat their number/source. Standalone answer/explanation sections retain source identity, including repeated question numbers.
+- All per-question forward/back/answer-check links are removed at the user's request. The EPUB TOC remains functional. Do not reintroduce `문제로 돌아가기` or decorative controls.
+- `rendition:spread=auto` permits reader-managed layout, not forced facing pages. On Mac, Books window width and column preferences determine one/two-page view; its own top toolbar controls type size, TOC, and search/page navigation. Pagination changes with reader settings.
+- Apple Books native visual testing was attempted but computer-use permissions were pending. Offline browser rendering supplements EPUBCheck; it is not a native reader certification.
+- Existing downloaded/imported books do not update automatically. Regenerate with the updated backend and open the new EPUB; use a distinct title while reviewing to distinguish copies.
+
+Revision verification: 67 backend tests passed (0 failures/errors), including all nine placement combinations validated by EPUBCheck and long/escaped cover-title cases. Offline light/dark/390px enlarged XHTML renders had no horizontal overflow; scoped independent review returned ship. No API or admin UI contract changed.

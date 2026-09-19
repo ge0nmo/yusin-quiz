@@ -20,27 +20,15 @@ import java.util.zip.*;
 @RequiredArgsConstructor
 public class EpubRenderer implements BookRenderer {
     private final ObjectMapper mapper;
-    private static final String CSS = """
-            body { font-family: serif; line-height: 1.75; margin: 5%; }
-            h1 { font-size: 1.55em; line-height: 1.4; margin: 1.5em 0 1em; }
-            h2 { font-size: 1.2em; line-height: 1.5; margin: 2em 0 .6em; }
-            h3 { font-size: 1.05em; margin: 1.4em 0 .5em; }
-            p { margin: .65em 0; }
-            .source { font-size: .9em; }
-            .original { white-space: pre-wrap; overflow-wrap: break-word; }
-            .choices { padding-left: 1.7em; }
-            .choices li { margin: .65em 0; }
-            .answer { margin: 1.2em 0; }
-            .solution { margin: 1.5em 0 2.5em; }
-            .return { font-size: .9em; }
-            .statement { margin: 1em 0; }
-            .statement dt { font-weight: bold; margin-top: .7em; }
-            .statement dd { margin-left: 1.2em; }
-            blockquote { margin: 1em 1.2em; }
-            .underline { text-decoration: underline; }
-            .strike { text-decoration: line-through; }
-            a { text-decoration: underline; }
-            """;
+    // 스타일은 별도 리소스로 관리하여 콘텐츠/ZIP 로직을 바꾸지 않고 편집 디자인을 조정합니다.
+    private static final String CSS = loadStyles();
+
+    private static String loadStyles() {
+        try (InputStream input = EpubRenderer.class.getResourceAsStream("/ebook/reading.css")) {
+            if (input == null) throw new IllegalStateException("Missing ebook/reading.css");
+            return new String(input.readAllBytes(), StandardCharsets.UTF_8);
+        } catch (IOException e) { throw new UncheckedIOException(e); }
+    }
 
     @Override
     public byte[] render(Composition composition, BookSettings settings) {
@@ -54,12 +42,26 @@ public class EpubRenderer implements BookRenderer {
                     </container>
                     """, false);
             put(zip, "EPUB/styles.css", CSS, false);
-            put(zip, "EPUB/title.xhtml", document(composition.book().title(), "<section><h1>" + xml(composition.book().title()) +
-                    "</h1><p>" + composition.book().questions().size() + "문항</p><p><a href=\"nav.xhtml\">목차</a></p></section>"), false);
-            Map<String, String> targets = targets(composition);
+            put(zip, "EPUB/cover.svg", EpubCover.render(composition.book()), false);
+            put(zip, "EPUB/title.xhtml", document(composition.book().title(),
+                    "<section class=\"cover\" epub:type=\"cover\"><img src=\"cover.svg\" alt=\"" +
+                    xml(composition.book().title()) + "\"/></section>"), false);
             for (Chapter chapter : composition.chapters()) {
-                StringBuilder body = new StringBuilder("<section><h1>" + xml(chapter.title()) + "</h1>");
-                chapter.entries().forEach(entry -> body.append(entry(entry, targets)));
+                StringBuilder body = new StringBuilder("<section class=\"chapter\"><h1 class=\"chapter-title\">" + xml(chapter.title()) + "</h1>");
+                // 같은 문제의 연속 항목만 한 묶음으로 만듭니다. 순서/배치 정책은 Composer가 소유합니다.
+                // 긴 문제 전체에 break-inside:avoid를 걸면 큰 글씨에서 빈 페이지가 생기므로 제목만 보호합니다.
+                Long previousId = null;
+
+                for (Entry entry : chapter.entries()) {
+                    boolean startsGroup = !Objects.equals(previousId, entry.question().id());
+                    if (startsGroup) {
+                        if (previousId != null) body.append("</section>");
+                        body.append("<section class=\"problem-group\">");
+                    }
+                    body.append(entry(entry, !startsGroup));
+                    previousId = entry.question().id();
+                }
+                if (previousId != null) body.append("</section>");
                 body.append("</section>");
                 put(zip, "EPUB/" + chapter.id() + ".xhtml", document(chapter.title(), body.toString()), false);
             }
@@ -79,43 +81,39 @@ public class EpubRenderer implements BookRenderer {
         } catch (IOException e) { throw new UncheckedIOException("EPUB 파일 생성에 실패했습니다.", e); }
     }
 
-    private Map<String, String> targets(Composition composition) {
-        Map<String, String> result = new HashMap<>();
-        composition.chapters().forEach(c -> c.entries().forEach(e -> {
-            if (result.put(e.anchor(), c.id() + ".xhtml#" + e.anchor()) != null) {
-                throw new IllegalStateException("Duplicate ebook anchor: " + e.anchor());
-            }
-        }));
-        return result;
-    }
-
-    private String entry(Entry entry, Map<String, String> targets) {
+    private String entry(Entry entry, boolean continuation) {
         Question q = entry.question();
-        StringBuilder html = new StringBuilder("<div id=\"" + entry.anchor() + "\" class=\"" +
-                (entry.kind() == Kind.QUESTION ? "question" : "solution") + "\">");
+        String css = switch (entry.kind()) {
+            case QUESTION -> "question";
+            case ANSWER -> continuation ? "answer inline-answer" : "answer";
+            case EXPLANATION -> "explanation";
+        };
+        StringBuilder html = new StringBuilder("<div id=\"" + entry.anchor() + "\" class=\"" + css + "\">");
+        // 인접한 정답/해설에는 번호와 출처를 반복하지 않습니다. 별도 수록 시에는 출처를 유지합니다.
+        if (!continuation) {
+            String label = switch (entry.kind()) {
+                case QUESTION -> "번";
+                case ANSWER -> "번 정답";
+                case EXPLANATION -> "번 해설";
+            };
+            html.append("<header class=\"problem-heading\"><h2>").append(q.number()).append(label)
+                    .append("</h2>").append(source(q)).append("</header>");
+        }
         switch (entry.kind()) {
             case QUESTION -> {
-                html.append("<h2>").append(q.number()).append("번</h2>").append(source(q)).append(blocks(q.content()));
-                html.append("<ol class=\"choices\">");
-                q.choices().forEach(c -> html.append("<li><p class=\"original\">").append(xml(c.text())).append("</p></li>"));
-                html.append("</ol><p class=\"return\">").append(link(targets, "answer-" + q.id(), "정답"));
-                if (q.hasExplanation()) html.append(" · ").append(link(targets, "explanation-" + q.id(), "해설"));
-                html.append("</p>");
+                html.append(blocks(q.content())).append("<ol class=\"choices\">");
+                q.choices().forEach(c -> html.append("<li value=\"").append(c.number())
+                        .append("\"><p class=\"original\">").append(xml(c.text())).append("</p></li>"));
+                html.append("</ol>");
             }
-            case ANSWER -> {
-                html.append("<h2>").append(q.number()).append("번 정답</h2>").append(source(q));
-                html.append("<p class=\"answer\"><strong>정답: ");
-                html.append(q.choices().stream().filter(Choice::correct).map(c -> c.number() + "번")
-                        .collect(java.util.stream.Collectors.joining(", "))).append("</strong></p>");
-                html.append(back(q, targets));
-            }
+            case ANSWER -> html.append("<p class=\"answer-line\"><strong>정답: ")
+                    .append(q.choices().stream().filter(Choice::correct).map(c -> c.number() + "번")
+                            .collect(java.util.stream.Collectors.joining(", "))).append("</strong></p>");
             case EXPLANATION -> {
-                html.append("<h2>").append(q.number()).append("번 해설</h2>").append(source(q));
-                html.append("<p>").append(link(targets, "answer-" + q.id(), "정답 확인")).append("</p>");
+                if (continuation) html.append("<h3>해설</h3>");
                 html.append(blocks(q.explanation()));
-                q.choices().stream().filter(c -> !c.explanation().isEmpty()).forEach(c -> html.append("<h3>")
+                q.choices().stream().filter(c -> !c.explanation().isEmpty()).forEach(c -> html.append("<h3 class=\"choice-explanation-title\">")
                         .append(c.number()).append("번 보기 해설</h3>").append(blocks(c.explanation())));
-                html.append(back(q, targets));
             }
         }
         return html.append("</div>").toString();
@@ -123,13 +121,6 @@ public class EpubRenderer implements BookRenderer {
 
     private String source(Question q) {
         return "<p class=\"source\">" + q.year() + "년 · " + xml(q.examName()) + " · " + xml(q.subjectName()) + "</p>";
-    }
-    private String back(Question q, Map<String, String> targets) {
-        return "<p class=\"return\">" + link(targets, "question-" + q.id(), "문제로 돌아가기") + "</p>";
-    }
-    private String link(Map<String, String> targets, String anchor, String label) {
-        String target = Objects.requireNonNull(targets.get(anchor), "Missing ebook link: " + anchor);
-        return "<a href=\"" + xml(target) + "\">" + xml(label) + "</a>";
     }
 
     private String blocks(List<Block> blocks) {
@@ -171,7 +162,7 @@ public class EpubRenderer implements BookRenderer {
     }
 
     private String navigation(Composition c) {
-        StringBuilder body = new StringBuilder("<nav epub:type=\"toc\" id=\"toc\"><h1>목차</h1><ol><li><a href=\"title.xhtml\">");
+        StringBuilder body = new StringBuilder("<nav epub:type=\"toc\" id=\"toc\"><h1 class=\"chapter-title\">목차</h1><ol><li><a href=\"title.xhtml\">");
         body.append(xml(c.book().title())).append("</a></li>");
         c.chapters().forEach(ch -> body.append("<li><a href=\"").append(ch.id()).append(".xhtml\">")
                 .append(xml(ch.title())).append("</a></li>"));
@@ -186,8 +177,9 @@ public class EpubRenderer implements BookRenderer {
         opf.append("<dc:identifier id=\"book-id\">").append(xml(c.book().identifier())).append("</dc:identifier>")
                 .append("<dc:title>").append(xml(c.book().title())).append("</dc:title><dc:language>ko</dc:language>")
                 .append("<meta property=\"dcterms:modified\">").append(c.book().capturedAt().truncatedTo(ChronoUnit.SECONDS))
-                .append("</meta><meta property=\"rendition:layout\">reflowable</meta></metadata><manifest>")
+                .append("</meta><meta property=\"rendition:layout\">reflowable</meta><meta property=\"rendition:spread\">auto</meta><meta name=\"cover\" content=\"cover-image\"/></metadata><manifest>")
                 .append("<item id=\"style\" href=\"styles.css\" media-type=\"text/css\"/>")
+                .append("<item id=\"cover-image\" href=\"cover.svg\" media-type=\"image/svg+xml\" properties=\"cover-image\"/>")
                 .append("<item id=\"title\" href=\"title.xhtml\" media-type=\"application/xhtml+xml\"/>")
                 .append("<item id=\"nav\" href=\"nav.xhtml\" media-type=\"application/xhtml+xml\" properties=\"nav\"/>");
         c.chapters().forEach(ch -> opf.append("<item id=\"").append(ch.id()).append("\" href=\"").append(ch.id())
@@ -202,7 +194,7 @@ public class EpubRenderer implements BookRenderer {
                 "<head><meta charset=\"utf-8\"/><title>" + xml(title) +
                 "</title><link rel=\"stylesheet\" type=\"text/css\" href=\"styles.css\"/></head><body>" + body + "</body></html>";
     }
-    private static String xml(String text) {
+    static String xml(String text) {
         return text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
                 .replace("\"", "&quot;").replace("'", "&apos;");
     }

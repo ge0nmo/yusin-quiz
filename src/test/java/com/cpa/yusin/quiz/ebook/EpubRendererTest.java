@@ -37,7 +37,42 @@ class EpubRendererTest {
                 assertThat(combined).contains("정답: 1번, 2번", "보기별 해설", "전체 해설");
                 assertThat(combined).doesNotContain("explanation-12\""); // 해설 없는 문제에는 빈 해설을 만들지 않습니다.
                 assertLinks(files);
+                assertThat(combined).doesNotContain("문제로 돌아가기", "정답 확인", "class=\"return\"");
+                assertThat(files.get("EPUB/package.opf")).contains("properties=\"cover-image\"", "rendition:spread");
+                assertThat(files.get("EPUB/cover.svg")).contains("전자책", "총 3문항");
+                // 본문에는 조작 버튼/링크가 없고, 독서 위치 이동은 목차와 리더가 담당합니다.
+                for (var file : files.entrySet()) {
+                    if (file.getKey().matches("EPUB/(year|solutions)-.*\\.xhtml")) {
+                        assertThat(file.getValue()).doesNotContain("<a ", "<button", "<script");
+                    }
+                }
+                if (answer == BookSettings.Placement.AFTER_QUESTION) {
+                    assertThat(files.get("EPUB/year-2025.xhtml")).doesNotContain("1번 정답</h2>");
+                }
             }
+        }
+    }
+
+    @Test
+    void longCoverTitlesRemainCompleteEscapedAndWithinArtwork() throws Exception {
+        var original = sampleBook();
+        for (String title : List.of("가".repeat(160), "W".repeat(160), "제목 <원문> & \n 줄바꿈")) {
+            var book = new BookModel(original.identifier(), title, original.qualificationCode(),
+                    original.capturedAt(), original.questions());
+            var settings = new BookSettings(BookSettings.YearOrder.NEWEST_FIRST,
+                    BookSettings.Placement.AFTER_QUESTION, BookSettings.Placement.YEAR_END);
+            var files = unzip(renderer.render(composer.compose(book, settings), settings));
+            var xml = DocumentBuilderFactory.newInstance().newDocumentBuilder()
+                    .parse(new ByteArrayInputStream(files.get("EPUB/cover.svg").getBytes(java.nio.charset.StandardCharsets.UTF_8)));
+            var labels = xml.getElementsByTagName("text");
+            StringBuilder reconstructed = new StringBuilder();
+            for (int i = 0; i < labels.getLength() - 2; i++) {
+                var label = (org.w3c.dom.Element) labels.item(i);
+                reconstructed.append(label.getTextContent());
+                assertThat(Integer.parseInt(label.getAttribute("font-size"))).isPositive();
+                assertThat(Integer.parseInt(label.getAttribute("y"))).isLessThan(1010);
+            }
+            assertThat(reconstructed.toString()).isEqualTo(title.replaceAll("\\s+", " ").strip());
         }
     }
 
