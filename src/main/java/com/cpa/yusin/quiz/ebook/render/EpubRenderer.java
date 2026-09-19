@@ -92,12 +92,14 @@ public class EpubRenderer implements BookRenderer {
         // 인접한 정답/해설에는 번호와 출처를 반복하지 않습니다. 별도 수록 시에는 출처를 유지합니다.
         if (!continuation) {
             String label = switch (entry.kind()) {
-                case QUESTION -> "번";
-                case ANSWER -> "번 정답";
-                case EXPLANATION -> "번 해설";
+                case QUESTION -> "";
+                case ANSWER -> "정답";
+                case EXPLANATION -> "해설";
             };
-            html.append("<header class=\"problem-heading\"><h2>").append(q.number()).append(label)
-                    .append("</h2>").append(source(q)).append("</header>");
+            html.append("<header class=\"problem-heading\"><h2><span class=\"problem-number\">")
+                    .append(q.number()).append("</span><span class=\"problem-unit\">번</span>");
+            if (!label.isEmpty()) html.append(" <span class=\"heading-kind\">").append(label).append("</span>");
+            html.append("</h2>").append(source(q)).append("</header>");
         }
         switch (entry.kind()) {
             case QUESTION -> {
@@ -110,7 +112,8 @@ public class EpubRenderer implements BookRenderer {
                     .append(q.choices().stream().filter(Choice::correct).map(c -> c.number() + "번")
                             .collect(java.util.stream.Collectors.joining(", "))).append("</strong></p>");
             case EXPLANATION -> {
-                if (continuation) html.append("<h3>해설</h3>");
+                // 생성한 해설 제목만 꾸밉니다. 원문에 저장된 소제목과 스타일이 섞이지 않게 합니다.
+                if (continuation) html.append("<h3 class=\"explanation-heading\"><span class=\"explanation-label\">해설</span></h3>");
                 html.append(blocks(q.explanation()));
                 q.choices().stream().filter(c -> !c.explanation().isEmpty()).forEach(c -> html.append("<h3 class=\"choice-explanation-title\">")
                         .append(c.number()).append("번 보기 해설</h3>").append(blocks(c.explanation())));
@@ -142,8 +145,9 @@ public class EpubRenderer implements BookRenderer {
                 }
                 case Statements s -> {
                     html.append("<dl class=\"statement\">");
-                    s.items().forEach(i -> html.append("<dt>").append(xml(i.label())).append("</dt><dd>")
-                            .append(blocks(i.content())).append("</dd>"));
+                    // 항목별로 묶어 기호와 첫 문장을 같은 줄에 두고, 여러 문단/중첩 목록은 그대로 보존합니다.
+                    s.items().forEach(i -> html.append("<div class=\"statement-item\"><dt>").append(xml(i.label())).append("</dt><dd>")
+                            .append(blocks(i.content())).append("</dd></div>"));
                     html.append("</dl>");
                 }
             }

@@ -1,75 +1,67 @@
 ---
 name: Quiz EPUB Reading
-description: Quiet Korean exam review in a reader-controlled, reflowable book.
+description: Warm ivory, light-only Korean exam review with reflowable typography.
 colors:
-  cover-paper: "#f4f1e8"
-  cover-green: "#254b3e"
-  cover-ink: "#203d33"
-  reading-rule: "#939b94"
+  paper: "#faf7f0"
+  explanation: "#f0eadc"
+  ink: "#2f302b"
+  heading: "#315c4e"
+  secondary: "#696253"
+  answer-paper: "#ede2c8"
+  answer-ink: "#76531f"
+  rule: "#d5ccba"
 typography:
   body:
-    fontFamily: '"Noto Serif CJK KR", "Batang", serif'
+    fontFamily: '"Noto Sans CJK KR", "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif'
     fontSize: "1em"
     fontWeight: 400
-    lineHeight: 1.85
+    lineHeight: 1.8
   chapter:
-    fontSize: "1.8em"
+    fontSize: "1.9em"
     lineHeight: 1.4
   question:
-    fontSize: "1.28em"
+    fontSize: "1.5em"
     lineHeight: 1.4
   source:
-    fontFamily: "sans-serif"
-    fontSize: ".82em"
+    fontSize: ".85em"
     lineHeight: 1.6
 ---
 
 # Design System: Quiz EPUB Reading
 
-## Overview
+## Scope and confirmed direction
 
-Mode: Read. This scoped system describes the generated EPUB, not the admin website or a standalone reader application. Its original, Kyobo-inspired treatment uses restrained typography, generous reading rhythm, and a cream-and-green cover. Kyobo branding and reader integration are not part of the artifact.
+Mode: Read. This system describes the generated EPUB, not the admin website or a separate reader app. The user chose an extensive readability revision: all devices in portrait and landscape, balanced density, Korean sans-serif body, light-only warm ivory paper, and a slightly deeper ivory explanation surface. Printed workbook references establish information hierarchy, not a fixed two-column page template. These choices supersede the earlier serif and reader-controlled default color design.
 
-Ground truth: `src/main/resources/ebook/reading.css`, `EpubRenderer.java`, and `EpubCover.java`. Operational details and verification records live in [IMPLEMENTATION.md](IMPLEMENTATION.md).
+Ground truth: `src/main/resources/ebook/reading.css`, `EpubRenderer.java`, and `EpubCover.java`. The existing cream-and-green cover remains. No invented author, publisher, editorial facts, or additional source text.
 
-## Colors
+## Color and typography
 
-The fixed SVG cover uses cream paper, green rules and a left spine strip, and dark green lettering. Body foreground and background are unset so the reading app can supply its theme. Thin reading rules use `reading-rule`; the chapter underline and link focus outline use `currentColor`. Hierarchy also relies on size, weight, spacing, and borders. Source span colors, when supplied, remain source content rather than book-wide theme tokens.
+Paper and ink are explicitly paired on the root/body, explanation panel, and answer strip. There is no authored dark theme or dark media query. External reader themes and font preferences may override the book; no `!important` rules attempt to lock them out.
 
-## Typography
+The body requests local Korean sans-serif fonts with no bundled fonts or network requests. Relative sizes keep reader enlargement available. Body and answers are `1em`; choice explanation labels are `1em` bold; inline explanation titles are `1.1em`; question numbers are `1.5em`; chapters are `1.9em`. The question unit and standalone entry kind are `.67em` of the question heading. Source metadata is `.85em`. Body line height is `1.8`, choices `1.75`, metadata `1.6`, and headings `1.4`.
 
-The body requests Korean serif fallbacks without bundling fonts. Relative sizes preserve reader enlargement: body `1em`, chapter `1.8em`, question `1.28em`, subsection `1em`, source `.82em`, and answer/choice-explanation labels `.92em`. Body line height is `1.85`; headings use `1.4`. Source labels use sans-serif with line height `1.6`. Original line breaks and semantic emphasis are retained; source headings become subordinate `h3` elements.
+Dark green identifies chapters, question numbers, and explanation headings. Warm brown identifies answers; muted warm ink identifies source metadata. Hierarchy also uses size, weight, spacing, lines, and explicit labels. Original wording, authored line breaks, and semantic/source span emphasis remain intact. Generated explanation headings have dedicated classes so source-authored `h3` blocks do not receive the section-label treatment.
 
-Cover lettering is sans-serif SVG artwork. Its title wraps and scales down for long supplied titles; it does not share the body's adjustable text size.
+## Reading measure and rhythm
 
-## Layout
+Body width is `90%`, capped at `38em`, horizontally centered with `1.6em` vertical margins. It specifies no fixed page height, device width, or CSS columns. The EPUB remains reflowable with `rendition:spread=auto`; reader software controls pagination and facing-page display.
 
-The book reflows with a `5%` body margin and word wrapping. It imposes no fixed page height or CSS columns. Metadata declares reflowable layout and `rendition:spread=auto`; the reading app decides pagination and whether to show facing pages.
+Paragraph margins are `.65em`; options use `.65em` vertical separation and hanging list markers. Question groups have `2.8em` bottom space; subsequent groups start after a thin rule with `2em` padding. Headings/source lines stay visually attached, with `1em` before the body. Answers follow questions after `1.4em`; explanations follow after `1.2em`.
 
-Consecutive entries with the same source question ID form one group. Groups have `2.6em` bottom spacing; later groups start after a thin rule and `1.8em` top padding. Heading/source blocks resist page splits and separation from following text, while long questions can flow across pages. Widow and orphan targets are two lines. Inline answers also resist splitting; reader support determines final pagination.
-
-## Elevation & Depth
-
-Flat editorial composition, with no shadows. Whitespace, type hierarchy, and horizontal rules separate content.
-
-## Shapes
-
-Straight rules and square statement frames. The cover is a `900 × 1260` SVG with a narrow green left strip. Its displayed image scales to available width, capped at `32em`, with automatic height.
+Avoid page breaks inside short source headings and answers and after headings. Permit breaks within long questions, options, statements, and explanation panels. Widow/orphan targets are two lines. Reader support determines actual page boundaries; an offline browser preview is not native EPUB pagination certification.
 
 ## Components
 
-- **Cover:** prints only the supplied title, selected years (or their range when lengthy), and total question count. No fabricated author or publisher.
-- **Question:** number and year/exam/subject source line precede the original text and ordered choices. Distinct source identities remain distinguishable even when numbers repeat.
-- **Answer:** a compact bold text strip between thin rules. Adjacent answers omit repeated number/source headings; standalone answers retain them.
-- **Explanation:** adjacent explanations start with a short heading; per-choice explanations have subordinate labels. Placement follows the independently chosen generation settings.
-- **Statements:** a bordered definition list preserves labels and their associated content.
-- **Contents:** the EPUB TOC links to the cover and logical chapters using quiet ruled rows and inherited text color. Links have a visible focus outline. All per-question forward, return, and answer-check links are removed.
-- **Reader controls:** macOS Books owns its toolbar, type-size controls, contents, search, and navigation. These are not EPUB widgets and no custom toolbar is generated.
+- **Question:** large green original number, quieter number unit, compact source line, original content, and numbered choices. Repeated numbers retain distinct source identities.
+- **Answer:** full-width, compact warm ochre strip with dark brown bold text and thin top/bottom rules. Multiple correct answers remain visible. No inline source repetition or answer-check controls.
+- **Explanation:** one warm ivory surface, `.9em` horizontal and `1em` vertical padding. Inline entries begin with an underlined green `해설` label. Standalone entries include their original number and source inside the same surface. Per-choice explanations remain inside it and use bold labels with light horizontal separators, never individual nested cards. Missing explanations are omitted.
+- **Statements:** square, thin-bordered frame with `.7em` horizontal padding. Each `dt`/`dd` pair retains the existing hanging-indent fix: `2.2em` label column, `2.4em` content indent, `.55em` between rows. First/last child margins reset so labels align with the first text line. Long entries may paginate.
+- **Contents:** quiet ruled rows, green links, and visible keyboard focus. Navigation belongs to the EPUB TOC and the reader; no per-question return/forward buttons.
+- **Cover:** existing typographic SVG containing the supplied title, selected years, and question count, scaled to available width up to `32em`.
 
-## Do's and Don'ts
+## Verification and use
 
-- Do preserve reader theme and font enlargement, source wording, grouping, and useful chapter navigation.
-- Do regenerate and reopen an EPUB when evaluating changes; previously imported copies do not update.
-- Don't force spreads, page counts, body colors, or fixed-height question containers.
-- Don't add decorative buttons, repeat inline source headings, or invent publication identity.
-- Don't equate offline preview with native reader certification: offline renders were reviewed and all nine placement combinations passed EPUBCheck; native Books visual review remains blocked by pending computer-use permissions.
+Review both `build/ebook-samples/sample-review.epub` (year-end explanations) and `sample-reading-inline.epub` (inline explanations). Their long Korean sample content is explicitly fictional, not actual exam or legal material.
+
+Use the updated backend to regenerate EPUBs. Existing downloaded/imported copies do not update. Prefer a distinct review title so readers can distinguish versions. Test light-theme rendering and reader text enlargement on the intended apps; external app appearance overrides cannot be prohibited by the EPUB.

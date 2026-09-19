@@ -111,7 +111,42 @@ class EpubRendererTest {
                 BookSettings.Placement.AFTER_QUESTION, BookSettings.Placement.YEAR_END);
         Path path = Path.of("build/ebook-samples/sample-review.epub");
         Files.createDirectories(path.getParent());
-        Files.write(path, renderer.render(composer.compose(sampleBook(), settings), settings));
+        var book = readingSampleBook();
+        Files.write(path, renderer.render(composer.compose(book, settings), settings));
+        // 같은 가상 원고로 분리형/연속형을 함께 검수합니다. 실제 기출이나 법률 해설이 아닙니다.
+        var inline = new BookSettings(BookSettings.YearOrder.NEWEST_FIRST,
+                BookSettings.Placement.AFTER_QUESTION, BookSettings.Placement.AFTER_QUESTION);
+        Files.write(path.resolveSibling("sample-reading-inline.epub"),
+                renderer.render(composer.compose(book, inline), inline));
+    }
+
+    private BookModel readingSampleBook() {
+        var content = normalizer.normalize(List.of(
+                Map.of("type", "text", "text", "다음은 전자책의 편집 원칙에 관한 설명이다. 제시된 원칙에 부합하는 보기를 모두 고르시오."),
+                Map.of("type", "statementGroup", "items", List.of(
+                        Map.of("label", "ㄱ.", "content", List.of(Map.of("type", "text", "text",
+                                "독자는 기기의 방향과 글자 크기를 바꿀 수 있다. 본문은 화면의 너비에 맞춰 자연스럽게 이어져야 한다."))),
+                        Map.of("label", "ㄴ.", "content", List.of(Map.of("type", "text", "text",
+                                "문제와 해설의 경계는 색상뿐 아니라 제목의 굵기와 영역 사이의 간격으로도 구분한다."))),
+                        Map.of("label", "ㄷ.", "content", List.of(Map.of("type", "text", "text",
+                                "보기의 문장이 여러 줄로 이어질 때는 둘째 줄부터 본문의 시작 위치에 맞춰 읽을 수 있도록 한다.")))))) , "독서 샘플");
+        var explanation = normalizer.normalize(List.of(
+                Map.of("type", "text", "text", "이 문항은 실제 시험 문제가 아닌 디자인 검수용 가상 문항입니다. 제시문은 화면 크기가 달라져도 정보의 순서와 관계를 쉽게 파악할 수 있도록 하는 편집 원칙을 설명합니다."),
+                Map.of("type", "text", "text", "문제 번호와 출처를 먼저 확인한 뒤 본문과 보기를 읽습니다. 정답은 짧은 강조 영역에, 해설은 조금 더 짙은 미색 영역에 표시하여 본문과 구별합니다. 긴 해설은 다음 화면으로 이어져도 같은 읽기 흐름을 유지합니다.")), "독서 샘플");
+        var choiceExplanation = normalizer.normalize(List.of(
+                Map.of("type", "text", "text", "글자 크기를 키우면 한 줄에 들어가는 글자 수와 페이지 수가 달라집니다. 문장을 고정된 칸에 가두지 않고, 보기 번호와 본문의 들여쓰기 관계를 유지하는 것이 이 가상 문항의 편집 원칙에 부합합니다.")), "독서 샘플");
+        var choices = List.of(
+                new Choice(1, 1, "본문의 글자 크기를 바꾸더라도 문장과 보기의 순서가 유지되도록 한다.", true, choiceExplanation),
+                new Choice(2, 2, "모든 화면에 같은 수의 문장을 표시하기 위해 글자 크기와 페이지 높이를 고정한다.", false, List.of()),
+                new Choice(3, 3, "문제와 해설의 성격을 제목, 배경의 차이, 여백으로 함께 구분한다.", true, choiceExplanation),
+                new Choice(4, 4, "출처를 본문보다 크게 표시하고 모든 문장을 굵게 처리하여 중요도를 동일하게 만든다.", false, List.of()),
+                new Choice(5, 5, "문장이 길어지면 보기 번호 아래로 본문을 이어 쓰고 들여쓰기는 생략한다.", false, List.of()));
+        return new BookModel("urn:uuid:abc45678-1234-4234-8234-123456789012", "독서 디자인 검수용 샘플 (가상 문항)", "APPRAISER",
+                Instant.parse("2026-09-19T00:00:00Z"), List.of(
+                new Question(71, 1, "편집 검수 · 가상 시험", 2025, 1, "독서 디자인", 1, 7, content, explanation, choices),
+                new Question(81, 1, "편집 검수 · 가상 시험", 2025, 1, "독서 디자인", 1, 8,
+                        normalizer.normalize(List.of(Map.of("type", "text", "text", "다음 보기 중 위의 편집 원칙에 부합하는 것을 모두 고르시오. 이 문항은 전체 해설 없이 보기별 해설만 있는 경우의 검수용입니다.")), "독서 샘플"),
+                        List.of(), choices)));
     }
 
     private BookModel sampleBook() {
