@@ -1,67 +1,62 @@
 ---
 name: Quiz EPUB Reading
-description: Warm ivory, light-only Korean exam review with reflowable typography.
+description: Restrained Korean exam reading with one subtle number accent and continuous text.
 colors:
-  paper: "#faf7f0"
-  explanation: "#f0eadc"
-  ink: "#2f302b"
-  heading: "#315c4e"
-  secondary: "#696253"
-  answer-paper: "#ede2c8"
-  answer-ink: "#76531f"
-  rule: "#d5ccba"
+  question-number: "#45584d"
+  secondary: "#666666"
+  rule: "#bdbdbd"
 typography:
   body:
     fontFamily: '"Noto Sans CJK KR", "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif'
     fontSize: "1em"
     fontWeight: 400
-    lineHeight: 1.8
+    lineHeight: 1.7
   chapter:
-    fontSize: "1.9em"
-    lineHeight: 1.4
+    fontSize: "1.65em"
   question:
-    fontSize: "1.5em"
-    lineHeight: 1.4
+    fontSize: "1.35em"
   source:
     fontSize: ".85em"
-    lineHeight: 1.6
+    lineHeight: 1.5
 ---
 
 # Design System: Quiz EPUB Reading
 
-## Scope and confirmed direction
+## Current direction
 
-Mode: Read. This system describes the generated EPUB, not the admin website or a separate reader app. The user chose an extensive readability revision: all devices in portrait and landscape, balanced density, Korean sans-serif body, light-only warm ivory paper, and a slightly deeper ivory explanation surface. Printed workbook references establish information hierarchy, not a fixed two-column page template. These choices supersede the earlier serif and reader-controlled default color design.
+Mode: Read. This is the generated EPUB, not an admin UI or custom reader. The user's native-reader screenshots rejected the earlier ivory panels, ochre answer strips, repeated colored headings, and oversized gaps as overly decorated. This revision supersedes the warm-panel design. The book should read as continuous typeset text, with a restrained accent only on original question numbers.
 
-Ground truth: `src/main/resources/ebook/reading.css`, `EpubRenderer.java`, and `EpubCover.java`. The existing cream-and-green cover remains. No invented author, publisher, editorial facts, or additional source text.
+Keep the accepted Korean sans-serif default, adjustable type, original content, and reflow across phones/tablets/PC in both orientations. The intended viewing mode is light. There is no authored dark theme. Leave background painting and page margins to the reader: explicit body background colors appeared as disconnected rectangles in Apple Books instead of coloring the whole page. External reader font/theme overrides remain possible.
 
-## Color and typography
+Ground truth: `src/main/resources/ebook/reading.css`, `EpubRenderer.java`, and the unchanged `EpubCover.java`.
 
-Paper and ink are explicitly paired on the root/body, explanation panel, and answer strip. There is no authored dark theme or dark media query. External reader themes and font preferences may override the book; no `!important` rules attempt to lock them out.
+## Typography and color
 
-The body requests local Korean sans-serif fonts with no bundled fonts or network requests. Relative sizes keep reader enlargement available. Body and answers are `1em`; choice explanation labels are `1em` bold; inline explanation titles are `1.1em`; question numbers are `1.5em`; chapters are `1.9em`. The question unit and standalone entry kind are `.67em` of the question heading. Source metadata is `.85em`. Body line height is `1.8`, choices `1.75`, metadata `1.6`, and headings `1.4`.
+Use the local Korean sans-serif fallback stack, without font downloads. Body and answer text are `1em`; subsection labels are `1em` bold; original numbers are `1.35em`; chapter titles are `1.65em`. Unit/kind labels are `.74em` of the question heading. Source metadata is `.85em`, neutral gray. Body line height is `1.7`, metadata/answers `1.5`, and headings `1.35`.
 
-Dark green identifies chapters, question numbers, and explanation headings. Warm brown identifies answers; muted warm ink identifies source metadata. Hierarchy also uses size, weight, spacing, lines, and explicit labels. Original wording, authored line breaks, and semantic/source span emphasis remain intact. Generated explanation headings have dedicated classes so source-authored `h3` blocks do not receive the section-label treatment.
+Only `.problem-number` receives the muted green accent. Body, answer and explanation text inherit the reader foreground. No answer strips, explanation fills, colored underlines, selection tint or per-choice separator rules. Chapter titles and statement frames retain thin neutral lines. Stored source emphasis and span colors remain original content; do not delete those as book-theme decoration.
 
-## Reading measure and rhythm
+## Reflow and spacing
 
-Body width is `90%`, capped at `38em`, horizontally centered with `1.6em` vertical margins. It specifies no fixed page height, device width, or CSS columns. The EPUB remains reflowable with `rendition:spread=auto`; reader software controls pagination and facing-page display.
+Body width is automatic, capped at `38em`, with `margin: 0 auto`. Reader-provided margins handle the page edge; the EPUB adds no percentage inset or vertical page padding. No fixed height, fixed columns, forced per-question page break, or full-question keep-together.
 
-Paragraph margins are `.65em`; options use `.65em` vertical separation and hanging list markers. Question groups have `2.8em` bottom space; subsequent groups start after a thin rule with `2em` padding. Headings/source lines stay visually attached, with `1em` before the body. Answers follow questions after `1.4em`; explanations follow after `1.2em`.
+Question groups have zero bottom margin. The next group uses one `2em` top gap, increased from `1.4em` after the user found question boundaries too tight. The rejected design combined `2.8em` bottom margin with `2em` next-group padding and a border; do not reinstate that stack. Paragraph margins are `.5em`; options use `.4em`; heading-to-body spacing is `.55em`; inline answer and explanation gaps are `.75em`.
 
-Avoid page breaks inside short source headings and answers and after headings. Permit breaks within long questions, options, statements, and explanation panels. Widow/orphan targets are two lines. Reader support determines actual page boundaries; an offline browser preview is not native EPUB pagination certification.
+Only short source headings and answer lines resist splitting. Headings request attachment to following content; long questions/options/explanations may fragment. Widow/orphan targets remain two lines. Reader pagination can still leave some page-end space when the next heading and opening lines do not fit; eliminating every blank line would sacrifice readability. Source headers are compact to reduce this pressure.
 
 ## Components
 
-- **Question:** large green original number, quieter number unit, compact source line, original content, and numbered choices. Repeated numbers retain distinct source identities.
-- **Answer:** full-width, compact warm ochre strip with dark brown bold text and thin top/bottom rules. Multiple correct answers remain visible. No inline source repetition or answer-check controls.
-- **Explanation:** one warm ivory surface, `.9em` horizontal and `1em` vertical padding. Inline entries begin with an underlined green `해설` label. Standalone entries include their original number and source inside the same surface. Per-choice explanations remain inside it and use bold labels with light horizontal separators, never individual nested cards. Missing explanations are omitted.
-- **Statements:** square, thin-bordered frame with `.7em` horizontal padding. Each `dt`/`dd` pair retains the existing hanging-indent fix: `2.2em` label column, `2.4em` content indent, `.55em` between rows. First/last child margins reset so labels align with the first text line. Long entries may paginate.
-- **Contents:** quiet ruled rows, green links, and visible keyboard focus. Navigation belongs to the EPUB TOC and the reader; no per-question return/forward buttons.
-- **Cover:** existing typographic SVG containing the supplied title, selected years, and question count, scaled to available width up to `32em`.
+- **Question:** original number with subtle green accent, smaller unit, compact neutral source line, original body and hanging numbered choices.
+- **Answer:** a short bold line, with no fill, frame or colored text. Multiple correct choices are preserved.
+- **Explanation:** plain paragraphs. Show the generated `해설` heading for an inline overall explanation; when only per-choice explanations exist, start directly with `N번 보기 해설`. Standalone entries keep their question number/source. Per-choice headings use weight and spacing only.
+- **Statements:** thin neutral frame; `2.2em` label column and `2.4em` hanging indent, `.4em` between rows. Preserve label/first-line alignment and allow long rows to fragment.
+- **Contents:** neutral ruled rows, inherited link color, visible keyboard focus. No per-question return/answer-check buttons.
+- **Cover:** existing cream/green typographic SVG remains unchanged; the revision concerns reading pages.
 
-## Verification and use
+## Verification boundary
 
-Review both `build/ebook-samples/sample-review.epub` (year-end explanations) and `sample-reading-inline.epub` (inline explanations). Their long Korean sample content is explicitly fictional, not actual exam or legal material.
+`./gradlew test` validates all nine placement combinations and generates fictional review samples. A separate local preview, `build/ebook-samples/appraiser-quiet-preview.epub`, applies the same styles and generated-title change to the user's existing downloaded book. Original content/answer blocks were compared for equality; the preview has a distinct publication identifier and review title to avoid reader caching.
 
-Use the updated backend to regenerate EPUBs. Existing downloaded/imported copies do not update. Prefer a distinct review title so readers can distinguish versions. Test light-theme rendering and reader text enlargement on the intended apps; external app appearance overrides cannot be prohibited by the EPUB.
+Native Apple Books review is now available: both the rejected original and revised real-content preview were inspected in the same two-page window. The revised view removes the colored rectangles and allows the next question to begin partway down a page. This does not certify every device or EPUB reader, and some app-specific page-break behavior remains.
+
+Regenerate books with the updated backend. Imported copies never update automatically. No production server or source exam data was changed.

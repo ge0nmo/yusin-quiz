@@ -1,16 +1,12 @@
-/* 따뜻한 미색의 라이트 전용 EPUB. 고정 페이지/열 없이 기기와 글자 크기에 맞춰 흐릅니다.
-   리더의 사용자 스타일은 이 기본 디자인을 덮어쓸 수 있으므로 !important는 사용하지 않습니다. */
-html { background-color: #faf7f0; color: #2f302b; }
+/* 리더의 종이 위에 활자로 이어지는 EPUB. 본문 배경을 칠하면 일부 리더에서
+   페이지 전체가 아닌 사각형 면으로 분절되므로, 배경과 페이지 여백은 리더에 맡깁니다. */
 body {
     font-family: "Noto Sans CJK KR", "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
     font-size: 1em;
     font-weight: normal;
-    line-height: 1.8;
-    color: #2f302b;
-    background-color: #faf7f0;
-    width: 90%;
+    line-height: 1.7;
     max-width: 38em;
-    margin: 1.6em auto;
+    margin: 0 auto;
     word-wrap: break-word;
     overflow-wrap: break-word;
     widows: 2;
@@ -18,83 +14,63 @@ body {
 }
 h1, h2, h3 {
     font-weight: bold;
-    line-height: 1.4;
+    line-height: 1.35;
     page-break-after: avoid;
     break-after: avoid;
 }
-h1 { font-size: 1.9em; margin: 0 0 1.5em; }
-h2 { font-size: 1.5em; margin: 0; }
-h3 { font-size: 1em; margin: 1.4em 0 .5em; }
-p { margin: .65em 0; }
-.chapter-title { color: #315c4e; border-bottom: 2px solid #315c4e; padding-bottom: .6em; }
-.problem-group { margin: 0 0 2.8em; }
-.problem-group + .problem-group { border-top: 1px solid #d5ccba; padding-top: 2em; }
+h1 { font-size: 1.65em; margin: 0 0 1.1em; }
+h2 { font-size: 1.35em; margin: 0; }
+h3 { font-size: 1em; margin: .9em 0 .35em; }
+p { margin: .5em 0; }
+.chapter-title { border-bottom: 1px solid #bdbdbd; padding-bottom: .4em; }
+/* 문항 경계는 한 번만 띄웁니다. 아래 margin + 다음 문항 padding을 중첩하지 않습니다.
+   문항/해설 전체는 페이지를 넘길 수 있고, 짧은 제목과 정답만 분할을 피합니다. */
+.problem-group { margin: 0; }
+.problem-group + .problem-group { margin-top: 2em; }
 .problem-heading {
     page-break-inside: avoid;
     break-inside: avoid;
     page-break-after: avoid;
     break-after: avoid;
-    margin-bottom: 1em;
+    margin-bottom: .55em;
 }
-.problem-heading h2 { color: #315c4e; }
-.problem-number { font-variant-numeric: lining-nums tabular-nums; }
-.problem-unit { font-size: .67em; font-weight: normal; margin-left: .15em; }
-.heading-kind { font-size: .67em; margin-left: .5em; }
-.source { color: #696253; font-size: .85em; line-height: 1.6; margin: .4em 0 0; }
+.problem-number { color: #45584d; font-variant-numeric: lining-nums tabular-nums; }
+.problem-unit { font-size: .74em; font-weight: normal; margin-left: .12em; }
+.heading-kind { font-size: .74em; margin-left: .35em; }
+.source { color: #666666; font-size: .85em; line-height: 1.5; margin: .2em 0 0; }
 .original { white-space: pre-wrap; }
 ol, ul { padding-left: 1.6em; }
-li { margin: .45em 0; }
-.choices { padding-left: 1.65em; margin: 1.1em 0 0; line-height: 1.75; }
-.choices > li { padding-left: .25em; margin: .65em 0; }
-.choices > li::marker { color: #696253; }
+li { margin: .35em 0; }
+.choices { padding-left: 1.65em; margin: .65em 0 0; }
+.choices > li { padding-left: .2em; margin: .4em 0; }
 .choices p { margin: 0; }
-/* 정답은 짧은 강조 띠, 해설은 하나의 연속된 면으로 구별합니다.
-   긴 해설/보기 전체의 페이지 분할을 막지 않아 확대 시 큰 공백이 생기지 않게 합니다. */
 .answer-line {
-    background-color: #ede2c8;
-    color: #76531f;
-    border-top: 1px solid #d5c398;
-    border-bottom: 1px solid #d5c398;
-    padding: .55em .85em;
     margin: 0;
     font-size: 1em;
-    line-height: 1.6;
+    line-height: 1.5;
+    page-break-inside: avoid;
+    break-inside: avoid;
 }
-.answer { page-break-inside: avoid; break-inside: avoid; }
-.inline-answer { margin-top: 1.4em; }
-.explanation {
-    background-color: #f0eadc;
-    color: #2f302b;
-    padding: 1em .9em;
-    margin-top: 1.2em;
-}
+.inline-answer { margin-top: .75em; }
+.explanation { margin-top: .75em; }
 .explanation > :first-child { margin-top: 0; }
 .explanation > :last-child { margin-bottom: 0; }
-.explanation-heading { color: #315c4e; font-size: 1.1em; margin: 0 0 .8em; }
-.explanation-label { display: inline-block; border-bottom: 2px solid #315c4e; padding-bottom: .15em; }
-.choice-explanation-title {
-    color: #4f493b;
-    font-size: 1em;
-    border-top: 1px solid #d5ccba;
-    padding-top: .9em;
-    margin-top: 1.2em;
-    margin-bottom: .45em;
-}
-.statement { margin: 1em 0; padding: .45em .7em; border: 1px solid #b7ad98; }
+.explanation-heading { font-size: 1em; margin: 0 0 .35em; }
+.choice-explanation-title { font-size: 1em; margin: .85em 0 .3em; }
+.statement { margin: .75em 0; padding: .35em .65em; border: 1px solid #bdbdbd; }
 /* float + 들여쓰기로 ㄱ./ㄴ.와 첫 줄을 맞춥니다. 긴 항목은 페이지를 넘길 수 있습니다. */
-.statement-item { margin: .55em 0; }
+.statement-item { margin: .4em 0; }
 .statement-item::after { content: ""; display: block; clear: both; }
 .statement-item > dt { float: left; width: 2.2em; margin: 0; font-weight: normal; }
 .statement-item > dd { margin: 0 0 0 2.4em; }
 .statement-item > dd > :first-child { margin-top: 0; }
 .statement-item > dd > :last-child { margin-bottom: 0; }
-blockquote { margin: 1em 0 1em 1em; padding-left: .8em; border-left: 1px solid #b7ad98; }
+blockquote { margin: .75em 0 .75em 1em; }
 .underline { text-decoration: underline; }
 .strike { text-decoration: line-through; }
 nav ol { list-style: none; padding: 0; }
-nav li { border-bottom: 1px solid #d5ccba; padding: .85em 0; margin: 0; }
-nav a { color: #315c4e; text-decoration: none; }
-a:focus { outline: 2px solid #315c4e; outline-offset: 3px; }
-::selection { background-color: #d9e3d2; color: #2f302b; }
+nav li { border-bottom: 1px solid #bdbdbd; padding: .7em 0; margin: 0; }
+nav a { color: inherit; text-decoration: none; }
+a:focus { outline: 2px solid currentColor; outline-offset: 3px; }
 .cover { margin: 0; padding: 0; text-align: center; }
 .cover img { width: 100%; max-width: 32em; height: auto; }

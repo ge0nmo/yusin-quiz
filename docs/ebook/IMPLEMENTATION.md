@@ -190,3 +190,18 @@ The current user interview supersedes the earlier serif, unset body colors, and 
 Verification: Java 21 `./gradlew test` passed 67 tests with zero failures/errors; all nine placement combinations passed EPUBCheck. The typography detector reported no findings. Browser inspection covered inline and separated explanations at phone portrait/landscape, tablet portrait/landscape, PC portrait/landscape, 390px/24px enlarged text, and 320px/32px text (16 cases total). No horizontal overflow; statement label/first-line offsets were zero; explanation blocks permit fragmentation. Screenshots are in `build/ebook-samples/warm-*.png`, measurements in `warm-reading-metrics.json`. Authored text/background contrast is at least 5.04:1 across the tested palette (body 12.43:1, answer 5.39:1). This is browser evidence, not native Books/Windows/mobile pagination certification. No production content or server deployment was changed.
 
 Both final human-review EPUBs also passed `validateEpub` with zero fatal errors, errors, warnings, or information messages.
+
+
+## Native-reader correction: restrained reading — 2026-09-19
+
+The user rejected the warm-panel revision after viewing actual Apple Books pages: too many colors, artificial card-like blocks, and excess blank space. This supersedes the preceding warm-light style direction.
+
+- Removed body/background fills, ochre answer strips, colored explanation labels, and per-choice rules. Keep one muted accent on question numbers; other labels use inherited foreground and weight.
+- Removed body percentage width/vertical margins. Keep automatic width capped at 38em. Reader owns page edges and paper background.
+- Replaced stacked question-boundary spacing (2.8em bottom margin + 2em next-group padding) with one 1.4em top margin. Body leading is 1.7; option gaps .4em; answer/explanation gaps .75em. Whole questions/answers/explanations are not kept together; only short headers and answer lines resist splitting.
+- Omit the generated generic inline explanation heading when there is no overall explanation; per-choice labels remain. Original wording/emphasis/answer settings and prior statement alignment are preserved.
+- The existing 67-test suite passes, including nine EPUBCheck placement combinations. Existing human-review sample text was updated to describe the revised appearance.
+- Native Apple Books was inspected through computer-use tools, first with the user's original and then a separate copy of the existing downloaded `appraiser-2022-2023.epub`. The real-content preview uses exactly the revised CSS and equivalent generated-heading changes; original source and answer blocks were checked for equality. 66 redundant generated headings were removed. Its distinct title/identifier avoids stale reader-cache confusion. This copy is `build/ebook-samples/appraiser-quiet-preview.epub`, not a production export or source-data edit.
+- Same-window native inspection confirms the colored rectangles are gone and a new question can begin midway through a page after the previous explanation. Reader pagination can still reserve space at page ends for headings/opening lines; do not promise zero blank space or universal native compatibility.
+
+Spacing follow-up: the user clarified that the gap between questions was too tight. Increased only the inter-group top margin from 1.4em to 2em; body, options, answers, and explanations retain their internal spacing. Updated review EPUB: `build/ebook-samples/appraiser-spacing-preview.epub`; all XHTML is byte-identical to the preceding real-content preview.

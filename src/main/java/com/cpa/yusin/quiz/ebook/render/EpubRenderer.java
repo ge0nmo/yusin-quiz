@@ -112,8 +112,8 @@ public class EpubRenderer implements BookRenderer {
                     .append(q.choices().stream().filter(Choice::correct).map(c -> c.number() + "번")
                             .collect(java.util.stream.Collectors.joining(", "))).append("</strong></p>");
             case EXPLANATION -> {
-                // 생성한 해설 제목만 꾸밉니다. 원문에 저장된 소제목과 스타일이 섞이지 않게 합니다.
-                if (continuation) html.append("<h3 class=\"explanation-heading\"><span class=\"explanation-label\">해설</span></h3>");
+                // 보기별 해설만 있으면 그 제목으로 바로 시작해 '해설 → N번 보기 해설'의 중복을 피합니다.
+                if (continuation && !q.explanation().isEmpty()) html.append("<h3 class=\"explanation-heading\">해설</h3>");
                 html.append(blocks(q.explanation()));
                 q.choices().stream().filter(c -> !c.explanation().isEmpty()).forEach(c -> html.append("<h3 class=\"choice-explanation-title\">")
                         .append(c.number()).append("번 보기 해설</h3>").append(blocks(c.explanation())));
