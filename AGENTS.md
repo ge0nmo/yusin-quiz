@@ -20,6 +20,8 @@
 
 ## Task router
 
+- Ebook work: `docs/ebook/IMPLEMENTATION.md` (English agent handoff), `docs/ebook/USER_GUIDE.ko.md` (Korean setup/use), and `docs/frontend-api/admin-ebook.md`.
+
 - `.agents/architecture.md`
 - `.agents/api-contracts.md`
 - `.agents/security-auth.md`

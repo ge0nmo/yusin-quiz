@@ -454,6 +454,48 @@ class ContentApiIntegrationTest {
                 .andExpect(status().isNoContent()).andDo(document("admin-delete-problem", api("Admin Content", "문제 삭제")));
     }
 
+    @Test
+    void ebookCatalogAndBinaryExportRequireAdminAndExcludeDrafts() throws Exception {
+        mockMvc.perform(get("/api/admin/ebooks/catalog")).andExpect(status().isUnauthorized());
+        mockMvc.perform(post("/api/admin/ebooks/epub").contentType(MediaType.APPLICATION_JSON).content("{}"))
+                .andExpect(status().isUnauthorized());
+        String token = loginAdmin();
+        olderProblem.update(olderProblem.getExam(), olderProblem.getSubjectMapping(), olderProblem.getNumber(),
+                ContentStatus.DRAFT, olderProblem.getContent(), olderProblem.getExplanation());
+        problemRepository.saveAndFlush(olderProblem);
+        mockMvc.perform(get("/api/admin/ebooks/catalog").header("Authorization", bearer(token)))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.data", hasSize(1)))
+                .andExpect(jsonPath("$.data[0].questionCount").value(1))
+                .andExpect(jsonPath("$.data[0].year").value(2025))
+                .andDo(document("admin-ebook-catalog", api("Admin Ebook", "전자책 수록 가능한 공개 문제 범위")));
+
+        Map<String, Object> request = new java.util.HashMap<>(Map.of(
+                "qualificationCode", "APPRAISER", "subjectIds", List.of(newerProblem.getSubjectMapping().getSubject().getId()),
+                "years", List.of(2025), "title", "감정평가사 기출 복습", "yearOrder", "NEWEST_FIRST",
+                "answerPlacement", "AFTER_QUESTION", "explanationPlacement", "YEAR_END"));
+        byte[] epub = mockMvc.perform(post("/api/admin/ebooks/epub").header("Authorization", bearer(token))
+                        .contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsBytes(request)))
+                .andExpect(status().isOk()).andExpect(content().contentTypeCompatibleWith("application/epub+zip"))
+                .andExpect(header().string("Cache-Control", "no-store"))
+                .andExpect(header().string("Content-Disposition", "attachment; filename=\"appraiser.epub\""))
+                .andDo(document("admin-ebook-epub", api("Admin Ebook", "설정한 범위를 EPUB 파일로 다운로드")))
+                .andReturn().getResponse().getContentAsByteArray();
+        org.assertj.core.api.Assertions.assertThat(epub).startsWith((byte) 'P', (byte) 'K');
+        try (var zip = new java.util.zip.ZipInputStream(new java.io.ByteArrayInputStream(epub))) {
+            StringBuilder texts = new StringBuilder();
+            while (zip.getNextEntry() != null) texts.append(new String(zip.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8));
+            org.assertj.core.api.Assertions.assertThat(texts.toString()).contains("새 문제", "종합 해설", "정답 해설").doesNotContain("오래된 문제");
+        }
+        request.put("years", List.of(2025, 2022));
+        mockMvc.perform(post("/api/admin/ebooks/epub").header("Authorization", bearer(token))
+                        .contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsBytes(request)))
+                .andExpect(status().isBadRequest()).andExpect(jsonPath("$.code").value("EBOOK_INVALID_CONTENT"));
+        request.put("years", List.of());
+        mockMvc.perform(post("/api/admin/ebooks/epub").header("Authorization", bearer(token))
+                        .contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsBytes(request)))
+                .andExpect(status().isBadRequest());
+    }
+
     private Problem saveProblem(Exam exam, QualificationExamSubject mapping, int number, String text) {
         Problem problem = new Problem(exam, mapping, number, ContentStatus.PUBLISHED,
                 List.of(Map.of("type", "text", "text", text)),

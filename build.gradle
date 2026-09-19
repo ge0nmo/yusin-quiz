@@ -57,6 +57,11 @@ dependencies {
 
     annotationProcessor 'org.projectlombok:lombok:1.18.34'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    // 전자책 출력의 실제 규격을 테스트합니다. 운영 서버에는 검증 도구를 포함하지 않습니다.
+    testImplementation('org.w3c:epubcheck:5.4.0') {
+        // 검증기의 무음 로거가 Spring Boot의 Logback/MDC를 대체하지 않게 합니다.
+        exclude group: 'org.slf4j', module: 'slf4j-nop'
+    }
 
     // security
     testImplementation 'org.springframework.security:spring-security-test'
@@ -89,6 +94,16 @@ dependencies {
 tasks.named('test') {
     outputs.dir snippetsDir
     useJUnitPlatform()
+}
+
+// 외부에서 만든/다운로드한 EPUB도 같은 검증기로 확인할 수 있습니다.
+tasks.register('validateEpub', JavaExec) {
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'com.adobe.epubcheck.tool.Checker'
+    doFirst {
+        if (!project.hasProperty('epubFile')) throw new GradleException('Use -PepubFile=/path/to/book.epub')
+        args project.property('epubFile').toString()
+    }
 }
 
 tasks.named('asciidoctor') {

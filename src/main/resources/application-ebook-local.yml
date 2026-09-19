@@ -1,0 +1,41 @@
+# 개인 컴퓨터에서 텍스트 전자책을 만들 때 사용하는 독립 프로필입니다.
+# 실제 비밀 값은 환경 변수로만 받으며 운영 프로필/기존 설정을 덮어쓰지 않습니다.
+spring:
+  datasource:
+    url: ${EBOOK_DB_URL:jdbc:mysql://localhost:3306/quiz_ebook?serverTimezone=Asia/Seoul&characterEncoding=UTF-8}
+    username: ${EBOOK_DB_USERNAME}
+    password: ${EBOOK_DB_PASSWORD}
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: ${EBOOK_DDL_AUTO:validate}
+
+server:
+  address: 127.0.0.1
+  port: ${EBOOK_PORT:8080}
+  env: ebook-local
+
+jwt:
+  token:
+    secretKey: ${EBOOK_JWT_SECRET}
+    access-token-expiration: 3600000
+    refresh-token-expiration: 604800000
+
+# 기존 앱의 이미지 서비스 빈 초기화를 위한 로컬 전용 값입니다.
+# 전자책 생성은 S3를 호출하지 않습니다. 이 프로필에서 이미지 업로드는 지원하지 않습니다.
+cloud:
+  aws:
+    credentials:
+      access-key: ebook-local-unused
+      secret-key: ebook-local-unused
+    region:
+      static: ap-northeast-2
+    s3:
+      bucket: ebook-local-unused
+      prefix: ebook-local/
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info

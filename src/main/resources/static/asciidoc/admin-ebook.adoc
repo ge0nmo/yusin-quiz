@@ -1,0 +1,26 @@
+= Admin Ebook API
+:toc: left
+
+== Available published content
+
+All ebook endpoints require the existing ADMIN authentication.
+Only fully published qualification/exam/subject/mapping/problem combinations are included.
+
+include::{snippets}/admin-ebook-catalog/http-request.adoc[]
+include::{snippets}/admin-ebook-catalog/http-response.adoc[]
+
+== Generate an EPUB
+
+include::{snippets}/admin-ebook-epub/http-request.adoc[]
+
+The successful response is binary `application/epub+zip`, with an attachment filename and `Cache-Control: no-store`.
+It is not a JSON envelope. The binary body is intentionally not embedded in this document.
+
+The request includes `qualificationCode`, nonempty `subjectIds` and `years`, `title`, `yearOrder`, `answerPlacement`, and `explanationPlacement`.
+Year ordering is `NEWEST_FIRST` or `OLDEST_FIRST`.
+Both placements independently accept `AFTER_QUESTION`, `YEAR_END`, and `BOOK_END`.
+
+Generation is limited to 5,000 questions and 20MB of source content.
+Unsupported blocks, missing required content, and invalid scope return HTTP 400.
+Concurrent generation on the same server returns HTTP 429 with `Retry-After: 10`.
+No file history is retained. PDF generation is deferred.

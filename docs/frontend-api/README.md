@@ -1,13 +1,14 @@
 # Frontend API Contract Guide
 
 기존 사용자 인증, 북마크, 질문/답변, 학습 세션, 말문제 API는 모두 제거되었다.
-현재 외부 계약은 아래 세 문서와 integration test를 기준으로 한다.
+현재 외부 계약은 아래 문서와 integration test를 기준으로 한다.
 
 - `public-content.md`: 로그인 없는 모바일 콘텐츠 API
 - `admin-content.md`: 관리자 콘텐츠 CRUD API
 - `admin-auth.md`: 관리자 아이디 로그인
+- `admin-ebook.md`: 관리자 전자책 범위 조회 및 EPUB 다운로드
 
-모든 JSON 성공 응답은 `{ "data": ... }` 형태다. 파일 업로드만 기존과 같이 URL 문자열을 반환한다.
+모든 JSON 성공 응답은 `{ "data": ... }` 형태다. 파일 업로드는 URL 문자열, EPUB 다운로드는 바이너리 파일을 반환한다.
 
 생성 문서와 OpenAPI는 다음 명령으로 갱신한다.
 
