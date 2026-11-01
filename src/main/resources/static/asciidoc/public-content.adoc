@@ -31,3 +31,19 @@ include::{snippets}/public-check-answer/http-response.adoc[]
 
 include::{snippets}/public-solutions/http-request.adoc[]
 include::{snippets}/public-solutions/http-response.adoc[]
+
+== v2 content snapshot
+
+Every published subject with its problems, choices and `correctChoiceIds`. Explanations are not included.
+The `ETag` header equals `data.version`; send it back as `If-None-Match` to receive `304 Not Modified`.
+
+include::{snippets}/public-v2-content/http-request.adoc[]
+include::{snippets}/public-v2-content/http-response.adoc[]
+
+== v2 explanations snapshot
+
+Problem and choice explanations for every published problem, ordered by `problemId`.
+The version is independent of the content snapshot. This endpoint will require an entitlement later.
+
+include::{snippets}/public-v2-explanations/http-request.adoc[]
+include::{snippets}/public-v2-explanations/http-response.adoc[]

@@ -16,7 +16,7 @@ Public reads require PUBLISHED status on qualification, subject, mapping, exam a
 
 ## Data exposure
 
-Initial public problem responses contain content and choice text only. Answer flags and all explanations are available only from check/solutions endpoints as specified in the public contract.
+v1 problem responses contain content and choice text only; answer flags and explanations come only from v1 check/solutions. v2 content includes correct choice IDs but no explanations. v2 explanations are a separate endpoint reserved for future entitlement checks.
 
 ## Images
 

@@ -22,7 +22,6 @@ import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignReques
 import software.amazon.awssdk.services.s3.presigner.model.PresignedGetObjectRequest;
 
 import java.io.IOException;
-import java.time.Duration;
 
 @Transactional(readOnly = true)
 @Slf4j
@@ -98,9 +97,9 @@ public class FileServiceImpl implements FileService {
     @Override
     public String generatePresignedUrl(String objectKey) {
         try {
-            // 요청 객체 생성 (유효기간 60분)
+            // 요청 객체 생성 (유효기간 PRESIGNED_URL_TTL)
             GetObjectPresignRequest presignRequest = GetObjectPresignRequest.builder()
-                    .signatureDuration(Duration.ofMinutes(180))
+                    .signatureDuration(PRESIGNED_URL_TTL)
                     .getObjectRequest(req -> req.bucket(bucket).key(objectKey))
                     .build();
 

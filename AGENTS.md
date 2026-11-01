@@ -12,7 +12,7 @@
 - Every JPA entity extends `BaseEntity`.
 - Use Spring `@Transactional`.
 - Use `ClockHolder` and `UuidHolder` for application time/UUID values.
-- Public APIs live under `/api/v1/qualification-exams/{code}/**`.
+- Public APIs live under `/api/v1/qualification-exams/{code}/**` and `/api/v2/qualification-exams/{code}/**`. v1 stays unchanged for installed apps.
 - Admin APIs live under `/api/admin/**`.
 - JSON blocks are the single problem/explanation content model; do not add HTML compatibility fields.
 - Qualification exam codes are limited to `QualificationExamCode`; display names come from that enum.

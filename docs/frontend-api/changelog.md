@@ -1,5 +1,13 @@
 # Frontend API Changelog
 
+## 2026-11-01 — v2 콘텐츠·해설 스냅샷
+
+- `GET /api/v2/qualification-exams/{code}/content`를 추가했다. 공개 과목, 문제, 보기, 정답 ID를 한 응답으로 반환하고 해설은 넣지 않는다.
+- `GET /api/v2/qualification-exams/{code}/explanations`를 추가했다. 공개 문제 전체의 문제·보기별 해설을 반환한다. 향후 이용권 확인을 붙일 엔드포인트이며 지금은 로그인 없이 호출한다.
+- 두 응답은 각자 `version`을 `ETag`로 내려주고, `If-None-Match`가 같으면 `304`로 본문 없이 응답한다.
+- 관리 이미지가 있는 응답은 `imageUrlsExpireAt`을 내려준다.
+- v1 엔드포인트의 경로, 요청, 응답은 변경하지 않았다.
+
 ## 2026-08-14 — 앱 버전 정책
 
 - `GET /api/v1/qualification-exams/{code}/app-version-policy?platform=android|ios`를 추가했다.

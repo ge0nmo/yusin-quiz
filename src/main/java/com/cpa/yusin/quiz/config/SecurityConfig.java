@@ -63,7 +63,7 @@ public class SecurityConfig {
     @Bean
     @Order(2)
     SecurityFilterChain publicSecurity(HttpSecurity http) throws Exception {
-        http.securityMatcher("/api/v1/**")
+        http.securityMatcher("/api/v1/**", "/api/v2/**")
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
