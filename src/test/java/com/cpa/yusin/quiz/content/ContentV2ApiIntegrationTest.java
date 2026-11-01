@@ -21,6 +21,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpHeaders;
@@ -53,7 +54,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class ContentV2ApiIntegrationTest {
     private static final String CONTENT = "/api/v2/qualification-exams/{code}/content";
     private static final String EXPLANATIONS = "/api/v2/qualification-exams/{code}/explanations";
-    private static final String MANAGED_IMAGE = "https://test-bucket.s3.amazonaws.com/test/problem.png";
 
     @Autowired WebApplicationContext context;
     @Autowired ObjectMapper objectMapper;
@@ -63,6 +63,8 @@ class ContentV2ApiIntegrationTest {
     @Autowired ExamRepository examRepository;
     @Autowired ProblemRepository problemRepository;
     @MockBean FileService fileService;
+    // CI는 시크릿의 테스트 설정을 쓰므로 관리 이미지 경로는 설정된 prefix로 만든다.
+    @Value("${cloud.aws.s3.prefix}") String s3Prefix;
 
     private MockMvc mockMvc;
     private QualificationExamSubject accountingMapping;
@@ -236,11 +238,13 @@ class ContentV2ApiIntegrationTest {
 
     @Test
     void freshlySignedImageUrlsDoNotChangeVersion() throws Exception {
+        String objectKey = s3Prefix + "/problem.png";
+        String managedImage = "https://bucket.s3.amazonaws.com/" + objectKey;
         newerProblem.update(newerProblem.getExam(), newerProblem.getSubjectMapping(), newerProblem.getNumber(),
-                newerProblem.getStatus(), List.of(Map.of("type", "image", "src", MANAGED_IMAGE)),
-                List.of(Map.of("type", "image", "src", MANAGED_IMAGE)));
+                newerProblem.getStatus(), List.of(Map.of("type", "image", "src", managedImage)),
+                List.of(Map.of("type", "image", "src", managedImage)));
         problemRepository.saveAndFlush(newerProblem);
-        when(fileService.generatePresignedUrl("test/problem.png"))
+        when(fileService.generatePresignedUrl(objectKey))
                 .thenReturn("https://signed/1", "https://signed/2", "https://signed/3", "https://signed/4");
 
         JsonNode first = data(mockMvc.perform(get(CONTENT, "APPRAISER")).andExpect(status().isOk()).andReturn());
