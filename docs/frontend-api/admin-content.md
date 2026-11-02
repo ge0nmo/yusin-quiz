@@ -67,6 +67,7 @@
 ```json
 {
   "type": "table",
+  "columnWidths": [120, 80],
   "rows": [
     {"cells": [{"header": true, "colspan": 2, "content": [{"type": "text", "spans": [{"text": "구분"}]}]}]},
     {"cells": [
@@ -79,6 +80,7 @@
 
 - `rows`는 하나 이상이고 표 전체에 칸이 하나 이상 있어야 한다. 병합으로 가려진 칸은 `cells`에 넣지 않으므로(HTML table 규칙) 행마다 칸 수가 다를 수 있고 빈 행도 허용한다.
 - 각 칸의 `content`는 JSON block 배열이며 빈 배열(빈 칸)도 허용한다. `header`는 boolean, `colspan`·`rowspan`은 1~1000 정수이며 생략하면 각각 `false`, `1`이다. 관리자 편집기는 1이면 생략한다.
+- `columnWidths`는 생략할 수 있다. 있으면 열마다 하나씩 1~10000 정수(px)인 배열이며 길이는 열 수와 같게 보낸다. 화면에서는 비율로만 쓰며, 생략하면 모든 열이 같은 너비다.
 - 구조가 맞지 않으면 `400 INVALID_TABLE`로 거부한다. 표 칸 안의 관리 이미지도 조회할 때 다시 서명한다.
 - 인라인 수식은 text block의 span에 `{"text": "<LaTeX>", "math": true}`로 저장한다. `math`는 boolean이며, `true`이면 `text`가 공백이 아닌 LaTeX 원문이어야 한다. 아니면 `400 INVALID_MATH`.
 - 보기 본문은 plain text이므로 수식을 `$...$`로 감싸 저장한다. 서버는 보기 본문의 수식을 해석하거나 검사하지 않는다.

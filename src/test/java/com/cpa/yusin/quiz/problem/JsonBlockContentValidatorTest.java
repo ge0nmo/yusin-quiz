@@ -77,6 +77,24 @@ class JsonBlockContentValidatorTest {
     }
 
     @Test
+    void acceptsTablesWithColumnWidths() {
+        Map<String, Object> table = new LinkedHashMap<>(table(List.of(cell(Map.of()), cell(Map.of()))));
+        table.put("columnWidths", List.of(120, 80));
+
+        assertThatCode(() -> validator.validate(List.of(table))).doesNotThrowAnyException();
+    }
+
+    @Test
+    void rejectsMalformedColumnWidths() {
+        for (Object widths : List.of(List.of(), List.of(0), List.of(80, -1), List.of(80.5), List.of("80"),
+                List.of(10001), "80", Map.of("width", 80))) {
+            Map<String, Object> table = new LinkedHashMap<>(table(List.of(cell(Map.of()))));
+            table.put("columnWidths", widths);
+            assertInvalidTable(List.of(table));
+        }
+    }
+
+    @Test
     void acceptsTablesNestedInStatementGroupItems() {
         List<Map<String, Object>> blocks = statementGroup(Map.of(
                 "label", "(가)", "content", List.of(table(List.of(cell(Map.of()))))));

@@ -21,7 +21,7 @@ v1 problem responses contain content and choice text only; answer flags and expl
 ## Blocks
 
 - Blocks are stored and returned as submitted maps; `JsonBlockContentValidator` checks `statementGroup`, `table` and math spans anywhere in the tree.
-- `table`: `{rows: [{cells: [{content: Block[], header?, colspan?, rowspan?}]}]}`. Cells hidden by a merge are omitted (HTML table rule), so row lengths may differ; empty cells are allowed. Errors: `INVALID_TABLE`.
+- `table`: `{rows: [{cells: [{content: Block[], header?, colspan?, rowspan?}]}], columnWidths?: int[]}`. `columnWidths` is one 1..10000 px width per column, used as proportions; the server does not check it against the column count. Cells hidden by a merge are omitted (HTML table rule), so row lengths may differ; empty cells are allowed. Errors: `INVALID_TABLE`.
 - Inline math: text span `{text: "<LaTeX>", math: true}`; LaTeX must be non-blank. Errors: `INVALID_MATH`. Plain-text choice content wraps math in `$...$` and is not parsed by the server.
 
 ## Images

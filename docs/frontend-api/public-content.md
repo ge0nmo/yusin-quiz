@@ -26,7 +26,7 @@
 
 문제 본문에는 일반 블록과 함께 `{type:"statementGroup",items:[{label,content}]}`가 중첩될 수 있다. `label`은 `(가)`, `ㄱ.`, `A)`처럼 그대로 표시할 문자열이고, 각 `content`도 JSON block 배열이다.
 
-표는 `{type:"table",rows:[{cells:[{content,header?,colspan?,rowspan?}]}]}`다. 병합으로 가려진 칸은 `cells`에 없으므로(HTML table 규칙) 행마다 칸 수가 다를 수 있다. `colspan`·`rowspan`이 없으면 1, `header`가 없으면 일반 칸이다.
+표는 `{type:"table",rows:[{cells:[{content,header?,colspan?,rowspan?}]}],columnWidths?}`다. `columnWidths`는 열별 너비(px)이며 화면 폭에 맞춰 비율로 쓴다. 없으면 모든 열이 같은 너비이고, 길이가 열 수와 다르면 모자란 열은 나머지 평균으로 채우고 남는 값은 무시한다. 병합으로 가려진 칸은 `cells`에 없으므로(HTML table 규칙) 행마다 칸 수가 다를 수 있다. `colspan`·`rowspan`이 없으면 1, `header`가 없으면 일반 칸이다.
 
 인라인 수식은 span의 `{text:"<LaTeX>",math:true}`다. `math`를 모르는 앱은 LaTeX 원문을 그대로 보여주게 된다. 보기 본문(plain text)의 수식은 `$...$`로 감싸 있으며 `\$`는 달러 기호, 줄바꿈을 넘는 `$` 쌍은 수식이 아니다. 해설 응답(v1 solutions, v2 explanations)의 JSON block도 같은 규칙이다.
 

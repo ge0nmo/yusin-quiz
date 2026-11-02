@@ -352,6 +352,7 @@ class ContentApiIntegrationTest {
         Map<String, Object> payload = problemPayload(exam.getId(), subject.getId(), 58);
         payload.put("content", List.of(Map.of(
                 "type", "table",
+                "columnWidths", List.of(120, 80),
                 "rows", List.of(
                         Map.of("cells", List.of(
                                 Map.of("header", true, "colspan", 2, "content", List.of(Map.of(
@@ -370,6 +371,8 @@ class ContentApiIntegrationTest {
                 .andExpect(jsonPath("$.data.content[0].type").value("table"))
                 .andExpect(jsonPath("$.data.content[0].rows[0].cells[0].header").value(true))
                 .andExpect(jsonPath("$.data.content[0].rows[0].cells[0].colspan").value(2))
+                .andExpect(jsonPath("$.data.content[0].columnWidths[0]").value(120))
+                .andExpect(jsonPath("$.data.content[0].columnWidths[1]").value(80))
                 .andExpect(jsonPath("$.data.content[0].rows[1].cells[0].content[0].spans[0].math").value(true))
                 .andExpect(jsonPath("$.data.content[0].rows[1].cells[0].content[0].spans[0].text")
                         .value("\\frac{1}{2}"))

@@ -14,6 +14,7 @@ public class JsonBlockContentValidator {
     private static final String TEXT_TYPE = "text";
     private static final int MAX_LABEL_LENGTH = 20;
     private static final int MAX_TABLE_SPAN = 1000;
+    private static final int MAX_COLUMN_WIDTH = 10000;
 
     public void validate(List<Map<String, Object>> blocks) {
         if (blocks != null) {
@@ -90,9 +91,20 @@ public class JsonBlockContentValidator {
                 cellCount++;
             }
         }
-        if (cellCount == 0) {
+        if (cellCount == 0 || !isOptionalColumnWidths(block.get("columnWidths"))) {
             throw invalidTable();
         }
+    }
+
+    /** 열 너비(px)는 열마다 하나씩 양의 정수다. 화면에서는 비율로만 쓰므로 열 수와의 일치는 소비자가 맞춘다. */
+    private boolean isOptionalColumnWidths(Object value) {
+        if (value == null) {
+            return true;
+        }
+        return value instanceof List<?> widths
+                && !widths.isEmpty()
+                && widths.size() <= MAX_TABLE_SPAN
+                && widths.stream().allMatch(width -> isIntegerBetween(width, 1, MAX_COLUMN_WIDTH));
     }
 
     /** 수식 span은 LaTeX 원문을 text에 둔다. math를 모르는 소비자도 원문을 표시하므로 빈 수식은 거부한다. */
@@ -116,12 +128,13 @@ public class JsonBlockContentValidator {
     }
 
     private boolean isOptionalSpan(Object value) {
-        if (value == null) {
-            return true;
-        }
+        return value == null || isIntegerBetween(value, 1, MAX_TABLE_SPAN);
+    }
+
+    private boolean isIntegerBetween(Object value, long min, long max) {
         return (value instanceof Integer || value instanceof Long)
-                && ((Number) value).longValue() >= 1
-                && ((Number) value).longValue() <= MAX_TABLE_SPAN;
+                && ((Number) value).longValue() >= min
+                && ((Number) value).longValue() <= max;
     }
 
     private boolean containsMeaningfulContent(Object value) {

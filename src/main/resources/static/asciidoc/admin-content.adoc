@@ -39,8 +39,9 @@ meaningful text or an image. Invalid or partial groups return `400 INVALID_STATE
 Block arrays may also contain `{type: "table", rows: [{cells: [{content, header?, colspan?, rowspan?}]}]}`.
 `rows` must be non-empty and the table must have at least one cell. Cells hidden by a merge are omitted
 (HTML table rule), so rows may have different cell counts. `content` is a block array and may be empty;
-`header` is a boolean and `colspan`/`rowspan` are integers from 1 to 1000. Invalid tables return
-`400 INVALID_TABLE`.
+`header` is a boolean and `colspan`/`rowspan` are integers from 1 to 1000. The optional table-level
+`columnWidths` holds one pixel width (integer from 1 to 10000) per column; clients use it as proportions.
+Invalid tables return `400 INVALID_TABLE`.
 
 Inline math is a text span `{text: "<LaTeX>", math: true}`. `math` must be a boolean, and math spans
 need non-blank LaTeX text; otherwise the request returns `400 INVALID_MATH`. Plain-text choice content

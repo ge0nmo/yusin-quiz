@@ -1,5 +1,10 @@
 # Frontend API Changelog
 
+## 2026-11-02 — 표 열 너비
+
+- `table` 블록에 선택 필드 `columnWidths`(열별 px, 1~10000 정수 배열)를 추가했다. 화면에서는 비율로 쓰며 없으면 모든 열이 같은 너비다.
+- 잘못된 값은 `400 INVALID_TABLE`로 거부한다. 이 필드를 모르는 앱은 지금처럼 같은 너비로 그린다.
+
 ## 2026-11-02 — 표 블록과 인라인 수식
 
 - 문제 본문, 문제 해설, 보기별 해설 JSON block에 `{type:"table",rows:[{cells:[{content,header?,colspan?,rowspan?}]}]}`를 추가했다. 병합으로 가려진 칸은 `cells`에 넣지 않는다.
