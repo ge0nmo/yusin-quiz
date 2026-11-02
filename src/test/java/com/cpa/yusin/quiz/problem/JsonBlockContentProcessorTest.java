@@ -32,6 +32,27 @@ class JsonBlockContentProcessorTest {
     }
 
     @Test
+    void refreshesManagedImageUrlsInsideTableCells() {
+        FileService fileService = mock(FileService.class);
+        when(fileService.generatePresignedUrl("post/table.png")).thenReturn("https://signed/table");
+        JsonBlockContentProcessor processor = new JsonBlockContentProcessor(fileService);
+        ReflectionTestUtils.setField(processor, "s3Prefix", "post");
+
+        List<Map<String, Object>> processed = processor.withFreshImageUrls(List.of(Map.of(
+                "type", "table", "rows", List.of(Map.of("cells", List.of(Map.of(
+                        "header", true, "colspan", 2, "content", List.of(Map.of(
+                                "type", "image",
+                                "src", "https://bucket.s3.amazonaws.com/post/table.png?old=true")))))))));
+
+        Map<?, ?> row = (Map<?, ?>) ((List<?>) processed.getFirst().get("rows")).getFirst();
+        Map<?, ?> cell = (Map<?, ?>) ((List<?>) row.get("cells")).getFirst();
+        Map<?, ?> image = (Map<?, ?>) ((List<?>) cell.get("content")).getFirst();
+        assertThat(image.get("src")).isEqualTo("https://signed/table");
+        assertThat(cell.get("header")).isEqualTo(true);
+        assertThat(cell.get("colspan")).isEqualTo(2);
+    }
+
+    @Test
     void leavesExternalImagesUntouched() {
         FileService fileService = mock(FileService.class);
         JsonBlockContentProcessor processor = new JsonBlockContentProcessor(fileService);

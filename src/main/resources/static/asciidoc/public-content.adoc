@@ -17,7 +17,10 @@ include::{snippets}/public-subjects/http-response.adoc[]
 == Published problems without answers
 
 Problem `content` is a recursive JSON block array and may contain
-`{type: "statementGroup", items: [{label, content}]}` blocks.
+`{type: "statementGroup", items: [{label, content}]}` blocks,
+`{type: "table", rows: [{cells: [{content, header?, colspan?, rowspan?}]}]}` blocks
+(cells hidden by a merge are omitted), and inline math spans `{text: "<LaTeX>", math: true}`.
+Plain-text choice content wraps math in `$...$`.
 
 include::{snippets}/public-problems/http-request.adoc[]
 include::{snippets}/public-problems/http-response.adoc[]

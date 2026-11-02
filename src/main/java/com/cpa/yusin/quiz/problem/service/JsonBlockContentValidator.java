@@ -10,7 +10,10 @@ import java.util.Map;
 @Component
 public class JsonBlockContentValidator {
     private static final String STATEMENT_GROUP_TYPE = "statementGroup";
+    private static final String TABLE_TYPE = "table";
+    private static final String TEXT_TYPE = "text";
     private static final int MAX_LABEL_LENGTH = 20;
+    private static final int MAX_TABLE_SPAN = 1000;
 
     public void validate(List<Map<String, Object>> blocks) {
         if (blocks != null) {
@@ -20,8 +23,13 @@ public class JsonBlockContentValidator {
 
     private void validateNestedValue(Object value) {
         if (value instanceof Map<?, ?> map) {
-            if (STATEMENT_GROUP_TYPE.equals(map.get("type"))) {
+            Object type = map.get("type");
+            if (STATEMENT_GROUP_TYPE.equals(type)) {
                 validateStatementGroup(map);
+            } else if (TABLE_TYPE.equals(type)) {
+                validateTable(map);
+            } else if (TEXT_TYPE.equals(type)) {
+                validateMathSpans(map);
             }
             map.values().forEach(this::validateNestedValue);
         } else if (value instanceof List<?> list) {
@@ -57,6 +65,65 @@ public class JsonBlockContentValidator {
         }
     }
 
+    /**
+     * 병합으로 가려진 칸은 cells에 넣지 않으므로(HTML table 규칙) 행마다 칸 수가 다를 수 있고, 빈 행과 빈 칸도 허용한다.
+     */
+    private void validateTable(Map<?, ?> block) {
+        if (!(block.get("rows") instanceof List<?> rows) || rows.isEmpty()) {
+            throw invalidTable();
+        }
+
+        int cellCount = 0;
+        for (Object rowValue : rows) {
+            if (!(rowValue instanceof Map<?, ?> row) || !(row.get("cells") instanceof List<?> cells)) {
+                throw invalidTable();
+            }
+            for (Object cellValue : cells) {
+                if (!(cellValue instanceof Map<?, ?> cell)
+                        || !(cell.get("content") instanceof List<?> content)
+                        || content.stream().anyMatch(entry -> !(entry instanceof Map<?, ?>))
+                        || !isOptionalBoolean(cell.get("header"))
+                        || !isOptionalSpan(cell.get("colspan"))
+                        || !isOptionalSpan(cell.get("rowspan"))) {
+                    throw invalidTable();
+                }
+                cellCount++;
+            }
+        }
+        if (cellCount == 0) {
+            throw invalidTable();
+        }
+    }
+
+    /** 수식 span은 LaTeX 원문을 text에 둔다. math를 모르는 소비자도 원문을 표시하므로 빈 수식은 거부한다. */
+    private void validateMathSpans(Map<?, ?> block) {
+        if (!(block.get("spans") instanceof List<?> spans)) {
+            return;
+        }
+        for (Object spanValue : spans) {
+            if (!(spanValue instanceof Map<?, ?> span) || !isOptionalBoolean(span.get("math"))) {
+                throw invalidMath();
+            }
+            if (Boolean.TRUE.equals(span.get("math"))
+                    && !(span.get("text") instanceof String text && !text.isBlank())) {
+                throw invalidMath();
+            }
+        }
+    }
+
+    private boolean isOptionalBoolean(Object value) {
+        return value == null || value instanceof Boolean;
+    }
+
+    private boolean isOptionalSpan(Object value) {
+        if (value == null) {
+            return true;
+        }
+        return (value instanceof Integer || value instanceof Long)
+                && ((Number) value).longValue() >= 1
+                && ((Number) value).longValue() <= MAX_TABLE_SPAN;
+    }
+
     private boolean containsMeaningfulContent(Object value) {
         if (value instanceof Map<?, ?> map) {
             Object type = map.get("type");
@@ -88,5 +155,13 @@ public class JsonBlockContentValidator {
 
     private ContentException invalidStatementGroup() {
         return new ContentException(ExceptionMessage.INVALID_STATEMENT_GROUP);
+    }
+
+    private ContentException invalidTable() {
+        return new ContentException(ExceptionMessage.INVALID_TABLE);
+    }
+
+    private ContentException invalidMath() {
+        return new ContentException(ExceptionMessage.INVALID_MATH);
     }
 }

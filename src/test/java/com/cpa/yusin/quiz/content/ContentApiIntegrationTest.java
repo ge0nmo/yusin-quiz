@@ -344,6 +344,64 @@ class ContentApiIntegrationTest {
     }
 
     @Test
+    void adminStoresTablesAndInlineMathAsSubmitted() throws Exception {
+        String token = loginAdmin();
+        Exam exam = newerProblem.getExam();
+        Subject subject = newerProblem.getSubjectMapping().getSubject();
+
+        Map<String, Object> payload = problemPayload(exam.getId(), subject.getId(), 58);
+        payload.put("content", List.of(Map.of(
+                "type", "table",
+                "rows", List.of(
+                        Map.of("cells", List.of(
+                                Map.of("header", true, "colspan", 2, "content", List.of(Map.of(
+                                        "type", "text", "spans", List.of(Map.of("text", "구분"))))))),
+                        Map.of("cells", List.of(
+                                Map.of("content", List.of(Map.of("type", "text", "spans", List.of(
+                                        Map.of("text", "\\frac{1}{2}", "math", true))))),
+                                Map.of("content", List.of())))))));
+        payload.put("explanation", List.of(Map.of("type", "text", "spans", List.of(
+                Map.of("text", "x^2", "math", true)))));
+
+        mockMvc.perform(post("/api/admin/problems").header("Authorization", bearer(token))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(payload)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.data.content[0].type").value("table"))
+                .andExpect(jsonPath("$.data.content[0].rows[0].cells[0].header").value(true))
+                .andExpect(jsonPath("$.data.content[0].rows[0].cells[0].colspan").value(2))
+                .andExpect(jsonPath("$.data.content[0].rows[1].cells[0].content[0].spans[0].math").value(true))
+                .andExpect(jsonPath("$.data.content[0].rows[1].cells[0].content[0].spans[0].text")
+                        .value("\\frac{1}{2}"))
+                .andExpect(jsonPath("$.data.explanation[0].spans[0].math").value(true));
+    }
+
+    @Test
+    void adminRejectsMalformedTablesAndBlankMath() throws Exception {
+        String token = loginAdmin();
+        Exam exam = newerProblem.getExam();
+        Subject subject = newerProblem.getSubjectMapping().getSubject();
+
+        Map<String, Object> tablePayload = problemPayload(exam.getId(), subject.getId(), 59);
+        tablePayload.put("content", List.of(Map.of("type", "table", "rows", List.of(Map.of("cells", List.of(
+                Map.of("colspan", 0, "content", List.of())))))));
+        mockMvc.perform(post("/api/admin/problems").header("Authorization", bearer(token))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(tablePayload)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("INVALID_TABLE"));
+
+        Map<String, Object> mathPayload = problemPayload(exam.getId(), subject.getId(), 59);
+        mathPayload.put("explanation", List.of(Map.of("type", "text", "spans", List.of(
+                Map.of("text", " ", "math", true)))));
+        mockMvc.perform(post("/api/admin/problems").header("Authorization", bearer(token))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(mathPayload)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("INVALID_MATH"));
+    }
+
+    @Test
     void problemNumberAndNextNumberAreScopedByExamAndSubject() throws Exception {
         Exam exam = newerProblem.getExam();
         QualificationExam qualification = exam.getQualificationExam();

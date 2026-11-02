@@ -18,6 +18,12 @@ Public reads require PUBLISHED status on qualification, subject, mapping, exam a
 
 v1 problem responses contain content and choice text only; answer flags and explanations come only from v1 check/solutions. v2 content includes correct choice IDs but no explanations. v2 explanations are a separate endpoint reserved for future entitlement checks.
 
+## Blocks
+
+- Blocks are stored and returned as submitted maps; `JsonBlockContentValidator` checks `statementGroup`, `table` and math spans anywhere in the tree.
+- `table`: `{rows: [{cells: [{content: Block[], header?, colspan?, rowspan?}]}]}`. Cells hidden by a merge are omitted (HTML table rule), so row lengths may differ; empty cells are allowed. Errors: `INVALID_TABLE`.
+- Inline math: text span `{text: "<LaTeX>", math: true}`; LaTeX must be non-blank. Errors: `INVALID_MATH`. Plain-text choice content wraps math in `$...$` and is not parsed by the server.
+
 ## Images
 
-JSON blocks keep current rich editor/image capabilities. `/api/admin/file` keeps the S3 upload/presigned preview workflow. Managed image block URLs are re-signed on public/admin reads, including nested list blocks. Legacy HTML fields and converters are forbidden.
+JSON blocks keep current rich editor/image capabilities. `/api/admin/file` keeps the S3 upload/presigned preview workflow. Managed image block URLs are re-signed on public/admin reads, including nested list, statement group and table cell blocks. Legacy HTML fields and converters are forbidden.

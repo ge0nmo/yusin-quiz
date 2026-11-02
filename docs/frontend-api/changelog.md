@@ -1,5 +1,13 @@
 # Frontend API Changelog
 
+## 2026-11-02 — 표 블록과 인라인 수식
+
+- 문제 본문, 문제 해설, 보기별 해설 JSON block에 `{type:"table",rows:[{cells:[{content,header?,colspan?,rowspan?}]}]}`를 추가했다. 병합으로 가려진 칸은 `cells`에 넣지 않는다.
+- text block span에 `math:true`를 추가했다. `text`에 LaTeX 원문을 두므로 `math`를 모르는 앱도 원문은 잃지 않는다.
+- 보기 본문(plain text)의 수식은 `$...$`로 감싼다. 서버는 해석하지 않고 그대로 저장·반환한다.
+- 잘못된 표는 `400 INVALID_TABLE`, 빈 수식이나 boolean이 아닌 `math`는 `400 INVALID_MATH`로 관리자 생성·수정 API에서 거부한다.
+- API 경로와 최상위 요청·응답 구조는 바뀌지 않았다. 표와 병합·수식을 모르는 기존 앱은 표를 건너뛰거나 LaTeX 원문을 보여줄 수 있다.
+
 ## 2026-11-01 — v2 콘텐츠·해설 스냅샷
 
 - `GET /api/v2/qualification-exams/{code}/content`를 추가했다. 공개 과목, 문제, 보기, 정답 ID를 한 응답으로 반환하고 해설은 넣지 않는다.

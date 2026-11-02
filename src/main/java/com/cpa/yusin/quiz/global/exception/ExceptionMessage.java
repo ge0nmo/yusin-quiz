@@ -21,6 +21,8 @@ public enum ExceptionMessage {
     CHOICE_NOT_FOUND("보기를 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
     INVALID_PROBLEM_CHOICES("보기는 1번부터 연속이어야 하며 정답은 최소 하나 이상이어야 합니다.", HttpStatus.BAD_REQUEST),
     INVALID_STATEMENT_GROUP("지문 묶음의 라벨과 내용을 확인해 주세요.", HttpStatus.BAD_REQUEST),
+    INVALID_TABLE("표의 행, 칸, 병합 정보를 확인해 주세요.", HttpStatus.BAD_REQUEST),
+    INVALID_MATH("수식 내용을 확인해 주세요.", HttpStatus.BAD_REQUEST),
     INVALID_SUBJECT_MAPPING("문제 과목은 시험 자격시험에 연결된 과목이어야 합니다.", HttpStatus.BAD_REQUEST),
     CONTENT_IN_USE("사용 중인 콘텐츠는 삭제할 수 없습니다.", HttpStatus.CONFLICT),
     INVALID_DATA("유효하지 않은 데이터입니다.", HttpStatus.BAD_REQUEST),
