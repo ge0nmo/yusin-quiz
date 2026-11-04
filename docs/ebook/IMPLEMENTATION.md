@@ -178,6 +178,8 @@ Revision verification: 67 backend tests passed (0 failures/errors), including al
 
 Statement-group correction: `dl.statement` now groups each `dt`/`dd` pair in `.statement-item`. Float the label in a 2.2em column, indent content 2.4em, reset first/last block margins, and clear each item. This keeps labels such as ㄱ. on the first text line and aligns wrapped lines with the content, while preserving nested blocks and allowing long entries to paginate. All nine EPUB placement combinations still pass EPUBCheck. The supplied four-label example was checked in light/dark and 390px/24px browser renders; label/content top offsets are zero and no horizontal overflow occurs. This does not claim native Books pagination verification.
 
+Unlabeled single statement (2026-11-05): a statement group with exactly one item may have an empty label. `BlockNormalizer` keeps it as `""` (a blank label among 2+ items is still rejected), and `EpubRenderer` renders it as `div.statement > div.statement-body` instead of `dl.statement`, because a `dl` item needs a `dt`. `.statement-body` reuses the item spacing and first/last margin reset; there is no label column or indent. EPUBCheck passes.
+
 ## Warm light reading revision — 2026-09-19
 
 The current user interview supersedes the earlier serif, unset body colors, and dark-preview direction. Confirmed: EPUB across phone/tablet/PC and both orientations; balanced information density; Korean sans-serif defaults; light-only warm ivory canvas with a slightly deeper ivory explanation surface. Workbook references inform hierarchy rather than fixed print columns. See the replaced scoped `DESIGN.md` for exact built values.
