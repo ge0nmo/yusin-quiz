@@ -28,7 +28,7 @@ v2는 앱이 시작할 때마다 전체 스냅샷을 확인하고 기기에서 �
 
 공개 과목 전체와 각 과목의 문제, 보기, 정답 ID를 반환한다. 과목은 자격시험 연결 순서, 과목 안의 문제는 최신 시험 연도 우선이고 같은 연도는 원본 문제 번호 오름차순이다. 공개 문제가 없는 공개 과목도 빈 `problems`로 포함한다. 해설 필드는 없다. 정답은 `correctChoiceIds` 하나로만 표현하고 보기에 정답 플래그를 두지 않는다.
 
-문제 `content`는 JSON block 배열이다. 일반 블록과 함께 `{type:"statementGroup",items:[{label,content}]}`가 중첩될 수 있다. `label`은 `(가)`, `ㄱ.`, `A)`처럼 그대로 표시할 문자열이고, 각 `content`도 JSON block 배열이다.
+문제 `content`는 JSON block 배열이다. 일반 블록과 함께 `{type:"statementGroup",items:[{label,content}]}`가 중첩될 수 있다. `label`은 `(가)`, `ㄱ.`, `A)`처럼 그대로 표시할 문자열이고, 각 `content`도 JSON block 배열이다. 항목이 하나뿐인 묶음은 `label`이 `""`일 수 있다. 라벨이 비어 있거나 없거나 공백뿐이면 라벨 자리와 그 뒤 간격 없이 본문만 그리고, 묶음 상자(테두리·배경)는 그대로 그린다.
 
 표는 `{type:"table",rows:[{cells:[{content,header?,colspan?,rowspan?}]}],columnWidths?,border?}`다. `columnWidths`는 열별 너비(px)이며 화면 폭에 맞춰 비율로 쓴다. 없으면 모든 열이 같은 너비이고, 길이가 열 수와 다르면 모자란 열은 나머지 평균으로 채우고 남는 값은 무시한다. `border`는 `all`(모든 칸에 선, 기본값), `outer`(바깥 테두리만), `none`(선 없음)이며 없거나 모르는 값은 `all`로 그린다. `outer`·`none`에서는 머리글 칸에 배경색 없이 굵게만 표시한다. 병합으로 가려진 칸은 `cells`에 없으므로(HTML table 규칙) 행마다 칸 수가 다를 수 있다. `colspan`·`rowspan`이 없으면 1, `header`가 없으면 일반 칸이다.
 

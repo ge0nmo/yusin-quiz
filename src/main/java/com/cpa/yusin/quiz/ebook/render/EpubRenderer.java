@@ -143,6 +143,10 @@ public class EpubRenderer implements BookRenderer {
                     l.items().forEach(i -> html.append("<li>").append(blocks(i)).append("</li>"));
                     html.append("</").append(tag).append('>');
                 }
+                // dl 안의 항목은 dt가 있어야 하므로, 라벨 없는 단일 항목은 상자만 두고 본문을 그립니다.
+                case Statements s when s.items().size() == 1 && s.items().getFirst().label().isEmpty() ->
+                    html.append("<div class=\"statement\"><div class=\"statement-body\">")
+                            .append(blocks(s.items().getFirst().content())).append("</div></div>");
                 case Statements s -> {
                     html.append("<dl class=\"statement\">");
                     // 항목별로 묶어 기호와 첫 문장을 같은 줄에 두고, 여러 문단/중첩 목록은 그대로 보존합니다.

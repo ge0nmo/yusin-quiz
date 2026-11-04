@@ -33,8 +33,10 @@ include::{snippets}/admin-next-problem-number/http-response.adoc[]
 
 Problem, problem-explanation, and choice-explanation block arrays may contain a recursive
 `statementGroup` block. Its `items` array must contain at least one item. Each item has a
-trimmed, non-blank `label` of at most 20 characters and a `content` block array containing
-meaningful text or an image. Invalid or partial groups return `400 INVALID_STATEMENT_GROUP`.
+string `label` of at most 20 characters after trimming and a `content` block array containing
+meaningful text or an image. The label must be non-blank when the group has two or more items;
+a group with exactly one item may send `label: ""` (the field is still required). Invalid or
+partial groups return `400 INVALID_STATEMENT_GROUP`.
 
 Block arrays may also contain `{type: "table", rows: [{cells: [{content, header?, colspan?, rowspan?}]}]}`.
 `rows` must be non-empty and the table must have at least one cell. Cells hidden by a merge are omitted

@@ -50,11 +50,28 @@ class JsonBlockContentValidatorTest {
     }
 
     @Test
-    void rejectsBlankOrLongLabels() {
+    void acceptsBlankLabelOnlyForSingleItemGroups() {
         Map<String, Object> content = Map.of("type", "text", "spans", List.of(Map.of("text", "내용")));
 
-        assertInvalid(statementGroup(Map.of("label", "  ", "content", List.of(content))));
+        assertThatCode(() -> validator.validate(statementGroup(Map.of("label", "", "content", List.of(content)))))
+                .doesNotThrowAnyException();
+        assertThatCode(() -> validator.validate(statementGroup(Map.of("label", "  ", "content", List.of(content)))))
+                .doesNotThrowAnyException();
+    }
+
+    @Test
+    void rejectsBlankLabelsInMultiItemGroupsAndLongOrNonStringLabels() {
+        Map<String, Object> content = Map.of("type", "text", "spans", List.of(Map.of("text", "내용")));
+
+        assertInvalid(List.of(Map.of("type", "statementGroup", "items", List.of(
+                Map.of("label", "(가)", "content", List.of(content)),
+                Map.of("label", "", "content", List.of(content))))));
+        assertInvalid(List.of(Map.of("type", "statementGroup", "items", List.of(
+                Map.of("label", "  ", "content", List.of(content)),
+                Map.of("label", "(나)", "content", List.of(content))))));
         assertInvalid(statementGroup(Map.of("label", "123456789012345678901", "content", List.of(content))));
+        assertInvalid(statementGroup(Map.of("content", List.of(content))));
+        assertInvalid(statementGroup(Map.of("label", 1, "content", List.of(content))));
     }
 
     @Test

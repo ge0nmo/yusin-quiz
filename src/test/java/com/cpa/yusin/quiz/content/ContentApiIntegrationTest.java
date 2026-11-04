@@ -435,6 +435,37 @@ class ContentApiIntegrationTest {
     }
 
     @Test
+    void adminStoresSingleUnlabeledStatementGroupButRejectsBlankLabelAmongSeveral() throws Exception {
+        String token = loginAdmin();
+        Exam exam = newerProblem.getExam();
+        Subject subject = newerProblem.getSubjectMapping().getSubject();
+        Map<String, Object> text = Map.of("type", "text", "spans", List.of(Map.of("text", "제시문")));
+
+        Map<String, Object> payload = problemPayload(exam.getId(), subject.getId(), 54);
+        payload.put("content", List.of(Map.of(
+                "type", "statementGroup",
+                "items", List.of(Map.of("label", "", "content", List.of(text))))));
+        mockMvc.perform(post("/api/admin/problems").header("Authorization", bearer(token))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(payload)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.data.content[0].items[0].label").value(""))
+                .andExpect(jsonPath("$.data.content[0].items[0].content[0].spans[0].text").value("제시문"));
+
+        Map<String, Object> rejected = problemPayload(exam.getId(), subject.getId(), 55);
+        rejected.put("content", List.of(Map.of(
+                "type", "statementGroup",
+                "items", List.of(
+                        Map.of("label", "(가)", "content", List.of(text)),
+                        Map.of("label", "", "content", List.of(text))))));
+        mockMvc.perform(post("/api/admin/problems").header("Authorization", bearer(token))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(rejected)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("INVALID_STATEMENT_GROUP"));
+    }
+
+    @Test
     void adminStoresTablesAndInlineMathAsSubmitted() throws Exception {
         String token = loginAdmin();
         Exam exam = newerProblem.getExam();

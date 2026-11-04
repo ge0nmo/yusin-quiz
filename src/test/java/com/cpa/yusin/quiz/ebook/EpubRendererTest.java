@@ -106,6 +106,34 @@ class EpubRendererTest {
     }
 
     @Test
+    void singleUnlabeledStatementRendersOnlyItsContentAndPassesEpubcheck() throws Exception {
+        var content = normalizer.normalize(List.of(Map.of("type", "statementGroup", "items", List.of(
+                Map.of("label", " ", "content", List.of(Map.of("type", "text", "text", "라벨 없는 제시문")))))), "샘플");
+        assertThat(content).singleElement().isInstanceOfSatisfying(Statements.class,
+                s -> assertThat(s.items()).singleElement().extracting(Statement::label).isEqualTo(""));
+        assertThatThrownBy(() -> normalizer.normalize(List.of(Map.of("type", "statementGroup", "items", List.of(
+                Map.of("label", "(가)", "content", List.of(Map.of("type", "text", "text", "첫 제시문"))),
+                Map.of("label", "", "content", List.of(Map.of("type", "text", "text", "둘째 제시문")))))), "문제 12"))
+                .isInstanceOf(EbookValidationException.class).hasMessageContaining("문제 12").hasMessageContaining("라벨");
+
+        var original = sampleBook();
+        var question = original.questions().getFirst();
+        var book = new BookModel(original.identifier(), original.title(), original.qualificationCode(), original.capturedAt(),
+                List.of(new Question(question.id(), question.examId(), question.examName(), question.year(), question.subjectId(),
+                        question.subjectName(), question.subjectOrder(), question.number(), content,
+                        question.explanation(), question.choices())));
+        var settings = new BookSettings(BookSettings.YearOrder.NEWEST_FIRST,
+                BookSettings.Placement.AFTER_QUESTION, BookSettings.Placement.YEAR_END);
+        byte[] data = renderer.render(composer.compose(book, settings), settings);
+        Path path = temporary.resolve("unlabeled.epub");
+        Files.write(path, data);
+        assertThat(new EpubCheck(path.toFile()).doValidate()).isZero();
+        assertThat(unzip(data).get("EPUB/year-2025.xhtml"))
+                .contains("<div class=\"statement\"><div class=\"statement-body\"><p class=\"original\" style=\"text-align:left\">라벨 없는 제시문</p></div></div>")
+                .doesNotContain("<dt>", "<dl");
+    }
+
+    @Test
     void writesRepresentativeSampleForHumanReview() throws Exception {
         var settings = new BookSettings(BookSettings.YearOrder.NEWEST_FIRST,
                 BookSettings.Placement.AFTER_QUESTION, BookSettings.Placement.YEAR_END);

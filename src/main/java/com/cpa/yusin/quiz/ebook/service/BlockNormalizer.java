@@ -50,12 +50,14 @@ public class BlockNormalizer {
                 }
                 case "statementGroup" -> {
                     List<Statement> items = new ArrayList<>();
-                    for (Object child : array(block.get("items"))) {
+                    List<?> children = array(block.get("items"));
+                    for (Object child : children) {
                         Map<?, ?> item = object(child);
                         String label = string(item, "label", "");
                         List<Block> content = blocks(array(item.get("content")), depth + 1);
-                        if (label.isBlank() || !hasText(content)) throw invalid("제시문 라벨/본문이 비어 있습니다.");
-                        items.add(new Statement(label, content));
+                        // 항목이 하나뿐인 묶음만 라벨 없이 둘 수 있습니다(저장 검증과 같은 규칙).
+                        if ((label.isBlank() && children.size() > 1) || !hasText(content)) throw invalid("제시문 라벨/본문이 비어 있습니다.");
+                        items.add(new Statement(label.isBlank() ? "" : label, content));
                     }
                     if (items.isEmpty()) throw invalid("제시문이 비어 있습니다.");
                     result.add(new Statements(items));

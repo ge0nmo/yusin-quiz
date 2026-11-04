@@ -21,6 +21,7 @@ Public content is served by v2 only (the v1 content endpoints were removed). v2 
 ## Blocks
 
 - Blocks are stored and returned as submitted maps; `JsonBlockContentValidator` checks `statementGroup`, `table` and math spans anywhere in the tree.
+- `statementGroup`: `{items: [{label: string, content: Block[]}]}`. `label` is always a string of at most 20 chars after strip; it may be blank only when the group has exactly one item. Every item needs meaningful text or an image. Errors: `INVALID_STATEMENT_GROUP`. The ebook normalizer applies the same label rule and renders an unlabeled single item as `div.statement > div.statement-body` (no `dl`/`dt`).
 - `table`: `{rows: [{cells: [{content: Block[], header?, colspan?, rowspan?}]}], columnWidths?: int[], border?: "all"|"outer"|"none"}`. `columnWidths` is one 1..10000 px width per column, used as proportions; the server does not check it against the column count. `border` defaults to `all` (grid); `outer` draws only the outer frame and `none` no lines; any other value is rejected. Cells hidden by a merge are omitted (HTML table rule), so row lengths may differ; empty cells are allowed. Errors: `INVALID_TABLE`.
 - Inline math: text span `{text: "<LaTeX>", math: true}`; LaTeX must be non-blank. Errors: `INVALID_MATH`. Plain-text choice content wraps math in `$...$` and is not parsed by the server.
 

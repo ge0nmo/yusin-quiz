@@ -51,9 +51,10 @@ public class JsonBlockContentValidator {
                 throw invalidStatementGroup();
             }
 
+            // 항목이 하나뿐인 묶음은 라벨 없이(빈 문자열) 저장할 수 있습니다.
             Object labelValue = item.get("label");
             if (!(labelValue instanceof String label)
-                    || label.strip().isEmpty()
+                    || (label.strip().isEmpty() && items.size() > 1)
                     || label.strip().length() > MAX_LABEL_LENGTH) {
                 throw invalidStatementGroup();
             }

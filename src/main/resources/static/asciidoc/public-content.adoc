@@ -18,7 +18,8 @@ Every published subject with its problems, choices and `correctChoiceIds`. Expla
 The `ETag` header equals `data.version`; send it back as `If-None-Match` to receive `304 Not Modified`.
 
 Problem `content` is a recursive JSON block array and may contain
-`{type: "statementGroup", items: [{label, content}]}` blocks,
+`{type: "statementGroup", items: [{label, content}]}` blocks (a group with exactly one item may have an
+empty `label`; render only its content, without a label prefix),
 `{type: "table", rows: [{cells: [{content, header?, colspan?, rowspan?}]}], columnWidths?, border?}` blocks
 (cells hidden by a merge are omitted; `columnWidths` are per-column pixel widths used as proportions;
 `border` is `all` (default grid), `outer` or `none`, and unknown values render as `all`), and inline math

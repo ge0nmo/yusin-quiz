@@ -65,6 +65,9 @@ li { margin: .35em 0; }
 .statement-item > dd { margin: 0 0 0 2.4em; }
 .statement-item > dd > :first-child { margin-top: 0; }
 .statement-item > dd > :last-child { margin-bottom: 0; }
+.statement-body { margin: .4em 0; }
+.statement-body > :first-child { margin-top: 0; }
+.statement-body > :last-child { margin-bottom: 0; }
 blockquote { margin: .75em 0 .75em 1em; }
 .underline { text-decoration: underline; }
 .strike { text-decoration: line-through; }

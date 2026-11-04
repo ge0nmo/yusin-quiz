@@ -49,7 +49,7 @@ Only short source headings and answer lines resist splitting. Headings request a
 - **Question:** original number with subtle green accent, smaller unit, compact neutral source line, original body and hanging numbered choices.
 - **Answer:** a short bold line, with no fill, frame or colored text. Multiple correct choices are preserved.
 - **Explanation:** plain paragraphs. Show the generated `해설` heading for an inline overall explanation; when only per-choice explanations exist, start directly with `N번 보기 해설`. Standalone entries keep their question number/source. Per-choice headings use weight and spacing only.
-- **Statements:** thin neutral frame; `2.2em` label column and `2.4em` hanging indent, `.4em` between rows. Preserve label/first-line alignment and allow long rows to fragment.
+- **Statements:** thin neutral frame; `2.2em` label column and `2.4em` hanging indent, `.4em` between rows. Preserve label/first-line alignment and allow long rows to fragment. A single unlabeled item keeps the frame and renders only its content, with no label column or indent.
 - **Contents:** neutral ruled rows, inherited link color, visible keyboard focus. No per-question return/answer-check buttons.
 - **Cover:** existing cream/green typographic SVG remains unchanged; the revision concerns reading pages.
 
