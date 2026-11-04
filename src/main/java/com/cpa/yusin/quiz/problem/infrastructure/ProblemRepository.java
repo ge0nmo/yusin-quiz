@@ -28,18 +28,6 @@ public interface ProblemRepository extends JpaRepository<Problem, Long> {
     @EntityGraph(attributePaths = {"exam", "exam.qualificationExam", "subjectMapping", "subjectMapping.subject", "choices"})
     @Query("select distinct p from Problem p " +
             "where p.exam.qualificationExam.code = :code " +
-            "and p.subjectMapping.subject.id = :subjectId " +
-            "and p.status = com.cpa.yusin.quiz.common.domain.ContentStatus.PUBLISHED " +
-            "and p.exam.status = com.cpa.yusin.quiz.common.domain.ContentStatus.PUBLISHED " +
-            "and p.exam.qualificationExam.status = com.cpa.yusin.quiz.common.domain.ContentStatus.PUBLISHED " +
-            "and p.subjectMapping.status = com.cpa.yusin.quiz.common.domain.ContentStatus.PUBLISHED " +
-            "and p.subjectMapping.subject.status = com.cpa.yusin.quiz.common.domain.ContentStatus.PUBLISHED " +
-            "order by p.exam.year desc, p.number asc")
-    List<Problem> findPublished(@Param("code") QualificationExamCode code, @Param("subjectId") Long subjectId);
-
-    @EntityGraph(attributePaths = {"exam", "exam.qualificationExam", "subjectMapping", "subjectMapping.subject", "choices"})
-    @Query("select distinct p from Problem p " +
-            "where p.exam.qualificationExam.code = :code " +
             "and p.status = com.cpa.yusin.quiz.common.domain.ContentStatus.PUBLISHED " +
             "and p.exam.status = com.cpa.yusin.quiz.common.domain.ContentStatus.PUBLISHED " +
             "and p.exam.qualificationExam.status = com.cpa.yusin.quiz.common.domain.ContentStatus.PUBLISHED " +

@@ -111,7 +111,7 @@ class ContentV2ApiIntegrationTest {
     }
 
     @Test
-    void contentIncludesAnswersWithoutExplanationsInV1Order() throws Exception {
+    void contentIncludesAnswersWithoutExplanationsInBackendOrder() throws Exception {
         Choice correctChoice = newerProblem.getChoices().stream().filter(Choice::isAnswer).findFirst().orElseThrow();
 
         MvcResult result = mockMvc.perform(get(CONTENT, "APPRAISER"))
@@ -261,6 +261,72 @@ class ContentV2ApiIntegrationTest {
     }
 
     @Test
+    void choiceImagesAreFreshlySignedAndVersionedByObjectKey() throws Exception {
+        JsonNode withoutImages = data(mockMvc.perform(get(CONTENT, "APPRAISER")).andExpect(status().isOk()).andReturn());
+        JsonNode plainChoice = withoutImages.at("/subjects/0/problems/0/choices/0");
+        assertThat(plainChoice.has("imageUrl")).isTrue();
+        assertThat(plainChoice.path("imageUrl").isNull()).isTrue();
+        String versionWithoutImages = withoutImages.path("version").asText();
+
+        // 관리 이미지가 아닌 http(s) URL은 그대로 내려주고 서명 만료 시각도 없다.
+        String externalUrl = "https://cdn.example.com/graph.png";
+        updateChoiceImage(newerProblem.getId(), 2, externalUrl);
+        JsonNode external = data(mockMvc.perform(get(CONTENT, "APPRAISER")).andExpect(status().isOk()).andReturn());
+        assertThat(external.at("/subjects/0/problems/0/choices/1/imageUrl").asText()).isEqualTo(externalUrl);
+        assertThat(external.path("imageUrlsExpireAt").isNull()).isTrue();
+        assertThat(external.path("version").asText()).isNotEqualTo(versionWithoutImages);
+        updateChoiceImage(newerProblem.getId(), 2, null);
+
+        String objectKey = s3Prefix + "/choice-graph.png";
+        String managedImage = "https://bucket.s3.amazonaws.com/" + objectKey;
+        updateChoice(newerProblem.getId(), 1, "", false);
+        updateChoiceImage(newerProblem.getId(), 1, managedImage + "?X-Amz-Signature=first");
+        when(fileService.generatePresignedUrl(objectKey))
+                .thenReturn("https://signed/1", "https://signed/2", "https://signed/3", "https://signed/4");
+
+        JsonNode first = data(mockMvc.perform(get(CONTENT, "APPRAISER")).andExpect(status().isOk()).andReturn());
+        JsonNode second = data(mockMvc.perform(get(CONTENT, "APPRAISER")).andExpect(status().isOk()).andReturn());
+        assertThat(first.at("/subjects/0/problems/0/choices/0/content").asText()).isEmpty();
+        assertThat(first.at("/subjects/0/problems/0/choices/0/imageUrl").asText()).isEqualTo("https://signed/1");
+        assertThat(second.at("/subjects/0/problems/0/choices/0/imageUrl").asText()).isEqualTo("https://signed/2");
+        assertThat(first.at("/subjects/0/problems/0/choices/1/imageUrl").isNull()).isTrue();
+        // 본문 이미지 블록이 없어도 보기 이미지만으로 서명 만료 시각을 알린다.
+        assertThat(first.at("/subjects/0/problems/0/content/0/type").asText()).isEqualTo("text");
+        assertThat(first.path("imageUrlsExpireAt").isTextual()).isTrue();
+        String imageVersion = first.path("version").asText();
+        assertThat(second.path("version").asText()).isEqualTo(imageVersion);
+        assertThat(imageVersion).isNotEqualTo(versionWithoutImages);
+
+        // 저장된 URL의 서명만 달라지면 version은 그대로다.
+        updateChoiceImage(newerProblem.getId(), 1, managedImage + "?X-Amz-Signature=second");
+        assertThat(etag(CONTENT)).isEqualTo("\"" + imageVersion + "\"");
+
+        // 다른 이미지로 바꾸면 version이 바뀐다.
+        updateChoiceImage(newerProblem.getId(), 1, "https://bucket.s3.amazonaws.com/" + s3Prefix + "/other.png");
+        String replacedVersion = assertChanged(CONTENT, "\"" + imageVersion + "\"");
+
+        // 이미지를 지우면 version이 바뀌고, 본문까지 되돌리면 처음 version과 같다.
+        updateChoiceImage(newerProblem.getId(), 1, null);
+        assertChanged(CONTENT, replacedVersion);
+        updateChoice(newerProblem.getId(), 1, "보기 1", false);
+        assertThat(etag(CONTENT)).isEqualTo("\"" + versionWithoutImages + "\"");
+    }
+
+    @Test
+    void choiceImagesDoNotChangeExplanations() throws Exception {
+        String objectKey = s3Prefix + "/choice-graph.png";
+        String explanationsVersion = etag(EXPLANATIONS);
+
+        updateChoiceImage(newerProblem.getId(), 1, "https://bucket.s3.amazonaws.com/" + objectKey);
+        when(fileService.generatePresignedUrl(objectKey)).thenReturn("https://signed/choice");
+
+        MvcResult explanations = mockMvc.perform(get(EXPLANATIONS, "APPRAISER")).andExpect(status().isOk()).andReturn();
+        assertThat(explanations.getResponse().getContentAsString()).doesNotContain("\"imageUrl\"");
+        assertThat(data(explanations).path("imageUrlsExpireAt").isNull()).isTrue();
+        assertThat(explanations.getResponse().getHeader(HttpHeaders.ETAG)).isEqualTo(explanationsVersion);
+    }
+
+    @Test
     void unknownOrUnpublishedQualificationIsNotFound() throws Exception {
         mockMvc.perform(get(CONTENT, "CUSTOMS_BROKER"))
                 .andExpect(status().isNotFound())
@@ -290,6 +356,14 @@ class ContentV2ApiIntegrationTest {
         Choice choice = problem.getChoices().stream().filter(candidate -> candidate.getNumber() == number)
                 .findFirst().orElseThrow();
         choice.update(content, answer, choice.getExplanation());
+        problemRepository.saveAndFlush(problem);
+    }
+
+    private void updateChoiceImage(Long problemId, int number, String imageUrl) {
+        Problem problem = problemRepository.findDetailById(problemId).orElseThrow();
+        Choice choice = problem.getChoices().stream().filter(candidate -> candidate.getNumber() == number)
+                .findFirst().orElseThrow();
+        choice.update(choice.getContent(), imageUrl, choice.isAnswer(), choice.getExplanation());
         problemRepository.saveAndFlush(problem);
     }
 

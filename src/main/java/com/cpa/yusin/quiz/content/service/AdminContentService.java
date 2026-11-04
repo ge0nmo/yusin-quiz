@@ -20,6 +20,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.*;
 
 @Service
@@ -189,14 +191,7 @@ public class AdminContentService {
         validateProblemNumber(id, exam, mapping, request.number());
         problem.update(exam, mapping, request.number(), request.status(), request.content(),
                 safeBlocks(request.explanation()));
-        Map<Integer, Choice> existing = new HashMap<>();
-        problem.getChoices().forEach(choice -> existing.put(choice.getNumber(), choice));
-        if (existing.size() != 5) {
-            problem.replaceChoices(newChoices(request.choices()));
-        } else {
-            request.choices().forEach(choiceRequest -> existing.get(choiceRequest.number()).update(
-                    choiceRequest.content().trim(), choiceRequest.isAnswer(), safeBlocks(choiceRequest.explanation())));
-        }
+        synchronizeChoices(problem, request.choices());
         return toProblemDetail(problem);
     }
 
@@ -250,9 +245,10 @@ public class AdminContentService {
     /**
      * 문제 보기(Choice) 유효성 검증.
      * <p>
-     * - 보기 null 또는 비어있음 여부 확인<br>
+     * - 보기 null 또는 비어있음 여부 확인 (개수 2~5는 요청 DTO의 {@code @Size}가 검사)<br>
      * - 보기 번호가 1부터 N(보기 개수)까지 중간 빠짐없이 순차적으로 구성되어 있는지 확인<br>
-     * - 정답으로 표시된 보기가 최소 1개 이상 존재하는지 검증 (복수 정답 허용)
+     * - 정답으로 표시된 보기가 최소 1개 이상 존재하는지 검증 (복수 정답 허용)<br>
+     * - 보기 이미지 URL은 2048자 이하의 http(s) URL인지 검증 (본문·이미지 중 하나는 {@code @ChoiceContentOrImage}가 검사)
      * </p>
      */
     private void validateChoices(List<ChoiceRequest> choices) {
@@ -269,6 +265,36 @@ public class AdminContentService {
                 || choices.stream().filter(ChoiceRequest::isAnswer).count() < 1) {
             throw new ContentException(ExceptionMessage.INVALID_PROBLEM_CHOICES);
         }
+        choices.forEach(choice -> validateChoiceImageUrl(choiceImageUrl(choice)));
+    }
+
+    private void validateChoiceImageUrl(String imageUrl) {
+        if (imageUrl == null) {
+            return;
+        }
+        if (imageUrl.length() > Choice.MAX_IMAGE_URL_LENGTH) {
+            throw new ContentException(ExceptionMessage.INVALID_CHOICE_IMAGE);
+        }
+        try {
+            URI uri = new URI(imageUrl);
+            String scheme = uri.getScheme();
+            if (!("http".equalsIgnoreCase(scheme) || "https".equalsIgnoreCase(scheme))
+                    || uri.getHost() == null || uri.getHost().isBlank()) {
+                throw new ContentException(ExceptionMessage.INVALID_CHOICE_IMAGE);
+            }
+        } catch (URISyntaxException exception) {
+            throw new ContentException(ExceptionMessage.INVALID_CHOICE_IMAGE);
+        }
+    }
+
+    /** 그림만 있는 보기는 content가 비어 있으므로 null도 빈 문자열로 저장한다. */
+    private String choiceContent(ChoiceRequest choice) {
+        return choice.content() == null ? "" : choice.content().trim();
+    }
+
+    /** null·빈 문자열은 이미지 없음이다. 이미지 블록 src처럼 보낸 URL을 그대로 저장한다. */
+    private String choiceImageUrl(ChoiceRequest choice) {
+        return choice.imageUrl() == null || choice.imageUrl().isBlank() ? null : choice.imageUrl().trim();
     }
 
     private void validateRichContent(ProblemRequest request) {
@@ -297,11 +323,34 @@ public class AdminContentService {
         }
     }
 
+    /**
+     * 보기를 번호 기준으로 맞춘다. 남아 있는 번호는 같은 행을 고쳐 id를 유지하고, 줄어든 번호는 지우고, 늘어난 번호는 새로 만든다.
+     * <p>
+     * 번호는 1..N으로 검증되었으므로 지우는 번호(N 초과)와 새로 만드는 번호(기존 개수 초과)가 겹치지 않아
+     * Hibernate flush 순서와 관계없이 {@code uk_choice_problem_number}를 위반하지 않는다.
+     * </p>
+     */
+    private void synchronizeChoices(Problem problem, List<ChoiceRequest> requests) {
+        problem.removeChoicesNumberedAbove(requests.size());
+        Map<Integer, Choice> existing = new HashMap<>();
+        problem.getChoices().forEach(choice -> existing.put(choice.getNumber(), choice));
+        requests.stream().sorted(Comparator.comparingInt(ChoiceRequest::number)).forEach(request -> {
+            Choice choice = existing.get(request.number());
+            if (choice == null) {
+                problem.addChoice(new Choice(request.number(), choiceContent(request), choiceImageUrl(request),
+                        request.isAnswer(), safeBlocks(request.explanation())));
+            } else {
+                choice.update(choiceContent(request), choiceImageUrl(request), request.isAnswer(),
+                        safeBlocks(request.explanation()));
+            }
+        });
+    }
+
     private List<Choice> newChoices(List<ChoiceRequest> requests) {
         return requests.stream()
                 .sorted(Comparator.comparingInt(ChoiceRequest::number))
-                .map(request -> new Choice(request.number(), request.content().trim(), request.isAnswer(),
-                        safeBlocks(request.explanation())))
+                .map(request -> new Choice(request.number(), choiceContent(request), choiceImageUrl(request),
+                        request.isAnswer(), safeBlocks(request.explanation())))
                 .toList();
     }
 
@@ -364,7 +413,8 @@ public class AdminContentService {
         List<ChoiceDetailResponse> choices = problem.getChoices().stream()
                 .sorted(Comparator.comparingInt(Choice::getNumber))
                 .map(choice -> new ChoiceDetailResponse(choice.getId(), choice.getNumber(), choice.getContent(),
-                        choice.isAnswer(), blockContentProcessor.withFreshImageUrls(choice.getExplanation())))
+                        blockContentProcessor.withFreshImageUrl(choice.getImageUrl()), choice.isAnswer(),
+                        blockContentProcessor.withFreshImageUrls(choice.getExplanation())))
                 .toList();
         return new ProblemDetailResponse(problem.getId(), problem.getExam().getId(),
                 problem.getSubjectMapping().getSubject().getId(), problem.getNumber(), problem.getStatus(),

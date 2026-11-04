@@ -4,41 +4,30 @@
 :toc: left
 :source-highlighter: highlightjs
 
+Public content is served by v2 only. The v1 content endpoints (subjects, problems, check, solutions) were
+removed; the app version policy below and the health checks `/api/v1/hc` and `/api/v1/env` stay on v1 paths.
+
 == App version policy
 
 include::{snippets}/public-app-version-policy/http-request.adoc[]
 include::{snippets}/public-app-version-policy/http-response.adoc[]
 
-== Published subjects
-
-include::{snippets}/public-subjects/http-request.adoc[]
-include::{snippets}/public-subjects/http-response.adoc[]
-
-== Published problems without answers
-
-Problem `content` is a recursive JSON block array and may contain
-`{type: "statementGroup", items: [{label, content}]}` blocks,
-`{type: "table", rows: [{cells: [{content, header?, colspan?, rowspan?}]}], columnWidths?}` blocks
-(cells hidden by a merge are omitted; `columnWidths` are per-column pixel widths used as proportions), and inline math spans `{text: "<LaTeX>", math: true}`.
-Plain-text choice content wraps math in `$...$`.
-
-include::{snippets}/public-problems/http-request.adoc[]
-include::{snippets}/public-problems/http-response.adoc[]
-
-== Check selected choice
-
-include::{snippets}/public-check-answer/http-request.adoc[]
-include::{snippets}/public-check-answer/http-response.adoc[]
-
-== Solutions after a set
-
-include::{snippets}/public-solutions/http-request.adoc[]
-include::{snippets}/public-solutions/http-response.adoc[]
-
 == v2 content snapshot
 
 Every published subject with its problems, choices and `correctChoiceIds`. Explanations are not included.
 The `ETag` header equals `data.version`; send it back as `If-None-Match` to receive `304 Not Modified`.
+
+Problem `content` is a recursive JSON block array and may contain
+`{type: "statementGroup", items: [{label, content}]}` blocks,
+`{type: "table", rows: [{cells: [{content, header?, colspan?, rowspan?}]}], columnWidths?, border?}` blocks
+(cells hidden by a merge are omitted; `columnWidths` are per-column pixel widths used as proportions;
+`border` is `all` (default grid), `outer` or `none`, and unknown values render as `all`), and inline math
+spans `{text: "<LaTeX>", math: true}`. Plain-text choice content wraps math in `$...$`.
+
+Each choice is `{id, number, content, imageUrl}`. `imageUrl` is the choice image, freshly signed when it is a
+managed image, or `null`. An image-only choice has an empty `content`. Managed image URLs (image blocks and
+choice images) are hashed by object key, so a new signature alone keeps the version; adding, replacing or
+removing an image changes it. `imageUrlsExpireAt` is set whenever the response contains a managed image.
 
 include::{snippets}/public-v2-content/http-request.adoc[]
 include::{snippets}/public-v2-content/http-response.adoc[]

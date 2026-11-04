@@ -32,14 +32,18 @@ public final class AdminContentDto {
                                String qualificationExamName, String name, int year,
                                ContentStatus status, long problemCount) {}
 
-    public record ChoiceRequest(Long id, @Min(1) @Max(5) int number, @NotBlank String content,
+    /**
+     * 그림만 있는 보기는 content가 빈 문자열이다. imageUrl은 null·빈 문자열이면 이미지 없음이며 형식은 서비스에서 검사한다.
+     */
+    @ChoiceContentOrImage
+    public record ChoiceRequest(Long id, @Min(1) @Max(5) int number, String content, String imageUrl,
                                 boolean isAnswer, List<Map<String, Object>> explanation) {}
     public record ProblemRequest(@NotNull Long examId, @NotNull Long subjectId, @Positive int number,
                                  @NotNull ContentStatus status,
                                  @NotEmpty List<Map<String, Object>> content,
                                  List<Map<String, Object>> explanation,
-                                 @NotNull @Size(min = 5, max = 5) List<@Valid ChoiceRequest> choices) {}
-    public record ChoiceDetailResponse(Long id, int number, String content, boolean isAnswer,
+                                 @NotNull @Size(min = 2, max = 5) List<@Valid ChoiceRequest> choices) {}
+    public record ChoiceDetailResponse(Long id, int number, String content, String imageUrl, boolean isAnswer,
                                        List<Map<String, Object>> explanation) {}
     public record ProblemDetailResponse(Long id, Long examId, Long subjectId, int number,
                                         ContentStatus status, List<Map<String, Object>> content,

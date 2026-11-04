@@ -15,7 +15,8 @@ public final class PublicContentV2Dto {
     public record SubjectContentResponse(Long id, String name, long problemCount,
                                          List<ProblemContentResponse> problems) {}
     public record ExamResponse(Long id, String name, int year) {}
-    public record ChoiceResponse(Long id, int number, String content) {}
+    /** imageUrl은 보기 이미지(관리 이미지면 새 서명 URL)이며 없으면 null이다. 그림만 있는 보기는 content가 빈 문자열이다. */
+    public record ChoiceResponse(Long id, int number, String content, String imageUrl) {}
     public record ProblemContentResponse(Long id, int number, ExamResponse exam, List<Map<String, Object>> content,
                                          List<Long> correctChoiceIds, List<ChoiceResponse> choices) {}
 

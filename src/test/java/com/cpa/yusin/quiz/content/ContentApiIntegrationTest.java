@@ -24,6 +24,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
@@ -42,6 +43,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static com.epages.restdocs.apispec.MockMvcRestDocumentationWrapper.document;
@@ -65,11 +67,12 @@ class ContentApiIntegrationTest {
     @Autowired PasswordEncoder passwordEncoder;
     @Autowired JwtService jwtService;
     @MockBean FileService fileService;
+    // CI는 시크릿의 테스트 설정을 쓰므로 관리 이미지 경로는 설정된 prefix로 만든다.
+    @Value("${cloud.aws.s3.prefix}") String s3Prefix;
 
     private MockMvc mockMvc;
     private Problem olderProblem;
     private Problem newerProblem;
-    private Choice correctChoice;
 
     @BeforeEach
     void setUp(RestDocumentationContextProvider restDocumentation) {
@@ -95,68 +98,6 @@ class ContentApiIntegrationTest {
 
         olderProblem = saveProblem(exam2022, mapping, 41, "오래된 문제");
         newerProblem = saveProblem(exam2025, mapping, 56, "새 문제");
-        correctChoice = newerProblem.getChoices().stream().filter(Choice::isAnswer).findFirst().orElseThrow();
-    }
-
-    @Test
-    void publicCatalogDoesNotLeakAnswersOrExplanationsAndUsesBackendOrder() throws Exception {
-        newerProblem.update(newerProblem.getExam(), newerProblem.getSubjectMapping(), newerProblem.getNumber(),
-                newerProblem.getStatus(), statementGroupContent(), newerProblem.getExplanation());
-        problemRepository.saveAndFlush(newerProblem);
-
-        mockMvc.perform(get("/api/v1/qualification-exams/{code}/subjects", "APPRAISER"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data", hasSize(1)))
-                .andExpect(jsonPath("$.data[0].name").value("회계학"))
-                .andExpect(jsonPath("$.data[0].problemCount").value(2))
-                .andDo(document("public-subjects", api("Public Content", "자격시험의 공개 과목 목록 조회")));
-
-        mockMvc.perform(get("/api/v1/qualification-exams/{code}/subjects/{subjectId}/problems",
-                        "APPRAISER", newerProblem.getSubjectMapping().getSubject().getId()))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data", hasSize(2)))
-                .andExpect(jsonPath("$.data[0].id").value(newerProblem.getId()))
-                .andExpect(jsonPath("$.data[1].id").value(olderProblem.getId()))
-                .andExpect(jsonPath("$.data[0].content[0].type").value("statementGroup"))
-                .andExpect(jsonPath("$.data[0].content[0].items[0].label").value("(가)"))
-                .andExpect(jsonPath("$.data[0].content[0].items[0].content[0].spans[0].text")
-                        .value("보고기간말 이전에"))
-                .andExpect(jsonPath("$.data[0].choices", hasSize(5)))
-                .andExpect(jsonPath("$.data[0].choices[0].isAnswer").doesNotExist())
-                .andExpect(jsonPath("$.data[0].choices[0].explanation").doesNotExist())
-                .andExpect(jsonPath("$.data[0].explanation").doesNotExist())
-                .andDo(document("public-problems", api("Public Content", "과목의 공개 문제와 보기 전체 조회")));
-    }
-
-    @Test
-    void checkReturnsOnlyCorrectnessAndSolutionsAreSeparate() throws Exception {
-        mockMvc.perform(post("/api/v1/qualification-exams/{code}/problems/{problemId}/check",
-                        "APPRAISER", newerProblem.getId())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(Map.of("selectedChoiceId", correctChoice.getId()))))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.correct").value(true))
-                .andExpect(jsonPath("$.data.correctChoiceIds").doesNotExist())
-                .andDo(document("public-check-answer", api("Public Content", "선택한 보기 정답 여부 확인")));
-
-        mockMvc.perform(post("/api/v1/qualification-exams/{code}/solutions", "APPRAISER")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(Map.of("problemIds", List.of(newerProblem.getId())))))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data[0].problemId").value(newerProblem.getId()))
-                .andExpect(jsonPath("$.data[0].correctChoiceIds[0]").value(correctChoice.getId()))
-                .andExpect(jsonPath("$.data[0].choices", hasSize(5)))
-                .andDo(document("public-solutions", api("Public Content", "완료 문제의 정답과 해설 조회")));
-    }
-
-    @Test
-    void publicProblemAccessIsScopedByQualificationCode() throws Exception {
-        mockMvc.perform(post("/api/v1/qualification-exams/{code}/problems/{problemId}/check",
-                        "CUSTOMS_BROKER", newerProblem.getId())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(Map.of("selectedChoiceId", correctChoice.getId()))))
-                .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.code").value("PROBLEM_NOT_FOUND"));
     }
 
     @Test
@@ -249,8 +190,12 @@ class ContentApiIntegrationTest {
                 .andDo(document("admin-create-exam", api("Admin Content", "시험 회차 생성")))
                 .andReturn().getResponse().getContentAsString());
 
+        // 그림만 있는 보기는 content가 빈 문자열이고 imageUrl은 /api/admin/file이 돌려준 서명 URL이다.
+        String choiceImageKey = s3Prefix + "/choice-graph.png";
+        when(fileService.generatePresignedUrl(choiceImageKey)).thenReturn("https://signed/choice-graph.png");
         List<Map<String, Object>> choices = List.of(
-                adminChoice(1, false), adminChoice(2, false), adminChoice(3, true),
+                imageChoice(1, "", "https://bucket.s3.amazonaws.com/" + choiceImageKey + "?X-Amz-Signature=upload", false),
+                adminChoice(2, false), adminChoice(3, true),
                 adminChoice(4, false), adminChoice(5, false));
         Map<String, Object> problemRequest = new java.util.LinkedHashMap<>();
         problemRequest.put("examId", examId);
@@ -272,6 +217,7 @@ class ContentApiIntegrationTest {
                         .value("보고기간말 이전에"))
                 .andExpect(jsonPath("$.data.choices", hasSize(5)))
                 .andExpect(jsonPath("$.data.choices[2].isAnswer").value(true))
+                .andExpect(jsonPath("$.data.choices[0].imageUrl").value("https://signed/choice-graph.png"))
                 .andExpect(jsonPath("$.data.explanation", hasSize(0)))
                 .andDo(document("admin-create-problem", api("Admin Content", "JSON 블록 문제 생성")));
     }
@@ -299,6 +245,151 @@ class ContentApiIntegrationTest {
                 .andExpect(jsonPath("$.data.choices[0].isAnswer").value(true))
                 .andExpect(jsonPath("$.data.choices[1].isAnswer").value(true))
                 .andExpect(jsonPath("$.data.choices[2].isAnswer").value(false));
+    }
+
+    @Test
+    void adminStoresChoiceImagesAsSubmittedAndReSignsManagedOnesOnRead() throws Exception {
+        String token = loginAdmin();
+        Exam exam = newerProblem.getExam();
+        Subject subject = newerProblem.getSubjectMapping().getSubject();
+        String objectKey = s3Prefix + "/choice-graph.png";
+        String uploadedUrl = "https://bucket.s3.amazonaws.com/" + objectKey + "?X-Amz-Signature=upload";
+        String externalUrl = "https://cdn.example.com/graph.png";
+        when(fileService.generatePresignedUrl(objectKey))
+                .thenReturn("https://signed/choice-1", "https://signed/choice-2", "https://signed/choice-3");
+
+        Map<String, Object> payload = problemPayload(exam.getId(), subject.getId(), 60);
+        payload.put("choices", List.of(
+                imageChoice(1, "", uploadedUrl, false),
+                imageChoice(2, "그래프 B", externalUrl, true),
+                imageChoice(3, "보기 3", "", false),
+                adminChoice(4, false), adminChoice(5, false)));
+        long problemId = responseId(mockMvc.perform(post("/api/admin/problems").header("Authorization", bearer(token))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(payload)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.data.choices[0].content").value(""))
+                .andExpect(jsonPath("$.data.choices[0].imageUrl").value("https://signed/choice-1"))
+                .andExpect(jsonPath("$.data.choices[1].content").value("그래프 B"))
+                .andExpect(jsonPath("$.data.choices[1].imageUrl").value(externalUrl))
+                .andExpect(jsonPath("$.data.choices[2].imageUrl").value(nullValue()))
+                .andExpect(jsonPath("$.data.choices[3].imageUrl").value(nullValue()))
+                .andReturn().getResponse().getContentAsString());
+
+        List<Choice> stored = problemRepository.findDetailById(problemId).orElseThrow().getChoices().stream()
+                .sorted(java.util.Comparator.comparingInt(Choice::getNumber)).toList();
+        org.assertj.core.api.Assertions.assertThat(stored).extracting(Choice::getImageUrl)
+                .containsExactly(uploadedUrl, externalUrl, null, null, null);
+
+        mockMvc.perform(get("/api/admin/problems/{id}", problemId).header("Authorization", bearer(token)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.choices[0].imageUrl").value("https://signed/choice-2"))
+                .andExpect(jsonPath("$.data.choices[1].imageUrl").value(externalUrl));
+
+        Map<String, Object> updatePayload = problemPayload(exam.getId(), subject.getId(), 60);
+        updatePayload.put("choices", List.of(
+                adminChoice(1, false),
+                imageChoice(2, "그래프 B", externalUrl, true),
+                imageChoice(3, "", uploadedUrl, false),
+                adminChoice(4, false), adminChoice(5, false)));
+        mockMvc.perform(put("/api/admin/problems/{id}", problemId).header("Authorization", bearer(token))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(updatePayload)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.choices[0].content").value("보기 1"))
+                .andExpect(jsonPath("$.data.choices[0].imageUrl").value(nullValue()))
+                .andExpect(jsonPath("$.data.choices[1].imageUrl").value(externalUrl))
+                .andExpect(jsonPath("$.data.choices[2].content").value(""))
+                .andExpect(jsonPath("$.data.choices[2].imageUrl").value("https://signed/choice-3"));
+
+        org.assertj.core.api.Assertions.assertThat(problemRepository.findDetailById(problemId).orElseThrow()
+                        .getChoices().stream().sorted(java.util.Comparator.comparingInt(Choice::getNumber))
+                        .map(Choice::getImageUrl).toList())
+                .containsExactly(null, externalUrl, uploadedUrl, null, null);
+    }
+
+    @Test
+    void adminRejectsInvalidChoiceImagesAndChoicesWithoutContentOrImage() throws Exception {
+        String token = loginAdmin();
+        Exam exam = newerProblem.getExam();
+        Subject subject = newerProblem.getSubjectMapping().getSubject();
+        String tooLong = "https://cdn.example.com/" + "a".repeat(2048);
+
+        for (String imageUrl : List.of("ftp://cdn.example.com/graph.png", "graph.png", tooLong)) {
+            Map<String, Object> payload = problemPayload(exam.getId(), subject.getId(), 61);
+            payload.put("choices", List.of(imageChoice(1, "", imageUrl, false), adminChoice(2, true),
+                    adminChoice(3, false), adminChoice(4, false), adminChoice(5, false)));
+            mockMvc.perform(post("/api/admin/problems").header("Authorization", bearer(token))
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(payload)))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.code").value("INVALID_CHOICE_IMAGE"));
+        }
+
+        Map<String, Object> blankWithoutImage = new java.util.HashMap<>(adminChoice(1, false));
+        blankWithoutImage.put("content", " ");
+        blankWithoutImage.put("imageUrl", "");
+        Map<String, Object> missingContent = new java.util.HashMap<>(adminChoice(1, false));
+        missingContent.remove("content");
+        for (Map<String, Object> emptyChoice : List.of(blankWithoutImage, missingContent)) {
+            Map<String, Object> payload = problemPayload(exam.getId(), subject.getId(), 61);
+            payload.put("choices", List.of(emptyChoice, adminChoice(2, true),
+                    adminChoice(3, false), adminChoice(4, false), adminChoice(5, false)));
+            mockMvc.perform(post("/api/admin/problems").header("Authorization", bearer(token))
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(payload)))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"))
+                    .andExpect(jsonPath("$.valueErrors[0].descriptor").value("choices[0].content"));
+        }
+        org.assertj.core.api.Assertions.assertThat(problemRepository.count()).isEqualTo(2);
+    }
+
+    @Test
+    void adminCreatesTwoToFiveChoicesAndResizesThemKeepingIds() throws Exception {
+        String token = loginAdmin();
+        Exam exam = newerProblem.getExam();
+        Subject subject = newerProblem.getSubjectMapping().getSubject();
+
+        long twoChoiceId = createProblemWithChoices(token, exam, subject, 70, 2);
+        long fourChoiceId = createProblemWithChoices(token, exam, subject, 71, 4);
+        org.assertj.core.api.Assertions.assertThat(choiceIds(fourChoiceId)).hasSize(4);
+        for (int count : List.of(1, 6)) {
+            Map<String, Object> payload = problemPayload(exam.getId(), subject.getId(), 72);
+            payload.put("choices", choices(count));
+            mockMvc.perform(post("/api/admin/problems").header("Authorization", bearer(token))
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(payload)))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));
+        }
+
+        long resizedId = createProblemWithChoices(token, exam, subject, 73, 5);
+        List<Long> fiveIds = choiceIds(resizedId);
+
+        updateChoices(token, exam, subject, resizedId, 73, 3)
+                .andExpect(jsonPath("$.data.choices", hasSize(3)))
+                .andExpect(jsonPath("$.data.choices[2].number").value(3));
+        org.assertj.core.api.Assertions.assertThat(choiceIds(resizedId)).containsExactlyElementsOf(fiveIds.subList(0, 3));
+
+        mockMvc.perform(get("/api/v2/qualification-exams/{code}/content", "APPRAISER"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.subjects[0].problems[?(@.id == " + resizedId + ")].choices.length()")
+                        .value(3))
+                .andExpect(jsonPath("$.data.subjects[0].problems[?(@.id == " + twoChoiceId + ")].choices.length()")
+                        .value(2));
+
+        updateChoices(token, exam, subject, resizedId, 73, 5)
+                .andExpect(jsonPath("$.data.choices", hasSize(5)))
+                .andExpect(jsonPath("$.data.choices[4].content").value("보기 5"));
+        List<Long> grownIds = choiceIds(resizedId);
+        org.assertj.core.api.Assertions.assertThat(grownIds.subList(0, 3)).containsExactlyElementsOf(fiveIds.subList(0, 3));
+        org.assertj.core.api.Assertions.assertThat(grownIds).doesNotHaveDuplicates().hasSize(5);
+
+        List<Long> twoIds = choiceIds(twoChoiceId);
+        updateChoices(token, exam, subject, twoChoiceId, 70, 2)
+                .andExpect(jsonPath("$.data.choices", hasSize(2)));
+        org.assertj.core.api.Assertions.assertThat(choiceIds(twoChoiceId)).containsExactlyElementsOf(twoIds);
     }
 
     @Test
@@ -588,6 +679,44 @@ class ContentApiIntegrationTest {
 
     private Map<String, Object> adminChoice(int number, boolean answer) {
         return Map.of("number", number, "content", "보기 " + number,
+                "isAnswer", answer, "explanation", List.of());
+    }
+
+    /** 1..count번 보기. 마지막 보기를 정답으로 둔다. */
+    private List<Map<String, Object>> choices(int count) {
+        return java.util.stream.IntStream.rangeClosed(1, count)
+                .mapToObj(number -> adminChoice(number, number == count)).toList();
+    }
+
+    private long createProblemWithChoices(String token, Exam exam, Subject subject, int number, int count)
+            throws Exception {
+        Map<String, Object> payload = problemPayload(exam.getId(), subject.getId(), number);
+        payload.put("choices", choices(count));
+        return responseId(mockMvc.perform(post("/api/admin/problems").header("Authorization", bearer(token))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(payload)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.data.choices", hasSize(count)))
+                .andReturn().getResponse().getContentAsString());
+    }
+
+    private org.springframework.test.web.servlet.ResultActions updateChoices(
+            String token, Exam exam, Subject subject, long problemId, int number, int count) throws Exception {
+        Map<String, Object> payload = problemPayload(exam.getId(), subject.getId(), number);
+        payload.put("choices", choices(count));
+        return mockMvc.perform(put("/api/admin/problems/{id}", problemId).header("Authorization", bearer(token))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(payload)))
+                .andExpect(status().isOk());
+    }
+
+    private List<Long> choiceIds(long problemId) {
+        return problemRepository.findDetailById(problemId).orElseThrow().getChoices().stream()
+                .sorted(java.util.Comparator.comparingInt(Choice::getNumber)).map(Choice::getId).toList();
+    }
+
+    private Map<String, Object> imageChoice(int number, String content, String imageUrl, boolean answer) {
+        return Map.of("number", number, "content", content, "imageUrl", imageUrl,
                 "isAnswer", answer, "explanation", List.of());
     }
 

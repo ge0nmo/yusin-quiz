@@ -34,6 +34,20 @@ public class JsonBlockContentProcessor {
         return blocks != null && blocks.stream().anyMatch(this::containsManagedImage);
     }
 
+    /** 단일 이미지 URL(보기 이미지)을 블록 이미지 src와 같은 규칙으로 다시 서명한다. 관리 이미지가 아니면 그대로 둔다. */
+    public String withFreshImageUrl(String url) {
+        return replaceManagedImageSource(url, fileService::generatePresignedUrl);
+    }
+
+    /** 단일 이미지 URL의 관리 이미지 서명 URL을 object key로 바꾼다. 콘텐츠 version 해시에 쓴다. */
+    public String withImageObjectKey(String url) {
+        return replaceManagedImageSource(url, UnaryOperator.identity());
+    }
+
+    public boolean isManagedImage(String url) {
+        return url != null && extractManagedObjectKey(url) != null;
+    }
+
     private List<Map<String, Object>> replaceManagedImageSources(List<Map<String, Object>> blocks,
                                                                  UnaryOperator<String> sourceForObjectKey) {
         if (blocks == null || blocks.isEmpty()) {
@@ -46,15 +60,21 @@ public class JsonBlockContentProcessor {
         Map<String, Object> result = new LinkedHashMap<>();
         source.forEach((key, value) -> result.put(key, processValue(value, sourceForObjectKey)));
         if ("image".equals(result.get("type")) && result.get("src") instanceof String src) {
-            String objectKey = extractManagedObjectKey(src);
-            if (objectKey != null) {
-                String replacement = sourceForObjectKey.apply(objectKey);
-                if (replacement != null && !replacement.isBlank()) {
-                    result.put("src", replacement);
-                }
-            }
+            result.put("src", replaceManagedImageSource(src, sourceForObjectKey));
         }
         return result;
+    }
+
+    private String replaceManagedImageSource(String source, UnaryOperator<String> sourceForObjectKey) {
+        if (source == null) {
+            return null;
+        }
+        String objectKey = extractManagedObjectKey(source);
+        if (objectKey == null) {
+            return source;
+        }
+        String replacement = sourceForObjectKey.apply(objectKey);
+        return replacement == null || replacement.isBlank() ? source : replacement;
     }
 
     private Object processValue(Object value, UnaryOperator<String> sourceForObjectKey) {

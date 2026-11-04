@@ -41,11 +41,22 @@ Block arrays may also contain `{type: "table", rows: [{cells: [{content, header?
 (HTML table rule), so rows may have different cell counts. `content` is a block array and may be empty;
 `header` is a boolean and `colspan`/`rowspan` are integers from 1 to 1000. The optional table-level
 `columnWidths` holds one pixel width (integer from 1 to 10000) per column; clients use it as proportions.
+The optional table-level `border` must be `all` (grid, the default), `outer` (outer frame only) or `none`.
 Invalid tables return `400 INVALID_TABLE`.
 
 Inline math is a text span `{text: "<LaTeX>", math: true}`. `math` must be a boolean, and math spans
 need non-blank LaTeX text; otherwise the request returns `400 INVALID_MATH`. Plain-text choice content
 wraps math in `$...$` and is stored as is.
+
+A problem has two to five choices numbered 1 to N without gaps and at least one answer (multiple answers
+allowed). A count outside 2..5 returns `400 VALIDATION_ERROR`; bad numbering or no answer returns
+`400 INVALID_PROBLEM_CHOICES`. Updates may change the count: choices whose number remains keep their `id`,
+removed numbers are deleted and added numbers get new ids. Each choice is `{number, content, imageUrl?, isAnswer, explanation}`.
+`imageUrl` is one optional choice image: the URL returned by `POST /api/admin/file` or another http(s) URL of at
+most 2048 characters, otherwise `400 INVALID_CHOICE_IMAGE`. A missing, `null` or empty `imageUrl` means no image.
+A choice needs non-blank `content` or an `imageUrl`; an image-only choice sends `content: ""`, and a choice with
+neither returns `400 VALIDATION_ERROR` on `choices[i].content`. The URL is stored as submitted, and managed
+images are re-signed on every read; responses return `imageUrl: null` when there is no image.
 
 
 include::{snippets}/admin-create-problem/http-request.adoc[]

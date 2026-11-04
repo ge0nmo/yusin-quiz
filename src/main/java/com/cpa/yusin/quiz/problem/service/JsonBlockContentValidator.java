@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @Component
 public class JsonBlockContentValidator {
@@ -15,6 +16,7 @@ public class JsonBlockContentValidator {
     private static final int MAX_LABEL_LENGTH = 20;
     private static final int MAX_TABLE_SPAN = 1000;
     private static final int MAX_COLUMN_WIDTH = 10000;
+    private static final Set<String> TABLE_BORDERS = Set.of("all", "outer", "none");
 
     public void validate(List<Map<String, Object>> blocks) {
         if (blocks != null) {
@@ -91,7 +93,9 @@ public class JsonBlockContentValidator {
                 cellCount++;
             }
         }
-        if (cellCount == 0 || !isOptionalColumnWidths(block.get("columnWidths"))) {
+        if (cellCount == 0
+                || !isOptionalColumnWidths(block.get("columnWidths"))
+                || !isOptionalBorder(block.get("border"))) {
             throw invalidTable();
         }
     }
@@ -105,6 +109,11 @@ public class JsonBlockContentValidator {
                 && !widths.isEmpty()
                 && widths.size() <= MAX_TABLE_SPAN
                 && widths.stream().allMatch(width -> isIntegerBetween(width, 1, MAX_COLUMN_WIDTH));
+    }
+
+    /** 테두리는 all(격자, 기본값)·outer(바깥만)·none(없음) 중 하나다. 생략하면 소비자가 all로 그린다. */
+    private boolean isOptionalBorder(Object value) {
+        return value == null || (value instanceof String border && TABLE_BORDERS.contains(border));
     }
 
     /** 수식 span은 LaTeX 원문을 text에 둔다. math를 모르는 소비자도 원문을 표시하므로 빈 수식은 거부한다. */

@@ -76,15 +76,18 @@ public class PublicContentV2Service {
         List<QualificationExamSubject> mappings = findPublishedMappings(qualificationExam);
         List<Problem> problems = problemRepository.findAllPublished(qualificationExam.getCode());
 
-        String version = hash(toSubjects(mappings, problems, blockContentProcessor::withImageObjectKeys));
+        String version = hash(toSubjects(mappings, problems, ImageSources.objectKeys(blockContentProcessor)));
         if (matches(ifNoneMatch, version)) {
             return new Versioned<>(version, null);
         }
         Instant generatedAt = now();
-        boolean hasImages = problems.stream().anyMatch(problem -> blockContentProcessor.containsManagedImage(problem.getContent()));
+        boolean hasImages = problems.stream().anyMatch(problem ->
+                blockContentProcessor.containsManagedImage(problem.getContent())
+                        || problem.getChoices().stream().anyMatch(choice ->
+                        blockContentProcessor.isManagedImage(choice.getImageUrl())));
         return new Versioned<>(version, new ContentResponse(qualificationExam.getCode().name(), version, generatedAt,
                 imageUrlsExpireAt(generatedAt, hasImages),
-                toSubjects(mappings, problems, blockContentProcessor::withFreshImageUrls)));
+                toSubjects(mappings, problems, ImageSources.freshUrls(blockContentProcessor))));
     }
 
     public Versioned<ExplanationsResponse> getExplanations(String code, String ifNoneMatch) {
@@ -107,8 +110,21 @@ public class PublicContentV2Service {
                 toExplanations(problems, blockContentProcessor::withFreshImageUrls)));
     }
 
+    /**
+     * 관리 이미지 URL 처리 방식. 응답에는 새 서명 URL을, version 해시에는 서명과 무관한 object key를 쓴다.
+     */
+    private record ImageSources(UnaryOperator<List<Map<String, Object>>> blocks, UnaryOperator<String> url) {
+        static ImageSources freshUrls(JsonBlockContentProcessor processor) {
+            return new ImageSources(processor::withFreshImageUrls, processor::withFreshImageUrl);
+        }
+
+        static ImageSources objectKeys(JsonBlockContentProcessor processor) {
+            return new ImageSources(processor::withImageObjectKeys, processor::withImageObjectKey);
+        }
+    }
+
     private List<SubjectContentResponse> toSubjects(List<QualificationExamSubject> mappings, List<Problem> problems,
-                                                    UnaryOperator<List<Map<String, Object>>> blocks) {
+                                                    ImageSources images) {
         // 조회 순서(시험 연도 내림차순, 문제 번호 오름차순)를 과목 안에서도 유지한다.
         Map<Long, List<Problem>> problemsBySubject = problems.stream().collect(Collectors.groupingBy(
                 problem -> problem.getSubjectMapping().getSubject().getId(), LinkedHashMap::new, Collectors.toList()));
@@ -116,7 +132,7 @@ public class PublicContentV2Service {
                 .map(mapping -> {
                     List<ProblemContentResponse> subjectProblems = problemsBySubject
                             .getOrDefault(mapping.getSubject().getId(), List.of()).stream()
-                            .map(problem -> toProblemContent(problem, blocks))
+                            .map(problem -> toProblemContent(problem, images))
                             .toList();
                     return new SubjectContentResponse(mapping.getSubject().getId(), mapping.getSubject().getName(),
                             subjectProblems.size(), subjectProblems);
@@ -124,7 +140,7 @@ public class PublicContentV2Service {
                 .toList();
     }
 
-    private ProblemContentResponse toProblemContent(Problem problem, UnaryOperator<List<Map<String, Object>>> blocks) {
+    private ProblemContentResponse toProblemContent(Problem problem, ImageSources images) {
         List<Choice> choices = sortedChoices(problem);
         List<Long> correctChoiceIds = choices.stream().filter(Choice::isAnswer).map(Choice::getId).toList();
         if (correctChoiceIds.isEmpty()) {
@@ -132,9 +148,10 @@ public class PublicContentV2Service {
         }
         ExamResponse exam = new ExamResponse(problem.getExam().getId(), problem.getExam().getName(),
                 problem.getExam().getYear());
-        return new ProblemContentResponse(problem.getId(), problem.getNumber(), exam, blocks.apply(problem.getContent()),
-                correctChoiceIds,
-                choices.stream().map(choice -> new ChoiceResponse(choice.getId(), choice.getNumber(), choice.getContent())).toList());
+        return new ProblemContentResponse(problem.getId(), problem.getNumber(), exam,
+                images.blocks().apply(problem.getContent()), correctChoiceIds,
+                choices.stream().map(choice -> new ChoiceResponse(choice.getId(), choice.getNumber(), choice.getContent(),
+                        images.url().apply(choice.getImageUrl()))).toList());
     }
 
     private List<ProblemExplanationResponse> toExplanations(List<Problem> problems,

@@ -1,5 +1,29 @@
 # Frontend API Changelog
 
+## 2026-11-04 — 보기 2~5개
+
+- 관리자 문제 생성·수정의 `choices`는 이제 2~5개다(이전에는 정확히 5개). 번호는 1..N, 정답은 하나 이상이다. 개수가 범위를 벗어나면 `400 VALIDATION_ERROR`.
+- 수정으로 보기 개수를 바꿀 수 있다. 남는 번호의 보기 `id`는 그대로이고, 없어진 번호는 삭제, 늘어난 번호는 새로 만든다.
+- v2 content/explanations의 `choices`는 문제마다 2~5개다. 앱은 보기 개수를 5로 가정하지 않아야 한다.
+
+## 2026-11-04 — v1 콘텐츠 API 삭제
+
+- `GET /api/v1/qualification-exams/{code}/subjects`, `GET .../subjects/{subjectId}/problems`, `POST .../problems/{problemId}/check`, `POST .../solutions`를 삭제했다. v1만 쓰던 예전 앱은 스토어에서 내렸고, 앱은 v2 content/explanations로만 동기화한다.
+- `GET /api/v1/qualification-exams/{code}/app-version-policy`와 `GET /api/v1/hc`, `GET /api/v1/env`는 경로·응답 그대로 유지한다.
+- v1 전용이던 오류 코드 `SUBJECT_MAPPING_NOT_FOUND`, `CHOICE_NOT_FOUND`를 제거했다.
+
+## 2026-11-04 — 보기 이미지
+
+- 관리자 문제 생성·수정 요청의 `choices[]`에 `imageUrl`(선택, http(s), 2048자 이하)을 추가했다. 잘못된 값은 `400 INVALID_CHOICE_IMAGE`.
+- 보기는 `content`나 `imageUrl` 중 하나가 있으면 된다. 그림만 있는 보기는 `content: ""`이다. 둘 다 없으면 기존 빈 보기와 같은 `400 VALIDATION_ERROR`(`choices[i].content`).
+- 관리자 문제 상세와 `GET /api/v2/qualification-exams/{code}/content`의 `choices[]`에 `imageUrl: string | null`을 추가했다. 관리 이미지는 응답마다 새로 서명하고, content `version`은 서명이 아닌 object key로 계산한다. 보기 이미지가 있으면 `imageUrlsExpireAt`도 채운다.
+- 배포하면 모든 보기에 `imageUrl` 필드가 생기므로 content `version`이 한 번 바뀐다. v2 explanations 응답은 바뀌지 않았다.
+
+## 2026-11-04 — 표 테두리
+
+- `table` 블록에 선택 필드 `border`(`all` | `outer` | `none`)를 추가했다. 없으면 `all`(격자)이다. 다른 값은 `400 INVALID_TABLE`로 거부한다.
+- `outer`는 바깥 테두리만, `none`은 선 없이 그린다. 이 두 값에서는 머리글 칸에 배경색을 칠하지 않고 굵게만 표시한다. 모르는 값은 `all`로 그린다.
+
 ## 2026-11-02 — 표 열 너비
 
 - `table` 블록에 선택 필드 `columnWidths`(열별 px, 1~10000 정수 배열)를 추가했다. 화면에서는 비율로 쓰며 없으면 모든 열이 같은 너비다.

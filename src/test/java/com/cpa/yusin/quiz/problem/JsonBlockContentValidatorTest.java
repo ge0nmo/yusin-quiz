@@ -95,6 +95,25 @@ class JsonBlockContentValidatorTest {
     }
 
     @Test
+    void acceptsTablesWithBorder() {
+        for (String border : List.of("all", "outer", "none")) {
+            Map<String, Object> table = new LinkedHashMap<>(table(List.of(cell(Map.of()))));
+            table.put("border", border);
+
+            assertThatCode(() -> validator.validate(List.of(table))).doesNotThrowAnyException();
+        }
+    }
+
+    @Test
+    void rejectsMalformedBorder() {
+        for (Object border : List.of("", "ALL", "outline", "dashed", true, 1, List.of("all"), Map.of("style", "all"))) {
+            Map<String, Object> table = new LinkedHashMap<>(table(List.of(cell(Map.of()))));
+            table.put("border", border);
+            assertInvalidTable(List.of(table));
+        }
+    }
+
+    @Test
     void acceptsTablesNestedInStatementGroupItems() {
         List<Map<String, Object>> blocks = statementGroup(Map.of(
                 "label", "(가)", "content", List.of(table(List.of(cell(Map.of()))))));

@@ -64,4 +64,27 @@ class JsonBlockContentProcessorTest {
         assertThat(processed.getFirst().get("src")).isEqualTo("https://example.com/image.png");
         verifyNoInteractions(fileService);
     }
+
+    @Test
+    void handlesSingleChoiceImageUrlsLikeImageBlockSources() {
+        FileService fileService = mock(FileService.class);
+        when(fileService.generatePresignedUrl("post/choice.png")).thenReturn("https://signed/choice");
+        JsonBlockContentProcessor processor = new JsonBlockContentProcessor(fileService);
+        ReflectionTestUtils.setField(processor, "s3Prefix", "post");
+        String managed = "https://bucket.s3.amazonaws.com/post/choice.png?X-Amz-Signature=old";
+
+        assertThat(processor.withFreshImageUrl(managed)).isEqualTo("https://signed/choice");
+        assertThat(processor.withImageObjectKey(managed)).isEqualTo("post/choice.png");
+        assertThat(processor.isManagedImage(managed)).isTrue();
+
+        String external = "https://example.com/choice.png";
+        assertThat(processor.withFreshImageUrl(external)).isEqualTo(external);
+        assertThat(processor.withImageObjectKey(external)).isEqualTo(external);
+        assertThat(processor.isManagedImage(external)).isFalse();
+
+        assertThat(processor.withFreshImageUrl(null)).isNull();
+        assertThat(processor.withImageObjectKey(null)).isNull();
+        assertThat(processor.isManagedImage(null)).isFalse();
+        verify(fileService).generatePresignedUrl("post/choice.png");
+    }
 }

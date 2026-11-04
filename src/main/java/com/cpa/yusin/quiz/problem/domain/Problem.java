@@ -70,6 +70,16 @@ public class Problem extends BaseEntity {
         this.explanation = new ArrayList<>(explanation == null ? List.of() : explanation);
     }
 
+    /** 보기 개수를 줄일 때 남는 번호(count 초과)의 보기를 지운다. orphanRemoval로 행이 삭제된다. */
+    public void removeChoicesNumberedAbove(int count) {
+        choices.removeIf(choice -> choice.getNumber() > count);
+    }
+
+    public void addChoice(Choice choice) {
+        choice.attachTo(this);
+        choices.add(choice);
+    }
+
     public void replaceChoices(List<Choice> newChoices) {
         choices.clear();
         newChoices.forEach(choice -> {

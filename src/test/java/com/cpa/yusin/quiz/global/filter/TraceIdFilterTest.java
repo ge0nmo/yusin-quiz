@@ -13,7 +13,7 @@ class TraceIdFilterTest {
     @Test
     void shouldReuseIncomingRequestIdAndExposeItInResponseHeader() throws Exception {
         TraceIdFilter filter = new TraceIdFilter(new FakeUuidHolder("ignored-uuid-value"));
-        MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/v1/qualification-exams/APPRAISER/subjects");
+        MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/v2/qualification-exams/APPRAISER/content");
         MockHttpServletResponse response = new MockHttpServletResponse();
         request.addHeader("X-Request-ID", "client-trace-id");
 
@@ -32,7 +32,7 @@ class TraceIdFilterTest {
     @Test
     void shouldGenerateTraceIdWhenRequestHeaderIsMissing() throws Exception {
         TraceIdFilter filter = new TraceIdFilter(new FakeUuidHolder("12345678-90ab-cdef"));
-        MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/v1/qualification-exams/APPRAISER/subjects");
+        MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/v2/qualification-exams/APPRAISER/content");
         MockHttpServletResponse response = new MockHttpServletResponse();
 
         filter.doFilter(request, response, (req, res) -> {
