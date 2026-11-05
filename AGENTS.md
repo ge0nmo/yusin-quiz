@@ -21,7 +21,6 @@
 ## Task router
 
 - Ebook work: `docs/ebook/IMPLEMENTATION.md` (English agent handoff), `docs/ebook/USER_GUIDE.ko.md` (Korean setup/use), and `docs/frontend-api/admin-ebook.md`.
-- Problem reports / feedback: `docs/frontend-api/app-report.md` (app, `X-Device-Id`) and `docs/frontend-api/admin-report.md`.
 
 - `.agents/architecture.md`
 - `.agents/api-contracts.md`

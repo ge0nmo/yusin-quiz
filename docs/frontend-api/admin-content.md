@@ -5,8 +5,7 @@
 ## Dashboard
 
 - `GET /api/admin/dashboard`
-- 응답: `{qualificationExamCount, subjectCount, examCount, problemCount, openReportCount}`
-- `openReportCount`는 전체 미처리(`RECEIVED`, `IN_REVIEW`) 신고·문의 수다. 신고·문의 API는 `admin-report.md`.
+- 응답: `{qualificationExamCount, subjectCount, examCount, problemCount}`
 
 ## Qualification exams
 
@@ -15,7 +14,6 @@
 - `code`는 `APPRAISER | CPA | CUSTOMS_BROKER | REAL_ESTATE_AGENT` enum이며, 표시 이름은 서버가 enum에서 결정한다.
 - 생성: `{code,status,subjects:[{subjectId,status,displayOrder}]}`
 - 수정: `{status,subjects:[...]}` (`code`와 표시 이름은 불변)
-- 삭제: 시험 회차나 신고·문의가 남아 있으면 `409 CONTENT_IN_USE`.
 
 ## Global subjects
 
@@ -37,7 +35,6 @@
 - `GET|PUT|DELETE /api/admin/problems/{id}`
 - `POST /api/admin/problems`
 - 문제는 해당 Exam의 QualificationExam에 연결된 Subject만 선택할 수 있다.
-- 문제를 삭제하면 그 문제를 가리키는 신고·문의의 문제 연결을 끊고(스냅숏은 남김) 지운다. 신고가 있어도 삭제는 막히지 않는다.
 - `content`, 문제 해설, 보기별 해설은 JSON block 배열이다.
 - JSON block 배열의 어느 위치에서든 다음 `statementGroup` 블록을 중첩해 사용할 수 있다.
 

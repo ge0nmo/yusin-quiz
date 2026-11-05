@@ -14,13 +14,11 @@
 QualificationExam -> Exam
 QualificationExam <-> QualificationExamSubject <-> global Subject
 Exam + QualificationExamSubject -> Problem -> Choice
-QualificationExam -> Report -> (nullable) Problem
 ```
 
 - A Problem's subject mapping must belong to the Exam's QualificationExam.
 - JSON blocks are the only rich content representation.
 - There is no active server-rendered MVC package.
-- A Report keeps a snapshot of the problem (number, exam name/year, subject name). Deleting a problem detaches its reports first (`problem = null`, FK `ON DELETE SET NULL`); reports never block problem deletion. A qualification exam with reports cannot be deleted.
 
 ## Active capabilities
 
@@ -28,6 +26,5 @@ QualificationExam -> Report -> (nullable) Problem
 - Admin login and content CRUD
 - Admin dashboard content counts
 - Admin S3 image upload
-- Anonymous app problem reports and feedback (device id header), admin report triage
 
-End-user auth, bookmark, Q&A, study and word-practice runtimes were removed in the clean rebuild. Reports are not Q&A: they identify the sender only by an anonymous device id.
+End-user auth, bookmark, Q&A, study and word-practice runtimes were removed in the clean rebuild.

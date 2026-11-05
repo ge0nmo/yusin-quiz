@@ -2,7 +2,7 @@
 
 모든 API는 로그인 없이 호출하며 `{code}`가 가리키는 공개 자격시험 범위 안에서만 데이터를 반환한다.
 
-콘텐츠는 v2(`/api/v2/qualification-exams/{code}/content`, `/explanations`)로만 제공한다. 문제 오류 신고·건의/문의는 `app-report.md`를 본다. v1에는 설치된 앱의 강제 업데이트 게이트인 앱 버전 정책과 헬스체크(`/api/v1/hc`, `/api/v1/env`)만 남아 있다. v1 콘텐츠 API(subjects, problems, check, solutions)는 2026-11-04에 삭제했다.
+콘텐츠는 v2(`/api/v2/qualification-exams/{code}/content`, `/explanations`)로만 제공한다. v1에는 설치된 앱의 강제 업데이트 게이트인 앱 버전 정책과 헬스체크(`/api/v1/hc`, `/api/v1/env`)만 남아 있다. v1 콘텐츠 API(subjects, problems, check, solutions)는 2026-11-04에 삭제했다.
 
 ## GET /api/v1/qualification-exams/{code}/app-version-policy?platform=android|ios
 

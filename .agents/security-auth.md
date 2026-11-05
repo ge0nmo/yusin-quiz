@@ -1,7 +1,6 @@
 # Security and Auth
 
 - Public mobile content APIs are stateless and permit all requests.
-- App report APIs under `/api/v2/**` are also permitAll; the sender is identified only by the `X-Device-Id` UUID header (no member login). Admin report responses show only a masked device id.
 - `POST /api/admin/login`, `/api/admin/refresh`, and `/api/admin/logout` are public.
 - Every other `/api/admin/**` endpoint requires `ROLE_ADMIN`.
 - Admin login request is `{loginId,password}`; email and Google login are not supported.
