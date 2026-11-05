@@ -14,8 +14,6 @@ import com.cpa.yusin.quiz.qualification.domain.QualificationExam;
 import com.cpa.yusin.quiz.qualification.domain.QualificationExamSubject;
 import com.cpa.yusin.quiz.qualification.infrastructure.QualificationExamRepository;
 import com.cpa.yusin.quiz.qualification.infrastructure.QualificationExamSubjectRepository;
-import com.cpa.yusin.quiz.report.domain.ReportStatus;
-import com.cpa.yusin.quiz.report.infrastructure.ReportRepository;
 import com.cpa.yusin.quiz.subject.domain.Subject;
 import com.cpa.yusin.quiz.subject.infrastructure.SubjectRepository;
 import lombok.RequiredArgsConstructor;
@@ -37,7 +35,6 @@ public class AdminContentService {
     private final ProblemRepository problemRepository;
     private final JsonBlockContentProcessor blockContentProcessor;
     private final JsonBlockContentValidator blockContentValidator;
-    private final ReportRepository reportRepository;
 
     public List<QualificationExamResponse> getQualificationExams() {
         return qualificationExamRepository.findAllByOrderByNameAsc().stream().map(this::toQualificationResponse).toList();
@@ -71,8 +68,7 @@ public class AdminContentService {
     @Transactional
     public void deleteQualificationExam(Long id) {
         QualificationExam qualificationExam = findQualification(id);
-        // 신고·문의는 자격시험에 묶인 사용자 기록이므로 남아 있으면 자격시험을 지우지 않는다.
-        if (examRepository.existsByQualificationExamId(id) || reportRepository.existsByQualificationExamId(id)) {
+        if (examRepository.existsByQualificationExamId(id)) {
             throw new ContentException(ExceptionMessage.CONTENT_IN_USE);
         }
         mappingRepository.deleteAllByQualificationExamId(id);
@@ -199,22 +195,14 @@ public class AdminContentService {
         return toProblemDetail(problem);
     }
 
-    /**
-     * 문제를 지운다. 신고가 있어도 막지 않고, 그 문제를 가리키는 신고의 문제 연결만 먼저 끊는다(스냅숏은 남는다).
-     * <p>
-     * 회차 삭제와 과목 연결 해제는 문제가 남아 있으면 {@code CONTENT_IN_USE}로 막히므로 문제가 지워지는 경로는 여기뿐이다.
-     * </p>
-     */
     @Transactional
     public void deleteProblem(Long id) {
-        Problem problem = findProblem(id);
-        reportRepository.detachProblem(problem.getId());
-        problemRepository.delete(problem);
+        problemRepository.delete(findProblem(id));
     }
 
     public DashboardResponse getDashboard() {
         return new DashboardResponse(qualificationExamRepository.count(), subjectRepository.count(),
-                examRepository.count(), problemRepository.count(), reportRepository.countByStatusIn(ReportStatus.OPEN));
+                examRepository.count(), problemRepository.count());
     }
 
     private void synchronizeMappings(QualificationExam qualificationExam, List<MappingRequest> requests) {

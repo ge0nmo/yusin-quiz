@@ -6,8 +6,6 @@
 
 == Dashboard
 
-`openReportCount` is the number of open (`RECEIVED`, `IN_REVIEW`) reports across every qualification.
-
 include::{snippets}/admin-dashboard/http-request.adoc[]
 include::{snippets}/admin-dashboard/http-response.adoc[]
 
@@ -65,9 +63,6 @@ images are re-signed on every read; responses return `imageUrl: null` when there
 
 include::{snippets}/admin-create-problem/http-request.adoc[]
 include::{snippets}/admin-create-problem/http-response.adoc[]
-
-Deleting a problem first detaches the reports that point to it (their problem snapshot stays) and is never
-blocked by reports. A qualification exam that still has reports cannot be deleted (`409 CONTENT_IN_USE`).
 
 == Upload problem image
 
