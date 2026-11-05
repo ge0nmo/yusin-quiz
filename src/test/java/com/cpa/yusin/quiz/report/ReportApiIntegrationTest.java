@@ -35,7 +35,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.http.MediaType;
-import org.springframework.jdbc.core.ConnectionCallback;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.restdocs.RestDocumentationContextProvider;
 import org.springframework.restdocs.RestDocumentationExtension;
@@ -48,12 +47,10 @@ import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.filter.CharacterEncodingFilter;
 
 import java.time.LocalDateTime;
-import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.stream.IntStream;
 
@@ -737,20 +734,8 @@ class ReportApiIntegrationTest {
 
     @Test
     void reportTableHasContractIndexes() {
-        // information_schema의 인덱스 표는 H2와 MySQL이 달라서 JDBC 메타데이터로 읽는다.
-        List<String> indexes = jdbcTemplate.execute((ConnectionCallback<List<String>>) connection -> {
-            List<String> names = new ArrayList<>();
-            try (ResultSet rs = connection.getMetaData()
-                    .getIndexInfo(connection.getCatalog(), null, "report", false, false)) {
-                while (rs.next()) {
-                    String name = rs.getString("INDEX_NAME");
-                    if (name != null) {
-                        names.add(name.toLowerCase(Locale.ROOT));
-                    }
-                }
-            }
-            return names;
-        });
+        List<String> indexes = jdbcTemplate.queryForList(
+                "select index_name from information_schema.indexes where table_name = 'report'", String.class);
         assertThat(indexes).contains("idx_report_device_created", "idx_report_problem_status", "idx_report_status_created");
     }
 
