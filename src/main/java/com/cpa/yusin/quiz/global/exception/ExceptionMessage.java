@@ -25,6 +25,10 @@ public enum ExceptionMessage {
     INVALID_SUBJECT_MAPPING("문제 과목은 시험 자격시험에 연결된 과목이어야 합니다.", HttpStatus.BAD_REQUEST),
     CONTENT_IN_USE("사용 중인 콘텐츠는 삭제할 수 없습니다.", HttpStatus.CONFLICT),
     INVALID_DATA("유효하지 않은 데이터입니다.", HttpStatus.BAD_REQUEST),
+    INVALID_DEVICE_ID("기기 정보를 확인할 수 없어요. 앱을 다시 실행해 주세요.", HttpStatus.BAD_REQUEST),
+    REPORT_DUPLICATED("이미 신고한 문제예요. 확인 후 답변 드릴게요.", HttpStatus.CONFLICT),
+    REPORT_RATE_LIMITED("오늘은 더 보낼 수 없어요. 내일 다시 시도해 주세요.", HttpStatus.TOO_MANY_REQUESTS),
+    REPORT_NOT_FOUND("문의 내역을 찾을 수 없어요.", HttpStatus.NOT_FOUND),
     INTERNAL_SERVER_ERROR("서버 내부 오류가 발생했습니다.", HttpStatus.INTERNAL_SERVER_ERROR);
 
     private final String message;

@@ -17,6 +17,7 @@ import com.cpa.yusin.quiz.qualification.domain.QualificationExamCode;
 import com.cpa.yusin.quiz.qualification.domain.QualificationExamSubject;
 import com.cpa.yusin.quiz.qualification.infrastructure.QualificationExamRepository;
 import com.cpa.yusin.quiz.qualification.infrastructure.QualificationExamSubjectRepository;
+import com.cpa.yusin.quiz.report.infrastructure.ReportRepository;
 import com.cpa.yusin.quiz.subject.domain.Subject;
 import com.cpa.yusin.quiz.subject.infrastructure.SubjectRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -63,6 +64,7 @@ class ContentApiIntegrationTest {
     @Autowired SubjectRepository subjectRepository;
     @Autowired ExamRepository examRepository;
     @Autowired ProblemRepository problemRepository;
+    @Autowired ReportRepository reportRepository;
     @Autowired MemberRepository memberRepository;
     @Autowired PasswordEncoder passwordEncoder;
     @Autowired JwtService jwtService;
@@ -81,6 +83,7 @@ class ContentApiIntegrationTest {
                 .apply(springSecurity())
                 .apply(MockMvcRestDocumentation.documentationConfiguration(restDocumentation))
                 .build();
+        reportRepository.deleteAll();
         problemRepository.deleteAll();
         examRepository.deleteAll();
         mappingRepository.deleteAll();
@@ -135,6 +138,7 @@ class ContentApiIntegrationTest {
                 .andExpect(jsonPath("$.data.subjectCount").value(1))
                 .andExpect(jsonPath("$.data.examCount").value(2))
                 .andExpect(jsonPath("$.data.problemCount").value(2))
+                .andExpect(jsonPath("$.data.openReportCount").value(0))
                 .andDo(document("admin-dashboard", api("Admin", "관리자 콘텐츠 집계 조회")));
 
         mockMvc.perform(post("/api/admin/logout"))

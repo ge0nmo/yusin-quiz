@@ -12,6 +12,7 @@ import com.cpa.yusin.quiz.qualification.domain.QualificationExamCode;
 import com.cpa.yusin.quiz.qualification.domain.QualificationExamSubject;
 import com.cpa.yusin.quiz.qualification.infrastructure.QualificationExamRepository;
 import com.cpa.yusin.quiz.qualification.infrastructure.QualificationExamSubjectRepository;
+import com.cpa.yusin.quiz.report.infrastructure.ReportRepository;
 import com.cpa.yusin.quiz.subject.domain.Subject;
 import com.cpa.yusin.quiz.subject.infrastructure.SubjectRepository;
 import com.epages.restdocs.apispec.ResourceSnippetParameters;
@@ -62,6 +63,7 @@ class ContentV2ApiIntegrationTest {
     @Autowired SubjectRepository subjectRepository;
     @Autowired ExamRepository examRepository;
     @Autowired ProblemRepository problemRepository;
+    @Autowired ReportRepository reportRepository;
     @MockBean FileService fileService;
     // CI는 시크릿의 테스트 설정을 쓰므로 관리 이미지 경로는 설정된 prefix로 만든다.
     @Value("${cloud.aws.s3.prefix}") String s3Prefix;
@@ -81,6 +83,7 @@ class ContentV2ApiIntegrationTest {
                 .apply(springSecurity())
                 .apply(MockMvcRestDocumentation.documentationConfiguration(restDocumentation))
                 .build();
+        reportRepository.deleteAll();
         problemRepository.deleteAll();
         examRepository.deleteAll();
         mappingRepository.deleteAll();

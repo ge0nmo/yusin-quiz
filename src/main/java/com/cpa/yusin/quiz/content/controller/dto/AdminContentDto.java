@@ -56,6 +56,7 @@ public final class AdminContentDto {
                                          int choiceCount, long answerChoiceCount) {}
     public record NextProblemNumberResponse(int nextNumber) {}
 
+    /** openReportCount는 전체 미처리(RECEIVED, IN_REVIEW) 신고·문의 수다. */
     public record DashboardResponse(long qualificationExamCount, long subjectCount,
-                                    long examCount, long problemCount) {}
+                                    long examCount, long problemCount, long openReportCount) {}
 }
