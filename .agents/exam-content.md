@@ -9,6 +9,7 @@
 - `Problem`: belongs to Exam and one mapping under the same qualification; stores number, status, content JSON blocks and optional explanation JSON blocks.
 - `Choice`: two to five entries numbered 1..N with no gaps (request `@Size(min = 2, max = 5)`, service checks numbering); at least one answer, multiple answers allowed. Updates match choices by number: kept numbers update the same row (stable `id`), removed numbers are deleted, added numbers are inserted; plain text `content`, optional `imageUrl` (one image, http(s), at most 2048 chars, `INVALID_CHOICE_IMAGE` otherwise) and optional explanation JSON blocks. A choice needs non-blank `content` or an `imageUrl`; an image-only choice stores `content: ""`, and a choice with neither fails as `VALIDATION_ERROR` on `choices[i].content`.
 - Problem number uniqueness is `(exam, subject mapping, number)`.
+- Deleting a problem detaches the reports pointing to it before the delete; reports never block it. Exam deletion and mapping removal are still blocked by remaining problems, so problem deletion is the only path that removes problems.
 
 ## Publication
 

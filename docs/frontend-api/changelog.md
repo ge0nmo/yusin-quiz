@@ -1,5 +1,15 @@
 # Frontend API Changelog
 
+## 2026-11-05 — 문제 오류 신고 · 건의/문의
+
+- 앱용 `POST|GET /api/v2/qualification-exams/{code}/reports`, `GET .../reports/{id}`를 추가했다. 로그인 없이 `X-Device-Id` 헤더(UUID)로 기기를 구분하고, 같은 기기·자격시험의 내역만 보인다. 자세한 규칙은 `app-report.md`.
+- 관리자용 `GET /api/admin/reports`(필터, `SAME_PROBLEM`/`LATEST`/`OLDEST` 정렬, 1부터 세는 페이지와 `pageInfo`), `GET /api/admin/reports/summary`, `GET|PUT /api/admin/reports/{id}`를 추가했다. 자세한 규칙은 `admin-report.md`.
+- 새 오류 코드: `400 INVALID_DEVICE_ID`, `409 REPORT_DUPLICATED`, `429 REPORT_RATE_LIMITED`(같은 기기 24시간 20건), `404 REPORT_NOT_FOUND`.
+- `GET /api/admin/dashboard` 응답에 `openReportCount`(전체 미처리 신고 수)를 추가했다. 다른 필드는 그대로다.
+- 문제를 삭제하면 그 문제의 신고는 문제 연결만 끊기고 작성 시점의 스냅숏(번호·회차·연도·과목)은 남는다. 신고가 있어도 문제 삭제는 막히지 않는다.
+- 신고·문의가 남아 있는 자격시험은 `409 CONTENT_IN_USE`로 삭제를 막는다.
+- 신고 응답의 시각은 기존 `LocalDateTime` 형식(타임존 없음, 서버 시간)에서 초 단위까지만 내려간다. 예: `"2026-11-04T10:20:00"`.
+
 ## 2026-11-05 — 지문 묶음 단일 항목 라벨 생략
 
 - `statementGroup`의 항목이 정확히 1개이면 `label`을 `""`로 보낼 수 있다(앞뒤 공백만 있는 값도 빈 라벨로 본다). 필드는 계속 문자열로 보낸다.
